@@ -31,7 +31,20 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
   const handleDelete = async (id: number) => { if (!confirm('Delete this harvest?')) return; await harvestsService.delete(id); fetchData(); };
 
-  const typeEmoji: Record<string, string> = { honey: '🍯', beeswax: '��', propolis: '🟤', royal_jelly: '👑', pollen: '🌼', other: '📦' };
+// ...existing code...
+  const typeEmoji: Record<string, string> = { honey: '🍯', beeswax: '🕯️', propolis: '🟤', royal_jelly: '👑', pollen: '🌼', other: '📦' };
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-white to-emerald-50 text-stone-800 font-sans">
+      <MobileSidebar isOpen={isSidebarOpen} activeTab="harvest" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+      
+      <div className={`flex flex-col h-full transition-all duration-300 ${isSidebarOpen ? 'ml-72' : ''} h-screen`}>
+        <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+
+        <div className="px-4 py-6 space-y-4 flex-1 overflow-y-auto pb-20">
+          <div className="grid grid-cols-3 gap-2">
+// ...existing code...
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">

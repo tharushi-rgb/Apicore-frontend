@@ -30,18 +30,22 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
   const handleSave = async () => {
     setSaving(true);
     try { const updated = await profileService.update(form); setProfile(updated); setEditing(false); } catch {}
+    // ...existing code...
     setSaving(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-white to-emerald-50 text-stone-800 font-sans">
       <MobileSidebar isOpen={isSidebarOpen} activeTab="profile" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
-      <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-        isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      
+      <div className={`flex flex-col h-full transition-all duration-300 ${isSidebarOpen ? 'ml-72' : ''} h-screen`}>
+        <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-      <div className="px-4 py-6 space-y-4">
-        {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div> : profile && (
-          <>
+        <div className="px-4 py-6 space-y-4 flex-1 overflow-y-auto pb-20">
+          {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div> : profile && (
+            <>
+// ...existing code...
             {/* Avatar */}
             <div className="text-center">
               <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">

@@ -38,7 +38,20 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
   };
 
   const statusIcons: Record<string, any> = { pending: <Clock className="w-4 h-4 text-amber-500" />, in_progress: <Clock className="w-4 h-4 text-blue-500" />, completed: <CheckCircle className="w-4 h-4 text-emerald-500" />, cancelled: <XCircle className="w-4 h-4 text-red-500" /> };
+  // ...existing code...
   const statusColors: Record<string, string> = { pending: 'bg-amber-100 text-amber-700', in_progress: 'bg-blue-100 text-blue-700', completed: 'bg-emerald-100 text-emerald-700', cancelled: 'bg-red-100 text-red-700' };
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-white to-emerald-50 text-stone-800 font-sans">
+      <MobileSidebar isOpen={isSidebarOpen} activeTab="clients" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+      
+      <div className={`flex flex-col h-full transition-all duration-300 ${isSidebarOpen ? 'ml-72' : ''} h-screen`}>
+        <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+
+        <div className="px-4 py-6 space-y-4 flex-1 overflow-y-auto pb-20">
+          <div className="grid grid-cols-2 gap-2">
+// ...existing code...
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">

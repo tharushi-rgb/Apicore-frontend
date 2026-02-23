@@ -31,13 +31,18 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
+    // ...existing code...
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-white to-emerald-50 text-stone-800 font-sans">
       <MobileSidebar isOpen={isSidebarOpen} activeTab="apiaries" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
-      <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-        isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      
+      <div className={`flex flex-col h-full transition-all duration-300 ${isSidebarOpen ? 'ml-72' : ''} h-screen`}>
+        <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-      <div className="px-4 py-6 space-y-4">
-        {/* Stats */}
+        <div className="px-4 py-6 space-y-4 flex-1 overflow-y-auto pb-20">
+          {/* Stats */}
+// ...existing code...
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-stone-600 text-xs">Total</p><p className="text-2xl font-bold text-stone-800">{apiaries.length}</p></div>
           <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-stone-600 text-xs">Active</p><p className="text-2xl font-bold text-emerald-600">{apiaries.filter(a=>a.status==='active').length}</p></div>

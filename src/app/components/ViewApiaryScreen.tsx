@@ -60,10 +60,22 @@ export function ViewApiaryScreen({ onBack, onAddHive, onEditApiary, onViewHive, 
   const typeColors: Record<string, string> = { box: 'bg-amber-100 text-amber-700', pot: 'bg-emerald-100 text-emerald-700', log: 'bg-orange-100 text-orange-700', stingless: 'bg-blue-100 text-blue-700' };
   const statusColors: Record<string, string> = { active: 'bg-emerald-100 text-emerald-700', queenless: 'bg-red-100 text-red-700', inactive: 'bg-stone-100 text-stone-600', absconded: 'bg-purple-100 text-purple-700' };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div>;
-  if (!apiary) return <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100"><p>Apiary not found</p></div>;
+// ...existing code...
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-white to-emerald-50"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div>;
+  if (!apiary) return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-white to-emerald-50"><p>Apiary not found</p></div>;
 
   return (
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-emerald-50 text-stone-800 font-sans">
+      <div className="bg-white/90 backdrop-blur-md shadow-sm border-b border-stone-100 sticky top-0 z-20 px-4 py-3 flex items-center gap-3">
+        <button onClick={onBack} className="p-2 hover:bg-stone-100 rounded-xl transition-colors"><ArrowLeft className="w-5 h-5 text-stone-600" /></button>
+        <div className="flex-1 min-w-0"><h1 className="text-lg font-bold text-stone-800 truncate">{apiary.name}</h1><p className="text-xs text-stone-500 truncate">{apiary.district} {apiary.area ? `• ${apiary.area}` : ''}</p></div>
+        <button onClick={handleDelete} disabled={deleting} className="p-2 hover:bg-red-50 rounded-xl transition-colors"><Trash2 className="w-4 h-4 text-red-500" /></button>
+        <button onClick={() => onEditApiary(apiary)} className="px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-bold rounded-lg hover:bg-amber-100 transition-colors uppercase tracking-wide">Edit</button>
+      </div>
+
+      <div className="px-4 py-6 space-y-4 pb-20">
+        {/* Info Card */}
+// ...existing code...  return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
       <div className="bg-white shadow-sm px-4 py-3 flex items-center gap-3">
         <button onClick={onBack} className="p-2 hover:bg-stone-100 rounded-lg"><ArrowLeft className="w-5 h-5 text-stone-700" /></button>

@@ -30,7 +30,20 @@ export function NotificationsScreen({ selectedLanguage, onLanguageChange, onNavi
   const handleDismiss = async (id: number) => { await notificationsService.dismiss(id); fetchNotifications(); };
   const handleMarkAllRead = async () => { await notificationsService.markAllRead(); fetchNotifications(); };
 
+  // ...existing code...
   const typeIcons: Record<string, string> = { alert: '⚠️', info: 'ℹ️', success: '✅', warning: '🔔', error: '❌' };
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-white to-emerald-50 text-stone-800 font-sans">
+      <MobileSidebar isOpen={isSidebarOpen} activeTab="notifications" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+      
+      <div className={`flex flex-col h-full transition-all duration-300 ${isSidebarOpen ? 'ml-72' : ''} h-screen`}>
+        <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+
+        <div className="px-4 py-6 space-y-4 flex-1 overflow-y-auto pb-20">
+          <div className="flex items-center justify-between">
+// ...existing code...
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">

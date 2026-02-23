@@ -28,17 +28,21 @@ export function HelperMyApiariesScreen({ selectedLanguage, onLanguageChange, onN
         apiaryMap[key].hives.push(a);
       });
       setApiaries(Object.values(apiaryMap));
+    // ...existing code...
     }).catch(()=>{}).finally(() => setLoading(false));
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-white to-emerald-50 text-stone-800 font-sans">
       <HelperSidebar isOpen={isSidebarOpen} activeTab="myApiaries" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
-      <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-        isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      
+      <div className={`flex flex-col h-full transition-all duration-300 ${isSidebarOpen ? 'ml-72' : ''} h-screen`}>
+        <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-      <div className="px-4 py-6 space-y-4">
-        <h2 className="text-xl font-bold text-stone-800">📍 My Apiaries</h2>
+        <div className="px-4 py-6 space-y-4 flex-1 overflow-y-auto pb-20">
+          <h2 className="text-xl font-bold text-stone-800">📍 My Apiaries</h2>
+// ...existing code...
 
         {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-emerald-500 border-t-transparent rounded-full" /></div> :
           apiaries.length === 0 ? (

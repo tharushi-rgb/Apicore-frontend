@@ -30,16 +30,21 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
   const stats = data?.stats;
   const alerts = data?.alerts || [];
 
+  // ...existing code...
   const hiveChartData = (data?.hives || []).slice(0, 5).map(h => ({ name: h.name, value: 1 }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-white to-emerald-50 text-stone-800 font-sans">
       <MobileSidebar isOpen={isSidebarOpen} activeTab="dashboard" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
-      <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-        notificationCount={alerts.filter(a => !a.is_read).length} onNotificationClick={() => setShowNotifications(!showNotifications)}
-        isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      
+      <div className={`transition-all duration-300 ${isSidebarOpen ? 'ml-72' : ''}`}>
+        <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+          notificationCount={alerts.filter(a => !a.is_read).length} onNotificationClick={() => setShowNotifications(!showNotifications)}
+          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-      {showNotifications && (
+        <div className="p-4 space-y-4 max-w-7xl mx-auto">
+          {/* Welcome Cards */}
+// ...existing code...
         <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setShowNotifications(false)}>
           <div className="absolute top-20 right-4 left-4 max-w-md mx-auto bg-white rounded-2xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">

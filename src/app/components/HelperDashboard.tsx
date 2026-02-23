@@ -23,16 +23,20 @@ export function HelperDashboard({ selectedLanguage, onLanguageChange, onNavigate
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [data, setData] = useState<HelperDashboardData>({});
   const [loading, setLoading] = useState(true);
+  // ...existing code...
   const user = authService.getLocalUser();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-white to-emerald-50 text-stone-800 font-sans">
       <HelperSidebar isOpen={isSidebarOpen} activeTab="dashboard" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
-      <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-        isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      
+      <div className={`flex flex-col h-full transition-all duration-300 ${isSidebarOpen ? 'ml-72' : ''} h-screen`}>
+        <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-      <div className="px-4 py-6 space-y-4">
-        <h2 className="text-xl font-bold text-stone-800">👋 Welcome, {user?.name || 'Helper'}!</h2>
+        <div className="px-4 py-6 space-y-4 flex-1 overflow-y-auto pb-20">
+          <h2 className="text-xl font-bold text-stone-800">👋 Welcome, {user?.name || 'Helper'}!</h2>
+// ...existing code...
 
         {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-emerald-500 border-t-transparent rounded-full" /></div> : (
           <>

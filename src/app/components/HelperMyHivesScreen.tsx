@@ -21,7 +21,20 @@ export function HelperMyHivesScreen({ selectedLanguage, onLanguageChange, onNavi
   useEffect(() => { helpersService.getMyAssignments().then(setHives).catch(()=>{}).finally(() => setLoading(false)); }, []);
 
   const typeColors: Record<string, string> = { box: 'bg-amber-100 text-amber-700', pot: 'bg-emerald-100 text-emerald-700', log: 'bg-orange-100 text-orange-700', stingless: 'bg-blue-100 text-blue-700' };
+  // ...existing code...
   const statusColors: Record<string, string> = { active: 'bg-emerald-100 text-emerald-700', queenless: 'bg-red-100 text-red-700', inactive: 'bg-stone-100 text-stone-600', absconded: 'bg-purple-100 text-purple-700' };
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-white to-emerald-50 text-stone-800 font-sans">
+      <HelperSidebar isOpen={isSidebarOpen} activeTab="myHives" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+      
+      <div className={`flex flex-col h-full transition-all duration-300 ${isSidebarOpen ? 'ml-72' : ''} h-screen`}>
+        <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+
+        <div className="px-4 py-6 space-y-4 flex-1 overflow-y-auto pb-20">
+          <h2 className="text-xl font-bold text-stone-800">🐝 My Assigned Hives</h2>
+// ...existing code...
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
