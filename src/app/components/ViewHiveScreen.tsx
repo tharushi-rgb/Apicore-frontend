@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Star, Flag, Plus, Edit2, Trash2, ArrowRightLeft, ClipboardList, Droplets, Wrench, Crown, Pill, X } from 'lucide-react';
+import { ArrowLeft, Star, Flag, Plus, Edit2, Trash2, ArrowRightLeft, ClipboardList, Droplets, Wrench, Crown, Pill, X, Scissors } from 'lucide-react';
 import { hivesService, type Hive } from '../services/hives';
 import { inspectionsService, type Inspection } from '../services/inspections';
 import { feedingsService, type Feeding, componentsService, type HiveComponent, queensService, type Queen, treatmentsService, type Treatment } from '../services/hiveDetails';
@@ -226,6 +226,73 @@ function TransferForm({ hiveId, onClose, onSaved }: { hiveId: number; onClose: (
   );
 }
 
+// ---- Hive Split Form (R6.1) ----
+function SplitHiveForm({ hive, onClose, onSaved }: { hive: Hive; onClose: () => void; onSaved: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [f, setF] = useState({
+    new_hive_name: `${hive.name} - Split`,
+    transfer_date: new Date().toISOString().split('T')[0],
+    queen_moved: false,
+    brood_frames_moved: '3',
+    notes: ''
+  });
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!f.new_hive_name) { setError('New hive name required'); return; }
+    setSaving(true); setError('');
+    try {
+      // Step 1: Create the new hive in same apiary
+      const newHive = await hivesService.create({
+        name: f.new_hive_name,
+        hive_type: hive.hive_type,
+        apiary_id: hive.apiary_id || undefined,
+        status: 'active',
+        colony_strength: 'weak',
+        queen_present: f.queen_moved ? 1 : 0,
+        location_type: hive.location_type || (hive.apiary_id ? 'apiary-linked' : 'standalone'),
+        gps_latitude: hive.gps_latitude || undefined,
+        gps_longitude: hive.gps_longitude || undefined,
+        notes: `Split from ${hive.name} on ${f.transfer_date}`
+      });
+      // Step 2: Record colony transfer as 'split'
+      await transfersService.create({
+        source_hive_id: hive.id,
+        target_hive_id: newHive.id,
+        transfer_date: f.transfer_date,
+        transferType: 'split',
+        queenMoved: f.queen_moved,
+        broodFramesMoved: parseInt(f.brood_frames_moved) || 0,
+        notes: f.notes || `Hive split: ${hive.name} → ${f.new_hive_name}`
+      });
+      onSaved();
+    } catch (err: any) { setError(err.message || 'Split failed'); setSaving(false); }
+  };
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center"><div className="bg-white w-full max-w-md rounded-t-2xl p-5 max-h-[85vh] overflow-y-auto">
+      <div className="flex items-center justify-between mb-4"><h3 className="font-bold text-stone-800">✂️ Split Hive</h3><button onClick={onClose}><X className="w-5 h-5" /></button></div>
+      {error && <div className="bg-red-50 text-red-600 p-2 rounded-lg text-xs mb-3">{error}</div>}
+      <div className="bg-amber-50 p-3 rounded-xl text-xs text-amber-700 mb-3">
+        <p className="font-medium mb-1">Splitting "{hive.name}"</p>
+        <p>A new hive will be created and a colony transfer record will be logged. The source colony will be weakened.</p>
+      </div>
+      <form onSubmit={submit} className="space-y-3">
+        <div><label className="block text-xs font-medium text-stone-600 mb-1">New Hive Name *</label>
+          <input value={f.new_hive_name} onChange={e=>setF(p=>({...p,new_hive_name:e.target.value}))} className="w-full border rounded-xl px-3 py-2 text-sm" /></div>
+        <div><label className="block text-xs font-medium text-stone-600 mb-1">Split Date</label>
+          <input type="date" value={f.transfer_date} onChange={e=>setF(p=>({...p,transfer_date:e.target.value}))} className="w-full border rounded-xl px-3 py-2 text-sm" /></div>
+        <div><label className="block text-xs font-medium text-stone-600 mb-1">Brood Frames to Move</label>
+          <input value={f.brood_frames_moved} onChange={e=>setF(p=>({...p,brood_frames_moved:e.target.value}))} type="number" min="0" className="w-full border rounded-xl px-3 py-2 text-sm" /></div>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.queen_moved} onChange={e=>setF(p=>({...p,queen_moved:e.target.checked}))} className="accent-amber-500" /> Move queen to new hive</label>
+        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder="Notes (optional)" rows={2} className="w-full border rounded-xl px-3 py-2 text-sm" />
+        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-2.5 rounded-xl font-medium disabled:opacity-60 flex items-center justify-center gap-2">
+          {saving ? 'Splitting...' : <><Scissors className="w-4 h-4" /> Split Hive</>}
+        </button>
+      </form>
+    </div></div>
+  );
+}
+
 // ---- Main Screen ----
 export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
   const [hive, setHive] = useState<Hive | null>(null);
@@ -245,6 +312,7 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
   const [showQueenForm, setShowQueenForm] = useState<Queen | true | false>(false);
   const [showTreatForm, setShowTreatForm] = useState<Treatment | true | false>(false);
   const [showTransferForm, setShowTransferForm] = useState(false);
+  const [showSplitForm, setShowSplitForm] = useState(false);
 
   const fetchHive = async () => { try { const h = await hivesService.getById(hiveId); setHive(h); } catch {} };
   const fetchInspections = async () => { try { setInspections(await inspectionsService.getByHive(hiveId)); } catch {} };
@@ -332,9 +400,14 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
               <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-lg font-bold text-emerald-600">{feedings.length}</p><p className="text-xs text-stone-500">Feedings</p></div>
               <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-lg font-bold text-blue-600">{treatments.length}</p><p className="text-xs text-stone-500">Treatments</p></div>
             </div>
+            {/* Hive Split button (R6.1) */}
+            <button onClick={() => setShowSplitForm(true)} className="w-full bg-amber-50 hover:bg-amber-100 text-amber-700 py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 text-sm border border-amber-200">
+              <Scissors className="w-4 h-4" /> Split This Hive
+            </button>
             <button onClick={handleDeleteHive} className="w-full bg-red-50 hover:bg-red-100 text-red-600 py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 text-sm border border-red-200">
               <Trash2 className="w-4 h-4" /> Delete Hive
             </button>
+            {showSplitForm && <SplitHiveForm hive={hive} onClose={() => setShowSplitForm(false)} onSaved={() => { setShowSplitForm(false); fetchHive(); fetchTransfers(); }} />}
           </>
         )}
 

@@ -27,7 +27,7 @@ export function HelperDashboard({ selectedLanguage, onLanguageChange, onNavigate
   const user = authService.getLocalUser();
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50/30 to-emerald-50 text-stone-800 font-sans">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-8">
       <HelperSidebar isOpen={isSidebarOpen} activeTab="dashboard" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
       
       <div className="flex flex-col h-screen">

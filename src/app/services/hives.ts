@@ -26,6 +26,19 @@ export interface Hive {
   apiary_district?: string;
   created_at: string;
   updated_at: string;
+  // Dynamic fields per hive type (R5.2)
+  num_frames?: number;
+  num_supers?: number;
+  brood_box_type?: string;
+  pot_material?: string;
+  pot_volume_liters?: number;
+  entrance_size?: string;
+  log_length_cm?: number;
+  log_diameter_cm?: number;
+  wood_type?: string;
+  stingless_species?: string;
+  colony_size?: string;
+  propolis_type?: string;
 }
 
 export interface HivePayload {

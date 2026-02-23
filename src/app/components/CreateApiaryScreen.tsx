@@ -20,7 +20,16 @@ export function CreateApiaryScreen({ onClose, initialApiary, onLogout }: Props) 
     name: initialApiary?.name || '', district: initialApiary?.district || '', area: initialApiary?.area || '',
     established_date: initialApiary?.established_date || '', status: initialApiary?.status || 'active',
     terrain: initialApiary?.terrain || '', forage_primary: initialApiary?.forage_primary || '',
-    gps_latitude: initialApiary?.gps_latitude?.toString() || '', gps_longitude: initialApiary?.gps_longitude?.toString() || '', notes: initialApiary?.notes || ''
+    gps_latitude: initialApiary?.gps_latitude?.toString() || '', gps_longitude: initialApiary?.gps_longitude?.toString() || '', notes: initialApiary?.notes || '',
+    // Client/Personal toggle (R5.4/R5.5)
+    apiary_type: (initialApiary as any)?.apiary_type || 'personal',
+    client_name: (initialApiary as any)?.client_name || '',
+    client_contact: (initialApiary as any)?.client_contact || '',
+    contract_start: (initialApiary as any)?.contract_start || '',
+    contract_end: (initialApiary as any)?.contract_end || '',
+    landlord_name: (initialApiary as any)?.landlord_name || '',
+    landlord_contact: (initialApiary as any)?.landlord_contact || '',
+    rental_fee: (initialApiary as any)?.rental_fee?.toString() || '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,6 +63,39 @@ export function CreateApiaryScreen({ onClose, initialApiary, onLogout }: Props) 
 
         <div><label className="block text-sm font-medium text-stone-700 mb-1">Name *</label>
           <input value={form.name} onChange={e => setForm(p=>({...p, name: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none" /></div>
+
+        {/* Client / Personal Toggle (R5.4/R5.5/R5.6) */}
+        <div className="bg-white rounded-xl p-4 border border-stone-200 space-y-3">
+          <label className="text-sm font-medium text-stone-700">Apiary Type</label>
+          <div className="flex rounded-xl overflow-hidden border border-stone-200">
+            <button type="button" onClick={() => setForm(p=>({...p, apiary_type: 'personal'}))} className={`flex-1 py-2.5 text-sm font-medium ${form.apiary_type === 'personal' ? 'bg-amber-500 text-white' : 'bg-stone-50 text-stone-600'}`}>🏠 Personal</button>
+            <button type="button" onClick={() => setForm(p=>({...p, apiary_type: 'client'}))} className={`flex-1 py-2.5 text-sm font-medium ${form.apiary_type === 'client' ? 'bg-blue-500 text-white' : 'bg-stone-50 text-stone-600'}`}>🤝 Client</button>
+          </div>
+        </div>
+
+        {form.apiary_type === 'client' && (
+          <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100 space-y-3">
+            <h3 className="text-sm font-semibold text-blue-700">Client & Contract Details</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="block text-xs font-medium text-stone-600 mb-1">Client Name</label>
+                <input value={form.client_name} onChange={e => setForm(p=>({...p, client_name: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" /></div>
+              <div><label className="block text-xs font-medium text-stone-600 mb-1">Client Contact</label>
+                <input value={form.client_contact} onChange={e => setForm(p=>({...p, client_contact: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" /></div>
+            </div>
+            <div><label className="block text-xs font-medium text-stone-600 mb-1">Landlord Name</label>
+              <input value={form.landlord_name} onChange={e => setForm(p=>({...p, landlord_name: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" /></div>
+            <div><label className="block text-xs font-medium text-stone-600 mb-1">Landlord Contact</label>
+              <input value={form.landlord_contact} onChange={e => setForm(p=>({...p, landlord_contact: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="block text-xs font-medium text-stone-600 mb-1">Contract Start</label>
+                <input type="date" value={form.contract_start} onChange={e => setForm(p=>({...p, contract_start: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" /></div>
+              <div><label className="block text-xs font-medium text-stone-600 mb-1">Contract End</label>
+                <input type="date" value={form.contract_end} onChange={e => setForm(p=>({...p, contract_end: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" /></div>
+            </div>
+            <div><label className="block text-xs font-medium text-stone-600 mb-1">Monthly Rental Fee (LKR)</label>
+              <input type="number" value={form.rental_fee} onChange={e => setForm(p=>({...p, rental_fee: e.target.value}))} placeholder="0.00" className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" /></div>
+          </div>
+        )}
 
         <div><label className="block text-sm font-medium text-stone-700 mb-1">District *</label>
           <select value={form.district} onChange={e => setForm(p=>({...p, district: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none">

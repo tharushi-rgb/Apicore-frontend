@@ -4,20 +4,9 @@
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Smooth scrolling for all scroll containers */
+/* Smooth scrolling */
 * { scroll-behavior: smooth; }
-
-/* Custom scrollbar for content areas */
-.custom-scrollbar::-webkit-scrollbar { width: 3px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 10px; }
 
 /* Line clamp */
 .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
 .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-
-/* Border-left width utility */
-.border-l-3 { border-left-width: 3px; }
-
-/* Border width utility */
-.border-3 { border-width: 3px; }
