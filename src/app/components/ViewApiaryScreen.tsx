@@ -75,17 +75,6 @@ export function ViewApiaryScreen({ onBack, onAddHive, onEditApiary, onViewHive, 
 
       <div className="px-4 py-6 space-y-4 pb-20">
         {/* Info Card */}
-// ...existing code...  return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
-      <div className="bg-white shadow-sm px-4 py-3 flex items-center gap-3">
-        <button onClick={onBack} className="p-2 hover:bg-stone-100 rounded-lg"><ArrowLeft className="w-5 h-5 text-stone-700" /></button>
-        <div className="flex-1"><h1 className="text-lg font-bold text-stone-800">{apiary.name}</h1><p className="text-xs text-stone-500">{apiary.district} {apiary.area ? `• ${apiary.area}` : ''}</p></div>
-        <button onClick={handleDelete} disabled={deleting} className="p-2 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4 text-red-500" /></button>
-        <button onClick={() => onEditApiary(apiary)} className="text-sm text-amber-600 font-medium hover:text-amber-700">Edit</button>
-      </div>
-
-      <div className="px-4 py-6 space-y-4">
-        {/* Info Card */}
         <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
           <div className="grid grid-cols-3 gap-3 text-center">
             <div><p className="text-xl font-bold text-amber-600">{hives.length}</p><p className="text-xs text-stone-500">Hives</p></div>

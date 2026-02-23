@@ -25,27 +25,17 @@ export function HelperMyHivesScreen({ selectedLanguage, onLanguageChange, onNavi
   const statusColors: Record<string, string> = { active: 'bg-emerald-100 text-emerald-700', queenless: 'bg-red-100 text-red-700', inactive: 'bg-stone-100 text-stone-600', absconded: 'bg-purple-100 text-purple-700' };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-white to-emerald-50 text-stone-800 font-sans">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50/30 to-emerald-50 text-stone-800 font-sans">
       <HelperSidebar isOpen={isSidebarOpen} activeTab="myHives" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
       
-      <div className={`flex flex-col h-full transition-all duration-300 ${isSidebarOpen ? 'ml-72' : ''} h-screen`}>
+      <div className="flex flex-col h-screen">
         <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
           isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
         <div className="px-4 py-6 space-y-4 flex-1 overflow-y-auto pb-20">
           <h2 className="text-xl font-bold text-stone-800">🐝 My Assigned Hives</h2>
-// ...existing code...
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
-      <HelperSidebar isOpen={isSidebarOpen} activeTab="myHives" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
-      <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-        isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-
-      <div className="px-4 py-6 space-y-4">
-        <h2 className="text-xl font-bold text-stone-800">🐝 My Assigned Hives</h2>
-
-        <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2">
           <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold">{hives.length}</p><p className="text-xs text-stone-500">Total</p></div>
           <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold text-emerald-600">{hives.filter((h:any)=>h.status==='active').length}</p><p className="text-xs text-stone-500">Active</p></div>
           <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold text-red-600">{hives.filter((h:any)=>h.status==='queenless').length}</p><p className="text-xs text-stone-500">Queenless</p></div>
@@ -74,6 +64,7 @@ export function HelperMyHivesScreen({ selectedLanguage, onLanguageChange, onNavi
           )
         }
       </div>
+    </div>
     </div>
   );
 }

@@ -97,12 +97,10 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
   };
 
   return (
-    // ...existing code...
-  return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-white to-emerald-50 text-stone-800 font-sans">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50/30 to-emerald-50 text-stone-800 font-sans">
       <MobileSidebar isOpen={isSidebarOpen} activeTab="planning" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
       
-      <div className={`flex flex-col h-full transition-all duration-300 ${isSidebarOpen ? 'ml-72' : ''} h-screen`}>
+      <div className="flex flex-col h-screen">
         <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
           isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
@@ -373,6 +371,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
           </>
         )}
       </div>
+    </div>
     </div>
   );
 }

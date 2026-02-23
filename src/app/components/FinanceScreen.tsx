@@ -34,25 +34,15 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
   const deleteIncome = async (id: number) => { if (!confirm('Delete?')) return; await incomeService.delete(id); fetchAll(); };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-white to-emerald-50 text-stone-800 font-sans">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50/30 to-emerald-50 text-stone-800 font-sans">
       <MobileSidebar isOpen={isSidebarOpen} activeTab="finance" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
       
-      <div className={`flex flex-col h-full transition-all duration-300 ${isSidebarOpen ? 'ml-72' : ''} h-screen`}>
+      <div className="flex flex-col h-screen">
         <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
           isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
         <div className="px-4 py-6 space-y-4 flex-1 overflow-y-auto pb-20">
           <div className="grid grid-cols-3 gap-2">
-// ...existing code...
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab="finance" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
-      <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-        isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-
-      <div className="px-4 py-6 space-y-4">
-        <div className="grid grid-cols-3 gap-2">
           <div className="bg-white rounded-xl p-3 shadow-sm text-center"><TrendingDown className="w-4 h-4 text-red-500 mx-auto mb-1" /><p className="text-lg font-bold text-red-600">Rs.{totalExp.toFixed(0)}</p><p className="text-xs text-stone-500">Expenses</p></div>
           <div className="bg-white rounded-xl p-3 shadow-sm text-center"><TrendingUp className="w-4 h-4 text-emerald-500 mx-auto mb-1" /><p className="text-lg font-bold text-emerald-600">Rs.{totalInc.toFixed(0)}</p><p className="text-xs text-stone-500">Income</p></div>
           <div className="bg-white rounded-xl p-3 shadow-sm text-center"><DollarSign className="w-4 h-4 text-amber-500 mx-auto mb-1" /><p className={`text-lg font-bold ${totalInc - totalExp >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>Rs.{(totalInc - totalExp).toFixed(0)}</p><p className="text-xs text-stone-500">Profit</p></div>
@@ -102,7 +92,8 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                   </div>
                   {i.description && <p className="text-xs text-stone-500">{i.description}</p>}
                 </div>
-              ))}</div>
+              ))}
+              </div>
             }
           </>
         )}
@@ -110,6 +101,7 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
       {showExpForm && <ExpenseForm initial={showExpForm === true ? undefined : showExpForm} onClose={() => setShowExpForm(false)} onSaved={() => { setShowExpForm(false); fetchAll(); }} />}
       {showIncForm && <IncomeForm initial={showIncForm === true ? undefined : showIncForm} onClose={() => setShowIncForm(false)} onSaved={() => { setShowIncForm(false); fetchAll(); }} />}
+    </div>
     </div>
   );
 }
