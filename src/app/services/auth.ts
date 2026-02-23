@@ -14,13 +14,22 @@ export interface User {
   name: string;
   email: string;
   phone?: string;
+  nic_number?: string;
   district?: string;
+  preferred_language?: string;
+  age_group?: string;
+  known_bee_allergy?: string;
+  blood_group?: string;
+  beekeeping_nature?: string;
+  business_reg_no?: string;
+  primary_bee_species?: string;
+  nvq_level?: string;
   role: string;
   years_experience?: number;
 }
 
 export const authService = {
-  async register(payload: { name: string; email: string; password: string; phone?: string; district?: string; role?: string }) {
+  async register(payload: Record<string, unknown>) {
     const res = await api.post<AuthResponse>(EP.REGISTER, payload);
     localStorage.setItem('auth_token', res.data.token);
     localStorage.setItem('user', JSON.stringify(res.data.user));
