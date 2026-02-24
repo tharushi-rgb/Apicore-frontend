@@ -39,7 +39,7 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
       <div className="bg-white shadow-sm sticky top-0 z-30">
         <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
         <div className="px-6 pb-4 border-t border-stone-100">
           <h1 className="text-2xl font-bold text-stone-800">Profile</h1>
           <p className="text-stone-500 text-sm mt-1">Manage your account</p>

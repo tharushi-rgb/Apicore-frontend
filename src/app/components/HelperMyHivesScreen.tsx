@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Hexagon as HiveIcon, Star, Flag } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
 import { HelperSidebar, type HelperNavTab } from './HelperSidebar';
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function HelperMyHivesScreen({ selectedLanguage, onLanguageChange, onNavigate, onViewHive, onLogout }: Props) {
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [hives, setHives] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +31,7 @@ export function HelperMyHivesScreen({ selectedLanguage, onLanguageChange, onNavi
 
       <div className="bg-white shadow-sm sticky top-0 z-30">
         <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => navigate('/helper/notifications')} />
         <div className="px-6 pb-4 border-t border-stone-100">
           <h1 className="text-2xl font-bold text-stone-800">My Assigned Hives</h1>
           <p className="text-stone-500 text-sm mt-1">Hives assigned to you</p>

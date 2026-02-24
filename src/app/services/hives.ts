@@ -83,4 +83,15 @@ export const hivesService = {
   async toggleFlag(id: number, reason?: string) {
     return api.patch(`/hives/${id}/flag`, { flag_reason: reason });
   },
+  // R9.4: Hive edit locking
+  async acquireLock(id: number) {
+    return api.post<{ success: boolean; message: string; data: { locked: boolean; lockedBy: number } }>(`/hives/${id}/lock`, {});
+  },
+  async releaseLock(id: number) {
+    return api.delete(`/hives/${id}/lock`);
+  },
+  async checkLock(id: number) {
+    const res = await api.get<{ success: boolean; data: { locked: boolean; lockedBy?: number; lockedByName?: string; expiresAt?: string; isOwner?: boolean } }>(`/hives/${id}/lock`);
+    return res.data;
+  },
 };

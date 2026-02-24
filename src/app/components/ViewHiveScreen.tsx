@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Star, Flag, Plus, Edit2, Trash2, ArrowRightLeft, ClipboardList, Droplets, Wrench, Crown, Pill, X, Scissors, MapPin, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Star, Flag, Plus, Edit2, Trash2, ArrowRightLeft, ClipboardList, Droplets, Wrench, Crown, Pill, X, Scissors, MapPin, AlertTriangle, Lock } from 'lucide-react';
 import { hivesService, type Hive } from '../services/hives';
 import { inspectionsService, type Inspection } from '../services/inspections';
 import { feedingsService, type Feeding, componentsService, type HiveComponent, queensService, type Queen, treatmentsService, type Treatment } from '../services/hiveDetails';
@@ -354,6 +354,7 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
   const [hive, setHive] = useState<Hive | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<HiveTab>('overview');
+  const [lockInfo, setLockInfo] = useState<{ locked: boolean; lockedByName?: string; isOwner?: boolean } | null>(null);
 
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [feedings, setFeedings] = useState<Feeding[]>([]);
@@ -381,7 +382,26 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
   useEffect(() => {
     Promise.all([fetchHive(), fetchInspections(), fetchFeedings(), fetchComponents(), fetchQueens(), fetchTreatments(), fetchTransfers()])
       .finally(() => setLoading(false));
+    // Check lock status
+    hivesService.checkLock(hiveId).then(setLockInfo).catch(() => {});
   }, [hiveId]);
+
+  // R9.4: Acquire lock before editing
+  const handleEditHive = async () => {
+    if (!hive || !onEditHive) return;
+    try {
+      await hivesService.acquireLock(hive.id);
+      onEditHive(hive);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.response?.data?.data?.lockedByName;
+      if (err?.response?.status === 409) {
+        alert(msg || 'This hive is currently being edited by another user. Please try again later.');
+      } else {
+        // Lock table might not exist yet, proceed anyway
+        onEditHive(hive);
+      }
+    }
+  };
 
   const toggleStar = async () => { if (!hive) return; await hivesService.toggleStar(hive.id); fetchHive(); };
   const toggleFlag = async () => { if (!hive) return; await hivesService.toggleFlag(hive.id); fetchHive(); };
@@ -425,7 +445,13 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
         <div className="flex gap-1">
           <button onClick={toggleStar} className="p-2 hover:bg-stone-100 rounded-lg"><Star className={`w-5 h-5 ${hive.is_starred ? 'text-amber-500 fill-amber-500' : 'text-stone-400'}`} /></button>
           <button onClick={toggleFlag} className="p-2 hover:bg-stone-100 rounded-lg"><Flag className={`w-5 h-5 ${hive.is_flagged ? 'text-red-500 fill-red-500' : 'text-stone-400'}`} /></button>
-          {onEditHive && <button onClick={() => onEditHive(hive)} className="p-2 hover:bg-stone-100 rounded-lg"><Edit2 className="w-5 h-5 text-stone-600" /></button>}
+          {onEditHive && (
+            <button onClick={handleEditHive} className={`p-2 hover:bg-stone-100 rounded-lg relative ${lockInfo?.locked && !lockInfo?.isOwner ? 'opacity-50' : ''}`}
+              title={lockInfo?.locked && !lockInfo?.isOwner ? `Being edited by ${lockInfo.lockedByName || 'another user'}` : 'Edit hive'}>
+              <Edit2 className="w-5 h-5 text-stone-600" />
+              {lockInfo?.locked && !lockInfo?.isOwner && <Lock className="w-3 h-3 text-red-500 absolute -top-0.5 -right-0.5" />}
+            </button>
+          )}
         </div>
       </div>
 

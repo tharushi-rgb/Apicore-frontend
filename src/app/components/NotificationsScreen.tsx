@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, Check, CheckCheck, Trash2, X, Filter } from 'lucide-react';
+import { Bell, Check, CheckCheck, X } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
 import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
@@ -38,7 +38,7 @@ export function NotificationsScreen({ selectedLanguage, onLanguageChange, onNavi
 
       <div className="bg-white shadow-sm sticky top-0 z-30">
         <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-        isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+        isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
         <div className="px-6 pb-4 border-t border-stone-100">
           <h1 className="text-2xl font-bold text-stone-800">Notifications</h1>
           <p className="text-stone-500 text-sm mt-1">Stay updated</p>

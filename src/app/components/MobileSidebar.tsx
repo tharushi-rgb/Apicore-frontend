@@ -1,4 +1,4 @@
-import { Home, MapPin, Hexagon as HiveIcon, Package, Calendar, DollarSign, Users, User, Bell, LogOut } from 'lucide-react';
+import { Home, MapPin, Hexagon as HiveIcon, Package, Calendar, DollarSign, Users, User, LogOut } from 'lucide-react';
 
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
@@ -33,14 +33,14 @@ export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40"
+          className="absolute inset-0 bg-black/50 z-40"
           onClick={onClose}
           aria-hidden="true"
         />
       )}
 
       <div
-        className={`fixed top-0 left-0 h-full bg-white shadow-2xl z-50 transition-transform duration-300 ease-in-out w-72 flex flex-col ${
+        className={`absolute top-0 left-0 h-full bg-white shadow-2xl z-50 transition-transform duration-300 ease-in-out w-72 flex flex-col ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -66,7 +66,6 @@ export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout
           <NavItem icon={<Calendar className="w-5 h-5" />} label="Planning" active={activeTab === 'planning'} onClick={() => nav('planning')} />
           <NavItem icon={<DollarSign className="w-5 h-5" />} label="Finance" active={activeTab === 'finance'} onClick={() => nav('finance')} />
           <NavItem icon={<Users className="w-5 h-5" />} label="Clients" active={activeTab === 'clients'} onClick={() => nav('clients')} />
-          <NavItem icon={<Bell className="w-5 h-5" />} label="Notifications" active={activeTab === 'notifications'} onClick={() => nav('notifications')} />
           <NavItem icon={<User className="w-5 h-5" />} label="Profile" active={activeTab === 'profile'} onClick={() => nav('profile')} />
         </nav>
 

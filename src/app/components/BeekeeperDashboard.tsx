@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, AlertCircle, Info, X } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { MobileHeader } from './MobileHeader';
 import { MobileSidebar } from './MobileSidebar';
@@ -18,7 +17,6 @@ interface Props {
 
 export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavigate, onLogout }: Props) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const user = authService.getLocalUser();
@@ -28,7 +26,6 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
   }, []);
 
   const stats = data?.stats;
-  const alerts = data?.alerts || [];
   const hiveChartData = (data?.hives || []).slice(0, 5).map(h => ({ name: h.name, value: 1 }));
 
   const handleNavigate = (tab: NavTab) => {
@@ -52,57 +49,10 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         district={user?.district}
         selectedLanguage={selectedLanguage}
         onLanguageChange={onLanguageChange}
-        notificationCount={alerts.filter(a => !a.is_read).length}
-        onNotificationClick={() => setShowNotifications(!showNotifications)}
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        onViewAllNotifications={() => onNavigate('notifications')}
       />
-
-      {/* Notifications Overlay */}
-      {showNotifications && (
-        <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setShowNotifications(false)}>
-          <div
-            className="absolute top-20 right-4 left-4 max-w-md mx-auto bg-white rounded-2xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-stone-800">Recent Alerts</h2>
-              <button
-                onClick={() => setShowNotifications(false)}
-                className="p-1 hover:bg-stone-100 rounded-lg"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="space-y-3">
-              {alerts.length === 0 && <p className="text-stone-500 text-center py-4">No alerts</p>}
-              {alerts.map((a) => (
-                <div
-                  key={a.id}
-                  className={`p-4 rounded-xl border-l-4 ${
-                    a.type === 'critical'
-                      ? 'bg-red-50 border-red-500'
-                      : a.type === 'warning'
-                      ? 'bg-amber-50 border-amber-500'
-                      : 'bg-blue-50 border-blue-500'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    {a.type === 'critical' ? (
-                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                    ) : a.type === 'warning' ? (
-                      <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                    ) : (
-                      <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                    )}
-                    <p className="text-stone-700 text-sm leading-relaxed">{a.message}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Main Content */}
       <div className="px-4 py-6 space-y-6">
