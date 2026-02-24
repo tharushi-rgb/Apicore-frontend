@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Star, Flag, Plus, Edit2, Trash2, ArrowRightLeft, ClipboardList, Droplets, Wrench, Crown, Pill, X } from 'lucide-react';
+import { ArrowLeft, Star, Flag, Plus, Edit2, Trash2, ArrowRightLeft, ClipboardList, Droplets, Wrench, Crown, Pill, X, Scissors, MapPin, AlertTriangle } from 'lucide-react';
 import { hivesService, type Hive } from '../services/hives';
 import { inspectionsService, type Inspection } from '../services/inspections';
 import { feedingsService, type Feeding, componentsService, type HiveComponent, queensService, type Queen, treatmentsService, type Treatment } from '../services/hiveDetails';
 import { transfersService, type ColonyTransfer } from '../services/transfers';
+import { api } from '../services/api';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -15,26 +16,85 @@ interface Props {
 }
 
 // ---- Small form modals ----
-function InspectionForm({ hiveId, initial, onClose, onSaved }: { hiveId: number; initial?: Inspection; onClose: () => void; onSaved: () => void }) {
+function InspectionForm({ hiveId, hiveType, hiveLat, hiveLng, initial, onClose, onSaved }: { hiveId: number; hiveType?: string; hiveLat?: number; hiveLng?: number; initial?: Inspection; onClose: () => void; onSaved: () => void }) {
   const [saving, setSaving] = useState(false);
+  const [gpsError, setGpsError] = useState('');
+  const [gpsVerified, setGpsVerified] = useState(!hiveLat || !hiveLng); // skip if no hive GPS
   const [f, setF] = useState({
     inspection_date: initial?.inspection_date || new Date().toISOString().split('T')[0],
     colony_strength: initial?.colony_strength || '',
     queen_present: initial?.queen_present ?? 1,
     pest_detected: initial?.pest_detected ?? 0,
-    notes: initial?.notes || ''
+    notes: initial?.notes || '',
+    // Dynamic fields per hive type (R9.1)
+    frames_inspected: '',
+    honey_stores: '',
+    brood_pattern: '',
+    pot_condition: '',
+    entrance_activity: '',
   });
+
+  // R9.2/R9.3: GPS verification — check user is within 50m of hive
+  const verifyGPS = () => {
+    if (!hiveLat || !hiveLng) { setGpsVerified(true); return; }
+    if (!navigator.geolocation) { setGpsError('GPS not supported on this device'); return; }
+    setGpsError('');
+    navigator.geolocation.getCurrentPosition(pos => {
+      const R = 6371000; // Earth radius in meters
+      const dLat = ((hiveLat - pos.coords.latitude) * Math.PI) / 180;
+      const dLng = ((hiveLng - pos.coords.longitude) * Math.PI) / 180;
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos((pos.coords.latitude * Math.PI) / 180) * Math.cos((hiveLat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+      const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      if (distance <= 50) {
+        setGpsVerified(true);
+        setGpsError('');
+      } else {
+        setGpsError(`You are ${Math.round(distance)}m from the hive. Must be within 50m to inspect.`);
+      }
+    }, () => setGpsError('Location access denied. Enable GPS to verify proximity.'));
+  };
+
+  useEffect(() => {
+    if (!gpsVerified && hiveLat && hiveLng) verifyGPS();
+  }, []);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true);
     try {
-      const d: any = { hive_id: hiveId, inspection_date: f.inspection_date, colony_strength: f.colony_strength || null, queen_present: f.queen_present ? 1 : 0, pest_detected: f.pest_detected ? 1 : 0, notes: f.notes || null };
+      const extraNotes = [f.notes];
+      if (f.frames_inspected) extraNotes.push(`Frames inspected: ${f.frames_inspected}`);
+      if (f.honey_stores) extraNotes.push(`Honey stores: ${f.honey_stores}`);
+      if (f.brood_pattern) extraNotes.push(`Brood pattern: ${f.brood_pattern}`);
+      if (f.pot_condition) extraNotes.push(`Pot condition: ${f.pot_condition}`);
+      if (f.entrance_activity) extraNotes.push(`Entrance activity: ${f.entrance_activity}`);
+      const d: any = { hive_id: hiveId, inspection_date: f.inspection_date, colony_strength: f.colony_strength || null, queen_present: f.queen_present ? 1 : 0, pest_detected: f.pest_detected ? 1 : 0, notes: extraNotes.filter(Boolean).join('; ') || null };
       if (initial) await inspectionsService.update(initial.id, d); else await inspectionsService.create(d);
       onSaved();
     } catch { setSaving(false); }
   };
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center"><div className="bg-white w-full max-w-md rounded-t-2xl p-5 max-h-[85vh] overflow-y-auto">
       <div className="flex items-center justify-between mb-4"><h3 className="font-bold text-stone-800">{initial ? 'Edit' : 'New'} Inspection</h3><button onClick={onClose}><X className="w-5 h-5" /></button></div>
+
+      {/* GPS Verification Banner (R9.2/R9.3) */}
+      {!gpsVerified && (
+        <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-2">
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-amber-600" />
+            <span className="text-sm font-medium text-amber-700">GPS Verification Required</span>
+          </div>
+          {gpsError && <p className="text-xs text-red-600">{gpsError}</p>}
+          <button type="button" onClick={verifyGPS} className="w-full bg-amber-500 text-white py-2 rounded-xl text-sm font-medium">Verify My Location</button>
+        </div>
+      )}
+      {gpsVerified && hiveLat && hiveLng && (
+        <div className="mb-3 p-2 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-emerald-600" />
+          <span className="text-xs text-emerald-700">Location verified - within 50m of hive</span>
+        </div>
+      )}
+
       <form onSubmit={submit} className="space-y-3">
         <input type="date" value={f.inspection_date} onChange={e=>setF(p=>({...p,inspection_date:e.target.value}))} className="w-full border rounded-xl px-3 py-2 text-sm" />
         <select value={f.colony_strength} onChange={e=>setF(p=>({...p,colony_strength:e.target.value}))} className="w-full border rounded-xl px-3 py-2 text-sm">
@@ -42,8 +102,42 @@ function InspectionForm({ hiveId, initial, onClose, onSaved }: { hiveId: number;
         </select>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!f.queen_present} onChange={e=>setF(p=>({...p,queen_present:e.target.checked?1:0}))} className="accent-amber-500" /> Queen Present</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!f.pest_detected} onChange={e=>setF(p=>({...p,pest_detected:e.target.checked?1:0}))} className="accent-red-500" /> Pest Detected</label>
+
+        {/* Dynamic fields per hive type (R9.1) */}
+        {(hiveType === 'box') && (
+          <div className="bg-stone-50 rounded-xl p-3 space-y-2">
+            <p className="text-xs font-medium text-stone-600">Box Hive Fields</p>
+            <input value={f.frames_inspected} onChange={e=>setF(p=>({...p,frames_inspected:e.target.value}))} placeholder="Frames inspected (count)" type="number" className="w-full border rounded-xl px-3 py-2 text-sm" />
+            <select value={f.honey_stores} onChange={e=>setF(p=>({...p,honey_stores:e.target.value}))} className="w-full border rounded-xl px-3 py-2 text-sm">
+              <option value="">Honey Stores</option><option value="empty">Empty</option><option value="low">Low</option><option value="adequate">Adequate</option><option value="full">Full</option>
+            </select>
+            <select value={f.brood_pattern} onChange={e=>setF(p=>({...p,brood_pattern:e.target.value}))} className="w-full border rounded-xl px-3 py-2 text-sm">
+              <option value="">Brood Pattern</option><option value="solid">Solid</option><option value="spotty">Spotty</option><option value="none">None</option>
+            </select>
+          </div>
+        )}
+        {(hiveType === 'pot') && (
+          <div className="bg-stone-50 rounded-xl p-3 space-y-2">
+            <p className="text-xs font-medium text-stone-600">Pot Hive Fields</p>
+            <select value={f.pot_condition} onChange={e=>setF(p=>({...p,pot_condition:e.target.value}))} className="w-full border rounded-xl px-3 py-2 text-sm">
+              <option value="">Pot Condition</option><option value="intact">Intact</option><option value="cracked">Cracked</option><option value="damaged">Damaged</option>
+            </select>
+            <select value={f.entrance_activity} onChange={e=>setF(p=>({...p,entrance_activity:e.target.value}))} className="w-full border rounded-xl px-3 py-2 text-sm">
+              <option value="">Entrance Activity</option><option value="high">High</option><option value="moderate">Moderate</option><option value="low">Low</option><option value="none">None</option>
+            </select>
+          </div>
+        )}
+        {(hiveType === 'log' || hiveType === 'stingless') && (
+          <div className="bg-stone-50 rounded-xl p-3 space-y-2">
+            <p className="text-xs font-medium text-stone-600">{hiveType === 'log' ? 'Log' : 'Stingless'} Hive Fields</p>
+            <select value={f.entrance_activity} onChange={e=>setF(p=>({...p,entrance_activity:e.target.value}))} className="w-full border rounded-xl px-3 py-2 text-sm">
+              <option value="">Entrance Activity</option><option value="high">High</option><option value="moderate">Moderate</option><option value="low">Low</option><option value="none">None</option>
+            </select>
+          </div>
+        )}
+
         <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder="Notes" rows={2} className="w-full border rounded-xl px-3 py-2 text-sm" />
-        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-2.5 rounded-xl font-medium disabled:opacity-60">{saving ? 'Saving...' : 'Save'}</button>
+        <button type="submit" disabled={saving || !gpsVerified} className="w-full bg-amber-500 text-white py-2.5 rounded-xl font-medium disabled:opacity-60">{saving ? 'Saving...' : 'Save'}</button>
       </form>
     </div></div>
   );
@@ -226,6 +320,35 @@ function TransferForm({ hiveId, onClose, onSaved }: { hiveId: number; onClose: (
   );
 }
 
+// ---- Split Hive Form (R6.1) ----
+function SplitHiveForm({ hiveId, hiveName, onClose, onSaved }: { hiveId: number; hiveName: string; onClose: () => void; onSaved: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [f, setF] = useState({ new_hive_name: `${hiveName} - Split`, queen_moved: false, notes: '' });
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true);
+    try {
+      await api.post(`/hives/${hiveId}/split`, { new_hive_name: f.new_hive_name, queen_moved: f.queen_moved, notes: f.notes || undefined });
+      onSaved();
+    } catch { setSaving(false); }
+  };
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center"><div className="bg-white w-full max-w-md rounded-t-2xl p-5 max-h-[85vh] overflow-y-auto">
+      <div className="flex items-center justify-between mb-4"><h3 className="font-bold text-stone-800">Split Hive</h3><button onClick={onClose}><X className="w-5 h-5" /></button></div>
+      <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+        <p className="text-xs text-amber-700">This will create a new child hive from <strong>{hiveName}</strong>. The new hive will inherit the parent's attributes and a colony transfer record will be created.</p>
+      </div>
+      <form onSubmit={submit} className="space-y-3">
+        <input value={f.new_hive_name} onChange={e=>setF(p=>({...p,new_hive_name:e.target.value}))} placeholder="New hive name *" required className="w-full border rounded-xl px-3 py-2 text-sm" />
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.queen_moved} onChange={e=>setF(p=>({...p,queen_moved:e.target.checked}))} className="accent-amber-500" /> Queen moved to new hive</label>
+        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder="Notes (optional)" rows={2} className="w-full border rounded-xl px-3 py-2 text-sm" />
+        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-2.5 rounded-xl font-medium disabled:opacity-60 flex items-center justify-center gap-2">
+          <Scissors className="w-4 h-4" /> {saving ? 'Splitting...' : 'Split Hive'}
+        </button>
+      </form>
+    </div></div>
+  );
+}
+
 // ---- Main Screen ----
 export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
   const [hive, setHive] = useState<Hive | null>(null);
@@ -245,6 +368,7 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
   const [showQueenForm, setShowQueenForm] = useState<Queen | true | false>(false);
   const [showTreatForm, setShowTreatForm] = useState<Treatment | true | false>(false);
   const [showTransferForm, setShowTransferForm] = useState(false);
+  const [showSplitForm, setShowSplitForm] = useState(false);
 
   const fetchHive = async () => { try { const h = await hivesService.getById(hiveId); setHive(h); } catch {} };
   const fetchInspections = async () => { try { setInspections(await inspectionsService.getByHive(hiveId)); } catch {} };
@@ -322,7 +446,7 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
               <div className="grid grid-cols-2 gap-3">
                 <div><p className="text-xs text-stone-500">Status</p><p className="font-medium text-stone-800 capitalize">{hive.status}</p></div>
                 <div><p className="text-xs text-stone-500">Type</p><p className="font-medium text-stone-800 capitalize">{hive.hive_type}</p></div>
-                <div><p className="text-xs text-stone-500">Queen</p><p className="font-medium">{hive.queen_present ? '♛ Present' : '⚠ Absent'}</p></div>
+                <div><p className="text-xs text-stone-500">Queen</p><p className="font-medium">{hive.queen_present ? ' Present' : ' Absent'}</p></div>
                 <div><p className="text-xs text-stone-500">Colony Strength</p><p className="font-medium capitalize">{hive.colony_strength || 'N/A'}</p></div>
               </div>
               {hive.notes && <div><p className="text-xs text-stone-500">Notes</p><p className="text-sm text-stone-600 bg-stone-50 p-2 rounded-lg">{hive.notes}</p></div>}
@@ -332,9 +456,15 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
               <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-lg font-bold text-emerald-600">{feedings.length}</p><p className="text-xs text-stone-500">Feedings</p></div>
               <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-lg font-bold text-blue-600">{treatments.length}</p><p className="text-xs text-stone-500">Treatments</p></div>
             </div>
-            <button onClick={handleDeleteHive} className="w-full bg-red-50 hover:bg-red-100 text-red-600 py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 text-sm border border-red-200">
-              <Trash2 className="w-4 h-4" /> Delete Hive
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => setShowSplitForm(true)} className="bg-amber-50 hover:bg-amber-100 text-amber-700 py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 text-sm border border-amber-200">
+                <Scissors className="w-4 h-4" /> Split Hive
+              </button>
+              <button onClick={handleDeleteHive} className="bg-red-50 hover:bg-red-100 text-red-600 py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 text-sm border border-red-200">
+                <Trash2 className="w-4 h-4" /> Delete Hive
+              </button>
+            </div>
+            {showSplitForm && <SplitHiveForm hiveId={hiveId} hiveName={hive.name} onClose={() => setShowSplitForm(false)} onSaved={() => { setShowSplitForm(false); fetchHive(); fetchTransfers(); }} />}
           </>
         )}
 
@@ -352,13 +482,13 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs">
                   {i.colony_strength && <span className="bg-stone-100 px-2 py-0.5 rounded capitalize">Strength: {i.colony_strength}</span>}
-                  {i.queen_present ? <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">♛ Queen present</span> : <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded">⚠ Queen absent</span>}
-                  {i.pest_detected ? <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded">🐛 Pest detected</span> : null}
+                  {i.queen_present ? <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded"> Queen present</span> : <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded"> Queen absent</span>}
+                  {i.pest_detected ? <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded"> Pest detected</span> : null}
                 </div>
                 {i.notes && <p className="text-xs text-stone-500 mt-1">{i.notes}</p>}
               </div>
             ))}
-            {showInspForm && <InspectionForm hiveId={hiveId} initial={showInspForm === true ? undefined : showInspForm} onClose={() => setShowInspForm(false)} onSaved={() => { setShowInspForm(false); fetchInspections(); }} />}
+            {showInspForm && <InspectionForm hiveId={hiveId} hiveType={hive?.hive_type} hiveLat={hive?.gps_latitude} hiveLng={hive?.gps_longitude} initial={showInspForm === true ? undefined : showInspForm} onClose={() => setShowInspForm(false)} onSaved={() => { setShowInspForm(false); fetchInspections(); }} />}
           </>
         )}
 
@@ -466,7 +596,7 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
                   <span>From: {t.source_hive_name || `#${t.source_hive_id}`}</span> → <span>To: {t.target_hive_name || `#${t.target_hive_id}`}</span>
                 </div>
                 <div className="text-xs text-stone-500 mt-1">
-                  {t.queen_moved ? '♛ Queen moved' : ''} {t.brood_frames_moved ? ` • ${t.brood_frames_moved} brood frames` : ''}
+                  {t.queen_moved ? ' Queen moved' : ''} {t.brood_frames_moved ? ` • ${t.brood_frames_moved} brood frames` : ''}
                 </div>
                 {t.notes && <p className="text-xs text-stone-500 mt-1">{t.notes}</p>}
               </div>

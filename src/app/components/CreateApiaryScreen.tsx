@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, MapPin, Save, Loader2 } from 'lucide-react';
 import { apiariesService, type Apiary } from '../services/apiaries';
 
@@ -11,6 +11,96 @@ interface Props {
 }
 
 const SRI_LANKA_DISTRICTS = ['Colombo','Gampaha','Kalutara','Kandy','Matale','Nuwara Eliya','Galle','Matara','Hambantota','Jaffna','Kilinochchi','Mannar','Mullaitivu','Vavuniya','Batticaloa','Ampara','Trincomalee','Kurunegala','Puttalam','Anuradhapura','Polonnaruwa','Badulla','Monaragala','Ratnapura','Kegalle'];
+
+// Landlord Digital Signature Pad (R4.2)
+function SignaturePad({ label, value, onChange }: { label: string; value: string; onChange: (sig: string) => void }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [drawing, setDrawing] = useState(false);
+
+  const getPos = (e: React.TouchEvent | React.MouseEvent) => {
+    const canvas = canvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
+    if ('touches' in e) {
+      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+    }
+    return { x: (e as React.MouseEvent).clientX - rect.left, y: (e as React.MouseEvent).clientY - rect.top };
+  };
+
+  const startDraw = (e: React.TouchEvent | React.MouseEvent) => {
+    e.preventDefault();
+    setDrawing(true);
+    const ctx = canvasRef.current?.getContext('2d');
+    if (!ctx) return;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  };
+
+  const draw = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!drawing) return;
+    e.preventDefault();
+    const ctx = canvasRef.current?.getContext('2d');
+    if (!ctx) return;
+    const pos = getPos(e);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.strokeStyle = '#1c1917';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  };
+
+  const endDraw = () => {
+    setDrawing(false);
+    if (canvasRef.current) {
+      onChange(canvasRef.current.toDataURL('image/png'));
+    }
+  };
+
+  const clearSig = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    onChange('');
+  };
+
+  useEffect(() => {
+    if (value && canvasRef.current) {
+      const img = new Image();
+      img.onload = () => {
+        const ctx = canvasRef.current?.getContext('2d');
+        if (ctx) ctx.drawImage(img, 0, 0);
+      };
+      img.src = value;
+    }
+  }, []);
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between">
+        <label className="block text-xs font-medium text-stone-600">{label}</label>
+        <button type="button" onClick={clearSig} className="text-xs text-red-500 hover:text-red-600">Clear</button>
+      </div>
+      <div className="border border-stone-200 rounded-xl overflow-hidden bg-white">
+        <canvas
+          ref={canvasRef}
+          width={300}
+          height={100}
+          className="w-full touch-none cursor-crosshair"
+          onMouseDown={startDraw}
+          onMouseMove={draw}
+          onMouseUp={endDraw}
+          onMouseLeave={endDraw}
+          onTouchStart={startDraw}
+          onTouchMove={draw}
+          onTouchEnd={endDraw}
+        />
+      </div>
+      {value && <p className="text-xs text-emerald-600">Signature captured</p>}
+    </div>
+  );
+}
 
 export function CreateApiaryScreen({ onClose, initialApiary, onLogout }: Props) {
   const isEdit = !!initialApiary;
@@ -30,6 +120,7 @@ export function CreateApiaryScreen({ onClose, initialApiary, onLogout }: Props) 
     landlord_name: (initialApiary as any)?.landlord_name || '',
     landlord_contact: (initialApiary as any)?.landlord_contact || '',
     rental_fee: (initialApiary as any)?.rental_fee?.toString() || '',
+    landlord_signature: (initialApiary as any)?.landlord_signature || '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,8 +159,8 @@ export function CreateApiaryScreen({ onClose, initialApiary, onLogout }: Props) 
         <div className="bg-white rounded-xl p-4 border border-stone-200 space-y-3">
           <label className="text-sm font-medium text-stone-700">Apiary Type</label>
           <div className="flex rounded-xl overflow-hidden border border-stone-200">
-            <button type="button" onClick={() => setForm(p=>({...p, apiary_type: 'personal'}))} className={`flex-1 py-2.5 text-sm font-medium ${form.apiary_type === 'personal' ? 'bg-amber-500 text-white' : 'bg-stone-50 text-stone-600'}`}>🏠 Personal</button>
-            <button type="button" onClick={() => setForm(p=>({...p, apiary_type: 'client'}))} className={`flex-1 py-2.5 text-sm font-medium ${form.apiary_type === 'client' ? 'bg-blue-500 text-white' : 'bg-stone-50 text-stone-600'}`}>🤝 Client</button>
+            <button type="button" onClick={() => setForm(p=>({...p, apiary_type: 'personal'}))} className={`flex-1 py-2.5 text-sm font-medium ${form.apiary_type === 'personal' ? 'bg-amber-500 text-white' : 'bg-stone-50 text-stone-600'}`}> Personal</button>
+            <button type="button" onClick={() => setForm(p=>({...p, apiary_type: 'client'}))} className={`flex-1 py-2.5 text-sm font-medium ${form.apiary_type === 'client' ? 'bg-blue-500 text-white' : 'bg-stone-50 text-stone-600'}`}> Client</button>
           </div>
         </div>
 
@@ -94,6 +185,7 @@ export function CreateApiaryScreen({ onClose, initialApiary, onLogout }: Props) 
             </div>
             <div><label className="block text-xs font-medium text-stone-600 mb-1">Monthly Rental Fee (LKR)</label>
               <input type="number" value={form.rental_fee} onChange={e => setForm(p=>({...p, rental_fee: e.target.value}))} placeholder="0.00" className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" /></div>
+            <SignaturePad label="Landlord Signature (R4.2)" value={form.landlord_signature} onChange={(sig: string) => setForm(p => ({...p, landlord_signature: sig}))} />
           </div>
         )}
 

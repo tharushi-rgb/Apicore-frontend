@@ -1,4 +1,5 @@
 @import './tailwind.css';
+@import './theme.css';
 
 /* Hide scrollbar utility */
 .hide-scrollbar::-webkit-scrollbar { display: none; }

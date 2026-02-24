@@ -283,7 +283,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                   <span className="text-stone-500">Name:</span><span className="text-stone-800 font-medium">{watch('fullName') || '—'}</span>
                   <span className="text-stone-500">Email:</span><span className="text-stone-800 font-medium truncate">{watch('email') || '—'}</span>
                   <span className="text-stone-500">Phone:</span><span className="text-stone-800 font-medium">{watch('phoneNumber') || '—'}</span>
-                  <span className="text-stone-500">Bee Allergy:</span><span className="text-stone-800 font-medium">{watch('knownBeeAllergy') === 'yes' ? '⚠️ Yes' : 'No'}</span>
+                  <span className="text-stone-500">Bee Allergy:</span><span className="text-stone-800 font-medium">{watch('knownBeeAllergy') === 'yes' ? ' Yes' : 'No'}</span>
                   <span className="text-stone-500">Nature:</span><span className="text-stone-800 font-medium capitalize">{watch('beekeepingNature') || '—'}</span>
                   <span className="text-stone-500">Species:</span><span className="text-stone-800 font-medium">{watch('primaryBeeSpecies')?.replace('_',' ') || '—'}</span>
                 </div>
