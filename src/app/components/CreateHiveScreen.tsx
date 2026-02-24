@@ -22,20 +22,7 @@ export function CreateHiveScreen({ onClose, contextApiary, initialHive }: Props)
     status: (initialHive?.status || 'active') as string,
     queen_present: initialHive?.queen_present ?? 1, colony_strength: initialHive?.colony_strength || '',
     gps_latitude: initialHive?.gps_latitude?.toString() || '', gps_longitude: initialHive?.gps_longitude?.toString() || '',
-    notes: initialHive?.notes || '',
-    // Dynamic fields per hive type (R5.2)
-    num_frames: initialHive?.num_frames?.toString() || '',
-    num_supers: initialHive?.num_supers?.toString() || '',
-    brood_box_type: initialHive?.brood_box_type || '',
-    pot_material: initialHive?.pot_material || '',
-    pot_volume_liters: initialHive?.pot_volume_liters?.toString() || '',
-    entrance_size: initialHive?.entrance_size || '',
-    log_length_cm: initialHive?.log_length_cm?.toString() || '',
-    log_diameter_cm: initialHive?.log_diameter_cm?.toString() || '',
-    wood_type: initialHive?.wood_type || '',
-    stingless_species: initialHive?.stingless_species || '',
-    colony_size: initialHive?.colony_size || '',
-    propolis_type: initialHive?.propolis_type || '',
+    notes: initialHive?.notes || ''
   });
 
   useEffect(() => { apiariesService.getAll().then(setApiaries).catch(()=>{}); }, []);
@@ -95,77 +82,6 @@ export function CreateHiveScreen({ onClose, contextApiary, initialHive }: Props)
           <select value={form.status} onChange={e => setForm(p=>({...p, status: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
             <option value="active">Active</option><option value="queenless">Queenless</option><option value="inactive">Inactive</option><option value="absconded">Absconded</option>
           </select></div>
-
-        {/* Dynamic fields per hive type (R5.2) */}
-        {form.hive_type === 'box' && (
-          <div className="bg-amber-50/50 rounded-xl p-4 border border-amber-100 space-y-3">
-            <h3 className="text-sm font-semibold text-amber-700">📦 Box Hive Details</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div><label className="block text-xs font-medium text-stone-600 mb-1">Number of Frames</label>
-                <input type="number" value={form.num_frames} onChange={e => setForm(p=>({...p, num_frames: e.target.value}))} placeholder="e.g. 10" className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-500 focus:outline-none" /></div>
-              <div><label className="block text-xs font-medium text-stone-600 mb-1">Number of Supers</label>
-                <input type="number" value={form.num_supers} onChange={e => setForm(p=>({...p, num_supers: e.target.value}))} placeholder="e.g. 2" className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-500 focus:outline-none" /></div>
-            </div>
-            <div><label className="block text-xs font-medium text-stone-600 mb-1">Brood Box Type</label>
-              <select value={form.brood_box_type} onChange={e => setForm(p=>({...p, brood_box_type: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
-                <option value="">Select type</option><option value="langstroth">Langstroth</option><option value="top-bar">Top Bar</option><option value="warre">Warré</option><option value="national">National</option><option value="commercial">Commercial</option>
-              </select></div>
-          </div>
-        )}
-
-        {form.hive_type === 'pot' && (
-          <div className="bg-orange-50/50 rounded-xl p-4 border border-orange-100 space-y-3">
-            <h3 className="text-sm font-semibold text-orange-700">🏺 Pot Hive Details</h3>
-            <div><label className="block text-xs font-medium text-stone-600 mb-1">Pot Material</label>
-              <select value={form.pot_material} onChange={e => setForm(p=>({...p, pot_material: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
-                <option value="">Select material</option><option value="clay">Clay</option><option value="terracotta">Terracotta</option><option value="ceramic">Ceramic</option><option value="coconut_shell">Coconut Shell</option>
-              </select></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><label className="block text-xs font-medium text-stone-600 mb-1">Volume (liters)</label>
-                <input type="number" value={form.pot_volume_liters} onChange={e => setForm(p=>({...p, pot_volume_liters: e.target.value}))} placeholder="e.g. 5" className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-500 focus:outline-none" /></div>
-              <div><label className="block text-xs font-medium text-stone-600 mb-1">Entrance Size</label>
-                <select value={form.entrance_size} onChange={e => setForm(p=>({...p, entrance_size: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
-                  <option value="">Select</option><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option>
-                </select></div>
-            </div>
-          </div>
-        )}
-
-        {form.hive_type === 'log' && (
-          <div className="bg-stone-50 rounded-xl p-4 border border-stone-200 space-y-3">
-            <h3 className="text-sm font-semibold text-stone-700">🪵 Log Hive Details</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div><label className="block text-xs font-medium text-stone-600 mb-1">Length (cm)</label>
-                <input type="number" value={form.log_length_cm} onChange={e => setForm(p=>({...p, log_length_cm: e.target.value}))} placeholder="e.g. 60" className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-500 focus:outline-none" /></div>
-              <div><label className="block text-xs font-medium text-stone-600 mb-1">Diameter (cm)</label>
-                <input type="number" value={form.log_diameter_cm} onChange={e => setForm(p=>({...p, log_diameter_cm: e.target.value}))} placeholder="e.g. 25" className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-500 focus:outline-none" /></div>
-            </div>
-            <div><label className="block text-xs font-medium text-stone-600 mb-1">Wood Type</label>
-              <select value={form.wood_type} onChange={e => setForm(p=>({...p, wood_type: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
-                <option value="">Select wood</option><option value="kithul">Kithul</option><option value="coconut">Coconut</option><option value="jak">Jak</option><option value="mango">Mango</option><option value="other">Other</option>
-              </select></div>
-          </div>
-        )}
-
-        {form.hive_type === 'stingless' && (
-          <div className="bg-emerald-50/50 rounded-xl p-4 border border-emerald-100 space-y-3">
-            <h3 className="text-sm font-semibold text-emerald-700">🐝 Stingless Bee Details</h3>
-            <div><label className="block text-xs font-medium text-stone-600 mb-1">Stingless Bee Species</label>
-              <select value={form.stingless_species} onChange={e => setForm(p=>({...p, stingless_species: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
-                <option value="">Select species</option><option value="tetragonula_iridipennis">Tetragonula iridipennis</option><option value="lisotrigona_cacciae">Lisotrigona cacciae</option><option value="other">Other</option>
-              </select></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><label className="block text-xs font-medium text-stone-600 mb-1">Colony Size</label>
-                <select value={form.colony_size} onChange={e => setForm(p=>({...p, colony_size: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
-                  <option value="">Select</option><option value="small">Small (&lt;500)</option><option value="medium">Medium (500-2000)</option><option value="large">Large (2000+)</option>
-                </select></div>
-              <div><label className="block text-xs font-medium text-stone-600 mb-1">Propolis Type</label>
-                <select value={form.propolis_type} onChange={e => setForm(p=>({...p, propolis_type: e.target.value}))} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
-                  <option value="">Select</option><option value="cerumen">Cerumen</option><option value="batumen">Batumen</option><option value="mixed">Mixed</option>
-                </select></div>
-            </div>
-          </div>
-        )}
 
         <div className="bg-white rounded-xl p-4 border border-stone-200 space-y-3">
           <label className="text-sm font-medium text-stone-700">Queen Status</label>
