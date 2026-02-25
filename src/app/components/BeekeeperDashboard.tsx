@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { MobileHeader } from './MobileHeader';
 import { MobileSidebar } from './MobileSidebar';
 import { dashboardService, type DashboardData } from '../services/dashboard';
 import { planningService } from '../services/planning';
 import { authService } from '../services/auth';
-import { Leaf, AlertCircle, TrendingUp } from 'lucide-react';
+import { Leaf, AlertCircle, Home, Hexagon as HiveIcon, MapPin, TrendingUp } from 'lucide-react';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -108,12 +108,12 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
           </div>
         ) : (
           <>
-            {/* KPI Cards */}
-            <div className="grid grid-cols-2 gap-3">
-              <KPICard title="Total Apiaries" value={String(stats?.totalApiaries || 0)} color="emerald" />
-              <KPICard title="Total Hives" value={String(stats?.totalHives || 0)} color="amber" />
-              <KPICard title="Active Hives" value={String(stats?.activeHives || 0)} color="blue" />
-              <KPICard title="Active Apiaries" value={String(stats?.activeApiaries || 0)} color="emerald" />
+            {/* KPI Cards - Compact Row */}
+            <div className="grid grid-cols-2 gap-2">
+              <KPICard title="Total Apiaries" value={String(stats?.totalApiaries || 0)} icon={<MapPin className="w-4 h-4" />} color="emerald" />
+              <KPICard title="Total Hives" value={String(stats?.totalHives || 0)} icon={<HiveIcon className="w-4 h-4" />} color="amber" />
+              <KPICard title="Active Hives" value={String(stats?.activeHives || 0)} icon={<TrendingUp className="w-4 h-4" />} color="blue" />
+              <KPICard title="Active Apiaries" value={String(stats?.activeApiaries || 0)} icon={<Home className="w-4 h-4" />} color="emerald" />
             </div>
 
             {/* Quick Actions */}
@@ -139,52 +139,6 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
                     <Tooltip />
                     <Bar dataKey="value" fill="#f59e0b" radius={[8, 8, 0, 0]} />
                   </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-
-            {/* Hive Health Distribution */}
-            {healthData.length > 0 && (
-              <div className="bg-white rounded-xl p-5 shadow-sm">
-                <h2 className="text-lg font-bold text-stone-800 mb-4">Hive Health Distribution</h2>
-                <div className="flex items-center justify-center h-56">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={healthData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={2} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
-                        {healthData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex flex-wrap gap-2 justify-center mt-4">
-                  {healthData.map((item) => (
-                    <div key={item.name} className="flex items-center gap-2 text-xs">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span className="text-stone-700">{item.name}: {item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Inspection Status */}
-            {hives.length > 0 && (
-              <div className="bg-white rounded-xl p-5 shadow-sm">
-                <h2 className="text-lg font-bold text-stone-800 mb-4 flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-amber-500" /> Inspection Status (Last 30 Days)
-                </h2>
-                <ResponsiveContainer width="100%" height={150}>
-                  <PieChart>
-                    <Pie data={inspectionData} cx="50%" cy="50%" outerRadius={80} paddingAngle={2} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
-                      {inspectionData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
                 </ResponsiveContainer>
               </div>
             )}
@@ -250,18 +204,21 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
   );
 }
 
-function KPICard({ title, value, color, alert }: { title: string; value: string; color: 'emerald' | 'amber' | 'red' | 'blue'; alert?: boolean }) {
+function KPICard({ title, value, icon, color }: { title: string; value: string; icon?: React.ReactNode; color: 'emerald' | 'amber' | 'red' | 'blue' }) {
   const colors = {
-    emerald: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-    amber: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
-    red: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
-    blue: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+    emerald: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', icon: 'text-emerald-600' },
+    amber: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', icon: 'text-amber-600' },
+    red: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', icon: 'text-red-600' },
+    blue: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', icon: 'text-blue-600' },
   };
   const c = colors[color];
   return (
-    <div className={`bg-white rounded-xl p-4 shadow-sm border ${alert ? c.border : 'border-transparent'}`}>
-      <p className="text-stone-600 text-sm mb-2">{title}</p>
-      <p className={`text-3xl font-bold ${alert ? c.text : 'text-stone-800'}`}>{value}</p>
+    <div className={`${c.bg} rounded-lg p-3 shadow-sm border ${c.border}`}>
+      <div className="flex items-center justify-between mb-1">
+        <p className="text-stone-600 text-xs font-medium">{title}</p>
+        {icon && <div className={`${c.icon} opacity-70`}>{icon}</div>}
+      </div>
+      <p className={`text-2xl font-bold ${c.text}`}>{value}</p>
     </div>
   );
 }

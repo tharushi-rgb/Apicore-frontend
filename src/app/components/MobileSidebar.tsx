@@ -51,9 +51,10 @@ export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout
       )}
 
       <div
-        className={`fixed top-0 left-0 h-screen bg-white shadow-2xl z-50 transition-transform duration-300 ease-in-out w-72 flex flex-col ${
+        className={`fixed top-0 left-0 h-screen bg-white shadow-2xl z-50 transition-transform duration-300 ease-in-out w-72 flex flex-col max-w-[90vw] ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        style={{ maxWidth: 'calc(100vw - 2rem)' }}
       >
         {/* Logo/Header */}
         <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-6 flex-shrink-0">
