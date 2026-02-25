@@ -35,7 +35,7 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
   const statusColors: Record<string, string> = { active: 'bg-emerald-100 text-emerald-700', queenless: 'bg-red-100 text-red-700', inactive: 'bg-stone-100 text-stone-600', absconded: 'bg-purple-100 text-purple-700' };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24 relative overflow-hidden">
       <MobileSidebar isOpen={isSidebarOpen} activeTab="hives" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
 
       <div className="bg-white shadow-sm sticky top-0 z-30">

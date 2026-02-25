@@ -27,7 +27,7 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
   const deleteExpense = async (id: number) => { if (!confirm('Delete?')) return; await expensesService.delete(id); fetchAll(); };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24 relative overflow-hidden">
       <MobileSidebar isOpen={isSidebarOpen} activeTab="finance" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
 
       <div className="bg-white shadow-sm sticky top-0 z-30">

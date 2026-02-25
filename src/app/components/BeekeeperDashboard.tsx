@@ -5,7 +5,7 @@ import { MobileSidebar } from './MobileSidebar';
 import { dashboardService, type DashboardData } from '../services/dashboard';
 import { planningService } from '../services/planning';
 import { authService } from '../services/auth';
-import { Leaf, AlertCircle, Home, Hexagon as HiveIcon, MapPin, TrendingUp } from 'lucide-react';
+import { Leaf, Home, Hexagon as HiveIcon, MapPin, TrendingUp } from 'lucide-react';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -42,44 +42,13 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
   
   // Chart data
   const hiveChartData = hives.slice(0, 5).map(h => ({ name: h.name, value: 1 }));
-  
-  // Hive health distribution
-  const activeCount = hives.filter(h => h.status === 'active').length;
-  const queenlessCount = hives.filter(h => h.status === 'queenless').length;
-  const inactiveCount = hives.filter(h => h.status === 'inactive').length;
-  const abscondedCount = hives.filter(h => h.status === 'absconded').length;
-
-  const healthData = [
-    { name: 'Active', value: activeCount, color: '#10b981' },
-    { name: 'Queenless', value: queenlessCount, color: '#f59e0b' },
-    { name: 'Absconded', value: abscondedCount, color: '#ef4444' },
-    { name: 'Inactive', value: inactiveCount, color: '#9ca3af' },
-  ].filter(item => item.value > 0);
-
-  // Inspection status
-  const today = new Date();
-  const inspected30days = hives.filter(h => {
-    if (!h.last_inspection_date) return false;
-    try {
-      const inspectDate = new Date(h.last_inspection_date);
-      const diff = (today.getTime() - inspectDate.getTime()) / (1000 * 60 * 60 * 24);
-      return diff <= 30;
-    } catch {
-      return false;
-    }
-  }).length;
-  
-  const inspectionData = [
-    { name: 'Inspected (30d)', value: inspected30days, color: '#10b981' },
-    { name: 'Overdue', value: (hives.length - inspected30days), color: '#ef4444' }
-  ];
 
   const handleNavigate = (tab: NavTab) => {
     onNavigate(tab);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative overflow-hidden">
       {/* Mobile Sidebar */}
       <MobileSidebar
         isOpen={isSidebarOpen}

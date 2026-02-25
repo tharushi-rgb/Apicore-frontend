@@ -41,7 +41,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
   const statusColors: Record<string, string> = { pending: 'bg-amber-100 text-amber-700', in_progress: 'bg-blue-100 text-blue-700', completed: 'bg-emerald-100 text-emerald-700', cancelled: 'bg-red-100 text-red-700' };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24 relative overflow-hidden">
       <MobileSidebar isOpen={isSidebarOpen} activeTab="clients" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
 
       <div className="bg-white shadow-sm sticky top-0 z-30">
