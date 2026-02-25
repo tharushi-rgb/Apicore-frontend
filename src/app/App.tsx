@@ -24,14 +24,14 @@ type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
 const ADMIN_NAV_ROUTES: Record<NavTab, string> = {
-  dashboard: '/admin/dashboard',
-  apiaries: '/admin/apiaries',
-  hives: '/admin/hives',
-  planning: '/admin/planning',
-  finance: '/admin/finance',
-  clients: '/admin/clients',
-  notifications: '/admin/notifications',
-  profile: '/admin/profile',
+  dashboard: '/dashboard',
+  apiaries: '/apiaries',
+  hives: '/hives',
+  planning: '/planning',
+  finance: '/finance',
+  clients: '/clients',
+  notifications: '/notifications',
+  profile: '/profile',
 };
 
 // ─── Auth guards ───────────────────────────────────────────────────────────────
@@ -46,7 +46,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('auth_token');
   const user = authService.getLocalUser();
-  if (token && user) return <Navigate to="/admin/dashboard" replace />;
+  if (token && user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
@@ -83,7 +83,7 @@ function LoginPage({ lang, onLangChange }: { lang: Language; onLangChange: (l: L
       selectedLanguage={lang}
       onLanguageChange={onLangChange}
       onBackToHome={() => navigate('/')}
-      onLoginSuccess={() => navigate('/admin/dashboard')}
+      onLoginSuccess={() => navigate('/dashboard')}
       onForgotPassword={() => navigate('/forgot-password')}
     />
   );
@@ -138,7 +138,7 @@ function AdminCreateApiaryPage({ lang, onLangChange, onLogout }: { lang: Languag
       onLanguageChange={onLangChange}
       onLogout={onLogout}
       onNavigate={(tab) => navigate(ADMIN_NAV_ROUTES[tab])}
-      onClose={() => navigate('/admin/apiaries')}
+      onClose={() => navigate('/apiaries')}
       initialApiary={editApiary}
     />
   );
@@ -148,17 +148,17 @@ function AdminViewApiaryPage({ lang, onLangChange, onLogout }: { lang: Language;
   const navigate = useNavigate();
   const { id } = useParams();
   const apiaryId = parseInt(id || '0', 10);
-  if (!apiaryId) return <Navigate to="/admin/apiaries" replace />;
+  if (!apiaryId) return <Navigate to="/apiaries" replace />;
   return (
     <ViewApiaryScreen
       selectedLanguage={lang}
       onLanguageChange={onLangChange}
       onLogout={onLogout}
       onNavigate={(tab) => navigate(ADMIN_NAV_ROUTES[tab])}
-      onBack={() => navigate('/admin/apiaries')}
-      onEditApiary={(apiary: ApiaryModel) => navigate('/admin/apiaries/edit', { state: { apiary } })}
-      onAddHive={(id) => navigate('/admin/hives/new', { state: { apiaryId: id } })}
-      onViewHive={(hiveId) => navigate(`/admin/hives/${hiveId}`)}
+      onBack={() => navigate('/apiaries')}
+      onEditApiary={(apiary: ApiaryModel) => navigate('/apiaries/edit', { state: { apiary } })}
+      onAddHive={(id) => navigate('/hives/new', { state: { apiaryId: id } })}
+      onViewHive={(hiveId) => navigate(`/hives/${hiveId}`)}
       apiaryId={apiaryId}
     />
   );
@@ -188,7 +188,7 @@ function AdminCreateHivePage({ lang, onLangChange, onLogout }: { lang: Language;
       onLanguageChange={onLangChange}
       onLogout={onLogout}
       onNavigate={(tab) => navigate(ADMIN_NAV_ROUTES[tab])}
-      onClose={() => navigate('/admin/hives')}
+      onClose={() => navigate('/hives')}
       initialHive={editHive}
     />
   );
@@ -198,15 +198,15 @@ function AdminViewHivePage({ lang, onLangChange, onLogout }: { lang: Language; o
   const navigate = useNavigate();
   const { id } = useParams();
   const hiveId = parseInt(id || '0', 10);
-  if (!hiveId) return <Navigate to="/admin/hives" replace />;
+  if (!hiveId) return <Navigate to="/hives" replace />;
   return (
     <ViewHiveScreen
       selectedLanguage={lang}
       onLanguageChange={onLangChange}
       onLogout={onLogout}
       onNavigate={(tab) => navigate(ADMIN_NAV_ROUTES[tab])}
-      onBack={() => navigate('/admin/hives')}
-      onEditHive={(hive: HiveModel) => navigate('/admin/hives/edit', { state: { hive } })}
+      onBack={() => navigate('/hives')}
+      onEditHive={(hive: HiveModel) => navigate('/hives/edit', { state: { hive } })}
       hiveId={hiveId}
     />
   );
@@ -310,7 +310,7 @@ export default function App() {
 
   return (
     <div className="h-screen bg-stone-900 flex justify-center overflow-hidden">
-      <div className="w-full max-w-[430px] h-full bg-white shadow-2xl overflow-y-auto relative">
+      <div className="w-full max-w-[430px] h-full bg-white shadow-2xl overflow-y-auto relative z-0">
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<RedirectIfAuth><SplashPage {...lp} /></RedirectIfAuth>} />
@@ -318,21 +318,21 @@ export default function App() {
           <Route path="/login" element={<RedirectIfAuth><LoginPage {...lp} /></RedirectIfAuth>} />
           <Route path="/forgot-password" element={<RedirectIfAuth><ForgotPasswordPage {...lp} /></RedirectIfAuth>} />
 
-          {/* Admin (Beekeeper) routes */}
-          <Route path="/admin/dashboard" element={<RequireAuth><AdminDashboardPage {...ap} /></RequireAuth>} />
-          <Route path="/admin/apiaries" element={<RequireAuth><AdminApiariesPage {...ap} /></RequireAuth>} />
-          <Route path="/admin/apiaries/new" element={<RequireAuth><AdminCreateApiaryPage {...ap} /></RequireAuth>} />
-          <Route path="/admin/apiaries/edit" element={<RequireAuth><AdminCreateApiaryPage {...ap} /></RequireAuth>} />
-          <Route path="/admin/apiaries/:id" element={<RequireAuth><AdminViewApiaryPage {...ap} /></RequireAuth>} />
-          <Route path="/admin/hives" element={<RequireAuth><AdminHivesPage {...ap} /></RequireAuth>} />
-          <Route path="/admin/hives/new" element={<RequireAuth><AdminCreateHivePage {...ap} /></RequireAuth>} />
-          <Route path="/admin/hives/edit" element={<RequireAuth><AdminCreateHivePage {...ap} /></RequireAuth>} />
-          <Route path="/admin/hives/:id" element={<RequireAuth><AdminViewHivePage {...ap} /></RequireAuth>} />
-          <Route path="/admin/planning" element={<RequireAuth><AdminPlanningPage {...ap} /></RequireAuth>} />
-          <Route path="/admin/finance" element={<RequireAuth><AdminFinancePage {...ap} /></RequireAuth>} />
-          <Route path="/admin/clients" element={<RequireAuth><AdminClientsPage {...ap} /></RequireAuth>} />
-          <Route path="/admin/notifications" element={<RequireAuth><AdminNotificationsPage {...ap} /></RequireAuth>} />
-          <Route path="/admin/profile" element={<RequireAuth><AdminProfilePage {...ap} /></RequireAuth>} />
+          {/* Beekeeper routes */}
+          <Route path="/dashboard" element={<RequireAuth><AdminDashboardPage {...ap} /></RequireAuth>} />
+          <Route path="/apiaries" element={<RequireAuth><AdminApiariesPage {...ap} /></RequireAuth>} />
+          <Route path="/apiaries/new" element={<RequireAuth><AdminCreateApiaryPage {...ap} /></RequireAuth>} />
+          <Route path="/apiaries/edit" element={<RequireAuth><AdminCreateApiaryPage {...ap} /></RequireAuth>} />
+          <Route path="/apiaries/:id" element={<RequireAuth><AdminViewApiaryPage {...ap} /></RequireAuth>} />
+          <Route path="/hives" element={<RequireAuth><AdminHivesPage {...ap} /></RequireAuth>} />
+          <Route path="/hives/new" element={<RequireAuth><AdminCreateHivePage {...ap} /></RequireAuth>} />
+          <Route path="/hives/edit" element={<RequireAuth><AdminCreateHivePage {...ap} /></RequireAuth>} />
+          <Route path="/hives/:id" element={<RequireAuth><AdminViewHivePage {...ap} /></RequireAuth>} />
+          <Route path="/planning" element={<RequireAuth><AdminPlanningPage {...ap} /></RequireAuth>} />
+          <Route path="/finance" element={<RequireAuth><AdminFinancePage {...ap} /></RequireAuth>} />
+          <Route path="/clients" element={<RequireAuth><AdminClientsPage {...ap} /></RequireAuth>} />
+          <Route path="/notifications" element={<RequireAuth><AdminNotificationsPage {...ap} /></RequireAuth>} />
+          <Route path="/profile" element={<RequireAuth><AdminProfilePage {...ap} /></RequireAuth>} />
 
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
