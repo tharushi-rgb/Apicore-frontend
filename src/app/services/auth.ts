@@ -49,7 +49,7 @@ export const authService = {
       nvq_level: payload.nvq_level as string | undefined,
       role: 'beekeeper',
       years_experience: payload.years_experience as number | undefined,
-      password_hash: 'supabase_auth', // placeholder – real auth is via Supabase Auth
+      password: 'supabase_auth', // placeholder – real auth is via Supabase Auth
     };
 
     const { data: userRow, error: insertError } = await supabase
