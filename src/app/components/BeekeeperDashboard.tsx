@@ -44,11 +44,16 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
   const hiveChartData = hives.slice(0, 5).map(h => ({ name: h.name, value: 1 }));
   
   // Hive health distribution
+  const activeCount = hives.filter(h => h.status === 'active').length;
+  const queenlessCount = hives.filter(h => h.status === 'queenless').length;
+  const inactiveCount = hives.filter(h => h.status === 'inactive').length;
+  const abscondedCount = hives.filter(h => h.status === 'absconded').length;
+
   const healthData = [
-    { name: 'Active', value: stats?.activeHives || 0, color: '#10b981' },
-    { name: 'Weak', value: (hives.filter(h => h.status === 'weak').length || 0), color: '#f59e0b' },
-    { name: 'Queenless', value: (hives.filter(h => !h.queen_present).length || 0), color: '#ef4444' },
-    { name: 'Inactive', value: (hives.filter(h => h.status === 'inactive').length || 0), color: '#9ca3af' },
+    { name: 'Active', value: activeCount, color: '#10b981' },
+    { name: 'Queenless', value: queenlessCount, color: '#f59e0b' },
+    { name: 'Absconded', value: abscondedCount, color: '#ef4444' },
+    { name: 'Inactive', value: inactiveCount, color: '#9ca3af' },
   ].filter(item => item.value > 0);
 
   // Inspection status
