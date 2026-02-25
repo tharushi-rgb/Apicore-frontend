@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from 're
 import { SplashScreen } from '@/app/components/SplashScreen';
 import { BeekeeperRegistration } from '@/app/components/BeekeeperRegistration';
 import { LoginScreen } from '@/app/components/LoginScreen';
+import { ForgotPasswordScreen } from '@/app/components/ForgotPasswordScreen';
 import { BeekeeperDashboard } from '@/app/components/BeekeeperDashboard';
 import { ApiariesScreen } from '@/app/components/ApiariesScreen';
 import { HivesScreen } from '@/app/components/HivesScreen';
@@ -83,7 +84,18 @@ function LoginPage({ lang, onLangChange }: { lang: Language; onLangChange: (l: L
       onLanguageChange={onLangChange}
       onBackToHome={() => navigate('/')}
       onLoginSuccess={() => navigate('/admin/dashboard')}
-      onForgotPassword={() => {}}
+      onForgotPassword={() => navigate('/forgot-password')}
+    />
+  );
+}
+
+function ForgotPasswordPage({ lang, onLangChange }: { lang: Language; onLangChange: (l: Language) => void }) {
+  const navigate = useNavigate();
+  return (
+    <ForgotPasswordScreen
+      selectedLanguage={lang}
+      onLanguageChange={onLangChange}
+      onBackToLogin={() => navigate('/login')}
     />
   );
 }
@@ -304,6 +316,7 @@ export default function App() {
           <Route path="/" element={<RedirectIfAuth><SplashPage {...lp} /></RedirectIfAuth>} />
           <Route path="/register" element={<RedirectIfAuth><BeekeeperRegPage {...lp} /></RedirectIfAuth>} />
           <Route path="/login" element={<RedirectIfAuth><LoginPage {...lp} /></RedirectIfAuth>} />
+          <Route path="/forgot-password" element={<RedirectIfAuth><ForgotPasswordPage {...lp} /></RedirectIfAuth>} />
 
           {/* Admin (Beekeeper) routes */}
           <Route path="/admin/dashboard" element={<RequireAuth><AdminDashboardPage {...ap} /></RequireAuth>} />

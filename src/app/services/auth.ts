@@ -102,19 +102,39 @@ export const authService = {
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) throw new Error(authError.message);
 
-    // Fetch profile from custom users table
-    const { data: userRow, error: userError } = await supabase
+    // Fetch profile from custom users table (case-insensitive match)
+    // Try exact match first, then fallback to case-insensitive
+    let userRow: Record<string, unknown> | null = null;
+    let userError: any = null;
+
+    const { data: exactMatch, error: exactError } = await supabase
       .from('users')
       .select('*')
       .eq('email', email)
       .single();
 
+    if (!exactError && exactMatch) {
+      userRow = exactMatch as Record<string, unknown>;
+    } else {
+      // Try case-insensitive match
+      const { data: allUsers, error: allError } = await supabase
+        .from('users')
+        .select('*')
+        .ilike('email', email);
+
+      if (!allError && allUsers && allUsers.length > 0) {
+        userRow = allUsers[0] as Record<string, unknown>;
+      } else {
+        userError = allError || new Error('User profile not found');
+      }
+    }
+
     if (userError || !userRow) throw new Error('User profile not found. Please register first.');
 
     const token = authData.session?.access_token ?? '';
     localStorage.setItem('auth_token', token);
-    storeUser(userRow as User);
-    return { user: userRow as User, token };
+    storeUser(userRow as unknown as User);
+    return { user: userRow as unknown as User, token };
   },
 
   async getMe(): Promise<User> {
@@ -138,5 +158,34 @@ export const authService = {
 
   isLoggedIn() {
     return !!localStorage.getItem('auth_token');
+  },
+
+  async resetPasswordForEmail(email: string) {
+    // Get the frontend URL dynamically
+    const redirectUrl = `${window.location.origin}/reset-password`;
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectUrl,
+    });
+
+    if (error) throw new Error(error.message);
+  },
+
+  async confirmPasswordReset(token: string, newPassword: string) {
+    // Use the OTP exchange endpoint to update the password
+    const { error } = await supabase.auth.verifyOtp({
+      email: '',
+      token,
+      type: 'recovery',
+    });
+
+    if (error) throw new Error('Invalid or expired recovery code');
+
+    // After successful OTP verification, update password
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (updateError) throw new Error(updateError.message);
   },
 };
