@@ -335,6 +335,11 @@ export const planningService = {
     return SRI_LANKA_DISTRICTS;
   },
 
+  async getForageByMonth(month: number): Promise<ForagePlant[]> {
+    // Return forage plants blooming in the specified month
+    return FORAGE_PLANTS.filter(p => month >= p.bloomStart && month <= p.bloomEnd);
+  },
+
   async getApiaryWeather(lat: number, lng: number, district = 'Unknown'): Promise<ApiaryWeather> {
     const raw = await fetchWeather(lat, lng);
     const dailyDates: string[] = raw.daily?.time ?? [];

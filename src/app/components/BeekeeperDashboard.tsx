@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { MobileHeader } from './MobileHeader';
 import { MobileSidebar } from './MobileSidebar';
 import { dashboardService, type DashboardData } from '../services/dashboard';
+import { planningService } from '../services/planning';
 import { authService } from '../services/auth';
+import { Leaf, AlertCircle, TrendingUp } from 'lucide-react';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -18,15 +20,50 @@ interface Props {
 export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavigate, onLogout }: Props) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [data, setData] = useState<DashboardData | null>(null);
+  const [forageData, setForageData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const user = authService.getLocalUser();
 
   useEffect(() => {
-    dashboardService.get().then(d => { setData(d); setLoading(false); }).catch(() => setLoading(false));
+    Promise.all([
+      dashboardService.get(),
+      planningService.getForageByMonth(new Date().getMonth() + 1)
+    ])
+      .then(([dashData, forage]) => {
+        setData(dashData);
+        setForageData(forage || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const stats = data?.stats;
-  const hiveChartData = (data?.hives || []).slice(0, 5).map(h => ({ name: h.name, value: 1 }));
+  const hives = data?.hives || [];
+  
+  // Chart data
+  const hiveChartData = hives.slice(0, 5).map(h => ({ name: h.name, value: 1 }));
+  
+  // Hive health distribution
+  const healthData = [
+    { name: 'Active', value: stats?.activeHives || 0, color: '#10b981' },
+    { name: 'Weak', value: (hives.filter(h => h.status === 'weak').length || 0), color: '#f59e0b' },
+    { name: 'Queenless', value: (hives.filter(h => !h.queen_present).length || 0), color: '#ef4444' },
+    { name: 'Inactive', value: (hives.filter(h => h.status === 'inactive').length || 0), color: '#9ca3af' },
+  ].filter(item => item.value > 0);
+
+  // Inspection status
+  const today = new Date();
+  const inspected30days = hives.filter(h => {
+    if (!h.last_inspection_date) return false;
+    const inspectDate = new Date(h.last_inspection_date);
+    const diff = (today.getTime() - inspectDate.getTime()) / (1000 * 60 * 60 * 24);
+    return diff <= 30;
+  }).length;
+  
+  const inspectionData = [
+    { name: 'Inspected (30d)', value: inspected30days, color: '#10b981' },
+    { name: 'Overdue', value: (hives.length - inspected30days), color: '#ef4444' }
+  ];
 
   const handleNavigate = (tab: NavTab) => {
     onNavigate(tab);
@@ -94,6 +131,85 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
                     <Bar dataKey="value" fill="#f59e0b" radius={[8, 8, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Hive Health Distribution */}
+            {healthData.length > 0 && (
+              <div className="bg-white rounded-xl p-5 shadow-sm">
+                <h2 className="text-lg font-bold text-stone-800 mb-4">Hive Health Distribution</h2>
+                <div className="flex items-center justify-center h-56">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={healthData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={2} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+                        {healthData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex flex-wrap gap-2 justify-center mt-4">
+                  {healthData.map((item) => (
+                    <div key={item.name} className="flex items-center gap-2 text-xs">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                      <span className="text-stone-700">{item.name}: {item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Inspection Status */}
+            {hives.length > 0 && (
+              <div className="bg-white rounded-xl p-5 shadow-sm">
+                <h2 className="text-lg font-bold text-stone-800 mb-4 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-amber-500" /> Inspection Status (Last 30 Days)
+                </h2>
+                <ResponsiveContainer width="100%" height={150}>
+                  <PieChart>
+                    <Pie data={inspectionData} cx="50%" cy="50%" outerRadius={80} paddingAngle={2} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+                      {inspectionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Forage Information */}
+            {forageData.length > 0 && (
+              <div className="bg-white rounded-xl p-5 shadow-sm">
+                <h2 className="text-lg font-bold text-stone-800 mb-4 flex items-center gap-2">
+                  <Leaf className="w-5 h-5 text-emerald-600" /> Currently Blooming Forage
+                </h2>
+                <div className="space-y-2">
+                  {forageData.map((plant: any, idx: number) => (
+                    <div key={idx} className="p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-stone-800">{plant.name}</span>
+                        <span className={`text-xs px-2 py-1 rounded font-medium ${
+                          plant.availability === 'abundant' ? 'bg-emerald-200 text-emerald-800' :
+                          plant.availability === 'moderate' ? 'bg-amber-200 text-amber-800' :
+                          'bg-stone-200 text-stone-700'
+                        }`}>
+                          {plant.availability}
+                        </span>
+                      </div>
+                      <p className="text-xs text-stone-600"><em>{plant.scientific}</em> • {plant.resourceType}</p>
+                      {plant.note && <p className="text-xs text-stone-500 mt-1">{plant.note}</p>}
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => onNavigate('planning')}
+                  className="w-full mt-4 bg-emerald-50 text-emerald-700 py-2 rounded-lg font-medium hover:bg-emerald-100 transition-colors text-sm"
+                >
+                  View Full Forage Analysis
+                </button>
               </div>
             )}
 

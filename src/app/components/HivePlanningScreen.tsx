@@ -6,6 +6,9 @@ import { apiariesService, type Apiary } from '../services/apiaries';
 import { hivesService, type Hive } from '../services/hives';
 import { planningService, type PlanningAnalysis, type District, type WeatherDay, type WeatherHourly } from '../services/planning';
 import { Calendar, MapPin, Hexagon as HiveIcon, Plus, AlertTriangle, CloudRain, Sun, Cloud, Wind, Droplets, Thermometer, Search, Leaf, ChevronDown, ChevronUp } from 'lucide-react';
+import { ForecastDays14 } from './ForecastDays14';
+import { ForecastHourly } from './ForecastHourly';
+import { MapViewer } from './MapViewer';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -221,6 +224,20 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                   </button>
                 </div>
 
+                {/* Interactive Map */}
+                {(customLat && customLng) && (
+                  <MapViewer
+                    lat={parseFloat(customLat)}
+                    lng={parseFloat(customLng)}
+                    district={selectedDistrict}
+                    editable={true}
+                    onLocationSelect={(lat, lng) => {
+                      setCustomLat(String(lat));
+                      setCustomLng(String(lng));
+                    }}
+                  />
+                )}
+
                 {/* Analysis Results */}
                 {analysis && (
                   <>
@@ -286,62 +303,12 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
                     {/* 14-Day Forecast */}
                     {analysis.weather.days.length > 0 && (
-                      <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <h3 className="font-bold text-stone-800 mb-3 flex items-center gap-2"><Calendar className="w-4 h-4 text-blue-500" /> 14-Day Forecast</h3>
-                        <div className="space-y-2">
-                          {analysis.weather.days.map((day: WeatherDay) => (
-                            <div key={day.date} className="flex items-center gap-2 p-2 bg-stone-50 rounded-lg text-sm">
-                              <div className="w-10 text-center flex-shrink-0">
-                                <p className="font-bold text-xs">{day.dayName}</p>
-                                <p className="text-xs text-stone-500">{day.dayNum}</p>
-                              </div>
-                              <WeatherIcon code={day.icon} className="w-5 h-5 flex-shrink-0" />
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1">
-                                  <span className="font-bold">{day.maxTemp}°</span>
-                                  <span className="text-stone-400">/</span>
-                                  <span className="text-stone-500">{day.minTemp}°</span>
-                                </div>
-                                <div className="flex items-center gap-1 flex-wrap">
-                                  <span className={`text-xs px-1.5 py-0.5 rounded border ${riskBg(day.tempRisk.color)}`}>{day.tempRisk.label}</span>
-                                  {day.precipMm > 0 && <span className="text-xs text-blue-600">{day.precipMm}mm</span>}
-                                  {day.precipHours !== null && day.precipHours >= 2 && (
-                                    <span className="text-xs px-1.5 py-0.5 rounded bg-red-100 text-red-700 border border-red-200"> {day.precipHours}h rain</span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="text-right flex-shrink-0 space-y-0.5">
-                                {day.humidityAvg !== null && <p className="text-xs"><Droplets className="w-3 h-3 inline text-blue-400" /> {day.humidityAvg}%</p>}
-                                {day.windspeed !== null && <p className="text-xs"><Wind className="w-3 h-3 inline text-stone-400" /> {day.windspeed}</p>}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                      <ForecastDays14 days={analysis.weather.days} />
                     )}
 
                     {/* Hourly Forecast (Today + Tomorrow) */}
                     {analysis.weather.hourly.length > 0 && (
-                      <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <button onClick={() => setShowHourly(!showHourly)} className="w-full flex items-center justify-between">
-                          <h3 className="font-bold text-stone-800 flex items-center gap-2"><ClockIcon className="w-4 h-4 text-emerald-500" /> Hourly Forecast</h3>
-                          {showHourly ? <ChevronUp className="w-4 h-4 text-stone-400" /> : <ChevronDown className="w-4 h-4 text-stone-400" />}
-                        </button>
-                        {showHourly && (
-                          <div className="mt-3 space-y-1">
-                            {analysis.weather.hourly.map((h: WeatherHourly, i: number) => (
-                              <div key={i} className="flex items-center gap-2 p-2 bg-stone-50 rounded-lg text-sm">
-                                <span className="w-12 text-xs font-medium text-stone-600">{h.date?.split('-').slice(1).join('/') || ''} {h.time}</span>
-                                <WeatherIcon code={h.wcode} className="w-4 h-4" />
-                                <span className="font-bold w-10">{h.temp}°C</span>
-                                <span className={`text-xs px-1.5 py-0.5 rounded border flex-shrink-0 ${riskBg(h.tempRisk.color)}`}>{h.tempRisk.label}</span>
-                                <span className={`text-xs px-1.5 py-0.5 rounded border flex-shrink-0 ${riskBg(h.humidityStatus.color)}`}>{h.humidity}%</span>
-                                <span className="text-xs text-stone-500 ml-auto"><Wind className="w-3 h-3 inline" /> {h.wind}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                      <ForecastHourly hourly={analysis.weather.hourly} initialShowCount={6} />
                     )}
 
                     {/* Forage Information */}
