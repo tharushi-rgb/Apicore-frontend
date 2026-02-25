@@ -8,7 +8,7 @@ import { planningService, type PlanningAnalysis, type District, type WeatherDay,
 import { Calendar, MapPin, Hexagon as HiveIcon, Plus, AlertTriangle, CloudRain, Sun, Cloud, Wind, Droplets, Thermometer, Search, Leaf, ChevronDown, ChevronUp } from 'lucide-react';
 
 type Language = 'en' | 'si' | 'ta';
-type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
+type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
 interface Props {
   selectedLanguage: Language; onLanguageChange: (lang: Language) => void; onNavigate: (tab: NavTab) => void;
@@ -52,6 +52,12 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [customLat, setCustomLat] = useState('');
   const [customLng, setCustomLng] = useState('');
+  const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().split('T')[0];
+  });
   const [analysis, setAnalysis] = useState<PlanningAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [showHourly, setShowHourly] = useState(false);
@@ -73,6 +79,10 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
     let lng = parseFloat(customLng);
     const district = selectedDistrict;
 
+    if (startDate && endDate && startDate > endDate) {
+      return;
+    }
+
     if (selectedDistrict && (!customLat || !customLng)) {
       const d = districts.find(dd => dd.name === selectedDistrict);
       if (d) { lat = d.lat; lng = d.lng; }
@@ -82,7 +92,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
     setAnalyzing(true);
     try {
-      const result = await planningService.analyze(lat, lng, district);
+      const result = await planningService.analyze(lat, lng, district, { startDate, endDate });
       setAnalysis(result);
     } catch (e) {
       console.error('Analysis failed:', e);
@@ -190,6 +200,19 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                       className="border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none" />
                     <input type="text" placeholder="Longitude" value={customLng} onChange={e => setCustomLng(e.target.value)}
                       className="border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none" />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="text-xs text-stone-500">Start date</label>
+                      <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
+                        className="border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none w-full" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-stone-500">End date</label>
+                      <input type="date" value={endDate} min={startDate} onChange={e => setEndDate(e.target.value)}
+                        className="border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none w-full" />
+                    </div>
                   </div>
 
                   <button onClick={handleAnalyze} disabled={analyzing || (!customLat && !selectedDistrict)}

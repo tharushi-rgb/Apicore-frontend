@@ -5,7 +5,7 @@ import { hivesService, type Hive } from '../services/hives';
 import { planningService, type ApiaryWeather } from '../services/planning';
 
 type Language = 'en' | 'si' | 'ta';
-type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
+type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
 interface Props {
   selectedLanguage: Language; onLanguageChange: (lang: Language) => void; onNavigate: (tab: NavTab) => void;
@@ -50,7 +50,7 @@ export function ViewApiaryScreen({ onBack, onAddHive, onEditApiary, onViewHive, 
   useEffect(() => {
     if (activeTab === 'weather' && !weather && !weatherLoading && apiary?.gps_latitude && apiary?.gps_longitude) {
       setWeatherLoading(true);
-      planningService.getApiaryWeather(apiaryId)
+      planningService.getApiaryWeather(apiary.gps_latitude!, apiary.gps_longitude!, apiary.district)
         .then(w => setWeather(w))
         .catch(() => {})
         .finally(() => setWeatherLoading(false));

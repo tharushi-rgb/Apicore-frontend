@@ -7,7 +7,7 @@ import { transfersService, type ColonyTransfer } from '../services/transfers';
 import { api } from '../services/api';
 
 type Language = 'en' | 'si' | 'ta';
-type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
+type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 type HiveTab = 'overview' | 'inspections' | 'feedings' | 'components' | 'queens' | 'treatments' | 'transfers';
 
 interface Props {

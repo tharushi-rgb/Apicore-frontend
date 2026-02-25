@@ -6,7 +6,7 @@ import { apiariesService, type Apiary } from '../services/apiaries';
 import { authService } from '../services/auth';
 
 type Language = 'en' | 'si' | 'ta';
-type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
+type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
 interface Props {
   selectedLanguage: Language; onLanguageChange: (lang: Language) => void; onNavigate: (tab: NavTab) => void;

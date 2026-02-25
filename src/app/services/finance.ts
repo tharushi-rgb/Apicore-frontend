@@ -1,4 +1,5 @@
-import { api } from './api';
+import { supabase } from './supabaseClient';
+import { authService } from './auth';
 
 export interface Expense {
   id: number;
@@ -24,38 +25,56 @@ export interface Income {
   created_at: string;
 }
 
+function getUserId(): number {
+  const user = authService.getLocalUser();
+  if (!user) throw new Error('Not logged in');
+  return user.id;
+}
+
 export const expensesService = {
   async getAll() {
-    const res = await api.get<{ success: boolean; data: { expenses: Expense[] } }>('/expenses');
-    return res.data.expenses;
+    const userId = getUserId();
+    const { data, error } = await supabase
+      .from('expenses')
+      .select('*')
+      .eq('user_id', userId)
+      .order('expense_date', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data as Expense[];
   },
+
   async create(payload: Partial<Expense>) {
-    const res = await api.post<{ success: boolean; data: { expense: Expense } }>('/expenses', payload);
-    return res.data.expense;
+    const userId = getUserId();
+    const { data, error } = await supabase
+      .from('expenses')
+      .insert({ ...payload, user_id: userId })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data as Expense;
   },
+
   async update(id: number, payload: Partial<Expense>) {
-    const res = await api.put<{ success: boolean; data: { expense: Expense } }>(`/expenses/${id}`, payload);
-    return res.data.expense;
+    const { data, error } = await supabase
+      .from('expenses')
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data as Expense;
   },
+
   async delete(id: number) {
-    return api.delete(`/expenses/${id}`);
+    const { error } = await supabase.from('expenses').delete().eq('id', id);
+    if (error) throw new Error(error.message);
   },
 };
 
+// Income service kept for type compatibility but not actively used (harvest tab removed)
 export const incomeService = {
-  async getAll() {
-    const res = await api.get<{ success: boolean; data: { income: Income[] } }>('/income');
-    return res.data.income;
-  },
-  async create(payload: Partial<Income>) {
-    const res = await api.post<{ success: boolean; data: { income: Income } }>('/income', payload);
-    return res.data.income;
-  },
-  async update(id: number, payload: Partial<Income>) {
-    const res = await api.put<{ success: boolean; data: { income: Income } }>(`/income/${id}`, payload);
-    return res.data.income;
-  },
-  async delete(id: number) {
-    return api.delete(`/income/${id}`);
-  },
+  async getAll(): Promise<Income[]> { return []; },
+  async create(_payload: Partial<Income>): Promise<Income> { throw new Error('Not supported'); },
+  async update(_id: number, _payload: Partial<Income>): Promise<Income> { throw new Error('Not supported'); },
+  async delete(_id: number) { return; },
 };

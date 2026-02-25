@@ -6,7 +6,7 @@ import { dashboardService, type DashboardData } from '../services/dashboard';
 import { authService } from '../services/auth';
 
 type Language = 'en' | 'si' | 'ta';
-type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
+type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
 interface Props {
   selectedLanguage: Language;
@@ -67,19 +67,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
               <KPICard title="Total Apiaries" value={String(stats?.totalApiaries || 0)} color="emerald" />
               <KPICard title="Total Hives" value={String(stats?.totalHives || 0)} color="amber" />
               <KPICard title="Active Hives" value={String(stats?.activeHives || 0)} color="blue" />
-              <KPICard title="Total Harvests" value={String(stats?.totalHarvests || 0)} color="amber" />
-            </div>
-
-            {/* Second KPI Row */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white rounded-xl p-4 shadow-sm">
-                <p className="text-stone-600 text-sm mb-1">Honey Harvested</p>
-                <p className="text-2xl font-bold text-stone-800">{stats?.totalHoneyKg || 0} kg</p>
-              </div>
-              <div className="bg-white rounded-xl p-4 shadow-sm">
-                <p className="text-stone-600 text-sm mb-1">Active Apiaries</p>
-                <p className="text-2xl font-bold text-stone-800">{stats?.activeApiaries || 0}</p>
-              </div>
+              <KPICard title="Active Apiaries" value={String(stats?.activeApiaries || 0)} color="emerald" />
             </div>
 
             {/* Quick Actions */}
@@ -88,7 +76,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
               <div className="grid grid-cols-2 gap-3">
                 <button onClick={() => onNavigate('apiaries')} className="bg-emerald-50 text-emerald-700 py-3 rounded-xl font-medium hover:bg-emerald-100 transition-colors">View Apiaries</button>
                 <button onClick={() => onNavigate('hives')} className="bg-amber-50 text-amber-700 py-3 rounded-xl font-medium hover:bg-amber-100 transition-colors">View Hives</button>
-                <button onClick={() => onNavigate('harvest')} className="bg-blue-50 text-blue-700 py-3 rounded-xl font-medium hover:bg-blue-100 transition-colors">Record Harvest</button>
+                <button onClick={() => onNavigate('planning')} className="bg-blue-50 text-blue-700 py-3 rounded-xl font-medium hover:bg-blue-100 transition-colors">Planning</button>
                 <button onClick={() => onNavigate('finance')} className="bg-purple-50 text-purple-700 py-3 rounded-xl font-medium hover:bg-purple-100 transition-colors">Finance</button>
               </div>
             </div>

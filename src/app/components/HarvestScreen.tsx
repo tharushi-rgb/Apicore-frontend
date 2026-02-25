@@ -7,7 +7,7 @@ import { hivesService, type Hive } from '../services/hives';
 import { harvestsService, type Harvest } from '../services/harvests';
 
 type Language = 'en' | 'si' | 'ta';
-type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
+type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
 interface Props {
   selectedLanguage: Language; onLanguageChange: (lang: Language) => void; onNavigate: (tab: NavTab) => void; onLogout: () => void;
@@ -33,7 +33,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab="harvest" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+      <MobileSidebar isOpen={isSidebarOpen} activeTab="dashboard" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
 
       <div className="bg-white shadow-sm sticky top-0 z-30">
         <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}

@@ -1,4 +1,5 @@
-import { api } from './api';
+import { supabase } from './supabaseClient';
+import { authService } from './auth';
 
 export interface Notification {
   id: number; user_id: number; target_role: string; notification_type: string; severity: string;
@@ -6,10 +7,56 @@ export interface Notification {
   is_read: number; is_dismissed: number; created_at: string;
 }
 
+function getUserId(): number {
+  const user = authService.getLocalUser();
+  if (!user) throw new Error('Not logged in');
+  return user.id;
+}
+
 export const notificationsService = {
-  async getAll(unreadOnly = false) { return (await api.get<{ success: boolean; data: { notifications: Notification[] } }>(`/notifications${unreadOnly ? '?unreadOnly=true' : ''}`)).data.notifications; },
-  async markAsRead(id: number) { return api.patch(`/notifications/${id}/read`, {}); },
-  async markAllRead() { return api.patch('/notifications/read-all', {}); },
-  async dismiss(id: number) { return api.patch(`/notifications/${id}/dismiss`, {}); },
-  async clearOld() { return api.delete('/notifications/clear'); },
+  async getAll(unreadOnly = false) {
+    const userId = getUserId();
+    let query = supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_dismissed', 0)
+      .order('created_at', { ascending: false });
+    if (unreadOnly) query = query.eq('is_read', 0);
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    return data as Notification[];
+  },
+
+  async markAsRead(id: number) {
+    const { error } = await supabase.from('notifications').update({ is_read: 1 }).eq('id', id);
+    if (error) throw new Error(error.message);
+  },
+
+  async markAllRead() {
+    const userId = getUserId();
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_read: 1 })
+      .eq('user_id', userId)
+      .eq('is_read', 0);
+    if (error) throw new Error(error.message);
+  },
+
+  async dismiss(id: number) {
+    const { error } = await supabase.from('notifications').update({ is_dismissed: 1 }).eq('id', id);
+    if (error) throw new Error(error.message);
+  },
+
+  async clearOld() {
+    const userId = getUserId();
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', userId)
+      .lt('created_at', cutoff.toISOString());
+    if (error) throw new Error(error.message);
+  },
 };

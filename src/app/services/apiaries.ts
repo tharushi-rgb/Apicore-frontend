@@ -1,4 +1,5 @@
-import { api } from './api';
+import { supabase } from './supabaseClient';
+import { authService } from './auth';
 
 export interface Apiary {
   id: number;
@@ -35,28 +36,82 @@ export interface ApiaryPayload {
   notes?: string;
 }
 
+function getUserId(): number {
+  const user = authService.getLocalUser();
+  if (!user) throw new Error('Not logged in');
+  return user.id;
+}
+
 export const apiariesService = {
   async getAll() {
-    const res = await api.get<{ success: boolean; data: { apiaries: Apiary[] } }>('/apiaries');
-    return res.data.apiaries;
+    const userId = getUserId();
+    const { data, error } = await supabase
+      .from('apiaries')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    // Attach hive counts
+    const apiaries = data as Apiary[];
+    const { data: hiveCounts } = await supabase
+      .from('hives')
+      .select('apiary_id')
+      .eq('user_id', userId)
+      .eq('status', 'active');
+    if (hiveCounts) {
+      const countMap: Record<number, number> = {};
+      hiveCounts.forEach((h: { apiary_id: number | null }) => {
+        if (h.apiary_id) countMap[h.apiary_id] = (countMap[h.apiary_id] ?? 0) + 1;
+      });
+      apiaries.forEach(a => { a.hive_count = countMap[a.id] ?? 0; });
+    }
+    return apiaries;
   },
+
   async getById(id: number) {
-    const res = await api.get<{ success: boolean; data: { apiary: Apiary } }>(`/apiaries/${id}`);
-    return res.data.apiary;
+    const { data, error } = await supabase
+      .from('apiaries')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) throw new Error(error.message);
+    return data as Apiary;
   },
+
   async create(payload: ApiaryPayload) {
-    const res = await api.post<{ success: boolean; data: { apiary: Apiary } }>('/apiaries', payload);
-    return res.data.apiary;
+    const userId = getUserId();
+    const { data, error } = await supabase
+      .from('apiaries')
+      .insert({ ...payload, user_id: userId, status: payload.status ?? 'active' })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data as Apiary;
   },
+
   async update(id: number, payload: Partial<ApiaryPayload>) {
-    const res = await api.put<{ success: boolean; data: { apiary: Apiary } }>(`/apiaries/${id}`, payload);
-    return res.data.apiary;
+    const { data, error } = await supabase
+      .from('apiaries')
+      .update({ ...payload, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data as Apiary;
   },
+
   async delete(id: number) {
-    return api.delete(`/apiaries/${id}`);
+    const { error } = await supabase.from('apiaries').delete().eq('id', id);
+    if (error) throw new Error(error.message);
   },
+
   async getHistory(id: number) {
-    const res = await api.get<{ success: boolean; data: { history: any[] } }>(`/apiaries/${id}/history`);
-    return res.data.history;
+    const { data, error } = await supabase
+      .from('apiary_history')
+      .select('*')
+      .eq('apiary_id', id)
+      .order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data ?? [];
   },
 };

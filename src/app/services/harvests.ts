@@ -1,4 +1,4 @@
-import { api } from './api';
+// harvests.ts — harvest feature removed. Kept to prevent build errors.
 
 export interface Harvest {
   id: number;
@@ -16,19 +16,8 @@ export interface Harvest {
 }
 
 export const harvestsService = {
-  async getAll() {
-    const res = await api.get<{ success: boolean; data: { harvests: Harvest[] } }>('/harvests');
-    return res.data.harvests;
-  },
-  async create(payload: Partial<Harvest>) {
-    const res = await api.post<{ success: boolean; data: { harvest: Harvest } }>('/harvests', payload);
-    return res.data.harvest;
-  },
-  async update(id: number, payload: Partial<Harvest>) {
-    const res = await api.put<{ success: boolean; data: { harvest: Harvest } }>(`/harvests/${id}`, payload);
-    return res.data.harvest;
-  },
-  async delete(id: number) {
-    return api.delete(`/harvests/${id}`);
-  },
+  async getAll(): Promise<Harvest[]> { return []; },
+  async create(_payload: Partial<Harvest>): Promise<Harvest> { throw new Error('Not supported'); },
+  async update(_id: number, _payload: Partial<Harvest>): Promise<Harvest> { throw new Error('Not supported'); },
+  async delete(_id: number): Promise<void> { return; },
 };

@@ -1,4 +1,5 @@
-import { api } from './api';
+import { supabase } from './supabaseClient';
+import { authService } from './auth';
 
 export interface Inspection {
   id: number;
@@ -14,24 +15,63 @@ export interface Inspection {
   created_at: string;
 }
 
+function getUserId(): number {
+  const user = authService.getLocalUser();
+  if (!user) throw new Error('Not logged in');
+  return user.id;
+}
+
 export const inspectionsService = {
   async getAll() {
-    const res = await api.get<{ success: boolean; data: { inspections: Inspection[] } }>('/inspections');
-    return res.data.inspections;
+    const userId = getUserId();
+    const { data, error } = await supabase
+      .from('inspections')
+      .select('*, hives(name, apiaries(name))')
+      .eq('user_id', userId)
+      .order('inspection_date', { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((i: any) => ({
+      ...i,
+      hive_name: i.hives?.name,
+      apiary_name: i.hives?.apiaries?.name,
+      hives: undefined,
+    })) as Inspection[];
   },
+
   async getByHive(hiveId: number) {
-    const res = await api.get<{ success: boolean; data: { inspections: Inspection[] } }>(`/inspections?hiveId=${hiveId}`);
-    return res.data.inspections;
+    const { data, error } = await supabase
+      .from('inspections')
+      .select('*')
+      .eq('hive_id', hiveId)
+      .order('inspection_date', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data as Inspection[];
   },
+
   async create(payload: Partial<Inspection>) {
-    const res = await api.post<{ success: boolean; data: { inspection: Inspection } }>('/inspections', payload);
-    return res.data.inspection;
+    const userId = getUserId();
+    const { data, error } = await supabase
+      .from('inspections')
+      .insert({ ...payload, user_id: userId })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data as Inspection;
   },
+
   async update(id: number, payload: Partial<Inspection>) {
-    const res = await api.put<{ success: boolean; data: { inspection: Inspection } }>(`/inspections/${id}`, payload);
-    return res.data.inspection;
+    const { data, error } = await supabase
+      .from('inspections')
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data as Inspection;
   },
+
   async delete(id: number) {
-    return api.delete(`/inspections/${id}`);
+    const { error } = await supabase.from('inspections').delete().eq('id', id);
+    if (error) throw new Error(error.message);
   },
 };

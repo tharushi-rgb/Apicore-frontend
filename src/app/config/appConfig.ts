@@ -10,38 +10,12 @@ export const APP_CONFIG = {
     district: 'Colombo',
     role: 'Beekeeper (Admin)',
   },
-  
+
   // App information
   APP_NAME: 'ApiCore',
   APP_VERSION: '1.0.0',
   TAGLINE: 'Smart Beekeeping Management System',
-  
-  // API endpoints
-  API: {
-    BASE_URL: 'http://localhost:5001/api',
-    AUTH: {
-      LOGIN: '/auth/login',
-      REGISTER: '/auth/register',
-      ME: '/auth/me',
-    },
-    DASHBOARD: '/dashboard',
-    APIARIES: '/apiaries',
-    HIVES: '/hives',
-    INSPECTIONS: '/inspections',
-    HARVESTS: '/harvests',
-    EXPENSES: '/expenses',
-    INCOME: '/income',
-    FEEDINGS: '/feedings',
-    COMPONENTS: '/components',
-    QUEENS: '/queens',
-    TREATMENTS: '/treatments',
-    PROFILE: '/profile',
-    HELPERS: '/helpers',
-    CLIENTS: '/clients',
-    NOTIFICATIONS: '/notifications',
-    TRANSFERS: '/transfers',
-  },
-  
+
   // Default values
   DEFAULTS: {
     HIVE_TYPE: 'box',

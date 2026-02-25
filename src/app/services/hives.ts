@@ -1,4 +1,5 @@
-import { api } from './api';
+import { supabase } from './supabaseClient';
+import { authService } from './auth';
 
 export interface Hive {
   id: number;
@@ -26,7 +27,7 @@ export interface Hive {
   apiary_district?: string;
   created_at: string;
   updated_at: string;
-  // Dynamic fields per hive type (R5.2)
+  // Dynamic fields per hive type
   num_frames?: number;
   num_supers?: number;
   brood_box_type?: string;
@@ -54,44 +55,100 @@ export interface HivePayload {
   notes?: string;
 }
 
+function getUserId(): number {
+  const user = authService.getLocalUser();
+  if (!user) throw new Error('Not logged in');
+  return user.id;
+}
+
 export const hivesService = {
   async getAll() {
-    const res = await api.get<{ success: boolean; data: { hives: Hive[] } }>('/hives');
-    return res.data.hives;
+    const userId = getUserId();
+    const { data, error } = await supabase
+      .from('hives')
+      .select('*, apiaries(name, district)')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    // Flatten join
+    return (data ?? []).map((h: any) => ({
+      ...h,
+      apiary_name: h.apiaries?.name,
+      apiary_district: h.apiaries?.district,
+      apiaries: undefined,
+    })) as Hive[];
   },
+
   async getById(id: number) {
-    const res = await api.get<{ success: boolean; data: { hive: Hive } }>(`/hives/${id}`);
-    return res.data.hive;
+    const { data, error } = await supabase
+      .from('hives')
+      .select('*, apiaries(name, district)')
+      .eq('id', id)
+      .single();
+    if (error) throw new Error(error.message);
+    return {
+      ...data,
+      apiary_name: (data as any).apiaries?.name,
+      apiary_district: (data as any).apiaries?.district,
+      apiaries: undefined,
+    } as Hive;
   },
+
   async create(payload: HivePayload) {
-    const res = await api.post<{ success: boolean; data: { hive: Hive } }>('/hives', payload);
-    return res.data.hive;
+    const userId = getUserId();
+    const { data, error } = await supabase
+      .from('hives')
+      .insert({ ...payload, user_id: userId, status: payload.status ?? 'active' })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data as Hive;
   },
+
   async update(id: number, payload: Partial<HivePayload>) {
-    const res = await api.put<{ success: boolean; data: { hive: Hive } }>(`/hives/${id}`, payload);
-    return res.data.hive;
+    const { data, error } = await supabase
+      .from('hives')
+      .update({ ...payload, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data as Hive;
   },
+
   async delete(id: number) {
-    return api.delete(`/hives/${id}`);
+    const { error } = await supabase.from('hives').delete().eq('id', id);
+    if (error) throw new Error(error.message);
   },
+
   async moveToApiary(id: number, targetApiaryId: number) {
-    return api.patch(`/hives/${id}/move`, { target_apiary_id: targetApiaryId });
+    const { error } = await supabase
+      .from('hives')
+      .update({ apiary_id: targetApiaryId, location_type: 'apiary-linked', updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) throw new Error(error.message);
   },
+
   async toggleStar(id: number) {
-    return api.patch(`/hives/${id}/star`, {});
+    const { data: hive } = await supabase.from('hives').select('is_starred').eq('id', id).single();
+    const { error } = await supabase
+      .from('hives')
+      .update({ is_starred: hive?.is_starred ? 0 : 1, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) throw new Error(error.message);
   },
+
   async toggleFlag(id: number, reason?: string) {
-    return api.patch(`/hives/${id}/flag`, { flag_reason: reason });
+    const { data: hive } = await supabase.from('hives').select('is_flagged').eq('id', id).single();
+    const { error } = await supabase
+      .from('hives')
+      .update({ is_flagged: hive?.is_flagged ? 0 : 1, flag_reason: reason ?? null, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) throw new Error(error.message);
   },
-  // R9.4: Hive edit locking
-  async acquireLock(id: number) {
-    return api.post<{ success: boolean; message: string; data: { locked: boolean; lockedBy: number } }>(`/hives/${id}/lock`, {});
-  },
-  async releaseLock(id: number) {
-    return api.delete(`/hives/${id}/lock`);
-  },
-  async checkLock(id: number) {
-    const res = await api.get<{ success: boolean; data: { locked: boolean; lockedBy?: number; lockedByName?: string; expiresAt?: string; isOwner?: boolean } }>(`/hives/${id}/lock`);
-    return res.data;
-  },
+
+  // Lock operations are no-ops in the Supabase-only version (no concurrent multi-user editing)
+  async acquireLock(_id: number) { return { locked: false, lockedBy: 0 }; },
+  async releaseLock(_id: number) { return; },
+  async checkLock(_id: number) { return { locked: false }; },
 };
