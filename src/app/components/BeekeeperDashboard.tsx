@@ -60,9 +60,13 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
   const today = new Date();
   const inspected30days = hives.filter(h => {
     if (!h.last_inspection_date) return false;
-    const inspectDate = new Date(h.last_inspection_date);
-    const diff = (today.getTime() - inspectDate.getTime()) / (1000 * 60 * 60 * 24);
-    return diff <= 30;
+    try {
+      const inspectDate = new Date(h.last_inspection_date);
+      const diff = (today.getTime() - inspectDate.getTime()) / (1000 * 60 * 60 * 24);
+      return diff <= 30;
+    } catch {
+      return false;
+    }
   }).length;
   
   const inspectionData = [

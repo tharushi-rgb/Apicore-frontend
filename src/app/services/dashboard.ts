@@ -17,7 +17,7 @@ export interface DashboardData {
 }
 
 interface Apiary { id: number; name: string; district?: string; status: string; hive_count: number; }
-interface Hive { id: number; name: string; hive_type: string; status: string; apiary_name?: string; }
+interface Hive { id: number; name: string; hive_type: string; status: string; apiary_name?: string; last_inspection_date?: string; queen_present?: number; }
 
 export const dashboardService = {
   async get(): Promise<DashboardData> {
