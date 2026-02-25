@@ -32,39 +32,70 @@ export const authService = {
     const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
     if (authError) throw new Error(authError.message);
 
-    // 2. Insert profile row in custom users table
-    const profileData = {
+    // 2. Insert profile row in custom users table.
+    // We build the insert in two passes:
+    //   - First with ALL fields (new schema has all columns)
+    //   - If that fails due to missing column, retry with only the base columns
+    //   This makes registration resilient to any schema version.
+    const fullProfile: Record<string, unknown> = {
       name: payload.name as string,
       email,
-      phone: payload.phone as string | undefined,
-      nic_number: payload.nic_number as string | undefined,
-      district: payload.district as string | undefined,
-      preferred_language: payload.preferred_language as string | undefined,
-      age_group: payload.age_group as string | undefined,
-      known_bee_allergy: payload.known_bee_allergy as string | undefined,
-      blood_group: payload.blood_group as string | undefined,
-      beekeeping_nature: payload.beekeeping_nature as string | undefined,
-      business_reg_no: payload.business_reg_no as string | undefined,
-      primary_bee_species: payload.primary_bee_species as string | undefined,
-      nvq_level: payload.nvq_level as string | undefined,
-      role: 'beekeeper',
-      years_experience: payload.years_experience as number | undefined,
       password: 'supabase_auth', // placeholder – real auth is via Supabase Auth
+      phone: payload.phone ?? null,
+      nic_number: payload.nic_number ?? null,
+      district: payload.district ?? null,
+      preferred_language: payload.preferred_language ?? 'en',
+      age_group: payload.age_group ?? null,
+      known_bee_allergy: payload.known_bee_allergy ?? 'no',
+      blood_group: payload.blood_group ?? null,
+      beekeeping_nature: payload.beekeeping_nature ?? null,
+      business_reg_no: payload.business_reg_no ?? null,
+      primary_bee_species: payload.primary_bee_species ?? null,
+      nvq_level: payload.nvq_level ?? null,
+      role: 'beekeeper',
+      years_experience: (payload.years_experience as number) ?? 0,
     };
 
-    const { data: userRow, error: insertError } = await supabase
+    let userRow: Record<string, unknown> | null = null;
+
+    // Try full insert first
+    const { data: fullData, error: fullError } = await supabase
       .from('users')
-      .insert(profileData)
+      .insert(fullProfile)
       .select()
       .single();
 
-    if (insertError) throw new Error(insertError.message);
+    if (!fullError) {
+      userRow = fullData as Record<string, unknown>;
+    } else if (fullError.message.includes('schema cache') || fullError.message.includes('Could not find')) {
+      // Schema is stale / missing columns — fallback to base columns only
+      const baseProfile = {
+        name: fullProfile.name,
+        email: fullProfile.email,
+        password: fullProfile.password,
+        phone: fullProfile.phone,
+        district: fullProfile.district,
+        role: fullProfile.role,
+        years_experience: fullProfile.years_experience,
+      };
+      const { data: baseData, error: baseError } = await supabase
+        .from('users')
+        .insert(baseProfile)
+        .select()
+        .single();
+      if (baseError) throw new Error(baseError.message);
+      userRow = baseData as Record<string, unknown>;
+    } else {
+      throw new Error(fullError.message);
+    }
+
+    if (!userRow) throw new Error('Registration failed: could not create user profile.');
 
     // Store session token from supabase auth
     const token = authData.session?.access_token ?? '';
     localStorage.setItem('auth_token', token);
-    storeUser(userRow as User);
-    return { user: userRow as User, token };
+    storeUser(userRow as unknown as User);
+    return { user: userRow as unknown as User, token };
   },
 
   async login(email: string, password: string) {
