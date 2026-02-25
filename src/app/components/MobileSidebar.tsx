@@ -1,3 +1,4 @@
+import React from 'react';
 import { Home, MapPin, Hexagon as HiveIcon, Calendar, DollarSign, Users, User, LogOut } from 'lucide-react';
 
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -29,18 +30,28 @@ function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; labe
 export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout }: MobileSidebarProps) {
   const nav = (tab: NavTab) => { onNavigate(tab); onClose(); };
 
+  // Prevent body scroll when sidebar is open
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
   return (
     <>
       {isOpen && (
         <div
-          className="absolute inset-0 bg-black/50 z-40"
+          className="fixed inset-0 bg-black/50 z-40"
           onClick={onClose}
           aria-hidden="true"
         />
       )}
 
       <div
-        className={`absolute top-0 left-0 h-full bg-white shadow-2xl z-50 transition-transform duration-300 ease-in-out w-72 flex flex-col ${
+        className={`fixed top-0 left-0 h-screen bg-white shadow-2xl z-50 transition-transform duration-300 ease-in-out w-72 flex flex-col ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
