@@ -68,7 +68,7 @@ export function ForecastDays14({ days }: Props) {
           {visibleDays.map((day) => (
             <div
               key={day.date}
-              className="flex-shrink-0 w-24 bg-gradient-to-br from-stone-50 to-stone-100 rounded-lg p-3 border border-stone-200 hover:border-blue-300 transition-colors"
+              className="flex-shrink-0 w-24 bg-amber-50/70 rounded-lg p-3 border border-amber-200 hover:border-amber-400 transition-colors"
             >
               {/* Date header */}
               <div className="text-center mb-2">
@@ -89,9 +89,6 @@ export function ForecastDays14({ days }: Props) {
 
               {/* Risk badges */}
               <div className="space-y-1 text-center">
-                <div className={`text-xs px-1.5 py-0.5 rounded border ${riskBg(day.tempRisk.color)}`}>
-                  {day.tempRisk.label}
-                </div>
                 {day.precipMm > 0 && (
                   <div className="text-xs text-blue-600 bg-blue-50 px-1 py-0.5 rounded border border-blue-200">
                     {day.precipMm}mm

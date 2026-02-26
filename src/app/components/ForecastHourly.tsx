@@ -71,7 +71,7 @@ export function ForecastHourly({ hourly, initialShowCount = 6 }: Props) {
             return (
               <div
                 key={idx}
-                className="flex-shrink-0 w-20 bg-gradient-to-br from-stone-50 to-stone-100 rounded-lg p-2 border border-stone-200 hover:border-emerald-300 transition-colors"
+                className="flex-shrink-0 w-20 bg-blue-50/70 rounded-lg p-2 border border-blue-200 hover:border-blue-400 transition-colors"
               >
                 <p className="text-center text-xs font-bold text-stone-700 mb-1">
                   {hour.time}

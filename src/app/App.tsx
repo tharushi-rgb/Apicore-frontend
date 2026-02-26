@@ -127,6 +127,7 @@ function AdminApiariesPage({ lang, onLangChange, onLogout }: { lang: Language; o
       onLogout={onLogout}
       onCreateApiary={() => navigate('/apiaries/new')}
       onViewApiary={(id) => navigate(`/apiaries/${id}`)}
+      onAddHive={(apiary) => navigate('/hives/new', { state: { apiaryId: apiary.id } })}
     />
   );
 }

@@ -250,19 +250,17 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                   </button>
                 </div>
 
-                {/* Interactive Map */}
-                {(customLat && customLng) && (
-                  <MapViewer
-                    lat={parseFloat(customLat)}
-                    lng={parseFloat(customLng)}
-                    district={selectedDistrict}
-                    editable={true}
-                    onLocationSelect={(lat, lng) => {
-                      setCustomLat(String(lat));
-                      setCustomLng(String(lng));
-                    }}
-                  />
-                )}
+                {/* Interactive Map — always visible, defaults to Sri Lanka */}
+                <MapViewer
+                  lat={customLat ? parseFloat(customLat) : undefined}
+                  lng={customLng ? parseFloat(customLng) : undefined}
+                  district={selectedDistrict}
+                  editable={true}
+                  onLocationSelect={(lat, lng) => {
+                    setCustomLat(String(lat));
+                    setCustomLng(String(lng));
+                  }}
+                />
 
                 {/* Analysis Results */}
                 {analysis && (
