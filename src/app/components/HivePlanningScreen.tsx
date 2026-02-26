@@ -11,7 +11,7 @@ import { ForecastHourly } from './ForecastHourly';
 import { MapViewer } from './MapViewer';
 
 type Language = 'en' | 'si' | 'ta';
-type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
+type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
 interface Props {
   selectedLanguage: Language; onLanguageChange: (lang: Language) => void; onNavigate: (tab: NavTab) => void;
@@ -136,6 +136,32 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
             {activeView === 'overview' && (
               <>
+                {/* Date Range Picker */}
+                <div className="bg-white rounded-xl p-4 shadow-sm">
+                  <h3 className="font-bold text-stone-800 mb-3 flex items-center gap-2"><Calendar className="w-4 h-4 text-amber-500" /> Select Date Range</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-stone-500 uppercase tracking-wide">Start Date</label>
+                      <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
+                        className="w-full border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none bg-amber-50/40" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-stone-500 uppercase tracking-wide">End Date</label>
+                      <input type="date" value={endDate} min={startDate} onChange={e => setEndDate(e.target.value)}
+                        className="w-full border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none bg-amber-50/40" />
+                    </div>
+                  </div>
+                  {startDate && endDate && (
+                    <div className="mt-3 flex items-center gap-2 bg-amber-50 rounded-lg px-3 py-2">
+                      <Calendar className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                      <span className="text-xs text-amber-700 font-medium">
+                        {Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))} day{Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) !== 1 ? 's' : ''} selected
+                        &nbsp;({new Date(startDate).toLocaleDateString()} – {new Date(endDate).toLocaleDateString()})
+                      </span>
+                    </div>
+                  )}
+                </div>
+
                 {/* Overview Stats */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-white rounded-xl p-4 shadow-sm"><MapPin className="w-5 h-5 text-emerald-500 mb-1" /><p className="text-2xl font-bold">{activeApiaries.length}</p><p className="text-xs text-stone-500">Active Apiaries</p></div>

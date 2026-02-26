@@ -9,7 +9,7 @@ import { authService } from '../services/auth';
 import { Leaf, Home, Hexagon as HiveIcon, MapPin, TrendingUp, AlertTriangle, Package } from 'lucide-react';
 
 type Language = 'en' | 'si' | 'ta';
-type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
+type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
 interface Props {
   selectedLanguage: Language;
@@ -268,8 +268,6 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
                 <button onClick={() => onNavigate('hives')} className="bg-amber-50 text-amber-700 py-3 rounded-xl font-medium hover:bg-amber-100 transition-colors">View Hives</button>
                 <button onClick={() => onNavigate('planning')} className="bg-blue-50 text-blue-700 py-3 rounded-xl font-medium hover:bg-blue-100 transition-colors">Planning</button>
                 <button onClick={() => onNavigate('finance')} className="bg-purple-50 text-purple-700 py-3 rounded-xl font-medium hover:bg-purple-100 transition-colors">Finance</button>
-                <button onClick={() => onNavigate('harvest')} className="bg-orange-50 text-orange-700 py-3 rounded-xl font-medium hover:bg-orange-100 transition-colors">Harvest</button>
-                <button onClick={() => onNavigate('analytics' as NavTab)} className="bg-violet-50 text-violet-700 py-3 rounded-xl font-medium hover:bg-violet-100 transition-colors">Analytics</button>
               </div>
             </div>
 

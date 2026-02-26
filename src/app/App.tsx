@@ -16,28 +16,19 @@ import { ViewHiveScreen } from '@/app/components/ViewHiveScreen';
 import { ViewApiaryScreen } from '@/app/components/ViewApiaryScreen';
 import { ClientServicesScreen } from '@/app/components/ClientServicesScreen';
 import { NotificationsScreen } from '@/app/components/NotificationsScreen';
-import { HarvestScreen } from '@/app/components/HarvestScreen';
 import { AnalyticsScreen } from '@/app/components/AnalyticsScreen';
 import { ManageHelpersScreen } from '@/app/components/ManageHelpersScreen';
-import { HelperDashboard } from '@/app/components/HelperDashboard';
-import { HelperMyHivesScreen } from '@/app/components/HelperMyHivesScreen';
-import { HelperMyApiariesScreen } from '@/app/components/HelperMyApiariesScreen';
-import { HelperInvitationScreen } from '@/app/components/HelperInvitationScreen';
-import { HelperRegistrationScreen } from '@/app/components/HelperRegistrationScreen';
-import { HelperProfileScreen } from '@/app/components/HelperProfileScreen';
-import type { HelperNavTab } from '@/app/components/HelperSidebar';
 import { authService } from './services/auth';
 import type { Apiary as ApiaryModel } from './services/apiaries';
 import type { Hive as HiveModel } from './services/hives';
 
 type Language = 'en' | 'si' | 'ta';
-type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile' | 'analytics';
+type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile' | 'analytics';
 
 const ADMIN_NAV_ROUTES: Record<NavTab, string> = {
   dashboard: '/dashboard',
   apiaries: '/apiaries',
   hives: '/hives',
-  harvest: '/harvest',
   planning: '/planning',
   finance: '/finance',
   clients: '/clients',
@@ -58,10 +49,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('auth_token');
   const user = authService.getLocalUser();
-  if (token && user) {
-    const dest = (user as any).role === 'helper' ? '/helper/dashboard' : '/dashboard';
-    return <Navigate to={dest} replace />;
-  }
+  if (token && user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
@@ -98,10 +86,7 @@ function LoginPage({ lang, onLangChange }: { lang: Language; onLangChange: (l: L
       selectedLanguage={lang}
       onLanguageChange={onLangChange}
       onBackToHome={() => navigate('/')}
-      onLoginSuccess={() => {
-        const u = authService.getLocalUser();
-        navigate((u as any)?.role === 'helper' ? '/helper/dashboard' : '/dashboard');
-      }}
+      onLoginSuccess={() => navigate('/dashboard')}
       onForgotPassword={() => navigate('/forgot-password')}
     />
   );
@@ -140,8 +125,8 @@ function AdminApiariesPage({ lang, onLangChange, onLogout }: { lang: Language; o
       onLanguageChange={onLangChange}
       onNavigate={(tab) => navigate(ADMIN_NAV_ROUTES[tab])}
       onLogout={onLogout}
-      onCreateApiary={() => navigate('/admin/apiaries/new')}
-      onViewApiary={(id) => navigate(`/admin/apiaries/${id}`)}
+      onCreateApiary={() => navigate('/apiaries/new')}
+      onViewApiary={(id) => navigate(`/apiaries/${id}`)}
     />
   );
 }
@@ -190,8 +175,8 @@ function AdminHivesPage({ lang, onLangChange, onLogout }: { lang: Language; onLa
       onLanguageChange={onLangChange}
       onNavigate={(tab) => navigate(ADMIN_NAV_ROUTES[tab])}
       onLogout={onLogout}
-      onCreateHive={() => navigate('/admin/hives/new')}
-      onViewHive={(id) => navigate(`/admin/hives/${id}`)}
+      onCreateHive={() => navigate('/hives/new')}
+      onViewHive={(id) => navigate(`/hives/${id}`)}
     />
   );
 }
@@ -238,8 +223,8 @@ function AdminPlanningPage({ lang, onLangChange, onLogout }: { lang: Language; o
       onLanguageChange={onLangChange}
       onNavigate={(tab) => navigate(ADMIN_NAV_ROUTES[tab])}
       onLogout={onLogout}
-      onCreateApiary={() => navigate('/admin/apiaries/new')}
-      onCreateHive={() => navigate('/admin/hives/new')}
+      onCreateApiary={() => navigate('/apiaries/new')}
+      onCreateHive={() => navigate('/hives/new')}
     />
   );
 }
@@ -280,17 +265,7 @@ function AdminNotificationsPage({ lang, onLangChange, onLogout }: { lang: Langua
   );
 }
 
-function AdminHarvestPage({ lang, onLangChange, onLogout }: { lang: Language; onLangChange: (l: Language) => void; onLogout: () => void }) {
-  const navigate = useNavigate();
-  return (
-    <HarvestScreen
-      selectedLanguage={lang}
-      onLanguageChange={onLangChange}
-      onNavigate={(tab) => navigate(ADMIN_NAV_ROUTES[tab])}
-      onLogout={onLogout}
-    />
-  );
-}
+// ─── Main App ──────────────────────────────────────────────────────────────────
 
 function AdminProfilePage({ lang, onLangChange, onLogout }: { lang: Language; onLangChange: (l: Language) => void; onLogout: () => void }) {
   const navigate = useNavigate();
@@ -299,7 +274,6 @@ function AdminProfilePage({ lang, onLangChange, onLogout }: { lang: Language; on
       selectedLanguage={lang}
       onLanguageChange={onLangChange}
       onNavigate={(tab) => navigate(ADMIN_NAV_ROUTES[tab])}
-      onManageHelpers={() => navigate('/helpers')}
       onLogout={onLogout}
     />
   );
@@ -327,98 +301,6 @@ function ManageHelpersPage({ lang, onLangChange, onLogout }: { lang: Language; o
       onNavigate={(tab) => navigate(ADMIN_NAV_ROUTES[tab])}
       onLogout={onLogout}
       onBack={() => navigate('/profile')}
-    />
-  );
-}
-
-// ─── Helper page wrappers ──────────────────────────────────────────────────────
-
-const HELPER_NAV_ROUTES: Record<HelperNavTab, string> = {
-  dashboard: '/helper/dashboard',
-  myHives: '/helper/hives',
-  myApiaries: '/helper/apiaries',
-  profile: '/helper/profile',
-};
-
-function HelperDashboardPage({ lang, onLangChange, onLogout }: { lang: Language; onLangChange: (l: Language) => void; onLogout: () => void }) {
-  const navigate = useNavigate();
-  return (
-    <HelperDashboard
-      selectedLanguage={lang}
-      onLanguageChange={onLangChange}
-      onNavigate={(tab) => navigate(HELPER_NAV_ROUTES[tab])}
-      onViewHive={(id) => navigate(`/hives/${id}`)}
-      onLogout={onLogout}
-    />
-  );
-}
-
-function HelperMyHivesPage({ lang, onLangChange, onLogout }: { lang: Language; onLangChange: (l: Language) => void; onLogout: () => void }) {
-  const navigate = useNavigate();
-  return (
-    <HelperMyHivesScreen
-      selectedLanguage={lang}
-      onLanguageChange={onLangChange}
-      onNavigate={(tab) => navigate(HELPER_NAV_ROUTES[tab])}
-      onViewHive={(id) => navigate(`/hives/${id}`)}
-      onLogout={onLogout}
-    />
-  );
-}
-
-function HelperMyApiariesPage({ lang, onLangChange, onLogout }: { lang: Language; onLangChange: (l: Language) => void; onLogout: () => void }) {
-  const navigate = useNavigate();
-  return (
-    <HelperMyApiariesScreen
-      selectedLanguage={lang}
-      onLanguageChange={onLangChange}
-      onNavigate={(tab) => navigate(HELPER_NAV_ROUTES[tab])}
-      onViewHive={(id) => navigate(`/hives/${id}`)}
-      onLogout={onLogout}
-    />
-  );
-}
-
-function HelperProfilePage({ lang, onLangChange, onLogout }: { lang: Language; onLangChange: (l: Language) => void; onLogout: () => void }) {
-  const navigate = useNavigate();
-  return (
-    <HelperProfileScreen
-      selectedLanguage={lang}
-      onLanguageChange={onLangChange}
-      onNavigate={(tab) => navigate(HELPER_NAV_ROUTES[tab])}
-      onLogout={onLogout}
-    />
-  );
-}
-
-function HelperInvitationPage({ lang, onLangChange }: { lang: Language; onLangChange: (l: Language) => void }) {
-  const navigate = useNavigate();
-  return (
-    <HelperInvitationScreen
-      selectedLanguage={lang}
-      onLanguageChange={onLangChange}
-      onBackToHome={() => navigate('/')}
-      onValidToken={(token, email, invitedBy) =>
-        navigate('/helper/register', { state: { token, email, invitedBy } })
-      }
-    />
-  );
-}
-
-function HelperRegistrationPage({ lang, onLangChange }: { lang: Language; onLangChange: (l: Language) => void }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const state = (location.state as { token?: string; email?: string; invitedBy?: string } | null) ?? {};
-  if (!state.token) return <Navigate to="/helper/invite" replace />;
-  return (
-    <HelperRegistrationScreen
-      selectedLanguage={lang}
-      onLanguageChange={onLangChange}
-      token={state.token}
-      email={state.email || ''}
-      invitedBy={state.invitedBy || ''}
-      onBack={() => navigate('/helper/invite')}
-      onSuccess={() => navigate('/login')}
     />
   );
 }
@@ -477,7 +359,6 @@ export default function App() {
           <Route path="/hives/new" element={<RequireAuth><AdminCreateHivePage {...ap} /></RequireAuth>} />
           <Route path="/hives/edit" element={<RequireAuth><AdminCreateHivePage {...ap} /></RequireAuth>} />
           <Route path="/hives/:id" element={<RequireAuth><AdminViewHivePage {...ap} /></RequireAuth>} />
-          <Route path="/harvest" element={<RequireAuth><AdminHarvestPage {...ap} /></RequireAuth>} />
           <Route path="/planning" element={<RequireAuth><AdminPlanningPage {...ap} /></RequireAuth>} />
           <Route path="/finance" element={<RequireAuth><AdminFinancePage {...ap} /></RequireAuth>} />
           <Route path="/clients" element={<RequireAuth><AdminClientsPage {...ap} /></RequireAuth>} />
@@ -485,16 +366,6 @@ export default function App() {
           <Route path="/profile" element={<RequireAuth><AdminProfilePage {...ap} /></RequireAuth>} />
           <Route path="/analytics" element={<RequireAuth><AdminAnalyticsPage {...ap} /></RequireAuth>} />
           <Route path="/helpers" element={<RequireAuth><ManageHelpersPage {...ap} /></RequireAuth>} />
-
-          {/* Helper public routes */}
-          <Route path="/helper/invite" element={<HelperInvitationPage {...lp} />} />
-          <Route path="/helper/register" element={<HelperRegistrationPage {...lp} />} />
-
-          {/* Helper protected routes */}
-          <Route path="/helper/dashboard" element={<RequireAuth><HelperDashboardPage {...ap} /></RequireAuth>} />
-          <Route path="/helper/hives" element={<RequireAuth><HelperMyHivesPage {...ap} /></RequireAuth>} />
-          <Route path="/helper/apiaries" element={<RequireAuth><HelperMyApiariesPage {...ap} /></RequireAuth>} />
-          <Route path="/helper/profile" element={<RequireAuth><HelperProfilePage {...ap} /></RequireAuth>} />
 
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, Award, MapPin, Hexagon as HiveIcon, ArrowLeft, DollarSign, Droplets } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { Award, Hexagon as HiveIcon, ArrowLeft, Droplets, TrendingUp, DollarSign } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
 import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
@@ -8,7 +8,7 @@ import { supabase } from '../services/supabaseClient';
 import { expensesService, incomeService } from '../services/finance';
 
 type Language = 'en' | 'si' | 'ta';
-type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
+type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
 interface Props {
   selectedLanguage: Language; onLanguageChange: (lang: Language) => void;
@@ -20,7 +20,7 @@ const COLORS = ['#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#3b82f6', '#ec4899'
 export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate, onLogout, onBack }: Props) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'hives' | 'finance' | 'forage'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'hives'>('overview');
   const user = authService.getLocalUser();
 
   // Data states
@@ -105,8 +105,6 @@ export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate
   const tabs = [
     { key: 'overview', label: 'Overview' },
     { key: 'hives', label: 'Hives' },
-    { key: 'finance', label: 'Finance' },
-    { key: 'forage', label: 'Harvest' },
   ] as const;
 
   return (
@@ -244,105 +242,6 @@ export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate
                     </ResponsiveContainer>
                   </div>
                 )}
-              </>
-            )}
-
-            {/* Finance Tab */}
-            {activeTab === 'finance' && (
-              <>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-emerald-50 rounded-xl p-4">
-                    <p className="text-emerald-700 text-xs mb-1">Total Income</p>
-                    <p className="text-xl font-bold text-emerald-700">LKR {overviewStats.totalIncome.toLocaleString()}</p>
-                  </div>
-                  <div className="bg-red-50 rounded-xl p-4">
-                    <p className="text-red-700 text-xs mb-1">Total Expenses</p>
-                    <p className="text-xl font-bold text-red-700">LKR {overviewStats.totalExpenses.toLocaleString()}</p>
-                  </div>
-                  <div className={`col-span-2 ${overviewStats.netProfit >= 0 ? 'bg-green-50' : 'bg-red-50'} rounded-xl p-4`}>
-                    <p className={`${overviewStats.netProfit >= 0 ? 'text-green-700' : 'text-red-700'} text-xs mb-1`}>Net Profit / Loss</p>
-                    <p className={`text-2xl font-bold ${overviewStats.netProfit >= 0 ? 'text-green-700' : 'text-red-700'}`}>LKR {overviewStats.netProfit.toLocaleString()}</p>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-2xl shadow-sm p-5">
-                  <h3 className="font-bold text-stone-800 mb-4">Monthly Trend</h3>
-                  <ResponsiveContainer width="100%" height={220}>
-                    <LineChart data={monthlyFinance} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                      <YAxis tick={{ fontSize: 11 }} />
-                      <Tooltip formatter={(v: any) => `LKR ${Number(v).toLocaleString()}`} />
-                      <Line type="monotone" dataKey="income" name="Income" stroke="#10b981" strokeWidth={2} dot={{ fill: '#10b981', r: 4 }} />
-                      <Line type="monotone" dataKey="expense" name="Expense" stroke="#ef4444" strokeWidth={2} dot={{ fill: '#ef4444', r: 4 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                  <div className="flex gap-4 justify-center mt-2">
-                    <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-emerald-500" /><span className="text-xs text-stone-600">Income</span></div>
-                    <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-red-500" /><span className="text-xs text-stone-600">Expenses</span></div>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Harvest Tab */}
-            {activeTab === 'forage' && (
-              <>
-                <div className="bg-white rounded-2xl shadow-sm p-5">
-                  <h3 className="font-bold text-stone-800 mb-4 flex items-center gap-2">
-                    <Droplets className="w-5 h-5 text-amber-500" /> Harvest by Product Type
-                  </h3>
-                  {harvestByType.length === 0 ? (
-                    <div className="text-center py-8"><Droplets className="w-10 h-10 text-stone-300 mx-auto mb-2" /><p className="text-stone-500 text-sm">No harvest records yet</p></div>
-                  ) : (
-                    <>
-                      <ResponsiveContainer width="100%" height={180}>
-                        <BarChart data={harvestByType} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                          <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                          <YAxis tick={{ fontSize: 11 }} />
-                          <Tooltip formatter={(v: any) => `${Number(v).toFixed(2)} kg/L`} />
-                          <Bar dataKey="value" name="Quantity" radius={[4, 4, 0, 0]}>
-                            {harvestByType.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                      <div className="mt-4 space-y-2">
-                        {harvestByType.map((h, i) => (
-                          <div key={h.name} className="flex items-center justify-between p-3 bg-stone-50 rounded-xl">
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                              <span className="text-sm capitalize font-medium text-stone-700">{h.name}</span>
-                            </div>
-                            <span className="font-bold text-stone-800">{h.value.toFixed(2)} kg/L</span>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                <div className="bg-white rounded-2xl shadow-sm p-5">
-                  <h3 className="font-bold text-stone-800 mb-4 flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-emerald-500" /> Top Producing Hives
-                  </h3>
-                  {bestHives.length === 0 ? (
-                    <div className="text-center py-6"><p className="text-stone-500 text-sm">No harvest linked to hives yet</p></div>
-                  ) : (
-                    <div className="space-y-2">
-                      {bestHives.map((h, i) => (
-                        <div key={i} className="flex items-center gap-3 p-3 bg-amber-50 rounded-xl">
-                          <span className="w-6 text-center font-bold text-amber-600 text-sm">#{i + 1}</span>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-stone-800">{h.name}</p>
-                            <p className="text-xs text-stone-500">{h.count} sessions</p>
-                          </div>
-                          <span className="text-amber-600 font-bold text-sm">{h.total.toFixed(1)} kg</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
               </>
             )}
           </div>

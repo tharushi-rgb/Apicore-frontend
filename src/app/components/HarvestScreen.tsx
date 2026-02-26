@@ -63,7 +63,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
   const [searchText, setSearchText] = useState('');
   const [filterType, setFilterType] = useState('');
   const user = authService.getLocalUser();
-  const activeTab: NavTab = 'harvest';
+  const activeTab: NavTab = 'dashboard';
 
   const {
     register,
