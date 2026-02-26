@@ -1,113 +1,318 @@
 import { useState, useEffect } from 'react';
-import { User, Mail, MapPin, Phone, Edit2, Save, Loader2, Lock, Users, X } from 'lucide-react';
+import {
+  User,
+  X,
+  Edit,
+  Camera,
+  MapPinned,
+  Phone,
+  Mail,
+  Download,
+  FileText,
+  Shield,
+  Key,
+  LogOut,
+  Users,
+} from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
 import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
-import { profileService } from '../services/profile';
+import { profileService, type Profile } from '../services/profile';
+import { apiariesService } from '../services/apiaries';
+import { hivesService } from '../services/hives';
 
 type Language = 'en' | 'si' | 'ta';
-type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
+type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
 interface Props {
   selectedLanguage: Language; onLanguageChange: (lang: Language) => void; onNavigate: (tab: NavTab) => void;
   onManageHelpers?: () => void; onLogout: () => void;
 }
 
+interface NotificationSettings {
+  queenAge: boolean;
+  pestDetection: boolean;
+  inspectionReminders: boolean;
+  contractExpiry: boolean;
+}
+
 export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, onManageHelpers, onLogout }: Props) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', district: '' });
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editDistrict, setEditDistrict] = useState('');
+  const [stats, setStats] = useState({ apiaries: 0, hives: 0, clients: 0 });
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
+    queenAge: true, pestDetection: true, inspectionReminders: true, contractExpiry: true,
+  });
   const user = authService.getLocalUser();
+  const activeTab: NavTab = 'profile';
 
   useEffect(() => {
-    profileService.get().then(p => { setProfile(p.user); setForm({ name: p.user.name || '', email: p.user.email || '', phone: p.user.phone || '', district: p.user.district || '' }); setLoading(false); }).catch(() => setLoading(false));
+    const load = async () => {
+      try {
+        const [p, apis, hivs] = await Promise.all([
+          profileService.get(),
+          apiariesService.getAll(),
+          hivesService.getAll(),
+        ]);
+        setProfile(p.user);
+        setStats({ apiaries: apis.length, hives: hivs.length, clients: 0 });
+      } catch (error) {
+        console.error('Failed to load profile', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
 
-  const handleSave = async () => {
-    setSaving(true);
-    try { const updated = await profileService.update(form); setProfile(updated); setEditing(false); } catch {}
-    setSaving(false);
+  const handleOpenEdit = () => {
+    if (!profile) return;
+    setEditName(profile.name || '');
+    setEditEmail(profile.email || '');
+    setEditPhone(profile.phone || '');
+    setEditDistrict(profile.district || '');
+    setShowEditProfile(true);
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24 relative overflow-hidden">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab="profile" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+  const handleSaveProfile = async () => {
+    setIsSavingProfile(true);
+    try {
+      const updated = await profileService.update({
+        name: editName.trim(),
+        email: editEmail.trim(),
+        phone: editPhone.trim(),
+        district: editDistrict.trim(),
+      });
+      setProfile(updated);
+      setShowEditProfile(false);
+    } catch (error) {
+      console.error('Failed to update profile', error);
+      alert('Failed to update profile');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
 
-      <div className="bg-white shadow-sm sticky top-0 z-30">
-        <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
-        <div className="px-6 pb-4 border-t border-stone-100">
-          <h1 className="text-2xl font-bold text-stone-800">Profile</h1>
-          <p className="text-stone-500 text-sm mt-1">Manage your account</p>
+  const handleToggleNotification = (setting: keyof NotificationSettings) => {
+    setNotificationSettings(prev => ({ ...prev, [setting]: !prev[setting] }));
+  };
+
+  const handleSignOut = () => {
+    authService.logout();
+    onLogout();
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex items-center justify-center">
+        <div className="animate-spin h-10 w-10 border-4 border-amber-500 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
+      <MobileSidebar isOpen={isSidebarOpen} activeTab={activeTab} onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+
+      {/* Edit Profile Modal */}
+      {showEditProfile && (
+        <div className="absolute inset-0 bg-black/50 z-40" onClick={() => setShowEditProfile(false)}>
+          <div className="absolute top-20 right-4 left-4 max-w-md mx-auto bg-white rounded-2xl shadow-2xl p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-stone-800">Edit Profile</h2>
+              <button onClick={() => setShowEditProfile(false)} className="p-1 hover:bg-stone-100 rounded-lg"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-2">Name</label>
+                <input type="text" value={editName} onChange={e => setEditName(e.target.value)} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-2">Email</label>
+                <input type="email" value={editEmail} onChange={e => setEditEmail(e.target.value)} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-2">Phone</label>
+                <input type="tel" value={editPhone} onChange={e => setEditPhone(e.target.value)} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-2">District</label>
+                <input type="text" value={editDistrict} onChange={e => setEditDistrict(e.target.value)} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none" />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowEditProfile(false)} className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-3 rounded-xl font-medium">Cancel</button>
+              <button onClick={handleSaveProfile} disabled={isSavingProfile} className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-medium disabled:opacity-70">
+                {isSavingProfile ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Modal */}
+      {showPasswordForm && <PasswordModal onClose={() => setShowPasswordForm(false)} />}
+
+      <div className="h-full overflow-y-auto pb-8">
+        {/* Header */}
+        <div className="bg-white shadow-sm sticky top-0 z-30">
+          <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+            isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
+          <div className="px-6 pb-4 border-t border-stone-100">
+            <h1 className="text-2xl font-bold text-stone-800">Profile</h1>
+            <p className="text-stone-500 text-sm mt-1">Your account & preferences</p>
+          </div>
+        </div>
+
+        <div className="px-4 py-4 space-y-4">
+          {/* Compact Profile Card */}
+          <div className="bg-white rounded-xl shadow-sm p-4 relative">
+            <button onClick={handleOpenEdit} className="absolute top-3 right-3 p-2 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors" aria-label="Edit profile">
+              <Edit className="w-4 h-4 text-amber-700" />
+            </button>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center">
+                  <User className="w-8 h-8 text-white" />
+                </div>
+                <button className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 hover:bg-emerald-600 rounded-full flex items-center justify-center shadow-lg transition-colors">
+                  <Camera className="w-3 h-3 text-white" />
+                </button>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-lg font-bold text-stone-800">{profile?.name || 'User'}</h2>
+                <p className="text-amber-600 text-xs font-medium capitalize">{profile?.role || 'beekeeper'}</p>
+                <div className="mt-2 grid grid-cols-1 gap-1.5 text-stone-600">
+                  <div className="flex items-center gap-2"><MapPinned className="w-3.5 h-3.5 flex-shrink-0" /><span className="text-xs">{profile?.district || 'Not set'}</span></div>
+                  <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 flex-shrink-0" /><span className="text-xs">{profile?.phone || 'Not set'}</span></div>
+                  <div className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 flex-shrink-0" /><span className="text-xs truncate">{profile?.email || 'Not set'}</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Beekeeping Overview */}
+          <div className="space-y-2">
+            <h3 className="text-base font-bold text-stone-800 px-1">Beekeeping Overview</h3>
+            <div className="grid grid-cols-3 gap-2">
+              <StatCard label="Apiaries" value={stats.apiaries.toString()} color="emerald" />
+              <StatCard label="Hives" value={stats.hives.toString()} color="amber" />
+              <StatCard label="Clients" value={stats.clients.toString()} color="purple" />
+            </div>
+          </div>
+
+          {/* Manage Helpers */}
+          {onManageHelpers && profile?.role === 'beekeeper' && (
+            <button onClick={onManageHelpers} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+              <Users className="w-5 h-5" /> Manage Helpers
+            </button>
+          )}
+
+          {/* Notification Settings */}
+          <div className="bg-white rounded-2xl shadow-sm p-6">
+            <h3 className="text-lg font-bold text-stone-800 mb-2">Notification Settings</h3>
+            <p className="text-sm text-stone-600 mb-4">Choose which alerts you want to receive.</p>
+            <div className="space-y-4">
+              <ToggleSetting label="Queen age alerts" description="Get notified when queen bee needs replacement" checked={notificationSettings.queenAge} onChange={() => handleToggleNotification('queenAge')} />
+              <ToggleSetting label="Pest detection alerts" description="Alerts for pest activity in hives" checked={notificationSettings.pestDetection} onChange={() => handleToggleNotification('pestDetection')} />
+              <ToggleSetting label="Inspection reminders" description="Regular hive inspection schedule reminders" checked={notificationSettings.inspectionReminders} onChange={() => handleToggleNotification('inspectionReminders')} />
+              <ToggleSetting label="Contract expiry alerts" description="Apiary rental contract expiration warnings" checked={notificationSettings.contractExpiry} onChange={() => handleToggleNotification('contractExpiry')} />
+            </div>
+          </div>
+
+          {/* Data & Privacy */}
+          <div className="bg-white rounded-2xl shadow-sm p-6">
+            <h3 className="text-lg font-bold text-stone-800 mb-4">Data & Privacy</h3>
+            <div className="space-y-3">
+              <DataButton icon={<Download className="w-5 h-5 text-emerald-600" />} iconBg="bg-emerald-100" title="Export My Data" subtitle="Download all your beekeeping data" />
+              <DataButton icon={<FileText className="w-5 h-5 text-blue-600" />} iconBg="bg-blue-100" title="Download Reports" subtitle="Generate activity and financial reports" />
+              <DataButton icon={<Shield className="w-5 h-5 text-amber-600" />} iconBg="bg-amber-100" title="Privacy Policy" subtitle="View our privacy policy" />
+              <DataButton icon={<FileText className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-100" title="Terms & Conditions" subtitle="Read terms and conditions" />
+            </div>
+          </div>
+
+          {/* Account Actions */}
+          <div className="bg-white rounded-2xl shadow-sm p-6">
+            <h3 className="text-lg font-bold text-stone-800 mb-4">Account Actions</h3>
+            <div className="space-y-3">
+              <button onClick={() => setShowPasswordForm(true)} className="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 rounded-xl transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><Key className="w-5 h-5 text-blue-600" /></div>
+                  <p className="font-medium text-stone-800">Change Password</p>
+                </div>
+                <span className="text-stone-400">›</span>
+              </button>
+              <button onClick={handleSignOut} className="w-full flex items-center justify-between p-4 bg-red-50 hover:bg-red-100 rounded-xl transition-colors border-2 border-red-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center"><LogOut className="w-5 h-5 text-red-600" /></div>
+                  <p className="font-medium text-red-700">Sign Out</p>
+                </div>
+                <span className="text-red-400">›</span>
+              </button>
+            </div>
+          </div>
+
+          {/* App Version */}
+          <div className="text-center py-4">
+            <p className="text-sm text-stone-500">ApiCore v1.0.0</p>
+            <p className="text-xs text-stone-400 mt-1">Beekeeping Management System</p>
+          </div>
         </div>
       </div>
-
-      <div className="px-4 py-6 space-y-4">
-        {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div> : profile && (
-          <>
-                        {/* Avatar */}
-            <div className="text-center">
-              <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <User className="w-10 h-10 text-amber-600" />
-              </div>
-              <h2 className="text-xl font-bold text-stone-800">{profile.name}</h2>
-              <p className="text-sm text-stone-500 capitalize">{profile.role}</p>
-            </div>
-
-            {/* Profile Card */}
-            <div className="bg-white rounded-xl p-4 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-stone-800">Profile Details</h3>
-                {!editing ? (
-                  <button onClick={() => setEditing(true)} className="flex items-center gap-1 text-sm text-amber-600"><Edit2 className="w-4 h-4" /> Edit</button>
-                ) : (
-                  <button onClick={handleSave} disabled={saving} className="flex items-center gap-1 text-sm text-emerald-600 font-medium">
-                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save
-                  </button>
-                )}
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center gap-3"><User className="w-4 h-4 text-stone-400" />
-                  {editing ? <input value={form.name} onChange={e => setForm(p=>({...p,name:e.target.value}))} className="flex-1 border-b border-stone-200 py-1 text-sm focus:border-amber-500 focus:outline-none" /> :
-                    <span className="text-sm text-stone-700">{profile.name}</span>}
-                </div>
-                <div className="flex items-center gap-3"><Mail className="w-4 h-4 text-stone-400" />
-                  <span className="text-sm text-stone-700">{profile.email}</span>
-                </div>
-                <div className="flex items-center gap-3"><Phone className="w-4 h-4 text-stone-400" />
-                  {editing ? <input value={form.phone} onChange={e => setForm(p=>({...p,phone:e.target.value}))} className="flex-1 border-b border-stone-200 py-1 text-sm focus:border-amber-500 focus:outline-none" placeholder="Phone" /> :
-                    <span className="text-sm text-stone-700">{profile.phone || 'Not set'}</span>}
-                </div>
-                <div className="flex items-center gap-3"><MapPin className="w-4 h-4 text-stone-400" />
-                  {editing ? <input value={form.district} onChange={e => setForm(p=>({...p,district:e.target.value}))} className="flex-1 border-b border-stone-200 py-1 text-sm focus:border-amber-500 focus:outline-none" placeholder="District" /> :
-                    <span className="text-sm text-stone-700">{profile.district || 'Not set'}</span>}
-                </div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="space-y-3">
-              <button onClick={() => setShowPasswordForm(true)} className="w-full bg-white border border-stone-200 py-3 rounded-xl font-medium text-stone-700 flex items-center justify-center gap-2 hover:bg-stone-50">
-                <Lock className="w-5 h-5" /> Change Password
-              </button>
-              {onManageHelpers && profile.role === 'beekeeper' && (
-                <button onClick={onManageHelpers} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
-                  <Users className="w-5 h-5" /> Manage Helpers
-                </button>
-              )}
-              <button onClick={onLogout} className="w-full bg-red-50 text-red-600 py-3 rounded-xl font-medium hover:bg-red-100">Logout</button>
-            </div>
-          </>
-        )}
-      </div>
-
-      {showPasswordForm && <PasswordModal onClose={() => setShowPasswordForm(false)} />}
     </div>
+  );
+}
+
+function StatCard({ label, value, color }: { label: string; value: string; color: 'emerald' | 'amber' | 'purple' }) {
+  const colorClasses = {
+    emerald: { bg: 'bg-emerald-50', text: 'text-emerald-700', accent: 'bg-emerald-500' },
+    amber: { bg: 'bg-amber-50', text: 'text-amber-700', accent: 'bg-amber-500' },
+    purple: { bg: 'bg-purple-50', text: 'text-purple-700', accent: 'bg-purple-500' },
+  };
+  const c = colorClasses[color];
+  return (
+    <div className={`${c.bg} rounded-lg p-2.5 shadow-sm relative`}>
+      <div className={`absolute top-0 right-0 w-1.5 h-1.5 rounded-bl-lg ${c.accent}`} />
+      <p className="text-stone-600 text-[10px] mb-0.5 leading-tight">{label}</p>
+      <p className={`text-xl font-bold ${c.text} leading-none`}>{value}</p>
+    </div>
+  );
+}
+
+function ToggleSetting({ label, description, checked, onChange }: { label: string; description: string; checked: boolean; onChange: () => void }) {
+  return (
+    <div className="flex items-start justify-between gap-4 pb-4 border-b border-stone-200 last:border-0 last:pb-0">
+      <div className="flex-1">
+        <p className="font-medium text-stone-800 mb-1">{label}</p>
+        <p className="text-xs text-stone-500">{description}</p>
+      </div>
+      <button onClick={onChange} className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-emerald-500' : 'bg-stone-300'}`}>
+        <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${checked ? 'translate-x-6' : 'translate-x-0.5'}`} />
+      </button>
+    </div>
+  );
+}
+
+function DataButton({ icon, iconBg, title, subtitle }: { icon: React.ReactNode; iconBg: string; title: string; subtitle: string }) {
+  return (
+    <button className="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 rounded-xl transition-colors">
+      <div className="flex items-center gap-3">
+        <div className={`w-10 h-10 ${iconBg} rounded-lg flex items-center justify-center`}>{icon}</div>
+        <div className="text-left">
+          <p className="font-medium text-stone-800">{title}</p>
+          <p className="text-xs text-stone-500">{subtitle}</p>
+        </div>
+      </div>
+      <span className="text-stone-400">›</span>
+    </button>
   );
 }
 
@@ -124,16 +329,18 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
     try { await profileService.changePassword(f.currentPassword, f.newPassword); setSuccess(true); setTimeout(onClose, 1500); } catch (e: any) { setError(e.message || 'Failed'); setSaving(false); }
   };
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center"><div className="bg-white w-full max-w-md rounded-t-2xl p-5">
-      <div className="flex items-center justify-between mb-4"><h3 className="font-bold text-stone-800">Change Password</h3><button onClick={onClose}><X className="w-5 h-5" /></button></div>
-      {success ? <p className="text-emerald-600 text-center py-4">Password changed successfully!</p> :
-      <form onSubmit={submit} className="space-y-3">
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        <input type="password" value={f.currentPassword} onChange={e=>setF(p=>({...p,currentPassword:e.target.value}))} placeholder="Current Password" className="w-full border rounded-xl px-3 py-2 text-sm" />
-        <input type="password" value={f.newPassword} onChange={e=>setF(p=>({...p,newPassword:e.target.value}))} placeholder="New Password" className="w-full border rounded-xl px-3 py-2 text-sm" />
-        <input type="password" value={f.confirmPassword} onChange={e=>setF(p=>({...p,confirmPassword:e.target.value}))} placeholder="Confirm New Password" className="w-full border rounded-xl px-3 py-2 text-sm" />
-        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-2.5 rounded-xl font-medium disabled:opacity-60">{saving ? 'Saving...' : 'Change Password'}</button>
-      </form>}
-    </div></div>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center">
+      <div className="bg-white w-full max-w-md rounded-t-2xl p-5">
+        <div className="flex items-center justify-between mb-4"><h3 className="font-bold text-stone-800">Change Password</h3><button onClick={onClose}><X className="w-5 h-5" /></button></div>
+        {success ? <p className="text-emerald-600 text-center py-4">Password changed successfully!</p> :
+        <form onSubmit={submit} className="space-y-3">
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <input type="password" value={f.currentPassword} onChange={e => setF(p => ({ ...p, currentPassword: e.target.value }))} placeholder="Current Password" className="w-full border rounded-xl px-3 py-2 text-sm" />
+          <input type="password" value={f.newPassword} onChange={e => setF(p => ({ ...p, newPassword: e.target.value }))} placeholder="New Password" className="w-full border rounded-xl px-3 py-2 text-sm" />
+          <input type="password" value={f.confirmPassword} onChange={e => setF(p => ({ ...p, confirmPassword: e.target.value }))} placeholder="Confirm New Password" className="w-full border rounded-xl px-3 py-2 text-sm" />
+          <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-2.5 rounded-xl font-medium disabled:opacity-60">{saving ? 'Saving...' : 'Change Password'}</button>
+        </form>}
+      </div>
+    </div>
   );
 }

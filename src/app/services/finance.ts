@@ -71,10 +71,47 @@ export const expensesService = {
   },
 };
 
-// Income service kept for type compatibility but not actively used (harvest tab removed)
+// Income service with Supabase CRUD
 export const incomeService = {
-  async getAll(): Promise<Income[]> { return []; },
-  async create(_payload: Partial<Income>): Promise<Income> { throw new Error('Not supported'); },
-  async update(_id: number, _payload: Partial<Income>): Promise<Income> { throw new Error('Not supported'); },
-  async delete(_id: number) { return; },
+  async getAll(): Promise<Income[]> {
+    const userId = getUserId();
+    try {
+      const { data, error } = await supabase
+        .from('income')
+        .select('*')
+        .eq('user_id', userId)
+        .order('income_date', { ascending: false });
+      if (error) throw new Error(error.message);
+      return (data ?? []) as Income[];
+    } catch {
+      return [];
+    }
+  },
+
+  async create(payload: Partial<Income>): Promise<Income> {
+    const userId = getUserId();
+    const { data, error } = await supabase
+      .from('income')
+      .insert({ ...payload, user_id: userId })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data as Income;
+  },
+
+  async update(id: number, payload: Partial<Income>): Promise<Income> {
+    const { data, error } = await supabase
+      .from('income')
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data as Income;
+  },
+
+  async delete(id: number) {
+    const { error } = await supabase.from('income').delete().eq('id', id);
+    if (error) throw new Error(error.message);
+  },
 };

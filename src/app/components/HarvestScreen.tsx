@@ -1,139 +1,744 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, X } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import {
+  Plus,
+  X,
+  MapPin,
+  Calendar,
+  Package,
+  Camera,
+  Upload,
+  ChevronDown,
+  ChevronUp,
+  Search,
+  Filter,
+  Edit,
+  Eye,
+  Info,
+} from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
 import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
-import { hivesService, type Hive } from '../services/hives';
+import { hivesService } from '../services/hives';
+import { apiariesService } from '../services/apiaries';
 import { harvestsService, type Harvest } from '../services/harvests';
 
 type Language = 'en' | 'si' | 'ta';
-type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
+type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
 interface Props {
-  selectedLanguage: Language; onLanguageChange: (lang: Language) => void; onNavigate: (tab: NavTab) => void; onLogout: () => void;
+  selectedLanguage: Language;
+  onLanguageChange: (lang: Language) => void;
+  onNavigate: (tab: NavTab) => void;
+  onLogout: () => void;
+}
+
+interface FormData {
+  harvestDate: string;
+  harvestType: string;
+  otherHarvestType?: string;
+  quantity: number;
+  customUnit?: string;
+  showToBuyers: boolean;
+  linkType: 'hive' | 'apiary' | 'none';
+  hiveId?: string;
+  apiaryId?: string;
+  harvestMethod: string;
+  notes: string;
 }
 
 export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, onLogout }: Props) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showRecordForm, setShowRecordForm] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [harvestType, setHarvestType] = useState('');
+  const [linkType, setLinkType] = useState<'hive' | 'apiary' | 'none'>('hive');
+  const [showToBuyers, setShowToBuyers] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [harvests, setHarvests] = useState<Harvest[]>([]);
-  const [hives, setHives] = useState<Hive[]>([]);
+  const [hives, setHives] = useState<{ id: number; name: string; apiary?: string }[]>([]);
+  const [apiaries, setApiaries] = useState<{ id: number; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState<Harvest | true | false>(false);
-  const [search, setSearch] = useState('');
+  const [editingHarvest, setEditingHarvest] = useState<Harvest | null>(null);
+  const [searchText, setSearchText] = useState('');
+  const [filterType, setFilterType] = useState('');
   const user = authService.getLocalUser();
+  const activeTab: NavTab = 'harvest';
 
-  const fetchData = async () => { try { const [h, hv] = await Promise.all([harvestsService.getAll(), hivesService.getAll()]); setHarvests(h); setHives(hv); } catch {} setLoading(false); };
-  useEffect(() => { fetchData(); }, []);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<FormData>({
+    defaultValues: {
+      showToBuyers: false,
+      linkType: 'hive',
+    },
+  });
 
-  const filtered = harvests.filter(h => !search || h.hive_name?.toLowerCase().includes(search.toLowerCase()) || h.harvest_type?.toLowerCase().includes(search.toLowerCase()));
-  const totalQuantity = harvests.reduce((s, h) => s + (h.quantity || 0), 0);
-  const honeyCount = harvests.filter(h => h.harvest_type === 'honey').length;
+  const loadData = async () => {
+    try {
+      const [harvestData, hiveData, apiaryData] = await Promise.all([
+        harvestsService.getAll(),
+        hivesService.getAll(),
+        apiariesService.getAll(),
+      ]);
+      setHarvests(harvestData);
+      setHives(hiveData.map((h: any) => ({ id: h.id, name: h.name, apiary: h.apiary_name || 'Standalone' })));
+      setApiaries(apiaryData.map((a: any) => ({ id: a.id, name: a.name })));
+    } catch (error) {
+      console.error('Failed to load harvest data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const handleDelete = async (id: number) => { if (!confirm('Delete this harvest?')) return; await harvestsService.delete(id); fetchData(); };
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // Reset form when editing harvest changes
+  useEffect(() => {
+    if (editingHarvest) {
+      const isOtherType = !['honey', 'wax'].includes(editingHarvest.harvest_type.toLowerCase());
+      const formLinkType = editingHarvest.hive_id ? 'hive' : editingHarvest.apiary_id ? 'apiary' : 'none';
+      reset({
+        harvestDate: editingHarvest.harvest_date,
+        harvestType: isOtherType ? 'other' : editingHarvest.harvest_type.toLowerCase(),
+        otherHarvestType: isOtherType ? editingHarvest.harvest_type : undefined,
+        quantity: editingHarvest.quantity,
+        customUnit: editingHarvest.unit !== 'kg' ? editingHarvest.unit : undefined,
+        showToBuyers: false,
+        linkType: formLinkType,
+        hiveId: editingHarvest.hive_id?.toString() || undefined,
+        apiaryId: editingHarvest.apiary_id?.toString() || undefined,
+        harvestMethod: editingHarvest.harvest_method || '',
+        notes: editingHarvest.notes || '',
+      });
+      setHarvestType(isOtherType ? 'other' : editingHarvest.harvest_type.toLowerCase());
+      setLinkType(formLinkType);
+    } else {
+      reset({ showToBuyers: false, linkType: 'hive' });
+      setHarvestType('');
+      setLinkType('hive');
+    }
+  }, [editingHarvest, reset]);
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      const payload: any = {
+        harvest_date: data.harvestDate,
+        harvest_type: data.harvestType === 'other' ? data.otherHarvestType || 'other' : data.harvestType,
+        quantity: data.quantity,
+        unit: data.customUnit || 'kg',
+        harvest_method: data.harvestMethod || null,
+        surplus_listed: showToBuyers ? data.quantity : 0,
+        hive_id: linkType === 'hive' && data.hiveId ? Number(data.hiveId) : null,
+        apiary_id: linkType === 'apiary' && data.apiaryId ? Number(data.apiaryId) : null,
+        notes: data.notes || null,
+      };
+
+      if (editingHarvest) {
+        await harvestsService.update(editingHarvest.id, payload);
+      } else {
+        await harvestsService.create(payload);
+      }
+
+      setShowRecordForm(false);
+      setEditingHarvest(null);
+      reset();
+      setUploadedImages([]);
+      loadData();
+    } catch (error) {
+      console.error('Failed to save harvest:', error);
+      alert('Failed to save harvest');
+    }
+  };
+
+  const handleImageUpload = () => {
+    setUploadedImages([...uploadedImages, `image-${Date.now()}.jpg`]);
+  };
+
+  // Summary stats
+  const totalHarvest = harvests.reduce((sum, h) => sum + (h.quantity || 0), 0);
+  const honeyHarvested = harvests.filter((h) => h.harvest_type?.toLowerCase().includes('honey')).reduce((sum, h) => sum + (h.quantity || 0), 0);
+  const waxHarvested = harvests.filter((h) => h.harvest_type?.toLowerCase().includes('wax')).reduce((sum, h) => sum + (h.quantity || 0), 0);
+  const harvestSessions = harvests.length;
+
+  // Filter records
+  const filteredHarvests = harvests.filter((h) => {
+    if (searchText && !h.harvest_type?.toLowerCase().includes(searchText.toLowerCase()) && !h.hive_name?.toLowerCase().includes(searchText.toLowerCase()) && !h.apiary_name?.toLowerCase().includes(searchText.toLowerCase())) return false;
+    if (filterType && h.harvest_type?.toLowerCase() !== filterType) return false;
+    return true;
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex items-center justify-center">
+        <div className="animate-spin h-10 w-10 border-4 border-amber-500 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab="dashboard" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+    <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
+      {/* Mobile Sidebar */}
+      <MobileSidebar
+        isOpen={isSidebarOpen}
+        activeTab={activeTab}
+        onNavigate={onNavigate}
+        onClose={() => setIsSidebarOpen(false)}
+        onLogout={onLogout}
+      />
 
-      <div className="bg-white shadow-sm sticky top-0 z-30">
-        <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-        isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
-        <div className="px-6 pb-4 border-t border-stone-100">
-          <h1 className="text-2xl font-bold text-stone-800">Harvest Records</h1>
-          <p className="text-stone-500 text-sm mt-1">Track and manage harvests</p>
+      <div className="h-full overflow-y-auto pb-8">
+        {/* Header */}
+        <div className="bg-white shadow-sm sticky top-0 z-30">
+          <MobileHeader
+            userName={user?.name}
+            district={user?.district}
+            selectedLanguage={selectedLanguage}
+            onLanguageChange={onLanguageChange}
+            isSidebarOpen={isSidebarOpen}
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            onViewAllNotifications={() => onNavigate('notifications')}
+          />
+
+          {/* Harvest Title Section */}
+          <div className="px-6 pb-4 border-t border-stone-100">
+            <h1 className="text-2xl font-bold text-stone-800">Harvest</h1>
+            <p className="text-stone-500 text-sm mt-1">Record and track harvest yields</p>
+          </div>
         </div>
-      </div>
 
-      <div className="px-4 py-6 space-y-4">
-        <div className="grid grid-cols-3 gap-2">
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold text-amber-600">{harvests.length}</p><p className="text-xs text-stone-500">Records</p></div>
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold text-amber-600">{totalQuantity.toFixed(1)}</p><p className="text-xs text-stone-500">Total (kg)</p></div>
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold text-amber-600">{honeyCount}</p><p className="text-xs text-stone-500">Honey</p></div>
-        </div>
+        {/* Main Content */}
+        <div className="px-4 py-6 space-y-6">
+          {/* Section 1: Harvest Summary */}
+          <div className="grid grid-cols-2 gap-3">
+            <SummaryCard
+              label="Total Harvest (This Month)"
+              value={`${totalHarvest.toFixed(2)} kg`}
+              bgColor="bg-amber-50"
+              textColor="text-amber-700"
+            />
+            <SummaryCard
+              label="Honey Harvested"
+              value={`${honeyHarvested.toFixed(2)} kg`}
+              bgColor="bg-emerald-50"
+              textColor="text-emerald-700"
+            />
+            <SummaryCard
+              label="Wax Harvested"
+              value={`${waxHarvested.toFixed(2)} kg`}
+              bgColor="bg-blue-50"
+              textColor="text-blue-700"
+            />
+            <SummaryCard
+              label="Harvest Sessions"
+              value={harvestSessions.toString()}
+              bgColor="bg-purple-50"
+              textColor="text-purple-700"
+            />
+          </div>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-          <input value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm focus:border-amber-500 focus:outline-none" placeholder="Search harvests..." />
-        </div>
+          {/* Section 2: Primary Action */}
+          {!showRecordForm && (
+            <button
+              onClick={() => setShowRecordForm(true)}
+              className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 shadow-sm"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Record New Harvest</span>
+            </button>
+          )}
 
-        <button onClick={() => setShowForm(true)} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
-          <Plus className="w-5 h-5" /> Record Harvest
-        </button>
+          {/* Section 3: Record Harvest Form */}
+          {showRecordForm && (
+            <div className="bg-white rounded-2xl shadow-sm p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-stone-800">
+                  {editingHarvest ? 'Edit Harvest' : 'Record New Harvest'}
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowRecordForm(false);
+                    setEditingHarvest(null);
+                    reset();
+                  }}
+                  className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-stone-600" />
+                </button>
+              </div>
 
-        {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div> :
-          filtered.length === 0 ? <p className="text-center text-stone-500 py-8">No harvests recorded</p> :
-          <div className="space-y-3">
-            {filtered.map(h => (
-              <div key={h.id} className="bg-white rounded-xl p-4 shadow-sm">
-                <div className="flex items-center justify-between mb-2">
-                  <div><h3 className="font-bold text-stone-800">{h.hive_name || `Hive #${h.hive_id}`}</h3><p className="text-xs text-stone-500">{new Date(h.harvest_date).toLocaleDateString()}</p></div>
-                  <div className="flex gap-1">
-                    <button onClick={() => setShowForm(h)} className="p-1.5 hover:bg-stone-100 rounded"><Edit2 className="w-4 h-4 text-stone-500" /></button>
-                    <button onClick={() => handleDelete(h.id)} className="p-1.5 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4 text-red-400" /></button>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {/* Harvest Details */}
+                <div className="space-y-4">
+                  <h3 className="font-bold text-stone-800 pb-2 border-b-2 border-amber-200">
+                    Harvest Details
+                  </h3>
+
+                  <div>
+                    <label className="block text-stone-700 font-medium mb-2">
+                      Harvest Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      {...register('harvestDate', { required: 'Date is required' })}
+                      className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
+                    />
+                    {errors.harvestDate && (
+                      <p className="text-red-500 text-sm mt-1">{errors.harvestDate.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-stone-700 font-medium mb-2">
+                      Harvest Type <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      {...register('harvestType', { required: 'Type is required' })}
+                      onChange={(e) => setHarvestType(e.target.value)}
+                      className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
+                    >
+                      {!editingHarvest && <option value="">Select type</option>}
+                      <option value="honey">Honey</option>
+                      <option value="wax">Wax</option>
+                      <option value="other">Other</option>
+                    </select>
+                    {errors.harvestType && (
+                      <p className="text-red-500 text-sm mt-1">{errors.harvestType.message}</p>
+                    )}
+                  </div>
+
+                  {harvestType === 'other' && (
+                    <div>
+                      <label className="block text-stone-700 font-medium mb-2">
+                        Other Harvest Type <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        {...register('otherHarvestType', { required: 'Other type is required' })}
+                        className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
+                        placeholder="Enter type"
+                      />
+                      {errors.otherHarvestType && (
+                        <p className="text-red-500 text-sm mt-1">{errors.otherHarvestType.message}</p>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-stone-700 font-medium mb-2">
+                        Quantity <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        {...register('quantity', { required: 'Quantity is required', min: 0.1 })}
+                        className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
+                        placeholder="0.0"
+                      />
+                      {errors.quantity && (
+                        <p className="text-red-500 text-sm mt-1">{errors.quantity.message}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-stone-700 font-medium mb-2">Unit</label>
+                      {harvestType === 'other' ? (
+                        <input
+                          type="text"
+                          {...register('customUnit')}
+                          className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
+                          placeholder="Enter unit"
+                        />
+                      ) : (
+                        <input
+                          type="text"
+                          value="kg"
+                          disabled
+                          className="w-full px-4 py-3 bg-stone-100 border-2 border-stone-200 rounded-xl text-stone-600 cursor-not-allowed"
+                        />
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-3 text-xs text-stone-600">
-                  <span>{h.harvest_type}</span>
-                  <span>{h.quantity} {h.unit}</span>
-                  {h.quality && <span> {h.quality}</span>}
-                </div>
-                {h.apiary_name && <p className="text-xs text-stone-400 mt-1"> {h.apiary_name}</p>}
-                {h.notes && <p className="text-xs text-stone-500 mt-1">{h.notes}</p>}
-              </div>
-            ))}
-          </div>
-        }
-      </div>
 
-      {showForm && <HarvestForm initial={showForm === true ? undefined : showForm} hives={hives} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); fetchData(); }} />}
+                {/* Surplus Listing */}
+                <div className="space-y-4">
+                  <h3 className="font-bold text-stone-800 pb-2 border-b-2 border-amber-200">
+                    Surplus Listing
+                  </h3>
+
+                  <div className="p-4 bg-emerald-50 border-2 border-emerald-200 rounded-xl">
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div className="flex-1">
+                        <p className="font-medium text-stone-800 mb-1">Show to Buyers</p>
+                        <p className="text-sm text-stone-600">
+                          When turned on, this harvest will be listed as available surplus for buyers.
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={showToBuyers}
+                          onChange={(e) => setShowToBuyers(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-14 h-7 bg-stone-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
+                      </label>
+                    </div>
+
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-xs text-blue-800 flex items-start gap-2">
+                        <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                        <span>
+                          <strong>Step 1:</strong> Record harvest → enter quantity → enable 'Show to
+                          Buyers' if surplus.
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Hive/Apiary Association */}
+                <div className="space-y-4">
+                  <h3 className="font-bold text-stone-800 pb-2 border-b-2 border-amber-200">
+                    Hive / Apiary Association
+                  </h3>
+
+                  <div>
+                    <label className="block text-stone-700 font-medium mb-3">
+                      Link Harvest To
+                    </label>
+                    <div className="grid grid-cols-3 gap-3">
+                      <label className="cursor-pointer">
+                        <input
+                          type="radio"
+                          value="hive"
+                          checked={linkType === 'hive'}
+                          onChange={() => setLinkType('hive')}
+                          className="sr-only peer"
+                        />
+                        <div className="p-3 bg-white border-2 border-stone-200 rounded-xl peer-checked:border-amber-500 peer-checked:bg-amber-50 transition-all text-center text-sm">
+                          Specific Hive
+                        </div>
+                      </label>
+                      <label className="cursor-pointer">
+                        <input
+                          type="radio"
+                          value="apiary"
+                          checked={linkType === 'apiary'}
+                          onChange={() => setLinkType('apiary')}
+                          className="sr-only peer"
+                        />
+                        <div className="p-3 bg-white border-2 border-stone-200 rounded-xl peer-checked:border-amber-500 peer-checked:bg-amber-50 transition-all text-center text-sm">
+                          Apiary
+                        </div>
+                      </label>
+                      <label className="cursor-pointer">
+                        <input
+                          type="radio"
+                          value="none"
+                          checked={linkType === 'none'}
+                          onChange={() => setLinkType('none')}
+                          className="sr-only peer"
+                        />
+                        <div className="p-3 bg-white border-2 border-stone-200 rounded-xl peer-checked:border-amber-500 peer-checked:bg-amber-50 transition-all text-center text-sm">
+                          Not Linked
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  {linkType === 'hive' && (
+                    <div>
+                      <label className="block text-stone-700 font-medium mb-2">Select Hive</label>
+                      <select
+                        {...register('hiveId')}
+                        className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
+                      >
+                        {!editingHarvest && <option value="">Select hive</option>}
+                        {hives.map((hive) => (
+                          <option key={hive.id} value={hive.id}>
+                            {hive.name} ({hive.apiary})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {linkType === 'apiary' && (
+                    <div>
+                      <label className="block text-stone-700 font-medium mb-2">Select Apiary</label>
+                      <select
+                        {...register('apiaryId')}
+                        className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
+                      >
+                        {!editingHarvest && <option value="">Select apiary</option>}
+                        {apiaries.map((apiary) => (
+                          <option key={apiary.id} value={apiary.id}>
+                            {apiary.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Harvest Method & Notes */}
+                <div className="space-y-4">
+                  <h3 className="font-bold text-stone-800 pb-2 border-b-2 border-amber-200">
+                    Harvest Method & Notes
+                  </h3>
+
+                  <div>
+                    <label className="block text-stone-700 font-medium mb-2">Harvest Method</label>
+                    <select
+                      {...register('harvestMethod')}
+                      className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
+                    >
+                      <option value="">Select method</option>
+                      <option value="frame">Frame extraction</option>
+                      <option value="crush">Crush & strain</option>
+                      <option value="pot">Pot harvest</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-stone-700 font-medium mb-2">Notes</label>
+                    <textarea
+                      {...register('notes')}
+                      rows={4}
+                      className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors resize-none"
+                      placeholder="Harvest conditions, comb condition, moisture concerns…"
+                    />
+                  </div>
+                </div>
+
+                {/* Media Upload */}
+                <div className="space-y-4">
+                  <h3 className="font-bold text-stone-800 pb-2 border-b-2 border-amber-200">
+                    Media Upload
+                  </h3>
+
+                  <div>
+                    <label className="block text-stone-700 font-medium mb-3">Harvest Images</label>
+                    <div className="space-y-3">
+                      {uploadedImages.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {uploadedImages.map((img, idx) => (
+                            <div
+                              key={idx}
+                              className="w-20 h-20 bg-stone-200 rounded-lg flex items-center justify-center"
+                            >
+                              <Camera className="w-6 h-6 text-stone-500" />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={handleImageUpload}
+                          className="flex-1 bg-white border-2 border-stone-200 hover:border-amber-500 py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Camera className="w-5 h-5 text-stone-600" />
+                          <span className="text-stone-700 font-medium">Camera</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleImageUpload}
+                          className="flex-1 bg-white border-2 border-stone-200 hover:border-amber-500 py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Upload className="w-5 h-5 text-stone-600" />
+                          <span className="text-stone-700 font-medium">Gallery</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Form Actions */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowRecordForm(false);
+                      setEditingHarvest(null);
+                      reset();
+                    }}
+                    className="flex-1 bg-stone-200 hover:bg-stone-300 text-stone-700 py-3 rounded-xl font-medium transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-medium transition-colors"
+                  >
+                    {editingHarvest ? 'Update Harvest' : 'Save Harvest'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* Filter & Search */}
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="w-full flex items-center justify-between p-4 hover:bg-stone-50 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-stone-600" />
+                <span className="font-medium text-stone-800">Filter & Search</span>
+              </div>
+              {showFilters ? (
+                <ChevronUp className="w-5 h-5 text-stone-600" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-stone-600" />
+              )}
+            </button>
+
+            {showFilters && (
+              <div className="p-4 border-t border-stone-200 space-y-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+                  <input
+                    type="text"
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    placeholder="Search harvest records..."
+                    className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 transition-colors"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className="px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 transition-colors"
+                  >
+                    <option value="">All Types</option>
+                    <option value="honey">Honey</option>
+                    <option value="wax">Wax</option>
+                    <option value="other">Other</option>
+                  </select>
+
+                  <select className="px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 transition-colors">
+                    <option value="">Surplus Status</option>
+                    <option value="listed">Listed for Buyers</option>
+                    <option value="internal">Internal Use</option>
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Section 4: Harvest Records List */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold text-stone-800">Harvest Records</h2>
+
+            {filteredHarvests.length > 0 ? (
+              <div className="space-y-3">
+                {filteredHarvests.map((record) => (
+                  <div
+                    key={record.id}
+                    className="bg-white rounded-2xl shadow-sm p-4 border-l-4 border-amber-400"
+                  >
+                    {/* Top Row */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <p className="text-lg font-bold text-stone-800">{record.harvest_type}</p>
+                        <p className="text-2xl font-bold text-amber-600">
+                          {record.quantity} {record.unit}
+                        </p>
+                      </div>
+                      <span className="px-3 py-1 bg-stone-100 text-stone-600 text-xs font-medium rounded-full">
+                        {record.harvest_date}
+                      </span>
+                    </div>
+
+                    {/* Second Row */}
+                    <div className="flex items-center gap-4 text-sm text-stone-600 mb-2">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>{record.harvest_date}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        <span>{record.hive_name || record.apiary_name || 'Not linked'}</span>
+                      </div>
+                    </div>
+
+                    {/* Third Row */}
+                    {record.notes && (
+                      <div className="text-sm text-stone-600 mb-3">
+                        <p className="truncate">
+                          <span className="font-medium">Notes:</span> {record.notes}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex gap-2">
+                      <button className="flex-1 flex items-center justify-center gap-2 py-2 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors text-sm font-medium text-stone-700">
+                        <Eye className="w-4 h-4" />
+                        <span>View Details</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingHarvest(record);
+                          setShowRecordForm(true);
+                        }}
+                        className="flex-1 flex items-center justify-center gap-2 py-2 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors text-sm font-medium text-amber-700"
+                      >
+                        <Edit className="w-4 h-4" />
+                        <span>Edit</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
+                <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Package className="w-10 h-10 text-amber-600" />
+                </div>
+                <p className="text-lg font-bold text-stone-800 mb-2">No harvest records yet</p>
+                <p className="text-stone-600 mb-6">
+                  Record your first harvest to track production and performance
+                </p>
+                <button
+                  onClick={() => setShowRecordForm(true)}
+                  className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-medium transition-colors"
+                >
+                  Record Harvest
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-function HarvestForm({ initial, hives, onClose, onSaved }: { initial?: Harvest; hives: Hive[]; onClose: () => void; onSaved: () => void }) {
-  const [saving, setSaving] = useState(false);
-  const [f, setF] = useState({
-    hive_id: initial?.hive_id?.toString() || '',
-    harvest_date: initial?.harvest_date || new Date().toISOString().split('T')[0],
-    harvest_type: initial?.harvest_type || 'honey',
-    quantity: initial?.quantity?.toString() || '',
-    unit: initial?.unit || 'kg',
-    quality: initial?.quality || '',
-    notes: initial?.notes || '',
-  });
+interface SummaryCardProps {
+  label: string;
+  value: string;
+  bgColor: string;
+  textColor: string;
+}
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault(); if (!f.hive_id || !f.quantity) return; setSaving(true);
-    try {
-      const d: any = { hive_id: parseInt(f.hive_id), harvest_date: f.harvest_date, harvest_type: f.harvest_type, quantity: parseFloat(f.quantity), unit: f.unit, quality: f.quality || null, notes: f.notes || null };
-      if (initial) await harvestsService.update(initial.id, d); else await harvestsService.create(d); onSaved();
-    } catch { setSaving(false); }
-  };
-
+function SummaryCard({ label, value, bgColor, textColor }: SummaryCardProps) {
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center"><div className="bg-white w-full max-w-md rounded-t-2xl p-5 max-h-[85vh] overflow-y-auto">
-      <div className="flex items-center justify-between mb-4"><h3 className="font-bold text-stone-800">{initial ? 'Edit' : 'Record'} Harvest</h3><button onClick={onClose}><X className="w-5 h-5" /></button></div>
-      <form onSubmit={submit} className="space-y-3">
-        <select value={f.hive_id} onChange={e => setF(p => ({ ...p, hive_id: e.target.value }))} className="w-full border rounded-xl px-3 py-2 text-sm">
-          <option value="">Select Hive *</option>{hives.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
-        </select>
-        <input type="date" value={f.harvest_date} onChange={e => setF(p => ({ ...p, harvest_date: e.target.value }))} className="w-full border rounded-xl px-3 py-2 text-sm" />
-        <select value={f.harvest_type} onChange={e => setF(p => ({ ...p, harvest_type: e.target.value }))} className="w-full border rounded-xl px-3 py-2 text-sm">
-          <option value="honey">Honey</option><option value="beeswax">Beeswax</option><option value="propolis">Propolis</option>
-          <option value="royal_jelly">Royal Jelly</option><option value="pollen">Pollen</option><option value="other">Other</option>
-        </select>
-        <div className="grid grid-cols-2 gap-2">
-          <input value={f.quantity} onChange={e => setF(p => ({ ...p, quantity: e.target.value }))} placeholder="Quantity *" type="number" step="0.1" className="border rounded-xl px-3 py-2 text-sm" />
-          <select value={f.unit} onChange={e => setF(p => ({ ...p, unit: e.target.value }))} className="border rounded-xl px-3 py-2 text-sm">
-            <option value="kg">kg</option><option value="g">g</option><option value="l">Liters</option><option value="ml">ml</option>
-          </select>
-        </div>
-        <select value={f.quality} onChange={e => setF(p => ({ ...p, quality: e.target.value }))} className="w-full border rounded-xl px-3 py-2 text-sm">
-          <option value="">Quality (optional)</option><option value="premium">Premium</option><option value="standard">Standard</option><option value="organic">Organic</option>
-        </select>
-        <textarea value={f.notes} onChange={e => setF(p => ({ ...p, notes: e.target.value }))} placeholder="Notes" rows={2} className="w-full border rounded-xl px-3 py-2 text-sm" />
-        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-2.5 rounded-xl font-medium disabled:opacity-60">{saving ? 'Saving...' : 'Save'}</button>
-      </form>
-    </div></div>
+    <div className={`${bgColor} rounded-xl p-4`}>
+      <p className="text-stone-600 text-xs mb-1.5">{label}</p>
+      <p className={`text-xl font-bold ${textColor} break-words`}>{value}</p>
+    </div>
   );
 }

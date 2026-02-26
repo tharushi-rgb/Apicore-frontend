@@ -1,7 +1,7 @@
 import React from 'react';
-import { Home, MapPin, Hexagon as HiveIcon, Calendar, DollarSign, Users, User, LogOut } from 'lucide-react';
+import { Home, MapPin, Hexagon as HiveIcon, Calendar, DollarSign, Users, User, LogOut, Package } from 'lucide-react';
 
-type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
+type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
 interface MobileSidebarProps {
   isOpen: boolean;
@@ -64,6 +64,7 @@ export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout
             <NavItem icon={<Home className="w-5 h-5" />}       label="Dashboard" active={activeTab === 'dashboard'} onClick={() => nav('dashboard')} />
             <NavItem icon={<MapPin className="w-5 h-5" />}     label="Apiaries"  active={activeTab === 'apiaries'}  onClick={() => nav('apiaries')}  />
             <NavItem icon={<HiveIcon className="w-5 h-5" />}   label="Hives"     active={activeTab === 'hives'}     onClick={() => nav('hives')}     />
+            <NavItem icon={<Package className="w-5 h-5" />}    label="Harvest"   active={activeTab === 'harvest'}   onClick={() => nav('harvest')}   />
             <NavItem icon={<Calendar className="w-5 h-5" />}   label="Planning"  active={activeTab === 'planning'}  onClick={() => nav('planning')}  />
             <NavItem icon={<DollarSign className="w-5 h-5" />} label="Finance"   active={activeTab === 'finance'}   onClick={() => nav('finance')}   />
             <NavItem icon={<Users className="w-5 h-5" />}      label="Clients"   active={activeTab === 'clients'}   onClick={() => nav('clients')}   />
