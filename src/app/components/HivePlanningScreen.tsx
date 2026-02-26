@@ -4,7 +4,7 @@ import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
 import { apiariesService, type Apiary } from '../services/apiaries';
 import { hivesService, type Hive } from '../services/hives';
-import { planningService, type PlanningAnalysis, type District, type WeatherDay, type WeatherHourly } from '../services/planning';
+import { planningService, type PlanningAnalysis, type District, type GBIFForageSpecies } from '../services/planning';
 import { Calendar, MapPin, Hexagon as HiveIcon, Plus, AlertTriangle, CloudRain, Sun, Cloud, Wind, Droplets, Thermometer, Search, Leaf, ChevronDown, ChevronUp } from 'lucide-react';
 import { ForecastDays14 } from './ForecastDays14';
 import { ForecastHourly } from './ForecastHourly';
@@ -40,6 +40,106 @@ function ClockIcon({ className }: { className?: string }) {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
     </svg>
+  );
+}
+
+// ── GBIF Forage Card ──────────────────────────────────────────────────────────
+type GBIFNearbyEntry = GBIFForageSpecies & { scientific: string; nearbyCount: number };
+
+function gbifGradeBadge(grade: GBIFForageSpecies['grade']) {
+  if (grade === 'excellent') return 'bg-amber-100 text-amber-800 border border-amber-300';
+  if (grade === 'high')      return 'bg-emerald-100 text-emerald-800 border border-emerald-300';
+  if (grade === 'medium')    return 'bg-blue-100 text-blue-700 border border-blue-300';
+  return 'bg-stone-100 text-stone-600 border border-stone-200';
+}
+
+const MONTH_ABBR = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function GBIFForageCard({ plants, score, currentMonth }: { plants: GBIFNearbyEntry[]; score: number; currentMonth: number }) {
+  const [expanded, setExpanded] = useState(false);
+  const blooming = plants.filter(p => currentMonth >= p.bloomStart && currentMonth <= p.bloomEnd);
+  const other    = plants.filter(p => !(currentMonth >= p.bloomStart && currentMonth <= p.bloomEnd));
+  const visible  = expanded ? plants : plants.slice(0, 6);
+
+  return (
+    <div className="bg-white rounded-xl p-4 shadow-sm border border-blue-100">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <Leaf className="w-4 h-4 text-blue-600" />
+          </div>
+          <div>
+            <h3 className="font-bold text-stone-800 text-sm">GBIF Verified Forage Plants</h3>
+            <p className="text-xs text-stone-500">Real field observations near this location</p>
+          </div>
+        </div>
+        <div className="text-right flex-shrink-0 ml-2">
+          <p className="text-lg font-bold text-blue-700">{plants.length}</p>
+          <p className="text-xs text-stone-500">species</p>
+        </div>
+      </div>
+
+      {/* Biodiversity score bar */}
+      <div className="mb-3 bg-stone-100 rounded-full h-2 overflow-hidden">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-blue-400 to-emerald-500 transition-all"
+          style={{ width: `${Math.min(100, score)}%` }}
+        />
+      </div>
+      <div className="flex items-center justify-between text-xs text-stone-500 mb-3">
+        <span>Forage Biodiversity</span>
+        <span className="font-medium text-blue-700">{score}/100</span>
+      </div>
+
+      {/* Currently blooming callout */}
+      {blooming.length > 0 && (
+        <div className="mb-3 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg">
+          <p className="text-xs font-semibold text-emerald-700 mb-1">🌸 Blooming Now ({blooming.length})</p>
+          <p className="text-xs text-emerald-600">{blooming.map(p => p.common).join(' · ')}</p>
+        </div>
+      )}
+
+      {/* Species list */}
+      <div className="space-y-2">
+        {visible.map((p) => {
+          const isNow = currentMonth >= p.bloomStart && currentMonth <= p.bloomEnd;
+          return (
+            <div key={p.scientific} className={`p-2.5 rounded-lg border ${isNow ? 'bg-emerald-50 border-emerald-100' : 'bg-stone-50 border-stone-100'}`}>
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-sm font-medium text-stone-800 truncate">{p.common}</span>
+                    {isNow && <span className="text-xs px-1 py-0.5 rounded bg-emerald-200 text-emerald-800 flex-shrink-0">Now</span>}
+                  </div>
+                  <p className="text-xs text-stone-400 italic truncate">{p.scientific}</p>
+                </div>
+                <span className={`text-xs px-1.5 py-0.5 rounded-full flex-shrink-0 capitalize ${gbifGradeBadge(p.grade)}`}>{p.grade}</span>
+              </div>
+              <div className="flex items-center gap-3 mt-1.5 text-xs text-stone-500 flex-wrap">
+                <span>{p.resources.join(' & ')}</span>
+                <span>Blooms: {MONTH_ABBR[p.bloomStart]}{p.bloomStart !== p.bloomEnd ? `–${MONTH_ABBR[p.bloomEnd]}` : ''}</span>
+                <span className="ml-auto text-blue-600 font-medium">{p.nearbyCount} obs.</span>
+              </div>
+              {p.note && <p className="text-xs text-stone-500 mt-1 leading-relaxed">{p.note}</p>}
+            </div>
+          );
+        })}
+      </div>
+
+      {plants.length > 6 && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-3 w-full flex items-center justify-center gap-1.5 text-xs text-blue-600 font-medium py-2 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-colors"
+        >
+          {expanded ? <><ChevronUp className="w-3.5 h-3.5" /> Show less</> : <><ChevronDown className="w-3.5 h-3.5" /> Show all {plants.length} species</>}
+        </button>
+      )}
+
+      <p className="text-xs text-stone-400 mt-3 text-center">
+        Source: GBIF · {plants.reduce((s, p) => s + p.nearbyCount, 0).toLocaleString()} field records
+      </p>
+    </div>
   );
 }
 
@@ -346,15 +446,20 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                             {analysis.forage.current.map((p, i) => (
                               <div key={i} className="p-2 bg-emerald-50 rounded-lg border border-emerald-100">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-sm font-medium text-stone-800"> {p.name}</span>
-                                  <span className={`text-xs px-1.5 py-0.5 rounded ${
-                                    p.availability === 'high' ? 'bg-emerald-200 text-emerald-800' :
-                                    p.availability === 'medium' ? 'bg-amber-200 text-amber-800' :
-                                    'bg-stone-200 text-stone-600'
-                                  }`}>{p.availability}</span>
+                                  <span className="text-sm font-medium text-stone-800">{p.name}</span>
+                                  <div className="flex items-center gap-1">
+                                    {p.confirmed && (
+                                      <span className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 border border-blue-200" title="Verified in GBIF field data">✓ GBIF</span>
+                                    )}
+                                    <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                      p.availability === 'abundant' ? 'bg-emerald-200 text-emerald-800' :
+                                      p.availability === 'moderate' ? 'bg-amber-200 text-amber-800' :
+                                      'bg-stone-200 text-stone-600'
+                                    }`}>{p.availability}</span>
+                                  </div>
                                 </div>
                                 <p className="text-xs text-stone-500 italic">{p.scientific} • {p.resourceType}</p>
-                                <p className="text-xs text-stone-600">{p.zone}</p>
+                                {p.gbifCount && <p className="text-xs text-blue-600">{p.gbifCount} field records in Sri Lanka</p>}
                                 {p.note && <p className="text-xs text-stone-500 mt-1">{p.note}</p>}
                               </div>
                             ))}
@@ -370,9 +475,9 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                           <div className="space-y-1">
                             {analysis.forage.upcoming.map((p, i) => (
                               <div key={i} className="p-2 bg-amber-50 rounded-lg border border-amber-100 flex items-center justify-between">
-                                <div>
-                                  <span className="text-sm text-stone-700"> {p.name}</span>
-                                  <span className="text-xs text-stone-500 ml-1">({p.zone})</span>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-sm text-stone-700">{p.name}</span>
+                                  {p.confirmed && <span className="text-xs px-1 py-0.5 rounded bg-blue-100 text-blue-700">✓</span>}
                                 </div>
                                 <span className="text-xs text-amber-700">Month {p.bloomStart}–{p.bloomEnd}</span>
                               </div>
@@ -381,6 +486,15 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                         </div>
                       )}
                     </div>
+
+                    {/* GBIF Verified Nearby Plants */}
+                    {analysis.forage.gbifNearby.length > 0 && (
+                      <GBIFForageCard
+                        plants={analysis.forage.gbifNearby}
+                        score={analysis.forage.gbifScore}
+                        currentMonth={analysis.forage.month}
+                      />
+                    )}
                   </>
                 )}
               </>

@@ -1,6 +1,10 @@
 // planning.ts — fully client-side, no backend required
 // Weather: Open-Meteo (https://api.open-meteo.com) — free, no API key needed
 // Districts: embedded static list for Sri Lanka
+// Forage: enriched with GBIF occurrence data (dataset 0017890-260108223611665)
+
+import { getNearbyGBIFForage, getGBIFBiodiversityScore } from './gbifForage';
+export type { GBIFForageSpecies } from './gbifForage';
 
 export interface WeatherDay {
   date: string;
@@ -55,6 +59,10 @@ export interface ForagePlant {
   availability: string;
   note: string;
   zone: string;
+  /** Number of GBIF field occurrence records in Sri Lanka (0 = not in dataset) */
+  gbifCount?: number;
+  /** True if verified present in GBIF Sri Lanka occurrence dataset */
+  confirmed?: boolean;
 }
 
 export interface PlanningAnalysis {
@@ -62,7 +70,15 @@ export interface PlanningAnalysis {
   saturation: { count: number; totalInSystem: number; level: string; message: string; radiusKm: number };
   suitability: { score: number; label: string; color: string };
   weather: { current: CurrentWeather | null; days: WeatherDay[]; hourly: WeatherHourly[]; source: string };
-  forage: { current: ForagePlant[]; upcoming: ForagePlant[]; month: number };
+  forage: {
+    current: ForagePlant[];
+    upcoming: ForagePlant[];
+    month: number;
+    /** GBIF-verified bee forage plants observed near the selected location */
+    gbifNearby: ReturnType<typeof getNearbyGBIFForage>;
+    /** Biodiversity score 0-100 from GBIF data */
+    gbifScore: number;
+  };
 }
 
 export interface District {
@@ -115,24 +131,37 @@ const SRI_LANKA_DISTRICTS: District[] = [
 ];
 
 const FORAGE_PLANTS: ForagePlant[] = [
-  { name: 'Rubber', scientific: 'Hevea brasiliensis', resourceType: 'nectar', bloomStart: 3, bloomEnd: 5, availability: 'abundant', note: 'Major nectar source in wet zone', zone: 'wet' },
-  { name: 'Coconut', scientific: 'Cocos nucifera', resourceType: 'pollen', bloomStart: 1, bloomEnd: 12, availability: 'moderate', note: 'Year-round pollen; coastal and low country', zone: 'all' },
-  { name: 'Jak', scientific: 'Artocarpus heterophyllus', resourceType: 'nectar', bloomStart: 2, bloomEnd: 5, availability: 'moderate', note: 'Common in home gardens', zone: 'wet' },
-  { name: 'Mango', scientific: 'Mangifera indica', resourceType: 'nectar', bloomStart: 1, bloomEnd: 3, availability: 'abundant', note: 'Heavy bloom Jan–Mar in dry zone', zone: 'dry' },
-  { name: 'Rambutan', scientific: 'Nephelium lappaceum', resourceType: 'nectar', bloomStart: 5, bloomEnd: 7, availability: 'abundant', note: 'Key summer flow', zone: 'wet' },
-  { name: 'Durian', scientific: 'Durio zibethinus', resourceType: 'nectar', bloomStart: 4, bloomEnd: 6, availability: 'moderate', note: 'Night-blooming but daytime forage too', zone: 'wet' },
-  { name: 'Eucalyptus', scientific: 'Eucalyptus spp.', resourceType: 'nectar', bloomStart: 6, bloomEnd: 10, availability: 'abundant', note: 'Plantation species; excellent nectar flow', zone: 'mid' },
-  { name: 'Coffee', scientific: 'Coffea arabica', resourceType: 'nectar', bloomStart: 4, bloomEnd: 6, availability: 'moderate', note: 'Short intense bloom after rain', zone: 'mid' },
-  { name: 'Maize', scientific: 'Zea mays', resourceType: 'pollen', bloomStart: 3, bloomEnd: 8, availability: 'moderate', note: 'Important pollen source, multiple seasons', zone: 'dry' },
-  { name: 'Sesame', scientific: 'Sesamum indicum', resourceType: 'nectar', bloomStart: 6, bloomEnd: 9, availability: 'moderate', note: 'Yala season crop; dry zone', zone: 'dry' },
-  { name: 'Calotropis', scientific: 'Calotropis gigantea', resourceType: 'nectar', bloomStart: 1, bloomEnd: 12, availability: 'low', note: 'Roadside weed; year-round', zone: 'dry' },
-  { name: 'Guava', scientific: 'Psidium guajava', resourceType: 'nectar', bloomStart: 3, bloomEnd: 5, availability: 'moderate', note: 'Home gardens and scrubland', zone: 'all' },
-  { name: 'Neem', scientific: 'Azadirachta indica', resourceType: 'nectar', bloomStart: 2, bloomEnd: 4, availability: 'moderate', note: 'Dry zone trees; bitter honey possible', zone: 'dry' },
-  { name: 'Pumpkin', scientific: 'Cucurbita maxima', resourceType: 'pollen', bloomStart: 9, bloomEnd: 12, availability: 'moderate', note: 'Maha season; important pollen', zone: 'all' },
-  { name: 'Sunflower', scientific: 'Helianthus annuus', resourceType: 'nectar', bloomStart: 7, bloomEnd: 10, availability: 'abundant', note: 'Cultivated; excellent forage', zone: 'dry' },
-  { name: 'Wild Mango', scientific: 'Mangifera zeylanica', resourceType: 'nectar', bloomStart: 1, bloomEnd: 3, availability: 'moderate', note: 'Forest edges', zone: 'dry' },
-  { name: 'Wild Cinnamon', scientific: 'Cinnamomum verum', resourceType: 'pollen', bloomStart: 3, bloomEnd: 5, availability: 'low', note: 'Forest understory, wet zone', zone: 'wet' },
-  { name: 'Lotus', scientific: 'Nelumbo nucifera', resourceType: 'nectar', bloomStart: 6, bloomEnd: 9, availability: 'moderate', note: 'Tanks and wetlands', zone: 'all' },
+  // ── GBIF-confirmed species (verified present in Sri Lanka field data) ──
+  { name: 'Calotropis (Wara)', scientific: 'Calotropis gigantea',      resourceType: 'nectar',        bloomStart: 1, bloomEnd: 12, availability: 'abundant', note: 'Year-round excellent nectar; 311 GBIF records island-wide',          zone: 'all', confirmed: true, gbifCount: 311 },
+  { name: 'Coconut',           scientific: 'Cocos nucifera',           resourceType: 'pollen',        bloomStart: 1, bloomEnd: 12, availability: 'abundant', note: 'Year-round pollen; 265 GBIF records, coastal & low country',         zone: 'all', confirmed: true, gbifCount: 265 },
+  { name: 'Blue Pea',          scientific: 'Clitoria ternatea',        resourceType: 'nectar',        bloomStart: 1, bloomEnd: 12, availability: 'moderate', note: 'Continuous bloom, heavily visited; 143 GBIF records',                zone: 'all', confirmed: true, gbifCount: 143 },
+  { name: 'Lotus',             scientific: 'Nelumbo nucifera',         resourceType: 'nectar',        bloomStart: 6, bloomEnd: 9,  availability: 'moderate', note: 'Tanks & wetlands, excellent summer forage; 122 GBIF records',       zone: 'all', confirmed: true, gbifCount: 122 },
+  { name: 'Golden Shower',     scientific: 'Cassia fistula',           resourceType: 'pollen',        bloomStart: 3, bloomEnd: 6,  availability: 'moderate', note: 'Excellent pollen source, seasonal bloom; 85 GBIF records',          zone: 'all', confirmed: true, gbifCount: 85 },
+  { name: 'Mango',             scientific: 'Mangifera indica',         resourceType: 'nectar',        bloomStart: 1, bloomEnd: 3,  availability: 'abundant', note: 'Major spring honey crop, heavy bloom Jan–Mar; 82 GBIF records',     zone: 'dry', confirmed: true, gbifCount: 82 },
+  { name: 'Kithul Palm',       scientific: 'Caryota urens',            resourceType: 'nectar',        bloomStart: 1, bloomEnd: 12, availability: 'moderate', note: 'Hill country, source of kithul honey; 70 GBIF records',             zone: 'wet', confirmed: true, gbifCount: 70 },
+  { name: 'Jak (Jackfruit)',   scientific: 'Artocarpus heterophyllus', resourceType: 'nectar',        bloomStart: 2, bloomEnd: 5,  availability: 'moderate', note: 'Common in home gardens, seasonal; 177 GBIF records',               zone: 'wet', confirmed: true, gbifCount: 177 },
+  { name: 'Jamun',             scientific: 'Syzygium cumini',          resourceType: 'nectar',        bloomStart: 3, bloomEnd: 5,  availability: 'moderate', note: 'Excellent nectar — major honey plant in season; 14 GBIF records',   zone: 'all', confirmed: true, gbifCount: 14 },
+  { name: 'Ceylon Olive',      scientific: 'Syzygium caryophyllatum',  resourceType: 'nectar',        bloomStart: 4, bloomEnd: 7,  availability: 'moderate', note: 'Forest edges & gardens, good nectar; 27 GBIF records',             zone: 'wet', confirmed: true, gbifCount: 27 },
+  { name: 'Coffee',            scientific: 'Coffea arabica',           resourceType: 'nectar',        bloomStart: 4, bloomEnd: 6,  availability: 'moderate', note: 'Short intense bloom after rain; 26 GBIF records',                   zone: 'mid', confirmed: true, gbifCount: 26 },
+  { name: 'Tamarind',          scientific: 'Tamarindus indica',        resourceType: 'nectar',        bloomStart: 3, bloomEnd: 6,  availability: 'low',      note: 'Dry zone seasonal nectar, cluster blooms; 48 GBIF records',        zone: 'dry', confirmed: true, gbifCount: 48 },
+  { name: 'Sea Almond',        scientific: 'Terminalia catappa',       resourceType: 'nectar',        bloomStart: 3, bloomEnd: 7,  availability: 'moderate', note: 'Coastal & roadsides, seasonal nectar; 87 GBIF records',            zone: 'all', confirmed: true, gbifCount: 87 },
+  { name: 'Bo Tree',           scientific: 'Ficus religiosa',          resourceType: 'pollen',        bloomStart: 1, bloomEnd: 12, availability: 'low',      note: 'Sacred tree, year-round minor pollen; 77 GBIF records',            zone: 'all', confirmed: true, gbifCount: 77 },
+  { name: 'Blue Water Lily',   scientific: 'Nymphaea nouchali',        resourceType: 'pollen',        bloomStart: 1, bloomEnd: 12, availability: 'moderate', note: 'National flower, pollen in tanks & wetlands; 74 GBIF records',     zone: 'all', confirmed: true, gbifCount: 74 },
+  { name: 'Flame Lily',        scientific: 'Gloriosa superba',         resourceType: 'pollen',        bloomStart: 8, bloomEnd: 11, availability: 'moderate', note: 'National flower, seasonal pollen; 155 GBIF records',               zone: 'all', confirmed: true, gbifCount: 155 },
+  { name: 'Arjun Tree',        scientific: 'Terminalia arjuna',        resourceType: 'nectar',        bloomStart: 4, bloomEnd: 7,  availability: 'moderate', note: 'Riverbanks & tanks, seasonal nectar; 54 GBIF records',             zone: 'all', confirmed: true, gbifCount: 54 },
+  { name: 'Wild Cinnamon',     scientific: 'Cinnamomum verum',         resourceType: 'pollen',        bloomStart: 3, bloomEnd: 5,  availability: 'low',      note: 'Spice crop, minor pollen source; 60 GBIF records wet zone',        zone: 'wet', confirmed: true, gbifCount: 60 },
+  // ── Standard forage (not in GBIF download but well-documented) ──
+  { name: 'Rubber',            scientific: 'Hevea brasiliensis',       resourceType: 'nectar',        bloomStart: 3, bloomEnd: 5,  availability: 'abundant', note: 'Major nectar source in wet zone',                                   zone: 'wet' },
+  { name: 'Rambutan',          scientific: 'Nephelium lappaceum',      resourceType: 'nectar',        bloomStart: 5, bloomEnd: 7,  availability: 'abundant', note: 'Key summer flow in wet zone',                                       zone: 'wet' },
+  { name: 'Durian',            scientific: 'Durio zibethinus',         resourceType: 'nectar',        bloomStart: 4, bloomEnd: 6,  availability: 'moderate', note: 'Night-blooming with daytime foraging too',                          zone: 'wet' },
+  { name: 'Eucalyptus',        scientific: 'Eucalyptus spp.',          resourceType: 'nectar',        bloomStart: 6, bloomEnd: 10, availability: 'abundant', note: 'Plantation species; excellent nectar flow',                         zone: 'mid' },
+  { name: 'Maize',             scientific: 'Zea mays',                 resourceType: 'pollen',        bloomStart: 3, bloomEnd: 8,  availability: 'moderate', note: 'Important pollen source, Maha & Yala seasons',                      zone: 'dry' },
+  { name: 'Sesame',            scientific: 'Sesamum indicum',          resourceType: 'nectar',        bloomStart: 6, bloomEnd: 9,  availability: 'moderate', note: 'Yala season crop, dry zone',                                        zone: 'dry' },
+  { name: 'Guava',             scientific: 'Psidium guajava',          resourceType: 'nectar',        bloomStart: 3, bloomEnd: 5,  availability: 'moderate', note: 'Home gardens and scrubland',                                        zone: 'all' },
+  { name: 'Neem',              scientific: 'Azadirachta indica',       resourceType: 'nectar',        bloomStart: 2, bloomEnd: 4,  availability: 'moderate', note: 'Dry zone trees; can produce bitter honey',                          zone: 'dry' },
+  { name: 'Pumpkin',           scientific: 'Cucurbita maxima',         resourceType: 'pollen',        bloomStart: 9, bloomEnd: 12, availability: 'moderate', note: 'Maha season vegetable crop, important pollen',                      zone: 'all' },
+  { name: 'Sunflower',         scientific: 'Helianthus annuus',        resourceType: 'nectar',        bloomStart: 7, bloomEnd: 10, availability: 'abundant', note: 'Cultivated; excellent nectar & pollen',                             zone: 'dry' },
+  { name: 'Wild Mango',        scientific: 'Mangifera zeylanica',      resourceType: 'nectar',        bloomStart: 1, bloomEnd: 3,  availability: 'moderate', note: 'Forest edges, endemic to Sri Lanka',                                zone: 'dry' },
 ];
 
 // ─── Weather helpers ──────────────────────────────────────────────────────────
@@ -310,7 +339,7 @@ export const planningService = {
     const totalRain = days.reduce((s, d) => s + d.precipMm, 0);
     const suit = suitabilityScore(avgMaxTemp, avgHumidity, totalRain);
 
-    // Forage
+    // Forage — static zone-based plants
     const currentMonth = new Date().getMonth() + 1;
     const zone = lat > 8 ? 'dry' : lng > 80.7 && lat < 7.5 ? 'wet' : 'mid';
     const forageForZone = (z: string) => FORAGE_PLANTS.filter(p => p.zone === z || p.zone === 'all');
@@ -322,12 +351,26 @@ export const planningService = {
       nextMonth >= p.bloomStart && nextMonth <= p.bloomEnd && !currentForage.includes(p)
     );
 
+    // GBIF-verified forage — real field observations near this location
+    const gbifNearby = getNearbyGBIFForage(lat, lng);
+    const gbifScore = getGBIFBiodiversityScore(lat, lng);
+
+    // Boost suitability score with biodiversity bonus (up to +15 points)
+    const biodiversityBonus = Math.round(gbifScore * 0.15);
+    const boostedScore = Math.min(100, suit.score + biodiversityBonus);
+    let boostedLabel = suit.label;
+    let boostedColor = suit.color;
+    if (boostedScore >= 75) { boostedLabel = 'Excellent'; boostedColor = 'green'; }
+    else if (boostedScore >= 55) { boostedLabel = 'Good'; boostedColor = 'lime'; }
+    else if (boostedScore >= 35) { boostedLabel = 'Fair'; boostedColor = 'orange'; }
+    else { boostedLabel = 'Poor'; boostedColor = 'red'; }
+
     return {
       location: { lat, lng, district: district ?? 'Unknown' },
       saturation: { count: 0, totalInSystem: 0, level: 'low', message: 'No saturation data available offline', radiusKm: 5 },
-      suitability: suit,
+      suitability: { score: boostedScore, label: boostedLabel, color: boostedColor },
       weather: { current, days, hourly, source: 'Open-Meteo' },
-      forage: { current: currentForage, upcoming: upcomingForage, month: currentMonth },
+      forage: { current: currentForage, upcoming: upcomingForage, month: currentMonth, gbifNearby, gbifScore },
     };
   },
 
