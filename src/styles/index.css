@@ -4,3 +4,24 @@
 /* Hide scrollbar utility */
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Phone-width constraint (desktop looks like a phone) ── */
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100dvh;
+  background-color: #d6d3d1; /* stone-300 surround */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+#root {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100dvh;
+  background: #fffbeb; /* warm white, matches app background */
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.25);
+  overflow-x: hidden;
+  position: relative;
+}

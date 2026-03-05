@@ -5,7 +5,7 @@ import { authService } from '../services/auth';
 import { apiariesService, type Apiary } from '../services/apiaries';
 import { hivesService, type Hive } from '../services/hives';
 import { planningService, type PlanningAnalysis, type District, type GBIFForageSpecies } from '../services/planning';
-import { Calendar, MapPin, Hexagon as HiveIcon, Plus, AlertTriangle, CloudRain, Sun, Cloud, Wind, Droplets, Thermometer, Search, Leaf, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, Hexagon as HiveIcon, CloudRain, Sun, Cloud, Wind, Droplets, Thermometer, Search, Leaf, ChevronDown, ChevronUp } from 'lucide-react';
 import { ForecastDays14 } from './ForecastDays14';
 import { ForecastHourly } from './ForecastHourly';
 import { MapViewer } from './MapViewer';
@@ -164,18 +164,12 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
   const [analysis, setAnalysis] = useState<PlanningAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [showHourly, setShowHourly] = useState(false);
-  const [activeView, setActiveView] = useState<'overview' | 'analyze'>('overview');
 
   useEffect(() => {
     Promise.all([apiariesService.getAll(), hivesService.getAll(), planningService.getDistricts()])
       .then(([a, h, d]) => { setApiaries(a); setHives(h); setDistricts(d); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
-
-  const queenlessHives = hives.filter(h => !h.queen_present || h.status === 'queenless');
-  const inactiveHives = hives.filter(h => h.status === 'inactive' || h.status === 'absconded');
-  const activeApiaries = apiaries.filter(a => a.status === 'active');
-  const activeHives = hives.filter(h => h.status === 'active');
 
   const handleAnalyze = async () => {
     let lat = parseFloat(customLat);
@@ -226,94 +220,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
         {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div> : (
           <>
-            {/* Tab Switcher */}
-            <div className="flex bg-white rounded-xl p-1 shadow-sm">
-              <button onClick={() => setActiveView('overview')} className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${activeView === 'overview' ? 'bg-amber-500 text-white' : 'text-stone-600'}`}>Overview</button>
-              <button onClick={() => setActiveView('analyze')} className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${activeView === 'analyze' ? 'bg-amber-500 text-white' : 'text-stone-600'}`}>
-                <span className="flex items-center justify-center gap-1"><Search className="w-3.5 h-3.5" /> Analyze Location</span>
-              </button>
-            </div>
-
-            {activeView === 'overview' && (
-              <>
-                {/* Date Range Picker */}
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <h3 className="font-bold text-stone-800 mb-3 flex items-center gap-2"><Calendar className="w-4 h-4 text-amber-500" /> Select Date Range</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-stone-500 uppercase tracking-wide">Start Date</label>
-                      <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
-                        className="w-full border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none bg-amber-50/40" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-stone-500 uppercase tracking-wide">End Date</label>
-                      <input type="date" value={endDate} min={startDate} onChange={e => setEndDate(e.target.value)}
-                        className="w-full border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none bg-amber-50/40" />
-                    </div>
-                  </div>
-                  {startDate && endDate && (
-                    <div className="mt-3 flex items-center gap-2 bg-amber-50 rounded-lg px-3 py-2">
-                      <Calendar className="w-4 h-4 text-amber-500 flex-shrink-0" />
-                      <span className="text-xs text-amber-700 font-medium">
-                        {Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))} day{Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) !== 1 ? 's' : ''} selected
-                        &nbsp;({new Date(startDate).toLocaleDateString()} – {new Date(endDate).toLocaleDateString()})
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Overview Stats */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white rounded-xl p-4 shadow-sm"><MapPin className="w-5 h-5 text-emerald-500 mb-1" /><p className="text-2xl font-bold">{activeApiaries.length}</p><p className="text-xs text-stone-500">Active Apiaries</p></div>
-                  <div className="bg-white rounded-xl p-4 shadow-sm"><HiveIcon className="w-5 h-5 text-amber-500 mb-1" /><p className="text-2xl font-bold">{activeHives.length}</p><p className="text-xs text-stone-500">Active Hives</p></div>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="grid grid-cols-2 gap-3">
-                  <button onClick={onCreateApiary} className="bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 text-sm"><Plus className="w-4 h-4" /> New Apiary</button>
-                  <button onClick={onCreateHive} className="bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 text-sm"><Plus className="w-4 h-4" /> New Hive</button>
-                </div>
-
-                {/* Queenless Alert */}
-                {queenlessHives.length > 0 && (
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2"><AlertTriangle className="w-5 h-5 text-red-500" /><h3 className="font-bold text-red-700">Queenless Hives ({queenlessHives.length})</h3></div>
-                    <div className="space-y-1">{queenlessHives.map(h => (
-                      <div key={h.id} className="flex items-center justify-between text-sm"><span className="text-red-800">{h.name}</span><span className="text-red-600 text-xs">{h.apiary_name || 'Standalone'}</span></div>
-                    ))}</div>
-                  </div>
-                )}
-
-                {/* Inactive/Absconded */}
-                {inactiveHives.length > 0 && (
-                  <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2"><AlertTriangle className="w-5 h-5 text-orange-500" /><h3 className="font-bold text-orange-700">Inactive / Absconded ({inactiveHives.length})</h3></div>
-                    <div className="space-y-1">{inactiveHives.map(h => (
-                      <div key={h.id} className="flex items-center justify-between text-sm"><span className="text-orange-800">{h.name}</span><span className="text-orange-600 text-xs capitalize">{h.status}</span></div>
-                    ))}</div>
-                  </div>
-                )}
-
-                {/* Apiaries Summary */}
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <h3 className="font-bold text-stone-800 mb-3">Apiaries Overview</h3>
-                  {apiaries.length === 0 ? <p className="text-stone-500 text-sm">No apiaries yet</p> :
-                    <div className="space-y-2">{apiaries.map(a => {
-                      const aHives = hives.filter(h => h.apiary_id === a.id);
-                      return (
-                        <div key={a.id} className="flex items-center justify-between p-2 bg-stone-50 rounded-lg">
-                          <div><p className="text-sm font-medium text-stone-800">{a.name}</p><p className="text-xs text-stone-500">{a.district}</p></div>
-                          <div className="text-right"><p className="text-sm font-bold">{aHives.length} hives</p><p className="text-xs text-stone-500">{aHives.filter(h=>h.status==='active').length} active</p></div>
-                        </div>
-                      );
-                    })}</div>
-                  }
-                </div>
-              </>
-            )}
-
-            {activeView === 'analyze' && (
-              <>
+            <>
                 {/* Location Selector */}
                 <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
                   <h3 className="font-bold text-stone-800 flex items-center gap-2"><MapPin className="w-4 h-4 text-emerald-500" /> Select Location</h3>
@@ -498,7 +405,6 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                   </>
                 )}
               </>
-            )}
           </>
         )}
       </div>

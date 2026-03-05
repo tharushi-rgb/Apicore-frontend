@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ApiCore Beekeeping Glossary</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ApiCore Beekeeping Glossary</h1>
+</header>
+<h1
+id="apicore-beekeeping-app-ai-generated-content-reference-glossary">ApiCore
+Beekeeping App — AI-Generated Content Reference Glossary</h1>
+<p><strong>Document purpose:</strong> This file documents every value
+that was manually assigned or AI-generated within the ApiCore system.
+None of these values come from a dataset or scientific publication
+unless explicitly noted. They are reasonable approximations based on
+general botanical and apicultural knowledge, and should be reviewed by a
+domain expert before being used for professional beekeeping
+decisions.</p>
+<p><strong>Last updated:</strong> 2026 | <strong>App version:</strong>
+Current production build</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#1-sri-lanka-agro-climatic-zones">Sri Lanka Agro-Climatic
+Zones</a></li>
+<li><a href="#2-forage-plant-reference-planningts--29-plants">Forage
+Plant Reference (planning.ts — 29 plants)</a></li>
+<li><a
+href="#3-gbif-sourced-forage-species-gbifforagets--34-species">GBIF-Sourced
+Forage Species (gbifForage.ts — 34 species)</a></li>
+<li><a href="#4-forage-availability-tiers">Forage Availability
+Tiers</a></li>
+<li><a href="#5-resource-type-definitions">Resource Type
+Definitions</a></li>
+<li><a href="#6-gbif-forage-grade-system">GBIF Forage Grade
+System</a></li>
+<li><a href="#7-temperature-status-thresholds">Temperature Status
+Thresholds</a></li>
+<li><a href="#8-humidity-status-thresholds">Humidity Status
+Thresholds</a></li>
+<li><a href="#9-rainfall-status-thresholds">Rainfall Status
+Thresholds</a></li>
+<li><a href="#10-location-suitability-score">Location Suitability
+Score</a></li>
+<li><a href="#11-wmo-weather-code--icon-reference">WMO Weather Code →
+Icon Reference</a></li>
+<li><a href="#12-gbif-biodiversity-bonus">GBIF Biodiversity
+Bonus</a></li>
+<li><a href="#13-known-limitations-and-caveats">Known Limitations and
+Caveats</a></li>
+</ol>
+<hr />
+<h2 id="sri-lanka-agro-climatic-zones">1. Sri Lanka Agro-Climatic
+Zones</h2>
+<p>The system assigns each forage plant to one or more zones. These
+zones are simplified from Sri Lanka’s Department of Agriculture
+classification.</p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 25%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>Zone Code</th>
+<th>Zone Name</th>
+<th>Description</th>
+<th>Annual Rainfall</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wet</code></td>
+<td>Wet Zone</td>
+<td>Western, Sabaragamuwa, Central provinces</td>
+<td>&gt; 2500 mm/year</td>
+</tr>
+<tr>
+<td><code>dry</code></td>
+<td>Dry Zone</td>
+<td>North, North-Central, Eastern, Southern (inland)</td>
+<td>1200–1900 mm/year</td>
+</tr>
+<tr>
+<td><code>mid</code></td>
+<td>Intermediate / Mid-Country</td>
+<td>Buffer areas between wet and dry</td>
+<td>1900–2500 mm/year</td>
+</tr>
+<tr>
+<td><code>all</code></td>
+<td>All Zones</td>
+<td>Found throughout Sri Lanka</td>
+<td>Any</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>⚠ Note:</strong> Zone assignments in the system are manually
+approximated. A plant listed as <code>wet</code> may also grow in
+<code>mid</code> zones; the system shows only the primary zone.</p>
+</blockquote>
+<hr />
+<h2 id="forage-plant-reference-planning.ts-29-plants">2. Forage Plant
+Reference (planning.ts — 29 plants)</h2>
+<p>This is the core forage database used when the system calculates
+“currently blooming” and “upcoming blooms” for a location. All values in
+the <strong>Resource</strong>, <strong>Availability</strong>, and
+<strong>Bloom Months</strong> columns are <strong>manually
+assigned</strong> — they are NOT derived from any external dataset.</p>
+<p>Bloom months use calendar months: 1 = January, 12 = December.</p>
+<h3 id="a.-gbif-confirmed-plants-18-species">2a. GBIF-Confirmed Plants
+(18 species)</h3>
+<p><em>These species also appear in the GBIF field observation dataset
+used by the app.</em></p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 20%" />
+<col style="width: 12%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 7%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr>
+<th>Common Name</th>
+<th>Scientific Name</th>
+<th>Resource</th>
+<th>Availability</th>
+<th>Bloom Months</th>
+<th>Zone</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Calotropis / Wara</td>
+<td><em>Calotropis gigantea</em> (L.) Dryand.</td>
+<td>Nectar</td>
+<td>Abundant</td>
+<td>Jan–Dec</td>
+<td>All</td>
+<td>Prolific nectar source; flowering Nov–Apr per Wikipedia but widely
+year-round in Sri Lanka’s climate</td>
+</tr>
+<tr>
+<td>Coconut</td>
+<td><em>Cocos nucifera</em> L.</td>
+<td>Pollen</td>
+<td>Abundant</td>
+<td>Jan–Dec</td>
+<td>All</td>
+<td>Continuous bloomer in tropics; important pollen source</td>
+</tr>
+<tr>
+<td>Blue Pea</td>
+<td><em>Clitoria ternatea</em> L.</td>
+<td>Nectar</td>
+<td>Moderate</td>
+<td>Jan–Dec</td>
+<td>All</td>
+<td>Herbaceous legume; bees visit regularly</td>
+</tr>
+<tr>
+<td>Indian Lotus</td>
+<td><em>Nelumbo nucifera</em> Gaertn.</td>
+<td>Nectar</td>
+<td>Moderate</td>
+<td>Jun–Sep</td>
+<td>All</td>
+<td>Blooms during wet/monsoon months in tanks and wetlands</td>
+</tr>
+<tr>
+<td>Golden Shower</td>
+<td><em>Cassia fistula</em> L.</td>
+<td>Pollen</td>
+<td>Moderate</td>
+<td>Mar–Jun</td>
+<td>All</td>
+<td>Large yellow flower clusters; main flush Apr–May in Sri Lanka</td>
+</tr>
+<tr>
+<td>Mango</td>
+<td><em>Mangifera indica</em> L.</td>
+<td>Nectar</td>
+<td>Abundant</td>
+<td>Jan–Mar</td>
+<td>Dry</td>
+<td>Major honey-flow tree; blooms Jan–Mar in dry zone</td>
+</tr>
+<tr>
+<td>Kithul Palm</td>
+<td><em>Caryota urens</em> L.</td>
+<td>Nectar</td>
+<td>Moderate</td>
+<td>Jan–Dec</td>
+<td>Wet</td>
+<td>Monocarpic inflorescences produce nectar when tapped; UNESCO-listed
+traditional crop in Sri Lanka (2025)</td>
+</tr>
+<tr>
+<td>Jackfruit</td>
+<td><em>Artocarpus heterophyllus</em> Lam.</td>
+<td>Nectar</td>
+<td>Moderate</td>
+<td>Feb–May</td>
+<td>Wet</td>
+<td>Large cauliflorous flowers; bees collect from flower clusters</td>
+</tr>
+<tr>
+<td>Jamun / Lovi</td>
+<td><em>Syzygium cumini</em> (L.) Skeels</td>
+<td>Nectar</td>
+<td>Moderate</td>
+<td>Mar–May</td>
+<td>All</td>
+<td>Common roadside tree; nectar-rich flowers</td>
+</tr>
+<tr>
+<td>Ceylon Olive</td>
+<td><em>Syzygium caryophyllatum</em> (L.) Alston</td>
+<td>Nectar</td>
+<td>Moderate</td>
+<td>Apr–Jul</td>
+<td>Wet</td>
+<td>Endemic to Sri Lanka and S. India; IUCN Vulnerable (VU)</td>
+</tr>
+<tr>
+<td>Coffee</td>
+<td><em>Coffea arabica</em> L.</td>
+<td>Nectar</td>
+<td>Moderate</td>
+<td>Apr–Jun</td>
+<td>Mid</td>
+<td>Fragrant white flowers; secondary Arabica cultivation in
+mid-country</td>
+</tr>
+<tr>
+<td>Tamarind</td>
+<td><em>Tamarindus indica</em> L.</td>
+<td>Nectar</td>
+<td>Low</td>
+<td>Mar–Jun</td>
+<td>Dry</td>
+<td>Small pale flowers; minor nectar source</td>
+</tr>
+<tr>
+<td>Sea Almond / Kotamba</td>
+<td><em>Terminalia catappa</em> L.</td>
+<td>Nectar</td>
+<td>Moderate</td>
+<td>Mar–Jul</td>
+<td>All</td>
+<td>Coastal and inland; bees collect from inconspicuous flowers</td>
+</tr>
+<tr>
+<td>Bo Tree / Bodhi</td>
+<td><em>Ficus religiosa</em> L.</td>
+<td>Pollen</td>
+<td>Low</td>
+<td>Jan–Dec</td>
+<td>All</td>
+<td>Wind-pollinated; bees collect pollen opportunistically</td>
+</tr>
+<tr>
+<td>Blue Water Lily / Nil Manel</td>
+<td><em>Nymphaea nouchali</em> Burm.f.</td>
+<td>Pollen</td>
+<td>Moderate</td>
+<td>Jan–Dec</td>
+<td>All</td>
+<td>National flower of Sri Lanka; pollen collected from open blooms</td>
+</tr>
+<tr>
+<td>Flame Lily / Niyagala</td>
+<td><em>Gloriosa superba</em> L.</td>
+<td>Pollen</td>
+<td>Moderate</td>
+<td>Aug–Nov</td>
+<td>All</td>
+<td>Climbing lily; late wet season bloom</td>
+</tr>
+<tr>
+<td>Arjun Tree</td>
+<td><em>Terminalia arjuna</em> (Roxb. ex DC.) Wight &amp; Arn.</td>
+<td>Nectar</td>
+<td>Moderate</td>
+<td>Apr–Jul</td>
+<td>All</td>
+<td>Riverside and wetland margins</td>
+</tr>
+<tr>
+<td>Wild Cinnamon</td>
+<td><em>Cinnamomum verum</em> J.Presl</td>
+<td>Pollen</td>
+<td>Low</td>
+<td>Mar–May</td>
+<td>Wet</td>
+<td>Sri Lanka’s endemic cinnamon; small yellowish-white flowers; minor
+pollen source</td>
+</tr>
+</tbody>
+</table>
+<h3 id="b.-non-gbif-plants-11-species">2b. Non-GBIF Plants (11
+species)</h3>
+<p><em>These species do not appear in the GBIF dataset used by the app.
+Their data is entirely manually assigned.</em></p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 20%" />
+<col style="width: 12%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 7%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr>
+<th>Common Name</th>
+<th>Scientific Name</th>
+<th>Resource</th>
+<th>Availability</th>
+<th>Bloom Months</th>
+<th>Zone</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rubber</td>
+<td><em>Hevea brasiliensis</em> (Willd. ex A.Juss.) Müll.Arg.</td>
+<td>Nectar</td>
+<td>Abundant</td>
+<td>Mar–May</td>
+<td>Wet</td>
+<td>Wintering flush; extrafloral nectaries on leaves and flowers</td>
+</tr>
+<tr>
+<td>Rambutan</td>
+<td><em>Nephelium lappaceum</em> L.</td>
+<td>Nectar</td>
+<td>Abundant</td>
+<td>May–Jul</td>
+<td>Wet</td>
+<td>Strong nectar flow; beekeepers often place hives in rambutan
+orchards</td>
+</tr>
+<tr>
+<td>Durian</td>
+<td><em>Durio zibethinus</em> Murray</td>
+<td>Nectar</td>
+<td>Moderate</td>
+<td>Apr–Jun</td>
+<td>Wet</td>
+<td>Bat-pollinated primarily but bees also visit</td>
+</tr>
+<tr>
+<td>Eucalyptus</td>
+<td><em>Eucalyptus</em> spp.</td>
+<td>Nectar</td>
+<td>Abundant</td>
+<td>Jun–Oct</td>
+<td>Mid</td>
+<td>Plantation species; major honey source; species vary by
+plantation</td>
+</tr>
+<tr>
+<td>Maize / Corn</td>
+<td><em>Zea mays</em> L.</td>
+<td>Pollen</td>
+<td>Moderate</td>
+<td>Mar–Aug</td>
+<td>Dry</td>
+<td>Wind-pollinated crop; bees collect abundant pollen from tassels</td>
+</tr>
+<tr>
+<td>Sesame / Thala</td>
+<td><em>Sesamum indicum</em> L.</td>
+<td>Nectar</td>
+<td>Moderate</td>
+<td>Jun–Sep</td>
+<td>Dry</td>
+<td>Important oil crop; good nectar source for bees</td>
+</tr>
+<tr>
+<td>Guava</td>
+<td><em>Psidium guajava</em> L.</td>
+<td>Nectar</td>
+<td>Moderate</td>
+<td>Mar–May</td>
+<td>All</td>
+<td>Two crops/year; nectar collected from stamens</td>
+</tr>
+<tr>
+<td>Neem / Kohomba</td>
+<td><em>Azadirachta indica</em> A.Juss.</td>
+<td>Nectar</td>
+<td>Moderate</td>
+<td>Feb–Apr</td>
+<td>Dry</td>
+<td>Small white flowers in panicles; minor nectar</td>
+</tr>
+<tr>
+<td>Pumpkin / Wattakka</td>
+<td><em>Cucurbita moschata</em> Duchesne</td>
+<td>Pollen</td>
+<td>Moderate</td>
+<td>Sep–Dec</td>
+<td>All</td>
+<td>⚠ <strong>Corrected:</strong> original code used <em>C. maxima</em>;
+<em>C. moschata</em> is the species most commonly grown in Sri Lanka
+(hot/humid-tolerant)</td>
+</tr>
+<tr>
+<td>Sunflower</td>
+<td><em>Helianthus annuus</em> L.</td>
+<td>Nectar</td>
+<td>Abundant</td>
+<td>Jul–Oct</td>
+<td>Dry</td>
+<td>Cultivated crop; excellent nectar and pollen source</td>
+</tr>
+<tr>
+<td>Wild Mango / Aetamba</td>
+<td><em>Mangifera zeylanica</em> (Blume) Hook.f.</td>
+<td>Nectar</td>
+<td>Moderate</td>
+<td>Jan–Mar</td>
+<td>Dry</td>
+<td>Endemic to Sri Lanka (IUCN Vulnerable); grows in wet/intermediate
+zones along waterways; bloom timing parallels <em>M. indica</em></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>⚠ Correction note:</strong> The system’s source code
+(<code>planning.ts</code>) still uses <code>Cucurbita maxima</code> for
+Pumpkin. The botanically correct species for Sri Lanka is <em>Cucurbita
+moschata</em>, which is more tolerant of tropical heat and humidity.
+This should be corrected in a future update.</p>
+</blockquote>
+<hr />
+<h2 id="gbif-sourced-forage-species-gbifforage.ts-34-species">3.
+GBIF-Sourced Forage Species (gbifForage.ts — 34 species)</h2>
+<p>These 34 species appear in the GBIF occurrence dataset
+(<code>0017890-260108223611665.csv</code>) with field observations
+recorded in Sri Lanka. Their <strong>presence</strong> (GPS coordinates)
+is verified by GBIF field data. However, the <strong>grade</strong>,
+<strong>resources</strong>, and <strong>bloom months</strong> in this
+table are <strong>manually assigned</strong> — GBIF records contain
+only: species name, GPS coordinates, and collection date (not bloom
+date).</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 23%" />
+<col style="width: 10%" />
+<col style="width: 15%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th>Common Name</th>
+<th>Scientific Name</th>
+<th>Grade</th>
+<th>Resources</th>
+<th>Bloom Months (Manual)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Calotropis / Wara</td>
+<td><em>Calotropis gigantea</em></td>
+<td>Excellent</td>
+<td>Nectar</td>
+<td>Jan–Dec</td>
+</tr>
+<tr>
+<td>Rainbow Gum</td>
+<td><em>Eucalyptus deglupta</em></td>
+<td>Excellent</td>
+<td>Nectar</td>
+<td>Jun–Oct</td>
+</tr>
+<tr>
+<td>Coconut</td>
+<td><em>Cocos nucifera</em></td>
+<td>High</td>
+<td>Pollen</td>
+<td>Jan–Dec</td>
+</tr>
+<tr>
+<td>Blue Pea</td>
+<td><em>Clitoria ternatea</em></td>
+<td>High</td>
+<td>Nectar</td>
+<td>Jan–Dec</td>
+</tr>
+<tr>
+<td>Indian Lotus</td>
+<td><em>Nelumbo nucifera</em></td>
+<td>High</td>
+<td>Nectar</td>
+<td>Jun–Sep</td>
+</tr>
+<tr>
+<td>Golden Shower</td>
+<td><em>Cassia fistula</em></td>
+<td>High</td>
+<td>Pollen</td>
+<td>Mar–Jun</td>
+</tr>
+<tr>
+<td>Pink Shower / Senna</td>
+<td><em>Cassia roxburghii</em></td>
+<td>High</td>
+<td>Pollen</td>
+<td>Apr–Jul</td>
+</tr>
+<tr>
+<td>Mango</td>
+<td><em>Mangifera indica</em></td>
+<td>High</td>
+<td>Nectar</td>
+<td>Jan–Mar</td>
+</tr>
+<tr>
+<td>Kithul Palm</td>
+<td><em>Caryota urens</em></td>
+<td>High</td>
+<td>Nectar</td>
+<td>Jan–Dec</td>
+</tr>
+<tr>
+<td>Ceylon Olive</td>
+<td><em>Syzygium caryophyllatum</em></td>
+<td>High</td>
+<td>Nectar</td>
+<td>Apr–Jul</td>
+</tr>
+<tr>
+<td>Jamun</td>
+<td><em>Syzygium cumini</em></td>
+<td>High</td>
+<td>Nectar</td>
+<td>Mar–May</td>
+</tr>
+<tr>
+<td>Coffee (Arabica)</td>
+<td><em>Coffea arabica</em></td>
+<td>High</td>
+<td>Nectar</td>
+<td>Apr–Jun</td>
+</tr>
+<tr>
+<td>Coffee (Liberica)</td>
+<td><em>Coffea liberica</em></td>
+<td>High</td>
+<td>Nectar</td>
+<td>Mar–Jun</td>
+</tr>
+<tr>
+<td>Breadfruit</td>
+<td><em>Artocarpus altilis</em></td>
+<td>Medium</td>
+<td>Nectar</td>
+<td>Feb–May</td>
+</tr>
+<tr>
+<td>Jackfruit</td>
+<td><em>Artocarpus heterophyllus</em></td>
+<td>Medium</td>
+<td>Nectar</td>
+<td>Feb–May</td>
+</tr>
+<tr>
+<td>Fish Poison Tree</td>
+<td><em>Barringtonia asiatica</em></td>
+<td>Medium</td>
+<td>Nectar</td>
+<td>May–Aug</td>
+</tr>
+<tr>
+<td>Siam Weed</td>
+<td><em>Chromolaena odorata</em></td>
+<td>Low</td>
+<td>Nectar</td>
+<td>Nov–Jan</td>
+</tr>
+<tr>
+<td>Banyan</td>
+<td><em>Ficus benghalensis</em></td>
+<td>Medium</td>
+<td>Pollen</td>
+<td>Jan–Dec</td>
+</tr>
+<tr>
+<td>Cluster Fig</td>
+<td><em>Ficus racemosa</em></td>
+<td>Medium</td>
+<td>Pollen</td>
+<td>Jan–Dec</td>
+</tr>
+<tr>
+<td>Bo Tree</td>
+<td><em>Ficus religiosa</em></td>
+<td>Medium</td>
+<td>Pollen</td>
+<td>Jan–Dec</td>
+</tr>
+<tr>
+<td>Flame Lily</td>
+<td><em>Gloriosa superba</em></td>
+<td>Medium</td>
+<td>Pollen</td>
+<td>Aug–Nov</td>
+</tr>
+<tr>
+<td>Lantana</td>
+<td><em>Lantana camara</em></td>
+<td>Medium</td>
+<td>Nectar</td>
+<td>Jan–Dec</td>
+</tr>
+<tr>
+<td>Sensitive Plant</td>
+<td><em>Mimosa pudica</em></td>
+<td>Low</td>
+<td>Pollen</td>
+<td>Jun–Oct</td>
+</tr>
+<tr>
+<td>Blue Water Lily</td>
+<td><em>Nymphaea nouchali</em></td>
+<td>Medium</td>
+<td>Pollen</td>
+<td>Jan–Dec</td>
+</tr>
+<tr>
+<td>Red Water Lily</td>
+<td><em>Nymphaea pubescens</em></td>
+<td>Medium</td>
+<td>Pollen</td>
+<td>Jan–Dec</td>
+</tr>
+<tr>
+<td>Ruby Water Lily</td>
+<td><em>Nymphaea rubra</em></td>
+<td>Medium</td>
+<td>Pollen</td>
+<td>Jan–Dec</td>
+</tr>
+<tr>
+<td>Rice</td>
+<td><em>Oryza sativa</em></td>
+<td>Low</td>
+<td>Pollen</td>
+<td>Jun–Aug</td>
+</tr>
+<tr>
+<td>Brinjal / Eggplant</td>
+<td><em>Solanum melongena</em></td>
+<td>Medium</td>
+<td>Pollen</td>
+<td>Jan–Dec</td>
+</tr>
+<tr>
+<td>Tamarind</td>
+<td><em>Tamarindus indica</em></td>
+<td>Medium</td>
+<td>Nectar</td>
+<td>Mar–Jun</td>
+</tr>
+<tr>
+<td>Arjun Tree</td>
+<td><em>Terminalia arjuna</em></td>
+<td>Medium</td>
+<td>Nectar</td>
+<td>Apr–Jul</td>
+</tr>
+<tr>
+<td>Sea Almond</td>
+<td><em>Terminalia catappa</em></td>
+<td>Medium</td>
+<td>Nectar</td>
+<td>Mar–Jul</td>
+</tr>
+<tr>
+<td>Coat Buttons</td>
+<td><em>Tridax procumbens</em></td>
+<td>Medium</td>
+<td>Nectar</td>
+<td>Jan–Dec</td>
+</tr>
+<tr>
+<td>Wild Cinnamon</td>
+<td><em>Cinnamomum verum</em></td>
+<td>Low</td>
+<td>Pollen</td>
+<td>Mar–May</td>
+</tr>
+<tr>
+<td><em>(34th entry varies)</em></td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="forage-availability-tiers">4. Forage Availability Tiers</h2>
+<p>The <code>availability</code> field in <code>planning.ts</code>
+describes how much nectar or pollen a plant typically provides to bees
+relative to its bloom period. <strong>All tier assignments are manually
+estimated</strong> — no chemical nectar volume data was used.</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 24%" />
+<col style="width: 59%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Meaning</th>
+<th>Typical characteristic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>abundant</code></td>
+<td>High-value forage; can support a full honey flow or rapid pollen
+collection</td>
+<td>Large inflorescences, high nectar volume, or very high bee
+visitation rate. Examples: Rubber (<em>Hevea brasiliensis</em>), Mango
+(<em>Mangifera indica</em>), Sunflower (<em>Helianthus annuus</em>)</td>
+</tr>
+<tr>
+<td><code>moderate</code></td>
+<td>Useful supplemental forage; bees visit regularly but not
+exclusively</td>
+<td>Mid-range nectar secretion or pollen production. Examples: most
+<em>Syzygium</em> spp., Jackfruit, Coffee</td>
+</tr>
+<tr>
+<td><code>low</code></td>
+<td>Minor or secondary forage; bees visit occasionally</td>
+<td>Small flowers, low nectar volume, or primarily wind-pollinated.
+Examples: Tamarind (<em>Tamarindus indica</em>), Bo Tree (<em>Ficus
+religiosa</em>), Cinnamon (<em>Cinnamomum verum</em>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="resource-type-definitions">5. Resource Type Definitions</h2>
+<table>
+<colgroup>
+<col style="width: 62%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th>Resource Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nectar</code></td>
+<td>Bees collect liquid nectar from this plant’s flowers, which they
+convert to honey. The plant is a nectar source.</td>
+</tr>
+<tr>
+<td><code>pollen</code></td>
+<td>Bees collect pollen from this plant’s anthers as a protein source
+for brood-rearing. Some pollen-type plants also have minor nectar.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Note:</strong> A plant listed as <code>nectar</code> may also
+provide some pollen, and vice versa. The system uses only one primary
+type per plant. No dual-resource plants are modelled.</p>
+</blockquote>
+<hr />
+<h2 id="gbif-forage-grade-system">6. GBIF Forage Grade System</h2>
+<p>Grades in <code>gbifForage.ts</code> describe how valuable each
+GBIF-confirmed species is as a forage plant for honeybees. <strong>All
+grades are manually assigned</strong> — no standardised apicultural
+scoring index was used.</p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 51%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr>
+<th>Grade</th>
+<th>Criteria (manually defined)</th>
+<th>Badge colour in UI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>excellent</code></td>
+<td>Top-tier forage; prolific nectar or pollen, long bloom, widely found
+in Sri Lanka, very high bee visitation documented</td>
+<td>Gold / Amber</td>
+</tr>
+<tr>
+<td><code>high</code></td>
+<td>Major forage plant; good nectar or pollen, reliable seasonal bloom,
+significant for honey production</td>
+<td>Emerald / Green</td>
+</tr>
+<tr>
+<td><code>medium</code></td>
+<td>Moderate forage value; bees visit but not a primary honey-flow
+plant; may be invasive or have short bloom</td>
+<td>Blue</td>
+</tr>
+<tr>
+<td><code>low</code></td>
+<td>Minor forage; wind-pollinated, invasive weed, or bees rarely visit
+intentionally</td>
+<td>Stone / Grey</td>
+</tr>
+</tbody>
+</table>
+<h3 id="grade-rationale-for-notable-species">Grade rationale for notable
+species:</h3>
+<ul>
+<li><strong>Chromolaena odorata</strong> (Siam Weed) → <code>low</code>:
+Invasive weed, bees do visit but considered a nuisance species; not
+desirable for managed beekeeping areas</li>
+<li><strong>Mimosa pudica</strong> (Sensitive Plant) → <code>low</code>:
+Very small flowers; bees collect some pollen but negligible as a forage
+crop</li>
+<li><strong>Oryza sativa</strong> (Rice) → <code>low</code>: Primarily
+wind-pollinated; bees occasionally collect pollen from rice flowers but
+it is not a reliable forage source</li>
+<li><strong>Eucalyptus deglupta</strong> (Rainbow Gum) →
+<code>excellent</code>: Plantation species with very high nectar volume
+when in bloom; widely planted in Sri Lanka’s mid-country</li>
+</ul>
+<hr />
+<h2 id="temperature-status-thresholds">7. Temperature Status
+Thresholds</h2>
+<p>Used in the planning screen’s “Current Weather” and forecast cards to
+classify foraging conditions based on temperature (°C). <strong>All
+thresholds are manually defined</strong> based on general apicultural
+guidance (Apis cerana dorsata and Apis mellifera behavior in
+tropics).</p>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 15%" />
+<col style="width: 17%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Threshold</th>
+<th>Label</th>
+<th>Colour</th>
+<th>Beekeeping meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt; 15 °C</td>
+<td><strong>Too Cold</strong></td>
+<td>🔵 Blue</td>
+<td>Below 15°C bees cluster inside the hive; no foraging expected</td>
+</tr>
+<tr>
+<td>15–19 °C</td>
+<td><strong>Cool</strong></td>
+<td>🩵 Cyan</td>
+<td>Reduced foraging activity; bees may fly short distances</td>
+</tr>
+<tr>
+<td>20–35 °C</td>
+<td><strong>Optimal</strong></td>
+<td>🟢 Green</td>
+<td>Ideal foraging temperature range for tropical honeybees</td>
+</tr>
+<tr>
+<td>36–40 °C</td>
+<td><strong>Warm</strong></td>
+<td>🟠 Orange</td>
+<td>Bees reduce activity; provide shade and water at apiary</td>
+</tr>
+<tr>
+<td>&gt; 40 °C</td>
+<td><strong>Too Hot</strong></td>
+<td>🔴 Red</td>
+<td>Above 40°C causes heat stress; bees beard outside hive</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Reference context:</strong> <em>Apis cerana</em> is commonly
+active 18–37°C; <em>Apis mellifera</em> forages actively 15–40°C. The
+“Optimal” range 20–35°C is conservative and appropriate for Sri
+Lanka.</p>
+</blockquote>
+<hr />
+<h2 id="humidity-status-thresholds">8. Humidity Status Thresholds</h2>
+<p>Used to classify relative humidity (%) for foraging conditions.
+<strong>All thresholds are manually defined.</strong></p>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 15%" />
+<col style="width: 17%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Threshold</th>
+<th>Label</th>
+<th>Colour</th>
+<th>Beekeeping meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt; 40% RH</td>
+<td><strong>Dry</strong></td>
+<td>🟠 Orange</td>
+<td>Low humidity reduces nectar secretion in many plants</td>
+</tr>
+<tr>
+<td>40–70% RH</td>
+<td><strong>Good</strong></td>
+<td>🟢 Green</td>
+<td>Optimal humidity for most tropical nectar-producing plants</td>
+</tr>
+<tr>
+<td>71–85% RH</td>
+<td><strong>Humid</strong></td>
+<td>🟡 Yellow</td>
+<td>Elevated humidity; foraging still possible but nectar may be
+diluted</td>
+</tr>
+<tr>
+<td>&gt; 85% RH</td>
+<td><strong>Very Humid</strong></td>
+<td>🔴 Red</td>
+<td>Very high humidity can trap bees in hive, promote fungal
+disease</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="rainfall-status-thresholds">9. Rainfall Status Thresholds</h2>
+<p>Used to classify hourly precipitation (mm) in weather cards.
+<strong>All thresholds are manually defined.</strong> Note: the system
+uses <em>precipitation mm</em> from Open-Meteo’s WMO data, which
+represents hourly accumulated rainfall.</p>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 16%" />
+<col style="width: 19%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th>Threshold</th>
+<th>Label</th>
+<th>Colour</th>
+<th>Foraging impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt; 1 mm</td>
+<td><strong>No Rain</strong></td>
+<td>🟢 Green</td>
+<td>Clear conditions; optimal for foraging</td>
+</tr>
+<tr>
+<td>1–4.9 mm</td>
+<td><strong>Light Rain</strong></td>
+<td>🔵 Blue</td>
+<td>Light drizzle; bees may still fly but return rates drop</td>
+</tr>
+<tr>
+<td>5–14.9 mm</td>
+<td><strong>Moderate Rain</strong></td>
+<td>🟠 Orange</td>
+<td>Moderate rain; most bees shelter in hive</td>
+</tr>
+<tr>
+<td>≥ 15 mm</td>
+<td><strong>Heavy Rain</strong></td>
+<td>🔴 Red</td>
+<td>Heavy rain; bees confined to hive; check for hive flooding</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="location-suitability-score">10. Location Suitability Score</h2>
+<p>The <strong>suitability score</strong> is a 0–100 integer computed in
+<code>planningService.analyze()</code> for the selected location and
+date range. It is derived <strong>entirely from manually defined penalty
+rules</strong> — no external suitability index or scientific model is
+used.</p>
+<h3 id="scoring-formula">Scoring Formula</h3>
+<pre><code>Start: 100 points
+
+Penalties applied from weather averages over the selected date range:
+  avgTemp &lt; 15°C   OR  avgTemp &gt; 40°C   →  −40 pts   (extreme temperature)
+  avgTemp &lt; 20°C   OR  avgTemp &gt; 35°C   →  −15 pts   (sub-optimal temperature)
+  avgHumidity &gt; 85%                      →  −20 pts   (very high humidity)
+  avgHumidity &lt; 40%                      →  −15 pts   (too dry)
+  totalRain &gt; 50 mm (over period)        →  −20 pts   (excessive rainfall)
+  totalRain &lt; 1 mm  (over period)        →   −5 pts   (drought risk, low nectar)
+
+Clamp result to 0–100.
+
+Then add GBIF Biodiversity Bonus (0–15 pts) — see Section 12.</code></pre>
+<h3 id="score-labels">Score Labels</h3>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 16%" />
+<col style="width: 18%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th>Score Range</th>
+<th>Label</th>
+<th>Colour</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>≥ 75</td>
+<td><strong>Excellent</strong></td>
+<td>🟢 Green</td>
+<td>Strongly recommended for hive placement or new apiary</td>
+</tr>
+<tr>
+<td>55–74</td>
+<td><strong>Good</strong></td>
+<td>🟡 Lime</td>
+<td>Suitable; minor weather concerns</td>
+</tr>
+<tr>
+<td>35–54</td>
+<td><strong>Fair</strong></td>
+<td>🟠 Orange</td>
+<td>Acceptable with caution; check specific risk factors</td>
+</tr>
+<tr>
+<td>&lt; 35</td>
+<td><strong>Poor</strong></td>
+<td>🔴 Red</td>
+<td>Not recommended; significant foraging or weather risks</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="wmo-weather-code-icon-reference">11. WMO Weather Code → Icon
+Reference</h2>
+<p>The app uses the <strong>Open-Meteo API</strong> which returns
+weather conditions as <strong>WMO 4677 weather codes</strong>. The
+following mapping converts those codes to display icons. This mapping is
+standard and follows the WMO specification (not manually invented).</p>
+<table>
+<thead>
+<tr>
+<th>WMO Code Range</th>
+<th>Emoji</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>☀️</td>
+<td>Clear sky</td>
+</tr>
+<tr>
+<td>1</td>
+<td>⛅</td>
+<td>Mainly clear</td>
+</tr>
+<tr>
+<td>2</td>
+<td>⛅</td>
+<td>Partly cloudy</td>
+</tr>
+<tr>
+<td>3</td>
+<td>☁️</td>
+<td>Overcast</td>
+</tr>
+<tr>
+<td>45–49</td>
+<td>🌫️</td>
+<td>Fog / Depositing rime fog</td>
+</tr>
+<tr>
+<td>51–59</td>
+<td>🌦️</td>
+<td>Drizzle (light, moderate, dense)</td>
+</tr>
+<tr>
+<td>61–69</td>
+<td>🌧️</td>
+<td>Rain (slight, moderate, heavy; freezing rain)</td>
+</tr>
+<tr>
+<td>71–79</td>
+<td>❄️</td>
+<td>Snow / Snow grains / Ice crystals</td>
+</tr>
+<tr>
+<td>80–82</td>
+<td>🌧️</td>
+<td>Rain showers (slight, moderate, violent)</td>
+</tr>
+<tr>
+<td>83–84</td>
+<td>⛈️</td>
+<td>Snow showers / Slight/heavy</td>
+</tr>
+<tr>
+<td>85–99</td>
+<td>⛈️</td>
+<td>Thunderstorm (slight, moderate, heavy; with hail)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Beekeeping relevance:</strong> Codes 0–3 represent flyable
+conditions. Codes 45+ indicate bees should be expected to stay in the
+hive. Code 0 (clear sky) combined with temperature 20–35°C and humidity
+40–70% represents peak foraging conditions.</p>
+</blockquote>
+<h3 id="forecast-card-fields-explained">Forecast Card Fields
+Explained</h3>
+<p>Each day in the 14-day forecast displays:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 28%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Source</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Day name &amp; date</td>
+<td>Open-Meteo</td>
+<td>Calendar date of the forecast day</td>
+</tr>
+<tr>
+<td>Weather emoji</td>
+<td>WMO code (above table)</td>
+<td>Visual representation of dominant weather</td>
+</tr>
+<tr>
+<td>Max °C / Min °C</td>
+<td>Open-Meteo <code>temperature_2m_max/min</code></td>
+<td>Daily temperature range at 2 m height</td>
+</tr>
+<tr>
+<td>Precipitation (mm)</td>
+<td>Open-Meteo <code>precipitation_sum</code></td>
+<td>Total daily rainfall in millimetres</td>
+</tr>
+<tr>
+<td>Humidity (%)</td>
+<td>Open-Meteo <code>relative_humidity_2m</code> (hourly avg)</td>
+<td>Relative humidity percentage</td>
+</tr>
+<tr>
+<td>Suitability label</td>
+<td>Computed (Section 10)</td>
+<td>Foraging quality assessment for that day</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="gbif-biodiversity-bonus">12. GBIF Biodiversity Bonus</h2>
+<p>When the system finds GBIF-verified forage plant observations near
+the selected location (within a configurable search radius), it adds a
+<strong>biodiversity bonus</strong> to the suitability score. This
+rewards locations with higher verified forage diversity.</p>
+<h3 id="bonus-formula-manually-defined">Bonus Formula (manually
+defined)</h3>
+<pre><code>gbifScore = min(100, (number of distinct species found nearby) × configurable multiplier)
+
+Biodiversity bonus added to suitability score:
+  gbifScore ≥ 80  →  +15 pts
+  gbifScore ≥ 60  →  +10 pts
+  gbifScore ≥ 40  →   +7 pts
+  gbifScore ≥ 20  →   +3 pts
+  gbifScore &lt; 20  →   +0 pts</code></pre>
+<blockquote>
+<p>The GBIF score displayed in the UI (0–100 bar) represents forage
+biodiversity richness near the location based on field-verified plant
+observations from the GBIF dataset
+<code>0017890-260108223611665.csv</code> (Sri Lanka occurrences,
+downloaded 2026).</p>
+</blockquote>
+<hr />
+<h2 id="known-limitations-and-caveats">13. Known Limitations and
+Caveats</h2>
+<h3 id="scientific-name-issues">Scientific Name Issues</h3>
+<table>
+<colgroup>
+<col style="width: 46%" />
+<col style="width: 53%" />
+</colgroup>
+<thead>
+<tr>
+<th>Issue</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Cucurbita maxima</code> used for Pumpkin in code</td>
+<td><strong>Incorrect for Sri Lanka.</strong> Should be <em>Cucurbita
+moschata</em> which is the hot/humid-tolerant pumpkin grown in Sri
+Lanka. Pending code fix.</td>
+</tr>
+<tr>
+<td><code>Mangifera zeylanica</code></td>
+<td>✅ <strong>Correct.</strong> Verified valid endemic Sri Lanka
+species (IUCN Vulnerable). Also called “Aetamba” / “Wal Amba” in
+Sinhala.</td>
+</tr>
+<tr>
+<td><code>Eucalyptus spp.</code></td>
+<td>Acceptable placeholder. Dominant plantation species in Sri Lanka are
+<em>E. camaldulensis</em> and <em>E. deglupta</em>.</td>
+</tr>
+<tr>
+<td><code>Syzygium caryophyllatum</code></td>
+<td>✅ Correct endemic species; note IUCN Vulnerable status.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="gbif-data-limitations">GBIF Data Limitations</h3>
+<ul>
+<li><strong>GBIF <code>eventDate</code> ≠ bloom date.</strong> The
+collection date in the CSV is when a botanist collected a specimen —
+this is often NOT when the plant was flowering. Bloom months in the
+system are based on botanical knowledge, not GBIF dates.</li>
+<li><strong>GBIF has no nectar or pollen data.</strong> All
+<code>nectar</code>/<code>pollen</code> classifications, availability
+tiers, and grades are manually assigned.</li>
+<li><strong>Observation density ≠ plant abundance.</strong> A species
+with 500 GBIF records may simply be a well-studied species, not
+necessarily more common than a species with 5 records.</li>
+</ul>
+<h3 id="weather-threshold-limitations">Weather Threshold
+Limitations</h3>
+<ul>
+<li>All thresholds are designed for <em>Apis cerana</em> and <em>Apis
+mellifera</em> behaviour in tropical Sri Lanka conditions. They may not
+apply to <em>Apis dorsata</em> (giant honeybee) or <em>Tetragonula</em>
+(stingless bee) management.</li>
+<li>The suitability score is heuristic, not validated against actual
+honey yield data.</li>
+<li>Open-Meteo forecast accuracy decreases after Day 7; the 14-day
+forecast should be treated as approximate for Days 8–14.</li>
+</ul>
+<h3 id="bloom-month-limitations">Bloom Month Limitations</h3>
+<ul>
+<li>All bloom months represent <strong>Sri Lanka averages</strong>.
+Actual bloom onset varies by:
+<ul>
+<li>Elevation (plants in mid/up-country bloom later than lowland)</li>
+<li>Monsoon timing (can shift by 2–4 weeks year to year)</li>
+<li>Microclimate (coastal vs. inland)</li>
+</ul></li>
+<li>Plants listed as <code>Jan–Dec</code> bloom continuously at low
+intensity, not at equal intensity throughout the year.</li>
+</ul>
+<hr />
+<p><em>This document was generated as part of the ApiCore beekeeping
+management system. All AI-generated values should be verified by a
+qualified apiculturist or botanist before use in professional beekeeping
+operations.</em></p>
+</body>
+</html>
