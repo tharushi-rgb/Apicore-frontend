@@ -86,7 +86,10 @@ function LoginPage({ lang, onLangChange }: { lang: Language; onLangChange: (l: L
       selectedLanguage={lang}
       onLanguageChange={onLangChange}
       onBackToHome={() => navigate('/')}
-      onLoginSuccess={() => navigate('/dashboard')}
+      onLoginSuccess={(role) => {
+        if (role === 'landowner') navigate('/dashboard'); // or landowner dashboard
+        else navigate('/dashboard');
+      }}
       onForgotPassword={() => navigate('/forgot-password')}
     />
   );
