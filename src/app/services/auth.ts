@@ -40,7 +40,7 @@ export const authService = {
     const fullProfile: Record<string, unknown> = {
       name: payload.name as string,
       email,
-      password: 'supabase_auth', // placeholder – real auth is via Supabase Auth
+      password: 'supabase_auth', 
       phone: payload.phone ?? null,
       nic_number: payload.nic_number ?? null,
       district: payload.district ?? null,
@@ -52,7 +52,7 @@ export const authService = {
       business_reg_no: payload.business_reg_no ?? null,
       primary_bee_species: payload.primary_bee_species ?? null,
       nvq_level: payload.nvq_level ?? null,
-      role: 'beekeeper',
+      role: (payload.role as string) || 'beekeeper',
       years_experience: (payload.years_experience as number) ?? 0,
     };
 
