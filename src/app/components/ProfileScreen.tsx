@@ -119,13 +119,13 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
   }
 
   return (
-    <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
+    <div className="flex-1 flex flex-col min-h-0 bg-stone-50 relative">
       <MobileSidebar isOpen={isSidebarOpen} activeTab={activeTab} onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
 
       {/* Edit Profile Modal */}
       {showEditProfile && (
         <div className="absolute inset-0 bg-black/50 z-40" onClick={() => setShowEditProfile(false)}>
-          <div className="absolute top-20 right-4 left-4 max-w-md mx-auto bg-white rounded-2xl shadow-2xl p-6" onClick={e => e.stopPropagation()}>
+          <div className="absolute top-20 right-4 left-4 max-w-sm mx-auto bg-white rounded-2xl shadow-2xl p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-stone-800">Edit Profile</h2>
               <button onClick={() => setShowEditProfile(false)} className="p-1 hover:bg-stone-100 rounded-lg"><X className="w-5 h-5" /></button>

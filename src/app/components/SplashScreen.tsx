@@ -11,8 +11,8 @@ interface SplashScreenProps {
 
 export function SplashScreen({ selectedLanguage, onLanguageChange, onGetStarted, onLogin }: SplashScreenProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex flex-col">
-      <div className="absolute top-6 right-6 flex items-center gap-2">
+    <div className="flex-1 flex flex-col min-h-0 bg-stone-50">
+      <div className="absolute top-6 right-6 flex items-center gap-2 z-10">
         {(['en', 'si', 'ta'] as const).map((l) => (
           <button key={l} onClick={() => onLanguageChange(l)}
             className={`px-3 py-2 rounded-lg transition-all min-w-[48px] min-h-[44px] ${selectedLanguage === l ? 'bg-amber-500 text-white shadow-md' : 'bg-white/70 text-stone-700 hover:bg-white'}`}>

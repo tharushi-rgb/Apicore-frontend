@@ -117,9 +117,9 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
   const labelClass = "block text-stone-700 mb-1.5 text-sm font-medium";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex flex-col">
+    <div className="flex-1 flex flex-col min-h-0 bg-stone-50">
       <LangSelector />
-      <div className="px-6 pt-20 pb-4">
+      <div className="px-6 pt-20 pb-4 shrink-0">
         <h1 className="text-3xl font-bold text-stone-800 text-center mb-4">Beekeeper Registration</h1>
         <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between mb-2">

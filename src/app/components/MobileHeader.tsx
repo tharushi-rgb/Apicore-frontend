@@ -150,7 +150,7 @@ export function MobileHeader({
       {/* Notification Dropdown Overlay */}
       {showNotifications && (
         <div className="absolute inset-x-0 top-full z-50">
-          <div className="absolute inset-0 top-0 h-screen" onClick={() => setShowNotifications(false)} />
+          <div className="fixed inset-0 top-0 h-screen" onClick={() => setShowNotifications(false)} />
           <div
             className="relative mx-3 bg-white rounded-2xl shadow-2xl border border-stone-200 max-h-[70vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}

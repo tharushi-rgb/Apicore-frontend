@@ -34,7 +34,7 @@ export function LoginScreen({ selectedLanguage, onLanguageChange, onBackToHome, 
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex flex-col">
+    <div className="flex-1 flex flex-col min-h-0 bg-stone-50">
       <div className="absolute top-6 right-6 flex items-center gap-2 z-10">
         {(['en','si','ta'] as const).map(l=>(
           <button key={l} onClick={()=>onLanguageChange(l)}
@@ -87,7 +87,7 @@ export function LoginScreen({ selectedLanguage, onLanguageChange, onBackToHome, 
           </div>
         </div>
       </div>
-      <div className="px-6 pb-8">
+      <div className="px-6 pb-8 shrink-0">
         <button onClick={onBackToHome} className="w-full bg-white hover:bg-stone-50 text-stone-700 py-4 rounded-xl border-2 border-stone-300 min-h-[56px] font-medium text-lg flex items-center justify-center gap-2">
           <ArrowLeft className="w-5 h-5" /> Back to Home
         </button>
