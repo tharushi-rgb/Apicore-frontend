@@ -281,11 +281,18 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                 <h3 className="font-semibold text-stone-700 text-sm">Registration Summary</h3>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
                   <span className="text-stone-500">Name:</span><span className="text-stone-800 font-medium">{watch('fullName') || '—'}</span>
+                  <span className="text-stone-500">NIC Number:</span><span className="text-stone-800 font-medium">{watch('nicNumber') || '—'}</span>
                   <span className="text-stone-500">Email:</span><span className="text-stone-800 font-medium truncate">{watch('email') || '—'}</span>
                   <span className="text-stone-500">Phone:</span><span className="text-stone-800 font-medium">{watch('phoneNumber') || '—'}</span>
-                  <span className="text-stone-500">Bee Allergy:</span><span className="text-stone-800 font-medium">{watch('knownBeeAllergy') === 'yes' ? ' Yes' : 'No'}</span>
+                  <span className="text-stone-500">District:</span><span className="text-stone-800 font-medium">{watch('district') || '—'}</span>
+                  <span className="text-stone-500">Preferred Language:</span><span className="text-stone-800 font-medium">{watch('preferredLanguage') || '—'}</span>
+                  <span className="text-stone-500">Age Group:</span><span className="text-stone-800 font-medium">{watch('ageGroup') || '—'}</span>
+                  <span className="text-stone-500">Bee Allergy:</span><span className="text-stone-800 font-medium">{watch('knownBeeAllergy') === 'yes' ? 'Yes' : 'No'}</span>
+                  <span className="text-stone-500">Blood Group:</span><span className="text-stone-800 font-medium">{watch('bloodGroup') || '—'}</span>
                   <span className="text-stone-500">Nature:</span><span className="text-stone-800 font-medium capitalize">{watch('beekeepingNature') || '—'}</span>
-                  <span className="text-stone-500">Species:</span><span className="text-stone-800 font-medium">{watch('primaryBeeSpecies')?.replace('_',' ') || '—'}</span>
+                  <span className="text-stone-500">Business Reg. No:</span><span className="text-stone-800 font-medium">{watch('businessRegNo') || '—'}</span>
+                  <span className="text-stone-500">Primary Species:</span><span className="text-stone-800 font-medium">{watch('primaryBeeSpecies')?.replace('_',' ') || '—'}</span>
+                  <span className="text-stone-500">NVQ / Training:</span><span className="text-stone-800 font-medium">{watch('nvqLevel') || '—'}</span>
                 </div>
               </div>
 
