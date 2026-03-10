@@ -10,6 +10,7 @@ interface Props {
   onLanguageChange: (lang: Language) => void;
   onBack: () => void;
   onSuccess: () => void;
+  initialRole?: string;
 }
 
 interface FormData {
@@ -92,7 +93,7 @@ interface FormData {
 
 const TOTAL_STEPS = 3;
 
-export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBack, onSuccess }: Props) {
+export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBack, onSuccess, initialRole }: Props) {
   const [currentStep, setCurrentStep] = useState(1);
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -105,6 +106,8 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
       knownBeeAllergy: 'no'
     }
   });
+
+  const role = initialRole || 'beekeeper';
 
   const password = watch('password');
   const selectedProvince = watch('province');
@@ -156,7 +159,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
         business_reg_no: data.businessRegNo || undefined,
         primary_bee_species: data.primaryBeeSpecies,
         nvq_level: data.nvqLevel || undefined,
-        role: 'beekeeper',
+        role: role,
         // Optional fields removed from registration for profile later
         known_bee_allergy: 'no',
         blood_group: undefined,
@@ -188,7 +191,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
       <div className="w-[min(92vw,22rem)] h-full bg-stone-50 shadow-2xl relative flex flex-col">
         <LangSelector />
         <div className="px-[6%] pt-[0.75rem] pb-[1rem] shrink-0">
-          <h1 className="text-3xl font-bold text-stone-800 text-center mb-4 italic">Beekeeper Registration</h1>
+          <h1 className="text-3xl font-bold text-stone-800 text-center mb-4 italic capitalize">{role} Registration</h1>
           <div className="max-w-md mx-auto">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-stone-600 font-medium">Step {currentStep} of {TOTAL_STEPS}</span>

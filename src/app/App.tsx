@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { SplashScreen } from '@/app/components/SplashScreen';
 import { BeekeeperRegistration } from '@/app/components/BeekeeperRegistration';
+import { RoleSelectionScreen } from '@/app/components/RoleSelectionScreen';
 import { LoginScreen } from '@/app/components/LoginScreen';
 import { ForgotPasswordScreen } from '@/app/components/ForgotPasswordScreen';
 import { BeekeeperDashboard } from '@/app/components/BeekeeperDashboard';
@@ -61,20 +62,35 @@ function SplashPage({ lang, onLangChange }: { lang: Language; onLangChange: (l: 
     <SplashScreen
       selectedLanguage={lang}
       onLanguageChange={onLangChange}
-      onGetStarted={() => navigate('/register')}
+      onGetStarted={() => navigate('/roles')}
       onLogin={() => navigate('/login')}
+    />
+  );
+}
+
+function RoleSelectionPage({ lang, onLangChange }: { lang: Language; onLangChange: (l: Language) => void }) {
+  const navigate = useNavigate();
+  return (
+    <RoleSelectionScreen
+      selectedLanguage={lang}
+      onLanguageChange={onLangChange}
+      onBack={() => navigate('/')}
+      onContinue={(role) => navigate('/register', { state: { role } })}
     />
   );
 }
 
 function BeekeeperRegPage({ lang, onLangChange }: { lang: Language; onLangChange: (l: Language) => void }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const role = (location.state as { role?: string } | null)?.role || 'beekeeper';
   return (
     <BeekeeperRegistration
       selectedLanguage={lang}
       onLanguageChange={onLangChange}
-      onBack={() => navigate('/')}
+      onBack={() => navigate('/roles')}
       onSuccess={() => navigate('/login')}
+      initialRole={role}
     />
   );
 }
@@ -349,6 +365,7 @@ export default function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<RedirectIfAuth><SplashPage {...lp} /></RedirectIfAuth>} />
+          <Route path="/roles" element={<RedirectIfAuth><RoleSelectionPage {...lp} /></RedirectIfAuth>} />
           <Route path="/register" element={<RedirectIfAuth><BeekeeperRegPage {...lp} /></RedirectIfAuth>} />
           <Route path="/login" element={<RedirectIfAuth><LoginPage {...lp} /></RedirectIfAuth>} />
           <Route path="/forgot-password" element={<RedirectIfAuth><ForgotPasswordPage {...lp} /></RedirectIfAuth>} />
