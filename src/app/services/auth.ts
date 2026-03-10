@@ -151,9 +151,13 @@ export const authService = {
   },
 
   async logout() {
-    await supabase.auth.signOut();
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      // Always clear local auth state so route guards cannot bounce back.
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+    }
   },
 
   isLoggedIn() {

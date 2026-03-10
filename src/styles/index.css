@@ -18,7 +18,7 @@ html, body {
 
 #root {
   width: 100%;
-  max-width: 430px;
+  max-width: 390px;
   min-height: 100dvh;
   background: #fffbeb; /* warm white, matches app background */
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.25);
