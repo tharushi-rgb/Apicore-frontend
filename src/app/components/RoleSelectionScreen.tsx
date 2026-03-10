@@ -25,26 +25,26 @@ export function RoleSelectionScreen({ selectedLanguage, onLanguageChange, onBack
           ))}
         </div>
         <div className="flex-1 flex flex-col px-[6%] pt-[0.75rem] pb-[2rem] overflow-y-auto">
-          <h1 className="text-3xl font-bold text-stone-800 text-center mb-8 italic">Choose your role</h1>
+          <h1 className="text-[1.875rem] font-bold text-stone-800 text-center mb-8 italic leading-tight">Choose your role</h1>
           <div className="flex-1 flex flex-col items-center justify-center space-y-4 max-w-md mx-auto w-full">
             <button onClick={() => setSelectedRole('beekeeper')}
-              className={`w-full bg-white rounded-2xl p-6 transition-all min-h-[160px] flex flex-col items-center justify-center ${selectedRole === 'beekeeper' ? 'border-4 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.4)]' : 'border-2 border-stone-200 hover:border-amber-300 hover:shadow-lg'}`}>
+              className={`w-full bg-white rounded-2xl p-6 transition-all min-h-[10rem] flex flex-col items-center justify-center ${selectedRole === 'beekeeper' ? 'border-4 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.4)]' : 'border-2 border-stone-200 hover:border-amber-300 hover:shadow-lg'}`}>
               <div className="flex items-center justify-center mb-4">
                 <div className="relative">
-                  <Hexagon className="w-16 h-16 text-amber-500 fill-amber-500/20 stroke-[2]" />
-                  <Crown className="w-8 h-8 text-amber-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                  <Hexagon className="w-[4rem] h-[4rem] text-amber-500 fill-amber-500/20 stroke-[2]" />
+                  <Crown className="w-[2rem] h-[2rem] text-amber-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-stone-800 mb-2">Beekeeper</h2>
-              <p className="text-stone-600 text-center text-sm">Manage apiaries, hives, finances, helpers, and client services.</p>
+              <h2 className="text-[1.25rem] font-bold text-stone-800 mb-2">Beekeeper</h2>
+              <p className="text-stone-600 text-center text-[0.875rem] leading-snug">Manage apiaries, hives, finances, helpers, and client services.</p>
             </button>
             <button onClick={() => setSelectedRole('landowner')}
-              className={`w-full bg-white rounded-2xl p-6 transition-all min-h-[160px] flex flex-col items-center justify-center ${selectedRole === 'landowner' ? 'border-4 border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'border-2 border-stone-200 hover:border-emerald-300 hover:shadow-lg'}`}>
+              className={`w-full bg-white rounded-2xl p-6 transition-all min-h-[10rem] flex flex-col items-center justify-center ${selectedRole === 'landowner' ? 'border-4 border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'border-2 border-stone-200 hover:border-emerald-300 hover:shadow-lg'}`}>
               <div className="flex items-center justify-center mb-4">
-                <ClipboardCheck className="w-16 h-16 text-emerald-600 stroke-[1.5]" />
+                <ClipboardCheck className="w-[4rem] h-[4rem] text-emerald-600 stroke-[1.5]" />
               </div>
-              <h2 className="text-xl font-bold text-stone-800 mb-2">Landowner</h2>
-              <p className="text-stone-600 text-center text-sm">Offer your land for beekeeping activities and earn shared benefits.</p>
+              <h2 className="text-[1.25rem] font-bold text-stone-800 mb-2">Landowner</h2>
+              <p className="text-stone-600 text-center text-[0.875rem] leading-snug">Offer your land for beekeeping activities and earn shared benefits.</p>
             </button>
           </div>
         </div>

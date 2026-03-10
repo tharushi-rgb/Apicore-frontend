@@ -6,6 +6,11 @@
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* ── Phone-width constraint (desktop looks like a phone) ── */
+html {
+  /* Fluid font size base */
+  font-size: clamp(14px, 4vw, 16px);
+}
+
 html, body {
   margin: 0;
   padding: 0;

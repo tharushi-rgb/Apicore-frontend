@@ -182,20 +182,20 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
     </div>
   );
 
-  const inputClass = "w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none";
-  const selectClass = "w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none";
-  const labelClass = "block text-stone-700 mb-1.5 text-sm font-medium";
+  const inputClass = "w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none text-[1rem]";
+  const selectClass = "w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none text-[1rem]";
+  const labelClass = "block text-stone-700 mb-1.5 text-[0.875rem] font-medium";
 
   return (
     <div className="h-screen bg-stone-900 flex justify-center overflow-hidden">
       <div className="w-[min(92vw,22rem)] h-full bg-stone-50 shadow-2xl relative flex flex-col">
         <LangSelector />
         <div className="px-[6%] pt-[0.75rem] pb-[1rem] shrink-0">
-          <h1 className="text-3xl font-bold text-stone-800 text-center mb-4 italic capitalize">{role} Registration</h1>
+          <h1 className="text-[1.875rem] font-bold text-stone-800 text-center mb-4 italic capitalize leading-tight">{role} Registration</h1>
           <div className="max-w-md mx-auto">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-stone-600 font-medium">Step {currentStep} of {TOTAL_STEPS}</span>
-              <span className="text-sm text-stone-600 font-medium">{stepLabels[currentStep - 1]}</span>
+              <span className="text-[0.875rem] text-stone-600 font-medium">Step {currentStep} of {TOTAL_STEPS}</span>
+              <span className="text-[0.875rem] text-stone-600 font-medium">{stepLabels[currentStep - 1]}</span>
             </div>
             <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
               <div className="h-full bg-amber-500 transition-all duration-300" style={{ width: `${(currentStep / TOTAL_STEPS) * 100}%` }} />
@@ -211,22 +211,22 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                 <div>
                   <label className={labelClass}>Full Name <span className="text-red-500">*</span></label>
                   <input {...register('fullName',{required:'Full name is required'})} className={inputClass} placeholder="Enter your full name" />
-                  {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName.message}</p>}
+                  {errors.fullName && <p className="text-red-500 text-[0.75rem] mt-1">{errors.fullName.message}</p>}
                 </div>
                 <div>
                   <label className={labelClass}>NIC Number <span className="text-red-500">*</span></label>
                   <input {...register('nicNumber', {required: 'NIC number is required', pattern: {value: /^\d{12}$/, message: 'Must be 12 digits'}})} className={inputClass} placeholder="200012345678" maxLength={12} />
-                  {errors.nicNumber && <p className="text-red-500 text-xs mt-1">{errors.nicNumber.message}</p>}
+                  {errors.nicNumber && <p className="text-red-500 text-[0.75rem] mt-1">{errors.nicNumber.message}</p>}
                 </div>
                 <div>
                   <label className={labelClass}>Email / Phone <span className="text-red-500">*</span></label>
                   <input {...register('email',{required:'Email/Phone is required'})} className={inputClass} placeholder="your@email.com or 94771234567" />
-                  {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+                  {errors.email && <p className="text-red-500 text-[0.75rem] mt-1">{errors.email.message}</p>}
                 </div>
                 <div>
                   <label className={labelClass}>Phone Number <span className="text-red-500">*</span></label>
                   <input {...register('phoneNumber', {required: 'Phone number is required', pattern: {value: /^\d{12}$/, message: 'Must be 12 digits (e.g. 94771234567)'}})} className={inputClass} placeholder="94774567890" maxLength={12} />
-                  {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber.message}</p>}
+                  {errors.phoneNumber && <p className="text-red-500 text-[0.75rem] mt-1">{errors.phoneNumber.message}</p>}
                 </div>
                 <div>
                   <label className={labelClass}>Password <span className="text-red-500">*</span></label>
@@ -236,7 +236,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                       {showPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
-                  {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+                  {errors.password && <p className="text-red-500 text-[0.75rem] mt-1">{errors.password.message}</p>}
                 </div>
                 <div>
                   <label className={labelClass}>Confirm Password <span className="text-red-500">*</span></label>
@@ -246,7 +246,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                       {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
-                  {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
+                  {errors.confirmPassword && <p className="text-red-500 text-[0.75rem] mt-1">{errors.confirmPassword.message}</p>}
                 </div>
               </>
             )}
@@ -261,7 +261,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                     <option value="si">Sinhala (සිංහල)</option>
                     <option value="ta">Tamil (தமிழ்)</option>
                   </select>
-                  {errors.preferredLanguage && <p className="text-red-500 text-xs mt-1">{errors.preferredLanguage.message}</p>}
+                  {errors.preferredLanguage && <p className="text-red-500 text-[0.75rem] mt-1">{errors.preferredLanguage.message}</p>}
                 </div>
                 <div>
                   <label className={labelClass}>Age Group <span className="text-red-500">*</span></label>
@@ -272,7 +272,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                     <option value="51-65">51 – 65</option>
                     <option value="65+">65+</option>
                   </select>
-                  {errors.ageGroup && <p className="text-red-500 text-xs mt-1">{errors.ageGroup.message}</p>}
+                  {errors.ageGroup && <p className="text-red-500 text-[0.75rem] mt-1">{errors.ageGroup.message}</p>}
                 </div>
                 <div>
                   <label className={labelClass}>Beekeeping Nature <span className="text-red-500">*</span></label>
@@ -281,7 +281,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                     <option value="hobbyist">Hobbyist</option>
                     <option value="commercial">Commercial</option>
                   </select>
-                  {errors.beekeepingNature && <p className="text-red-500 text-xs mt-1">{errors.beekeepingNature.message}</p>}
+                  {errors.beekeepingNature && <p className="text-red-500 text-[0.75rem] mt-1">{errors.beekeepingNature.message}</p>}
                 </div>
                 <div>
                   <label className={labelClass}>Primary Bee Species <span className="text-red-500">*</span></label>
@@ -290,7 +290,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                     <option value="apis_cerana">Apis cerana (Mee Bee)</option>
                     <option value="tetragonula">Tetragonula (Kaneyawa)</option>
                   </select>
-                  {errors.primaryBeeSpecies && <p className="text-red-500 text-xs mt-1">{errors.primaryBeeSpecies.message}</p>}
+                  {errors.primaryBeeSpecies && <p className="text-red-500 text-[0.75rem] mt-1">{errors.primaryBeeSpecies.message}</p>}
                 </div>
                 <div>
                   <label className={labelClass}>Business Reg. No (Optional)</label>
@@ -324,7 +324,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                     <option value="">Select province</option>
                     {Object.keys(districtsByProvince).map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
-                  {errors.province && <p className="text-red-500 text-xs mt-1">{errors.province.message}</p>}
+                  {errors.province && <p className="text-red-500 text-[0.75rem] mt-1">{errors.province.message}</p>}
                 </div>
 
                 <div>
@@ -339,7 +339,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                     <option value="">Select district</option>
                     {districts.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
-                  {errors.district && <p className="text-red-500 text-xs mt-1">{errors.district.message}</p>}
+                  {errors.district && <p className="text-red-500 text-[0.75rem] mt-1">{errors.district.message}</p>}
                 </div>
 
                 <div>
@@ -350,7 +350,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                     <option value="">Select DS division</option>
                     {dsDivisions.map(ds => <option key={ds} value={ds}>{ds}</option>)}
                   </select>
-                  {errors.dsDivision && <p className="text-red-500 text-xs mt-1">{errors.dsDivision.message}</p>}
+                  {errors.dsDivision && <p className="text-red-500 text-[0.75rem] mt-1">{errors.dsDivision.message}</p>}
                 </div>
 
                 <div className="bg-white/80 rounded-xl p-4 border border-stone-200 space-y-2 mt-4">
@@ -380,15 +380,15 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
 
         <div className="px-[6%] pb-[2rem] space-y-3 shrink-0">
           {currentStep < TOTAL_STEPS ? (
-            <button onClick={handleNext} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl shadow-lg min-h-[56px] font-medium text-lg flex items-center justify-center gap-2">
+            <button onClick={handleNext} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl shadow-lg min-h-[3.5rem] font-medium text-[1.125rem] flex items-center justify-center gap-2">
               Next <ArrowRight className="w-5 h-5" />
             </button>
           ) : (
-            <button onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl shadow-lg min-h-[56px] font-medium text-lg flex items-center justify-center gap-2 disabled:opacity-50">
+            <button onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl shadow-lg min-h-[3.5rem] font-medium text-[1.125rem] flex items-center justify-center gap-2 disabled:opacity-50">
               {isSubmitting ? 'Registering...' : <><Check className="w-5 h-5" /> Register</>}
             </button>
           )}
-          <button onClick={currentStep===1?onBack:()=>setCurrentStep(currentStep - 1)} className="w-full bg-white hover:bg-stone-50 text-stone-700 py-4 rounded-xl border-2 border-stone-300 min-h-[56px] font-medium text-lg flex items-center justify-center gap-2">
+          <button onClick={currentStep===1?onBack:()=>setCurrentStep(currentStep - 1)} className="w-full bg-white hover:bg-stone-50 text-stone-700 py-4 rounded-xl border-2 border-stone-300 min-h-[3.5rem] font-medium text-[1.125rem] flex items-center justify-center gap-2">
             <ArrowLeft className="w-5 h-5" /> Back
           </button>
         </div>

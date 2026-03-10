@@ -85,11 +85,11 @@ export function MobileHeader({
             </button>
 
             <div className="flex-1">
-              <h1 className="text-xl font-bold text-stone-800">
+              <h1 className="text-[1.25rem] font-bold text-stone-800">
                 {getGreeting()}, {userName}
               </h1>
               {district && (
-                <p className="text-stone-600 text-sm flex items-center gap-1 mt-1">
+                <p className="text-stone-600 text-[0.875rem] flex items-center gap-1 mt-1">
                   <MapPin className="w-4 h-4" />
                   District: {district}
                 </p>
