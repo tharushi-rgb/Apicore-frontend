@@ -133,7 +133,7 @@ export function ForgotPasswordScreen({ selectedLanguage, onLanguageChange, onBac
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex flex-col">
-      <div className="absolute top-6 right-6 flex items-center gap-2 z-10">
+      <div className="w-full px-[5%] pt-[1rem] flex justify-end shrink-0">
         {(['en', 'si', 'ta'] as const).map((l) => (
           <button
             key={l}
@@ -149,7 +149,7 @@ export function ForgotPasswordScreen({ selectedLanguage, onLanguageChange, onBac
         ))}
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8">
+      <div className="flex-1 flex flex-col items-center justify-center px-[6%] pb-[2rem]">
         <div className="max-w-md w-full">
           <div className="flex flex-col items-center mb-8">
             <div className="relative mb-4">

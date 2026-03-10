@@ -15,7 +15,7 @@ export function RoleSelectionScreen({ selectedLanguage, onLanguageChange, onBack
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex flex-col">
-      <div className="absolute top-6 right-6 flex items-center gap-2">
+      <div className="w-full px-[5%] pt-[1rem] flex justify-end shrink-0">
         {(['en', 'si', 'ta'] as const).map((l) => (
           <button key={l} onClick={() => onLanguageChange(l)}
             className={`px-3 py-2 rounded-lg transition-all min-w-[48px] min-h-[44px] ${selectedLanguage === l ? 'bg-amber-500 text-white shadow-md' : 'bg-white/70 text-stone-700 hover:bg-white'}`}>
@@ -23,7 +23,7 @@ export function RoleSelectionScreen({ selectedLanguage, onLanguageChange, onBack
           </button>
         ))}
       </div>
-      <div className="flex-1 flex flex-col px-6 pt-20 pb-8">
+      <div className="flex-1 flex flex-col px-[6%] pt-[0.75rem] pb-[2rem]">
         <h1 className="text-3xl font-bold text-stone-800 text-center mb-8">Select Your Role</h1>
         <div className="flex-1 flex flex-col items-center justify-center space-y-4 max-w-md mx-auto w-full">
           <button onClick={() => setSelectedRole('beekeeper')}
@@ -47,7 +47,7 @@ export function RoleSelectionScreen({ selectedLanguage, onLanguageChange, onBack
           </button>
         </div>
       </div>
-      <div className="px-6 pb-8 space-y-3">
+      <div className="px-[6%] pb-[2rem] space-y-3">
         <button onClick={() => selectedRole && onContinue(selectedRole)} disabled={!selectedRole}
           className={`w-full py-4 rounded-xl shadow-lg transition-all min-h-[56px] font-medium text-lg ${selectedRole ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-stone-200 text-stone-400 cursor-not-allowed'}`}>
           Continue

@@ -12,7 +12,7 @@ interface SplashScreenProps {
 export function SplashScreen({ selectedLanguage, onLanguageChange, onGetStarted, onLogin }: SplashScreenProps) {
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-stone-50">
-      <div className="absolute top-6 right-6 flex items-center gap-2 z-10">
+      <div className="w-full px-[5%] pt-[1rem] flex justify-end shrink-0">
         {(['en', 'si', 'ta'] as const).map((l) => (
           <button key={l} onClick={() => onLanguageChange(l)}
             className={`px-3 py-2 rounded-lg transition-all min-w-[48px] min-h-[44px] ${selectedLanguage === l ? 'bg-amber-500 text-white shadow-md' : 'bg-white/70 text-stone-700 hover:bg-white'}`}>
@@ -20,7 +20,7 @@ export function SplashScreen({ selectedLanguage, onLanguageChange, onGetStarted,
           </button>
         ))}
       </div>
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8">
+      <div className="flex-1 flex flex-col items-center justify-center px-[6%] pb-[2rem]">
         <div className="flex flex-col items-center mb-8">
           <div className="relative mb-6">
             <div className="flex items-center justify-center">
@@ -39,7 +39,7 @@ export function SplashScreen({ selectedLanguage, onLanguageChange, onGetStarted,
           </div>
         </div>
       </div>
-      <div className="px-6 pb-8 space-y-6">
+      <div className="px-[6%] pb-[2rem] space-y-6">
         <div className="space-y-3">
           <button onClick={onGetStarted} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl shadow-lg hover:shadow-xl transition-all min-h-[56px] font-medium text-lg">
             Get Started

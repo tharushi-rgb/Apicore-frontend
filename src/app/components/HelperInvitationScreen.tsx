@@ -30,7 +30,7 @@ export function HelperInvitationScreen({ selectedLanguage, onLanguageChange, onB
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex flex-col">
-      <div className="absolute top-6 right-6 flex items-center gap-2 z-10">
+      <div className="w-full px-[5%] pt-[1rem] flex justify-end shrink-0">
         {(['en','si','ta'] as const).map(l=>(
           <button key={l} onClick={()=>onLanguageChange(l)}
             className={`px-3 py-2 rounded-lg transition-all min-w-[48px] min-h-[44px] ${selectedLanguage===l?'bg-amber-500 text-white shadow-md':'bg-white/70 text-stone-700 hover:bg-white'}`}>
@@ -38,7 +38,7 @@ export function HelperInvitationScreen({ selectedLanguage, onLanguageChange, onB
           </button>
         ))}
       </div>
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8">
+      <div className="flex-1 flex flex-col items-center justify-center px-[6%] pb-[2rem]">
         <div className="max-w-md w-full">
           <div className="flex flex-col items-center mb-8">
             <div className="bg-emerald-100 p-4 rounded-2xl mb-4"><KeyRound className="w-12 h-12 text-emerald-600" /></div>
@@ -64,7 +64,7 @@ export function HelperInvitationScreen({ selectedLanguage, onLanguageChange, onB
           </div>
         </div>
       </div>
-      <div className="px-6 pb-8">
+      <div className="px-[6%] pb-[2rem]">
         <button onClick={onBackToHome} className="w-full bg-white hover:bg-stone-50 text-stone-700 py-4 rounded-xl border-2 border-stone-300 min-h-[56px] font-medium text-lg flex items-center justify-center gap-2">
           <ArrowLeft className="w-5 h-5" /> Back to Home
         </button>

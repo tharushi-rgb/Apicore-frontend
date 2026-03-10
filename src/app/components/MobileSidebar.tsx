@@ -41,10 +41,10 @@ export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout
 
   return (
     // fixed inset-0 = always viewport-sized, never scrolls with page content.
-    // Inner max-w-[390px] matches the App container so the sidebar stays visually
+    // Inner max-w-[22rem] matches the App container so the sidebar stays visually
     // inside the mobile frame on desktop browsers.
     <div className="fixed inset-0 z-50 flex justify-center">
-      <div className="w-full max-w-[390px] h-full flex">
+      <div className="w-[min(92vw,22rem)] h-full flex">
 
         {/* Sidebar panel */}
         <div className="w-72 max-w-[85%] h-full bg-white shadow-2xl flex flex-col">

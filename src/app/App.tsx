@@ -325,7 +325,7 @@ export default function App() {
   if (isAuthChecking) {
     return (
       <div className="h-screen bg-stone-900 flex justify-center overflow-hidden">
-        <div className="w-full max-w-[390px] h-full bg-white shadow-2xl relative">
+        <div className="w-[min(92vw,22rem)] h-full bg-white shadow-2xl relative">
           <SplashScreen
             selectedLanguage={selectedLanguage}
             onLanguageChange={setSelectedLanguage}
@@ -342,7 +342,7 @@ export default function App() {
 
   return (
     <div className="h-screen bg-stone-900 flex justify-center overflow-hidden">
-      <div className="w-full max-w-[390px] h-full bg-white shadow-2xl relative z-0">
+      <div className="w-[min(92vw,22rem)] h-full bg-white shadow-2xl relative z-0">
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<RedirectIfAuth><SplashPage {...lp} /></RedirectIfAuth>} />
