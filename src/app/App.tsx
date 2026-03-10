@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { SplashScreen } from '@/app/components/SplashScreen';
 import { BeekeeperRegistration } from '@/app/components/BeekeeperRegistration';
+import { LandownerRegistration } from '@/app/components/LandownerRegistration';
 import { RoleSelectionScreen } from '@/app/components/RoleSelectionScreen';
 import { LoginScreen } from '@/app/components/LoginScreen';
 import { ForgotPasswordScreen } from '@/app/components/ForgotPasswordScreen';
@@ -75,7 +76,23 @@ function RoleSelectionPage({ lang, onLangChange }: { lang: Language; onLangChang
       selectedLanguage={lang}
       onLanguageChange={onLangChange}
       onBack={() => navigate('/')}
-      onContinue={(role) => navigate('/register', { state: { role } })}
+      onContinue={(role) =>
+        role === 'landowner'
+          ? navigate('/register/landowner')
+          : navigate('/register', { state: { role } })
+      }
+    />
+  );
+}
+
+function LandownerRegPage({ lang, onLangChange }: { lang: Language; onLangChange: (l: Language) => void }) {
+  const navigate = useNavigate();
+  return (
+    <LandownerRegistration
+      selectedLanguage={lang}
+      onLanguageChange={onLangChange}
+      onBack={() => navigate('/roles')}
+      onSuccess={() => navigate('/login')}
     />
   );
 }
@@ -367,6 +384,7 @@ export default function App() {
           <Route path="/" element={<RedirectIfAuth><SplashPage {...lp} /></RedirectIfAuth>} />
           <Route path="/roles" element={<RedirectIfAuth><RoleSelectionPage {...lp} /></RedirectIfAuth>} />
           <Route path="/register" element={<RedirectIfAuth><BeekeeperRegPage {...lp} /></RedirectIfAuth>} />
+          <Route path="/register/landowner" element={<RedirectIfAuth><LandownerRegPage {...lp} /></RedirectIfAuth>} />
           <Route path="/login" element={<RedirectIfAuth><LoginPage {...lp} /></RedirectIfAuth>} />
           <Route path="/forgot-password" element={<RedirectIfAuth><ForgotPasswordPage {...lp} /></RedirectIfAuth>} />
 

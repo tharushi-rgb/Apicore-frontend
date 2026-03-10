@@ -9,7 +9,7 @@ interface Props {
   selectedLanguage: Language;
   onLanguageChange: (lang: Language) => void;
   onBackToHome: () => void;
-  onLoginSuccess: (type: 'beekeeper' | 'helper') => void;
+  onLoginSuccess: (type: 'beekeeper' | 'landowner' | 'helper') => void;
   onForgotPassword: () => void;
 }
 
