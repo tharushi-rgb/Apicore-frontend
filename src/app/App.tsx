@@ -92,7 +92,7 @@ function LandownerRegPage({ lang, onLangChange }: { lang: Language; onLangChange
       selectedLanguage={lang}
       onLanguageChange={onLangChange}
       onBack={() => navigate('/roles')}
-      onSuccess={() => navigate('/login')}
+      onSuccess={() => navigate('/dashboard')}
     />
   );
 }
@@ -106,7 +106,7 @@ function BeekeeperRegPage({ lang, onLangChange }: { lang: Language; onLangChange
       selectedLanguage={lang}
       onLanguageChange={onLangChange}
       onBack={() => navigate('/roles')}
-      onSuccess={() => navigate('/login')}
+      onSuccess={() => navigate('/dashboard')}
       initialRole={role}
     />
   );

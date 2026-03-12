@@ -99,6 +99,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [error, setError] = useState('');
 
   const { register, handleSubmit, watch, formState: { errors }, trigger, setValue } = useForm<FormData>({ 
@@ -136,7 +137,20 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
   const handleNext = async () => {
     if (currentStep === 1) {
       const valid = await trigger(['fullName', 'email', 'phoneNumber', 'password', 'confirmPassword', 'nicNumber']);
-      if (valid) setCurrentStep(2);
+      if (valid) {
+        setIsCheckingEmail(true);
+        setError('');
+        try {
+          const exists = await authService.checkEmailExists(watch('email'));
+          if (exists) {
+            setError(t('emailAlreadyRegistered', selectedLanguage));
+            setIsCheckingEmail(false);
+            return;
+          }
+        } catch { /* ignore network errors, let backend catch it */ }
+        setIsCheckingEmail(false);
+        setCurrentStep(2);
+      }
     } else if (currentStep === 2) {
       const valid = await trigger(['preferredLanguage', 'ageGroup', 'primaryBeeSpecies', 'beekeepingNature']);
       if (valid) setCurrentStep(3);
@@ -168,8 +182,6 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
         known_bee_allergy: 'no',
         blood_group: undefined,
       });
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user');
       onSuccess();
     } catch (e: any) { setError(e.message === 'Failed to fetch' ? 'Cannot connect to server. Please make sure the backend is running.' : (e.message || 'Registration failed')); }
     setIsSubmitting(false);
@@ -206,6 +218,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 pb-2">
+          <div className="min-h-full flex flex-col justify-center py-2">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5">
 
             {currentStep === 1 && (
@@ -250,6 +263,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                   </div>
                   {errors.confirmPassword && <p className="text-red-500 text-[0.75rem] mt-1">{errors.confirmPassword.message}</p>}
                 </div>
+                {error && <div className="bg-red-50 border border-red-200 rounded-lg p-2.5"><p className="text-red-700 text-[0.75rem] font-medium">{error}</p></div>}
               </>
             )}
 
@@ -381,12 +395,13 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
               </>
             )}
           </form>
+          </div>
         </div>
 
         <div className="px-4 pb-4 pt-2 space-y-2 shrink-0">
           {currentStep < TOTAL_STEPS ? (
-            <button onClick={handleNext} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-lg shadow font-medium text-[0.9rem] flex items-center justify-center gap-1.5">
-              {t('next', selectedLanguage)} <ArrowRight className="w-4 h-4" />
+            <button onClick={handleNext} disabled={isCheckingEmail} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-lg shadow font-medium text-[0.9rem] flex items-center justify-center gap-1.5 disabled:opacity-60">
+              {isCheckingEmail ? t('loading', selectedLanguage) : <>{t('next', selectedLanguage)} <ArrowRight className="w-4 h-4" /></>}
             </button>
           ) : (
             <button onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-lg shadow font-medium text-[0.9rem] flex items-center justify-center gap-1.5 disabled:opacity-50">

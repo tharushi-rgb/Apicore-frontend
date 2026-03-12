@@ -473,6 +473,7 @@ const translations = {
   confirmPwdPlaceholder: { en: 'Confirm your password', si: 'ඔබේ මුරපදය තහවුරු කරන්න', ta: 'Confirm your password' },
   stepOf: { en: 'of', si: 'න්', ta: 'of' },
   emailPhonePlaceholder: { en: 'your@email.com or 94771234567', si: 'your@email.com හෝ 94771234567', ta: 'your@email.com or 94771234567' },
+  emailAlreadyRegistered: { en: 'This email is already registered. Please log in.', si: 'මෙම ඊ-තැපෑල දැනටමත් ලියාපදිංචි කර ඇත. කරුණාකර ඇතුල් වන්න.', ta: 'This email is already registered. Please log in.' },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

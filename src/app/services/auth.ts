@@ -168,6 +168,15 @@ export const authService = {
     return !!localStorage.getItem('auth_token');
   },
 
+  async checkEmailExists(email: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id')
+      .ilike('email', email)
+      .limit(1);
+    return !error && (data?.length ?? 0) > 0;
+  },
+
   async resetPasswordForEmail(email: string) {
     // Get the frontend URL dynamically
     const redirectUrl = `${window.location.origin}/reset-password`;

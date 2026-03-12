@@ -51,9 +51,9 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
 
   const getWeatherIcon = (condition: string) => {
     switch (condition) {
-      case 'sunny': return <Sun className="w-5 h-5 text-amber-500" />;
-      case 'rainy': return <CloudRain className="w-5 h-5 text-blue-500" />;
-      default: return <Cloud className="w-5 h-5 text-stone-500" />;
+      case 'sunny': return <Sun className="w-3.5 h-3.5 text-amber-500" />;
+      case 'rainy': return <CloudRain className="w-3.5 h-3.5 text-blue-500" />;
+      default: return <Cloud className="w-3.5 h-3.5 text-stone-500" />;
     }
   };
 
@@ -75,8 +75,8 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
           <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
             isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
           <div className="px-6 pb-4 border-t border-stone-100">
-            <h1 className="text-2xl font-bold text-stone-800">{t('apiaries', selectedLanguage)}</h1>
-            <p className="text-stone-500 text-sm mt-1">{t('manageApiaries', selectedLanguage)}</p>
+            <h1 className="text-[1.1rem] font-bold text-stone-800">{t('apiaries', selectedLanguage)}</h1>
+            <p className="text-stone-500 text-[0.75rem] mt-0.5">{t('manageApiaries', selectedLanguage)}</p>
           </div>
         </div>
 
@@ -111,13 +111,13 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
             <div className="space-y-4">
               {/* Search Bar */}
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-stone-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-stone-400" />
                 <input
                   type="text"
                   placeholder={t('searchApiaries', selectedLanguage)}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white"
+                  className="w-full pl-9 pr-4 py-2 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white text-[0.875rem]"
                 />
               </div>
 
@@ -182,109 +182,70 @@ function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon }:
   const config = statusConfig[apiary.status] || statusConfig.active;
 
   return (
-    <div className={`bg-white rounded-xl shadow-sm overflow-hidden ${apiary.status === 'expired' ? 'border-l-4 border-red-500' : ''} ${apiary.status === 'empty' ? 'bg-stone-50/50' : ''}`}>
-      <div className="p-5 space-y-4">
-        {/* Top Row - Name and Status */}
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="text-lg font-bold text-stone-800 flex-1">{apiary.name}</h3>
-          <span className={`px-3 py-1 rounded-full text-xs font-medium ${config.bgColor} ${config.textColor} whitespace-nowrap`}>
+    <div className={`bg-white rounded-xl shadow-sm overflow-hidden ${apiary.status === 'expired' ? 'border-l-4 border-red-400' : ''}`}>
+      <div className="p-3 space-y-2">
+        {/* Row 1: Name + Status */}
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-[0.875rem] font-bold text-stone-800 flex-1 truncate">{apiary.name}</h3>
+          <span className={`px-2 py-0.5 rounded-full text-[0.65rem] font-medium ${config.bgColor} ${config.textColor} whitespace-nowrap`}>
             {config.label}
           </span>
         </div>
 
-        {/* Location and Date */}
-        <div className="flex items-center gap-4 text-sm text-stone-600">
-          <div className="flex items-center gap-1">
-            <MapPin className="w-4 h-4" />
-            <span>{apiary.district}{apiary.area ? ` / ${apiary.area}` : ''}</span>
-          </div>
+        {/* Row 2: Location + Date + Hive count */}
+        <div className="flex items-center gap-3 text-[0.72rem] text-stone-500 flex-wrap">
+          <span className="flex items-center gap-0.5">
+            <MapPin className="w-3 h-3" />{apiary.district}{apiary.area ? ` / ${apiary.area}` : ''}
+          </span>
           {apiary.established_date && (
-            <div className="flex items-center gap-1">
-              <Calendar className="w-4 h-4" />
-              <span>Est. {apiary.established_date}</span>
-            </div>
+            <span className="flex items-center gap-0.5">
+              <Calendar className="w-3 h-3" />Est. {apiary.established_date}
+            </span>
+          )}
+          <span className="flex items-center gap-0.5 ml-auto text-amber-700 font-medium">
+            <HiveIcon className="w-3 h-3" />
+            {(apiary.hive_count || 0) > 0 ? `${apiary.hive_count} hives` : t('noHivesAdded', lang)}
+          </span>
+        </div>
+
+        {/* Row 3: Compact weather + forage strip */}
+        <div className="flex items-center gap-2 bg-stone-50 rounded-lg px-2.5 py-1.5 text-[0.72rem]">
+          <span className="flex items-center gap-1">
+            {getWeatherIcon('sunny')}
+            <span className="font-medium text-stone-700">28°C · Sunny</span>
+          </span>
+          {(apiary.forage_primary || apiary.blooming_window) && (
+            <>
+              <span className="text-stone-300">|</span>
+              <span className="text-emerald-700 truncate">{apiary.forage_primary || 'Mixed'}</span>
+              {apiary.blooming_window && (
+                <span className="text-stone-400 hidden sm:inline truncate"> · {apiary.blooming_window}</span>
+              )}
+            </>
           )}
         </div>
 
-        {/* Weather Preview */}
-        <div className="bg-gradient-to-r from-sky-50 to-blue-50 rounded-lg p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {getWeatherIcon('sunny')}
-              <div>
-                <p className="text-xl font-bold text-stone-800">28°C</p>
-                <p className="text-xs text-stone-600">Sunny</p>
-              </div>
-            </div>
-            <div className="flex gap-1">
-              <div className="w-2 h-2 rounded-full bg-amber-400" title="sunny" />
-              <div className="w-2 h-2 rounded-full bg-stone-400" title="cloudy" />
-            </div>
-          </div>
-        </div>
-
-        {/* Hives Snapshot */}
-        {apiary.status === 'empty' || (apiary.hive_count || 0) === 0 ? (
-          <div className="p-3 bg-stone-100 rounded-lg">
-            <p className="text-stone-600 text-sm font-medium">{t('noHivesAdded', lang)}</p>
-          </div>
-        ) : (
-          <div className="flex items-center gap-4">
-            <div className="flex-1 p-3 bg-amber-50 rounded-lg">
-              <p className="text-xs text-amber-700 mb-1">{t('totalHivesLabel', lang)}</p>
-              <p className="text-2xl font-bold text-amber-900">{apiary.hive_count || 0}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Forage Snapshot */}
-        {(apiary.forage_primary || apiary.blooming_window) && (
-          <div className="p-3 bg-emerald-50 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-emerald-700 mb-1">{t('primaryForage', lang)}</p>
-                <p className="font-bold text-emerald-900">{apiary.forage_primary || 'Mixed'}</p>
-              </div>
-              {apiary.blooming_window && (
-                <div className="text-right">
-                  <p className="text-xs text-emerald-700 mb-1">Blooming</p>
-                  <p className="text-sm font-medium text-emerald-800">{apiary.blooming_window}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Warning for Expired */}
+        {/* Expired warning */}
         {apiary.status === 'expired' && (
-          <div className="p-3 bg-red-100 rounded-lg flex items-start gap-2">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-800 font-medium">{t('contractRenewal', lang)}</p>
+          <div className="flex items-center gap-1.5 px-2 py-1 bg-red-50 rounded-lg">
+            <AlertCircle className="w-3 h-3 text-red-500 flex-shrink-0" />
+            <p className="text-[0.7rem] text-red-700 font-medium">{t('contractRenewal', lang)}</p>
           </div>
         )}
 
-        {/* Actions Row */}
-        <div className="flex items-center gap-3 pt-2">
-          <button
-            onClick={onView}
-            className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-          >
-            <Eye className="w-4 h-4" />
-            <span className="text-sm">{t('view', lang)}</span>
+        {/* Action buttons */}
+        <div className="flex gap-2 pt-0.5">
+          <button onClick={onView}
+            className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-1.5 rounded-lg text-[0.75rem] font-medium transition-colors flex items-center justify-center gap-1">
+            <Eye className="w-3.5 h-3.5" />{t('view', lang)}
           </button>
-          <button
-            onClick={onEdit}
-            className="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-700 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-          >
-            <Pencil className="w-4 h-4" />
-            <span className="text-sm">{t('edit', lang)}</span>
+          <button onClick={onEdit}
+            className="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-700 py-1.5 rounded-lg text-[0.75rem] font-medium transition-colors flex items-center justify-center gap-1">
+            <Pencil className="w-3.5 h-3.5" />{t('edit', lang)}
           </button>
-          <button
-            onClick={onAddHive}
-            className="flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-          >
-            <HiveIcon className="w-4 h-4" />
-            <span className="text-sm">{t('addHive', lang)}</span>
+          <button onClick={onAddHive}
+            className="flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 py-1.5 rounded-lg text-[0.75rem] font-medium transition-colors flex items-center justify-center gap-1">
+            <HiveIcon className="w-3.5 h-3.5" />{t('addHive', lang)}
           </button>
         </div>
       </div>

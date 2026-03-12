@@ -75,6 +75,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [error, setError] = useState('');
 
   const { register, handleSubmit, watch, setValue, formState: { errors }, trigger } = useForm<FormData>({ mode: 'onBlur' });
@@ -90,7 +91,20 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
   const handleNext = async () => {
     if (currentStep === 1) {
       const valid = await trigger(['fullName', 'phoneNumber', 'nicNumber', 'email']);
-      if (valid) setCurrentStep(2);
+      if (valid) {
+        setIsCheckingEmail(true);
+        setError('');
+        try {
+          const exists = await authService.checkEmailExists(watch('email'));
+          if (exists) {
+            setError(t('emailAlreadyRegistered', selectedLanguage));
+            setIsCheckingEmail(false);
+            return;
+          }
+        } catch { /* ignore, let backend catch it */ }
+        setIsCheckingEmail(false);
+        setCurrentStep(2);
+      }
     } else if (currentStep === 2) {
       const valid = await trigger(['preferredLanguage', 'ageGroup']);
       if (valid) setCurrentStep(3);
@@ -119,8 +133,6 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
         role: 'landowner',
         known_bee_allergy: 'no',
       });
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user');
       onSuccess();
     } catch (e: any) {
       setError(
@@ -167,6 +179,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
 
         {/* Form Body */}
         <div className="flex-1 overflow-y-auto px-4 pb-2">
+          <div className="min-h-full flex flex-col justify-center py-2">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5">
 
             {/* ── Step 1: Personal Details ── */}
@@ -199,6 +212,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
                   <input {...register('email', { required: t('emailRequired', selectedLanguage) })}
                     className={ic} placeholder={t('emailPhonePlaceholder', selectedLanguage)} />
                   {errors.email && <p className={ec}>{errors.email.message}</p>}
+                  {error && <div className="bg-red-50 border border-red-200 rounded-lg p-2.5"><p className="text-red-700 text-[0.75rem] font-medium">{error}</p></div>}
                 </div>
               </>
             )}
@@ -347,14 +361,15 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
               </>
             )}
           </form>
+          </div>
         </div>
 
         {/* Navigation Buttons */}
         <div className="px-4 pb-4 pt-2 space-y-2 shrink-0">
           {currentStep < TOTAL_STEPS ? (
-            <button onClick={handleNext}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg shadow font-medium text-[0.9rem] flex items-center justify-center gap-1.5">
-              {t('next', selectedLanguage)} <ArrowRight className="w-4 h-4" />
+            <button onClick={handleNext} disabled={isCheckingEmail}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg shadow font-medium text-[0.9rem] flex items-center justify-center gap-1.5 disabled:opacity-60">
+              {isCheckingEmail ? t('loading', selectedLanguage) : <>{t('next', selectedLanguage)} <ArrowRight className="w-4 h-4" /></>}
             </button>
           ) : (
             <button onClick={handleSubmit(onSubmit)} disabled={isSubmitting}
