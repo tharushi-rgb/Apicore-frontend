@@ -7,6 +7,7 @@ import { planningService } from '../services/planning';
 import { expensesService } from '../services/finance';
 import { authService } from '../services/auth';
 import { Leaf, Home, Hexagon as HiveIcon, MapPin, TrendingUp, AlertTriangle, Package } from 'lucide-react';
+import { t } from '../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -84,14 +85,14 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
   const kpiCards = useMemo(() => {
     if (!data) return [];
     return [
-      { title: 'Apiaries', value: data.stats.totalApiaries.toString(), color: 'emerald' as const, alert: false },
-      { title: 'Total Hives', value: data.stats.totalHives.toString(), color: 'amber' as const, alert: false },
-      { title: 'Active', value: data.stats.activeHives.toString(), color: 'blue' as const, alert: false },
-      { title: 'Not Insp.', value: notInspected14d.toString(), color: 'red' as const, alert: notInspected14d > 0 },
-      { title: 'Expenses', value: `Rs.${expenses.reduce((s: number, e: any) => s + (e.amount || 0), 0).toFixed(0)}`, color: 'red' as const, alert: false },
-      { title: 'Active Api.', value: String(data.stats.activeApiaries || 0), color: 'emerald' as const, alert: false },
+      { title: t('totalApiaries', selectedLanguage), value: data.stats.totalApiaries.toString(), color: 'emerald' as const, alert: false },
+      { title: t('totalHives', selectedLanguage), value: data.stats.totalHives.toString(), color: 'amber' as const, alert: false },
+      { title: t('activeHives', selectedLanguage), value: data.stats.activeHives.toString(), color: 'blue' as const, alert: false },
+      { title: t('notInspected', selectedLanguage), value: notInspected14d.toString(), color: 'red' as const, alert: notInspected14d > 0 },
+      { title: t('expenses', selectedLanguage), value: `Rs.${expenses.reduce((s: number, e: any) => s + (e.amount || 0), 0).toFixed(0)}`, color: 'red' as const, alert: false },
+      { title: t('activeApiaries', selectedLanguage), value: String(data.stats.activeApiaries || 0), color: 'emerald' as const, alert: false },
     ];
-  }, [data, notInspected14d, expenses]);
+  }, [data, notInspected14d, expenses, selectedLanguage]);
 
   const handleNavigate = (tab: NavTab) => {
     onNavigate(tab);
@@ -106,6 +107,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         onNavigate={handleNavigate}
         onClose={() => setIsSidebarOpen(false)}
         onLogout={onLogout}
+        lang={selectedLanguage}
       />
 
       <div className="h-full overflow-y-auto pb-24">
@@ -139,35 +141,35 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
 
             {/* Queen Age Risk Section */}
             <div className="bg-white rounded-xl p-3 shadow-sm">
-              <h2 className="text-[0.875rem] font-bold text-stone-800 mb-3">Queen Age Risk Status</h2>
+              <h2 className="text-[0.875rem] font-bold text-stone-800 mb-3">{t('queenAgeRisk', selectedLanguage)}</h2>
 
               {/* Risk Tabs */}
               <div className="flex gap-1.5 mb-3">
                 <button onClick={() => setQueenRiskView('low')}
                   className={`flex-1 py-1.5 px-2 rounded-lg text-[0.75rem] font-medium transition-colors ${queenRiskView === 'low' ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
-                  Low Risk
+                  {t('lowRisk', selectedLanguage)}
                 </button>
                 <button onClick={() => setQueenRiskView('medium')}
                   className={`flex-1 py-1.5 px-2 rounded-lg text-[0.75rem] font-medium transition-colors ${queenRiskView === 'medium' ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'}`}>
-                  Medium
+                  {t('mediumRisk', selectedLanguage)}
                 </button>
                 <button onClick={() => setQueenRiskView('high')}
                   className={`flex-1 py-1.5 px-2 rounded-lg text-[0.75rem] font-medium transition-colors ${queenRiskView === 'high' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-700 hover:bg-red-100'}`}>
-                  High Risk
+                  {t('highRisk', selectedLanguage)}
                 </button>
               </div>
 
               {/* Risk Info */}
               <div className={`p-3 rounded-lg mb-3 ${queenRiskView === 'low' ? 'bg-emerald-50 border border-emerald-200' : queenRiskView === 'medium' ? 'bg-amber-50 border border-amber-200' : 'bg-red-50 border border-red-200'}`}>
-                {queenRiskView === 'low' && <><p className="text-emerald-900 font-medium mb-0.5 text-[0.8rem]">Age: &lt; 1.5 years • Healthy</p><p className="text-emerald-700 text-[0.75rem]">No action required</p></>}
-                {queenRiskView === 'medium' && <><p className="text-amber-900 font-medium mb-0.5 text-[0.8rem]">Age: 1.5 – 2.5 years • Monitor</p><p className="text-amber-700 text-[0.75rem]">Plan queen replacement</p></>}
-                {queenRiskView === 'high' && <><p className="text-red-900 font-medium mb-0.5 text-[0.8rem]">Age: &gt; 2.5 years • Critical</p><p className="text-red-700 text-[0.75rem]">Change queen soon</p></>}
+                {queenRiskView === 'low' && <><p className="text-emerald-900 font-medium mb-0.5 text-[0.8rem]">{t('queenLowDesc', selectedLanguage)}</p><p className="text-emerald-700 text-[0.75rem]">{t('queenLowAction', selectedLanguage)}</p></>}
+                {queenRiskView === 'medium' && <><p className="text-amber-900 font-medium mb-0.5 text-[0.8rem]">{t('queenMedDesc', selectedLanguage)}</p><p className="text-amber-700 text-[0.75rem]">{t('queenMedAction', selectedLanguage)}</p></>}
+                {queenRiskView === 'high' && <><p className="text-red-900 font-medium mb-0.5 text-[0.8rem]">{t('queenHighDesc', selectedLanguage)}</p><p className="text-red-700 text-[0.75rem]">{t('queenHighAction', selectedLanguage)}</p></>}
               </div>
 
               {/* Hive Records */}
               <div className="space-y-2">
                 {queenAgeData[queenRiskView].length === 0 ? (
-                  <p className="text-sm text-stone-500 text-center py-4">No hives in this category</p>
+                  <p className="text-sm text-stone-500 text-center py-4">{t('noHivesInCategory', selectedLanguage)}</p>
                 ) : (
                   queenAgeData[queenRiskView].map((hive) => (
                     <div key={hive.hiveId} className="flex items-center justify-between p-2.5 bg-stone-50 rounded-lg">
@@ -187,8 +189,8 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
             {/* Best Performing Hives */}
             {hiveChartData.length > 0 && (
               <div className="bg-white rounded-xl p-3 shadow-sm">
-                <h2 className="text-[0.875rem] font-bold text-stone-800 mb-2">Hive Overview</h2>
-                <p className="text-[0.75rem] text-stone-600 mb-3">Your registered hives</p>
+                <h2 className="text-[0.875rem] font-bold text-stone-800 mb-2">{t('hiveOverview', selectedLanguage)}</h2>
+                <p className="text-[0.75rem] text-stone-600 mb-3">{t('registeredHives', selectedLanguage)}</p>
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={hiveChartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -204,18 +206,18 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
             {/* Forage Calendar */}
             <div className="bg-white rounded-xl p-3 shadow-sm">
               <h2 className="text-[0.875rem] font-bold text-stone-800 mb-3 flex items-center gap-2">
-                <Leaf className="w-4 h-4 text-emerald-600" /> Forage Calendar
+                <Leaf className="w-4 h-4 text-emerald-600" /> {t('forageCalendar', selectedLanguage)}
               </h2>
 
               {/* Forage Tabs */}
               <div className="flex gap-1.5 mb-3">
                 <button onClick={() => setForageTab('current')}
                   className={`flex-1 py-1.5 px-3 rounded-lg text-[0.75rem] font-medium transition-colors ${forageTab === 'current' ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}>
-                  Current Blooming
+                  {t('currentBlooming', selectedLanguage)}
                 </button>
                 <button onClick={() => setForageTab('upcoming')}
                   className={`flex-1 py-1.5 px-3 rounded-lg text-[0.75rem] font-medium transition-colors ${forageTab === 'upcoming' ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}>
-                  Upcoming
+                  {t('upcoming', selectedLanguage)}
                 </button>
               </div>
 
@@ -237,7 +239,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-stone-500 text-sm py-4">No major forage plants currently blooming</p>
+                  <p className="text-center text-stone-500 text-sm py-4">{t('noForageBlooming', selectedLanguage)}</p>
                 )
               ) : (
                 upcomingForage.length > 0 ? (
@@ -254,31 +256,31 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-stone-500 text-sm py-4">No upcoming forage data</p>
+                  <p className="text-center text-stone-500 text-sm py-4">{t('noForageBlooming', selectedLanguage)}</p>
                 )
               )}
 
               <button onClick={() => onNavigate('planning')} className="w-full mt-4 bg-emerald-50 text-emerald-700 py-2 rounded-lg font-medium hover:bg-emerald-100 transition-colors text-sm">
-                View Full Forage Analysis
+                {t('viewFullForage', selectedLanguage)}
               </button>
             </div>
 
             {/* Quick Actions */}
             <div className="bg-white rounded-xl p-3 shadow-sm">
-              <h2 className="text-[0.875rem] font-bold text-stone-800 mb-3">Quick Actions</h2>
+              <h2 className="text-[0.875rem] font-bold text-stone-800 mb-3">{t('quickActions', selectedLanguage)}</h2>
               <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => onNavigate('apiaries')} className="bg-emerald-50 text-emerald-700 py-2.5 rounded-xl text-[0.8rem] font-medium hover:bg-emerald-100 transition-colors">View Apiaries</button>
-                <button onClick={() => onNavigate('hives')} className="bg-amber-50 text-amber-700 py-2.5 rounded-xl text-[0.8rem] font-medium hover:bg-amber-100 transition-colors">View Hives</button>
-                <button onClick={() => onNavigate('planning')} className="bg-blue-50 text-blue-700 py-2.5 rounded-xl text-[0.8rem] font-medium hover:bg-blue-100 transition-colors">Planning</button>
-                <button onClick={() => onNavigate('finance')} className="bg-purple-50 text-purple-700 py-2.5 rounded-xl text-[0.8rem] font-medium hover:bg-purple-100 transition-colors">Finance</button>
+                <button onClick={() => onNavigate('apiaries')} className="bg-emerald-50 text-emerald-700 py-2.5 rounded-xl text-[0.8rem] font-medium hover:bg-emerald-100 transition-colors">{t('viewApiaries', selectedLanguage)}</button>
+                <button onClick={() => onNavigate('hives')} className="bg-amber-50 text-amber-700 py-2.5 rounded-xl text-[0.8rem] font-medium hover:bg-amber-100 transition-colors">{t('viewHives', selectedLanguage)}</button>
+                <button onClick={() => onNavigate('planning')} className="bg-blue-50 text-blue-700 py-2.5 rounded-xl text-[0.8rem] font-medium hover:bg-blue-100 transition-colors">{t('planning', selectedLanguage)}</button>
+                <button onClick={() => onNavigate('finance')} className="bg-purple-50 text-purple-700 py-2.5 rounded-xl text-[0.8rem] font-medium hover:bg-purple-100 transition-colors">{t('finance', selectedLanguage)}</button>
               </div>
             </div>
 
             {/* Recent Apiaries */}
             <div className="bg-white rounded-xl p-3 shadow-sm">
-              <h2 className="text-[0.875rem] font-bold text-stone-800 mb-3">Recent Apiaries</h2>
+              <h2 className="text-[0.875rem] font-bold text-stone-800 mb-3">{t('recentApiaries', selectedLanguage)}</h2>
               {apiaries.length === 0 ? (
-                <p className="text-stone-500 text-center py-4">No apiaries yet. Create your first apiary!</p>
+                <p className="text-stone-500 text-center py-4">{t('noApiaries', selectedLanguage)}</p>
               ) : (
                 <div className="space-y-3">
                   {apiaries.slice(0, 5).map((a: any) => (

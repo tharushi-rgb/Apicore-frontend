@@ -1,4 +1,5 @@
 import { Hexagon } from 'lucide-react';
+import { t } from '../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 
@@ -32,10 +33,10 @@ export function SplashScreen({ selectedLanguage, onLanguageChange, onGetStarted,
               </div>
             </div>
             <h1 className="text-4xl font-bold text-stone-800 mb-3 tracking-tight italic">ApiCore</h1>
-            <p className="text-stone-600 text-center mb-6 max-w-xs">Smart Beekeeping Management System</p>
+            <p className="text-stone-600 text-center mb-6 max-w-xs">{t('splashSubtitle', selectedLanguage)}</p>
             <div className="flex items-center gap-2 text-emerald-700">
               <span className="w-8 h-[2px] bg-emerald-700" />
-              <p className="font-medium">Plan. Monitor. Protect. Grow.</p>
+              <p className="font-medium">{t('splashTagline', selectedLanguage)}</p>
               <span className="w-8 h-[2px] bg-emerald-700" />
             </div>
           </div>
@@ -43,13 +44,13 @@ export function SplashScreen({ selectedLanguage, onLanguageChange, onGetStarted,
         <div className="px-[6%] pb-[2rem] space-y-6 shrink-0">
           <div className="space-y-3">
             <button onClick={onGetStarted} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl shadow-lg hover:shadow-xl transition-all min-h-[56px] font-medium text-lg">
-              Get Started
+              {t('getStarted', selectedLanguage)}
             </button>
             <button onClick={onLogin} className="w-full bg-white hover:bg-stone-50 text-stone-700 py-4 rounded-xl border-2 border-stone-300 hover:border-stone-400 transition-all min-h-[56px] font-medium text-lg">
-              Login
+              {t('login', selectedLanguage)}
             </button>
           </div>
-          <p className="text-stone-600 text-sm text-center">Designed for Sri Lankan Beekeepers</p>
+          <p className="text-stone-600 text-sm text-center">{t('splashFooter', selectedLanguage)}</p>
         </div>
       </div>
     </div>

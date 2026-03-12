@@ -6,6 +6,7 @@ import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
 import { supabase } from '../services/supabaseClient';
 import { expensesService, incomeService } from '../services/finance';
+import { t as tr } from '../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -103,13 +104,13 @@ export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate
   }, [user?.id]);
 
   const tabs = [
-    { key: 'overview', label: 'Overview' },
-    { key: 'hives', label: 'Hives' },
+    { key: 'overview', label: tr('overview', selectedLanguage) },
+    { key: 'hives', label: tr('hives', selectedLanguage) },
   ] as const;
 
   return (
     <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab="dashboard" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+      <MobileSidebar isOpen={isSidebarOpen} activeTab="dashboard" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
 
       <div className="h-full overflow-y-auto pb-8">
         {/* Header */}
@@ -119,8 +120,8 @@ export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate
           <div className="px-4 pb-3 border-t border-stone-100 flex items-center gap-3">
             <button onClick={onBack} className="p-2 hover:bg-stone-100 rounded-lg"><ArrowLeft className="w-5 h-5 text-stone-700" /></button>
             <div>
-              <h1 className="text-xl font-bold text-stone-800">Analytics & Reports</h1>
-              <p className="text-stone-500 text-xs mt-0.5">Performance insights for your beekeeping</p>
+              <h1 className="text-xl font-bold text-stone-800">{tr('analyticsReports', selectedLanguage)}</h1>
+              <p className="text-stone-500 text-xs mt-0.5">{tr('performanceInsights', selectedLanguage)}</p>
             </div>
           </div>
           {/* Tab bar */}
@@ -143,16 +144,16 @@ export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate
             {activeTab === 'overview' && (
               <>
                 <div className="grid grid-cols-2 gap-3">
-                  <KpiCard label="Total Harvest" value={`${overviewStats.totalHarvest.toFixed(1)} kg`} color="amber" icon={<Droplets className="w-5 h-5" />} />
-                  <KpiCard label="Total Income" value={`LKR ${overviewStats.totalIncome.toLocaleString()}`} color="emerald" icon={<TrendingUp className="w-5 h-5" />} />
-                  <KpiCard label="Total Expenses" value={`LKR ${overviewStats.totalExpenses.toLocaleString()}`} color="red" icon={<DollarSign className="w-5 h-5" />} />
-                  <KpiCard label="Net Profit" value={`LKR ${overviewStats.netProfit.toLocaleString()}`} color={overviewStats.netProfit >= 0 ? 'green' : 'red'} icon={<Award className="w-5 h-5" />} />
+                  <KpiCard label={tr('totalHarvest', selectedLanguage)} value={`${overviewStats.totalHarvest.toFixed(1)} kg`} color="amber" icon={<Droplets className="w-5 h-5" />} />
+                  <KpiCard label={tr('totalIncome', selectedLanguage)} value={`LKR ${overviewStats.totalIncome.toLocaleString()}`} color="emerald" icon={<TrendingUp className="w-5 h-5" />} />
+                  <KpiCard label={tr('totalExpenses', selectedLanguage)} value={`LKR ${overviewStats.totalExpenses.toLocaleString()}`} color="red" icon={<DollarSign className="w-5 h-5" />} />
+                  <KpiCard label={tr('netProfit', selectedLanguage)} value={`LKR ${overviewStats.netProfit.toLocaleString()}`} color={overviewStats.netProfit >= 0 ? 'green' : 'red'} icon={<Award className="w-5 h-5" />} />
                 </div>
 
                 {/* Hive Status Donut */}
                 {hiveStats.length > 0 && (
                   <div className="bg-white rounded-2xl shadow-sm p-5">
-                    <h3 className="font-bold text-stone-800 mb-4">Hive Status Distribution</h3>
+                    <h3 className="font-bold text-stone-800 mb-4">{tr('hiveStatusDist', selectedLanguage)}</h3>
                     <div className="flex items-center gap-4">
                       <ResponsiveContainer width={120} height={120}>
                         <PieChart>

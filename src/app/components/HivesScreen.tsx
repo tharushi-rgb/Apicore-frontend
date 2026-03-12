@@ -15,6 +15,7 @@ import { MobileHeader } from './MobileHeader';
 import { MobileSidebar } from './MobileSidebar';
 import { hivesService, type Hive } from '../services/hives';
 import { authService } from '../services/auth';
+import { t } from '../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -41,11 +42,11 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
   }, []);
 
   const filterOptions = [
-    { label: 'All', value: 'all' },
-    { label: 'Active', value: 'active' },
-    { label: 'Queenless', value: 'queenless' },
-    { label: 'Inactive', value: 'inactive' },
-    { label: 'Absconded', value: 'absconded' },
+    { label: t('all', selectedLanguage), value: 'all' },
+    { label: t('active', selectedLanguage), value: 'active' },
+    { label: t('queenless', selectedLanguage), value: 'queenless' },
+    { label: t('inactive', selectedLanguage), value: 'inactive' },
+    { label: t('absconded', selectedLanguage), value: 'absconded' },
   ];
 
   const calculateDaysAgo = (dateStr?: string) => {
@@ -56,10 +57,10 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
 
   const getTags = (h: Hive) => {
     const tags: string[] = [];
-    if (h.pest_detected) tags.push('Pest Active');
-    if (h.inspection_overdue) tags.push('Needs Inspection');
-    if (h.queen_age_risk === 'high') tags.push('Queen Change Due');
-    if (h.status === 'queenless') tags.push('Queenless');
+    if (h.pest_detected) tags.push(t('pestActive', selectedLanguage));
+    if (h.inspection_overdue) tags.push(t('needsInspection', selectedLanguage));
+    if (h.queen_age_risk === 'high') tags.push(t('queenChangeDue', selectedLanguage));
+    if (h.status === 'queenless') tags.push(t('queenless', selectedLanguage));
     return tags;
   };
 
@@ -79,7 +80,7 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
 
   const handleDeleteHive = async () => {
     if (!activeHiveId) return;
-    const confirmed = window.confirm('Delete this hive? This action cannot be undone.');
+    const confirmed = window.confirm(t('deleteConfirm', selectedLanguage));
     if (!confirmed) return;
     try {
       await hivesService.delete(activeHiveId);
@@ -102,14 +103,14 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
 
   return (
     <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab={activeTab} onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+      <MobileSidebar isOpen={isSidebarOpen} activeTab={activeTab} onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
 
       {/* Filter Overlay */}
       {showFilters && (
         <div className="absolute inset-0 bg-black/50 z-40" onClick={() => setShowFilters(false)}>
           <div className="absolute top-20 right-4 left-4 max-w-md mx-auto bg-white rounded-2xl shadow-2xl p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-stone-800">Filter Hives</h2>
+              <h2 className="text-xl font-bold text-stone-800">{t('filterHives', selectedLanguage)}</h2>
               <button onClick={() => setShowFilters(false)} className="p-1 hover:bg-stone-100 rounded-lg"><X className="w-5 h-5" /></button>
             </div>
             <div className="space-y-3">
@@ -142,13 +143,13 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
                 }}
                 className="w-full text-left px-4 py-3 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700"
               >
-                Edit Hive
+                {t('editHive', selectedLanguage)}
               </button>
               <button onClick={handleDeleteHive} className="w-full text-left px-4 py-3 rounded-lg bg-red-50 hover:bg-red-100 text-red-700">
-                Delete Hive
+                {t('deleteHive', selectedLanguage)}
               </button>
               <button onClick={() => setShowHiveActions(false)} className="w-full text-left px-4 py-3 rounded-lg bg-stone-50 hover:bg-stone-100 text-stone-600">
-                Cancel
+                {t('cancel', selectedLanguage)}
               </button>
             </div>
           </div>
@@ -161,20 +162,20 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
           <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
             isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
           <div className="px-6 pb-4 border-t border-stone-100">
-            <h1 className="text-2xl font-bold text-stone-800">Hives</h1>
-            <p className="text-stone-500 text-sm mt-1">All registered hives</p>
+            <h1 className="text-2xl font-bold text-stone-800">{t('hives', selectedLanguage)}</h1>
+            <p className="text-stone-500 text-sm mt-1">{t('allRegisteredHives', selectedLanguage)}</p>
           </div>
         </div>
 
         <div className="px-4 py-4 space-y-4">
           {/* Summary Cards - 6-card Grid */}
           <div className="grid grid-cols-3 gap-2">
-            <SummaryCard title="Total" value={totalHives.toString()} color="emerald" />
-            <SummaryCard title="Active" value={activeHives.toString()} color="amber" />
-            <SummaryCard title="Queenless" value={queenlessHives.toString()} color="red" alert />
-            <SummaryCard title="In Apiaries" value={apiaryLinkedHives.toString()} color="blue" />
-            <SummaryCard title="Standalone" value={standaloneHives.toString()} color="stone" />
-            <SummaryCard title="Pests" value={pestDetectedHives.toString()} color="orange" alert={pestDetectedHives > 0} />
+            <SummaryCard title={t('total', selectedLanguage)} value={totalHives.toString()} color="emerald" />
+            <SummaryCard title={t('active', selectedLanguage)} value={activeHives.toString()} color="amber" />
+            <SummaryCard title={t('queenless', selectedLanguage)} value={queenlessHives.toString()} color="red" alert />
+            <SummaryCard title={t('inApiaries', selectedLanguage)} value={apiaryLinkedHives.toString()} color="blue" />
+            <SummaryCard title={t('standalone', selectedLanguage)} value={standaloneHives.toString()} color="stone" />
+            <SummaryCard title={t('pests', selectedLanguage)} value={pestDetectedHives.toString()} color="orange" alert={pestDetectedHives > 0} />
           </div>
 
           {/* Search & Filter */}
@@ -185,7 +186,7 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by Hive ID or Apiary"
+                placeholder={t('searchHives', selectedLanguage)}
                 className="w-full pl-10 pr-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
               />
             </div>
@@ -198,10 +199,10 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
           {filtered.length === 0 ? (
             <div className="bg-white rounded-2xl p-12 text-center">
               <HiveIcon className="w-16 h-16 text-stone-300 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-stone-800 mb-2">No hives added yet</h2>
-              <p className="text-stone-600 mb-6">Add your first hive to start tracking inspections, queen health, pest activity, and harvests</p>
+              <h2 className="text-xl font-bold text-stone-800 mb-2">{t('noHivesAdded2', selectedLanguage)}</h2>
+              <p className="text-stone-600 mb-6">{selectedLanguage === 'en' ? 'Add your first hive to start tracking inspections, queen health, pest activity, and harvests' : t('addHive', selectedLanguage)}</p>
               <button onClick={onCreateHive} className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-medium inline-flex items-center gap-2 transition-colors">
-                <Plus className="w-5 h-5" /> Add Hive
+                <Plus className="w-5 h-5" /> {t('addHive', selectedLanguage)}
               </button>
             </div>
           ) : (
@@ -213,21 +214,21 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
                 const hasWarning = hive.status === 'queenless' || hive.queen_age_risk === 'high' || !!hive.pest_detected || isOverdue;
 
                 const statusConfig: Record<string, { label: string; textColor: string; bgColor: string }> = {
-                  active: { label: 'Active', textColor: 'text-emerald-700', bgColor: 'bg-emerald-50' },
-                  queenless: { label: 'Queenless', textColor: 'text-amber-700', bgColor: 'bg-amber-50' },
-                  inactive: { label: 'Inactive', textColor: 'text-stone-700', bgColor: 'bg-stone-50' },
-                  absconded: { label: 'Absconded', textColor: 'text-red-700', bgColor: 'bg-red-50' },
+                  active: { label: t('active', selectedLanguage), textColor: 'text-emerald-700', bgColor: 'bg-emerald-50' },
+                  queenless: { label: t('queenless', selectedLanguage), textColor: 'text-amber-700', bgColor: 'bg-amber-50' },
+                  inactive: { label: t('inactive', selectedLanguage), textColor: 'text-stone-700', bgColor: 'bg-stone-50' },
+                  absconded: { label: t('absconded', selectedLanguage), textColor: 'text-red-700', bgColor: 'bg-red-50' },
                 };
                 const config = statusConfig[hive.status] || statusConfig.active;
 
                 const queenAgeRiskConfig: Record<string, { label: string; color: string }> = {
-                  low: { label: 'Healthy', color: 'bg-emerald-100 text-emerald-700' },
-                  medium: { label: 'Monitor', color: 'bg-amber-100 text-amber-700' },
-                  high: { label: 'Critical', color: 'bg-red-100 text-red-700' },
+                  low: { label: t('healthy', selectedLanguage), color: 'bg-emerald-100 text-emerald-700' },
+                  medium: { label: t('monitor', selectedLanguage), color: 'bg-amber-100 text-amber-700' },
+                  high: { label: t('critical', selectedLanguage), color: 'bg-red-100 text-red-700' },
                 };
 
                 const hiveTypeLabels: Record<string, string> = { box: 'Standard Box Hive', pot: 'Pot Hive', log: 'Log Hive', stingless: 'Stingless Hive' };
-                const colonyStrengthLabels: Record<string, string> = { weak: 'Weak', normal: 'Normal', strong: 'Strong' };
+                const colonyStrengthLabels: Record<string, string> = { weak: t('weak', selectedLanguage), normal: t('normal', selectedLanguage), strong: t('strong', selectedLanguage) };
 
                 return (
                   <div key={hive.id} className={`bg-white rounded-xl shadow-sm overflow-hidden ${hasWarning ? 'border-l-4 border-red-500' : ''}`}>
@@ -243,7 +244,7 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
                       {/* Location Type */}
                       <div className="flex flex-wrap items-center gap-2 text-sm">
                         <span className={`px-2 py-1 rounded text-xs font-medium ${hive.location_type === 'apiary-linked' ? 'bg-blue-100 text-blue-700' : 'bg-stone-200 text-stone-700'}`}>
-                          {hive.location_type === 'apiary-linked' ? 'Apiary-Linked' : 'Standalone'}
+                          {hive.location_type === 'apiary-linked' ? t('apiaryLinked', selectedLanguage) : t('standalone', selectedLanguage)}
                         </span>
                         <span className="text-stone-600">•</span>
                         <span className="text-stone-700 font-medium">{hive.apiary_name || 'Standalone Hive'}</span>
@@ -255,12 +256,12 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
                       <div className="p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-xs text-purple-700 mb-1">Queen Status</p>
-                            <p className="font-bold text-purple-900">{hive.queen_present ? 'Present' : 'Queenless'}</p>
+                            <p className="text-xs text-purple-700 mb-1">{t('queenStatus', selectedLanguage)}</p>
+                            <p className="font-bold text-purple-900">{hive.queen_present ? t('queenPresent', selectedLanguage) : t('queenless', selectedLanguage)}</p>
                           </div>
                           {hive.queen_present && hive.queen_age != null && (
                             <div className="text-right">
-                              <p className="text-xs text-purple-700 mb-1">Queen Age</p>
+                              <p className="text-xs text-purple-700 mb-1">{t('queenAge', selectedLanguage)}</p>
                               <div className="flex items-center gap-2">
                                 <p className="font-bold text-purple-900">{hive.queen_age} yrs</p>
                                 {hive.queen_age_risk && queenAgeRiskConfig[hive.queen_age_risk] && (
@@ -277,11 +278,11 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
                       {/* Colony & Inspection */}
                       <div className="grid grid-cols-2 gap-3">
                         <div className="p-3 bg-amber-50 rounded-lg">
-                          <p className="text-xs text-amber-700 mb-1">Colony Strength</p>
+                          <p className="text-xs text-amber-700 mb-1">{t('colonyStrength', selectedLanguage)}</p>
                           <p className="font-bold text-amber-900 capitalize">{colonyStrengthLabels[hive.colony_strength || 'normal'] || hive.colony_strength || 'Normal'}</p>
                         </div>
                         <div className={`p-3 rounded-lg ${isOverdue ? 'bg-red-50' : 'bg-emerald-50'}`}>
-                          <p className={`text-xs mb-1 ${isOverdue ? 'text-red-700' : 'text-emerald-700'}`}>Last Inspection</p>
+                          <p className={`text-xs mb-1 ${isOverdue ? 'text-red-700' : 'text-emerald-700'}`}>{t('lastInspection', selectedLanguage)}</p>
                           <div className="flex items-center gap-1">
                             <p className={`font-bold ${isOverdue ? 'text-red-900' : 'text-emerald-900'}`}>
                               {hive.last_inspection_date ? `${daysAgo} days ago` : 'N/A'}
@@ -318,13 +319,13 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
                       {/* Actions */}
                       <div className="flex items-center gap-3 pt-2">
                         <button onClick={() => onViewHive(hive.id)} className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
-                          <Eye className="w-4 h-4" /><span className="text-sm">View</span>
+                          <Eye className="w-4 h-4" /><span className="text-sm">{t('view', selectedLanguage)}</span>
                         </button>
                         <button
                           onClick={() => onEditHive?.(hive)}
                           className="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-700 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                         >
-                          <Pencil className="w-4 h-4" /><span className="text-sm">Edit</span>
+                          <Pencil className="w-4 h-4" /><span className="text-sm">{t('edit', selectedLanguage)}</span>
                         </button>
                         <button
                           onClick={() => { setActiveHiveId(hive.id); setShowHiveActions(true); }}

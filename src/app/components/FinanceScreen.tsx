@@ -17,6 +17,7 @@ import {
 import { MobileHeader } from './MobileHeader';
 import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
+import { t as tr } from '../i18n';
 import { expensesService, type Expense } from '../services/finance';
 import { hivesService } from '../services/hives';
 import { apiariesService } from '../services/apiaries';
@@ -133,7 +134,7 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
   return (
     <div className="h-full bg-gradient-to-b from-red-50 via-amber-50 to-stone-50 relative">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab={activeTab} onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+      <MobileSidebar isOpen={isSidebarOpen} activeTab={activeTab} onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
 
       <div className="h-full overflow-y-auto pb-8">
         {/* Header */}
@@ -141,8 +142,8 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
           <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
             isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
           <div className="px-6 pb-4 border-t border-stone-100">
-            <h1 className="text-2xl font-bold text-stone-800">Finance</h1>
-            <p className="text-stone-500 text-sm mt-1">Track and manage your apiary expenses</p>
+            <h1 className="text-2xl font-bold text-stone-800">{tr('finance', selectedLanguage)}</h1>
+            <p className="text-stone-500 text-sm mt-1">{tr('trackExpenses', selectedLanguage)}</p>
           </div>
         </div>
 
@@ -153,15 +154,15 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
                 <TrendingDown className="w-5 h-5 opacity-80" />
-                <span className="text-sm opacity-90 font-medium">Total Expenses</span>
+                <span className="text-sm opacity-90 font-medium">{tr('totalExpenses', selectedLanguage)}</span>
               </div>
-              <span className="text-xs opacity-70 bg-white/20 rounded-full px-2 py-0.5">{transactions.length} records</span>
+              <span className="text-xs opacity-70 bg-white/20 rounded-full px-2 py-0.5">{transactions.length} {tr('records', selectedLanguage)}</span>
             </div>
             <p className="text-3xl font-bold mt-1">LKR {totalExpenses.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</p>
 
             {topCategories.length > 0 && (
               <div className="mt-4 pt-4 border-t border-white/20">
-                <p className="text-xs opacity-70 mb-2 font-medium">TOP SPENDING CATEGORIES</p>
+                <p className="text-xs opacity-70 mb-2 font-medium">{tr('topSpending', selectedLanguage)}</p>
                 <div className="space-y-1.5">
                   {topCategories.map(([cat, amount]) => {
                     const pct = totalExpenses > 0 ? Math.round((amount / totalExpenses) * 100) : 0;
@@ -188,7 +189,7 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
           {/* Quick Stats Row */}
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-100">
-              <p className="text-xs text-stone-500 mb-1">This Month</p>
+              <p className="text-xs text-stone-500 mb-1">{tr('thisMonth', selectedLanguage)}</p>
               <p className="text-lg font-bold text-stone-800">
                 LKR {expenseData
                   .filter(e => e.expense_date?.startsWith(new Date().toISOString().slice(0, 7)))
@@ -197,7 +198,7 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
               </p>
             </div>
             <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-100">
-              <p className="text-xs text-stone-500 mb-1">Categories Used</p>
+              <p className="text-xs text-stone-500 mb-1">{tr('categoriesUsed', selectedLanguage)}</p>
               <p className="text-lg font-bold text-stone-800">{Object.keys(categoryTotals).length}</p>
             </div>
           </div>
@@ -209,7 +210,7 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
               className="w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl font-semibold text-base transition-colors flex items-center justify-center gap-3 shadow-sm"
             >
               <ArrowDown className="w-5 h-5" />
-              Record Expense
+              {tr('recordExpense', selectedLanguage)}
             </button>
           ) : (
             <div className="bg-white rounded-2xl shadow-sm p-6 border border-red-100">
@@ -218,7 +219,7 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                   <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
                     <ArrowDown className="w-4 h-4 text-red-600" />
                   </div>
-                  <h2 className="text-lg font-bold text-stone-800">Record Expense</h2>
+                  <h2 className="text-lg font-bold text-stone-800">{tr('recordExpense', selectedLanguage)}</h2>
                 </div>
                 <button onClick={() => { setActiveForm(null); expenseForm.reset(); }} className="p-2 hover:bg-stone-100 rounded-lg">
                   <X className="w-5 h-5 text-stone-600" />
@@ -227,34 +228,34 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
               <form onSubmit={expenseForm.handleSubmit(onSubmitExpense)} className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-stone-700 text-sm font-medium mb-1.5">Date <span className="text-red-500">*</span></label>
+                    <label className="block text-stone-700 text-sm font-medium mb-1.5">{tr('date', selectedLanguage)} <span className="text-red-500">*</span></label>
                     <input type="date" {...expenseForm.register('date', { required: 'Required' })} className="w-full px-3 py-2.5 bg-white border-2 border-stone-200 rounded-xl focus:border-red-400 focus:outline-none text-sm" />
                     {expenseForm.formState.errors.date && <p className="text-red-500 text-xs mt-1">{expenseForm.formState.errors.date.message}</p>}
                   </div>
                   <div>
-                    <label className="block text-stone-700 text-sm font-medium mb-1.5">Amount (LKR) <span className="text-red-500">*</span></label>
+                    <label className="block text-stone-700 text-sm font-medium mb-1.5">{tr('amount', selectedLanguage)} <span className="text-red-500">*</span></label>
                     <input type="number" step="0.01" {...expenseForm.register('amount', { required: 'Required', min: 0 })} className="w-full px-3 py-2.5 bg-white border-2 border-stone-200 rounded-xl focus:border-red-400 focus:outline-none text-sm" placeholder="0.00" />
                     {expenseForm.formState.errors.amount && <p className="text-red-500 text-xs mt-1">{expenseForm.formState.errors.amount.message}</p>}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-stone-700 text-sm font-medium mb-1.5">Expense Type <span className="text-red-500">*</span></label>
+                  <label className="block text-stone-700 text-sm font-medium mb-1.5">{tr('expenseType', selectedLanguage)} <span className="text-red-500">*</span></label>
                   <select {...expenseForm.register('expenseType', { required: 'Required' })} className="w-full px-3 py-2.5 bg-white border-2 border-stone-200 rounded-xl focus:border-red-400 focus:outline-none text-sm">
-                    <option value="">Select type</option>
-                    <option value="feeding">Feeding</option>
-                    <option value="medicine">Medicine / Treatment</option>
-                    <option value="equipment">Equipment</option>
-                    <option value="transport">Transport</option>
-                    <option value="labor">Labor</option>
-                    <option value="rent">Apiary Rent</option>
-                    <option value="other">Other</option>
+                    <option value="">{tr('selectType', selectedLanguage)}</option>
+                    <option value="feeding">{tr('feeding', selectedLanguage)}</option>
+                    <option value="medicine">{tr('medicine', selectedLanguage)}</option>
+                    <option value="equipment">{tr('equipment', selectedLanguage)}</option>
+                    <option value="transport">{tr('transport', selectedLanguage)}</option>
+                    <option value="labor">{tr('labor', selectedLanguage)}</option>
+                    <option value="rent">{tr('rent', selectedLanguage)}</option>
+                    <option value="other">{tr('other', selectedLanguage)}</option>
                   </select>
                   {expenseForm.formState.errors.expenseType && <p className="text-red-500 text-xs mt-1">{expenseForm.formState.errors.expenseType.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-stone-700 text-sm font-medium mb-1.5">Link to</label>
+                  <label className="block text-stone-700 text-sm font-medium mb-1.5">{tr('linkTo', selectedLanguage)}</label>
                   <div className="grid grid-cols-3 gap-2">
                     {(['hive', 'apiary', 'general'] as const).map(t => (
                       <label key={t} className="cursor-pointer">
@@ -265,26 +266,26 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                   </div>
                   {expenseLinkType === 'hive' && (
                     <select {...expenseForm.register('hiveId')} className="mt-2 w-full px-3 py-2.5 bg-white border-2 border-stone-200 rounded-xl focus:border-red-400 focus:outline-none text-sm">
-                      <option value="">Select hive</option>
+                      <option value="">{tr('selectHive', selectedLanguage)}</option>
                       {hives.map(h => <option key={h.id} value={h.id}>{h.name} ({h.apiary})</option>)}
                     </select>
                   )}
                   {expenseLinkType === 'apiary' && (
                     <select {...expenseForm.register('apiaryId')} className="mt-2 w-full px-3 py-2.5 bg-white border-2 border-stone-200 rounded-xl focus:border-red-400 focus:outline-none text-sm">
-                      <option value="">Select apiary</option>
+                      <option value="">{tr('selectApiary', selectedLanguage)}</option>
                       {apiaries.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
                     </select>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-stone-700 text-sm font-medium mb-1.5">Notes</label>
+                  <label className="block text-stone-700 text-sm font-medium mb-1.5">{tr('notes', selectedLanguage)}</label>
                   <textarea {...expenseForm.register('notes')} rows={2} className="w-full px-3 py-2.5 bg-white border-2 border-stone-200 rounded-xl focus:border-red-400 focus:outline-none resize-none text-sm" placeholder="Medicine name, trip purpose, details…" />
                 </div>
 
                 <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={() => { setActiveForm(null); expenseForm.reset(); }} className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-3 rounded-xl font-medium text-sm">Cancel</button>
-                  <button type="submit" className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-medium text-sm">Save Expense</button>
+                  <button type="button" onClick={() => { setActiveForm(null); expenseForm.reset(); }} className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-3 rounded-xl font-medium text-sm">{tr('cancel', selectedLanguage)}</button>
+                  <button type="submit" className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-medium text-sm">{tr('saveExpense', selectedLanguage)}</button>
                 </div>
               </form>
             </div>
@@ -295,7 +296,7 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
             <button onClick={() => setShowFilters(!showFilters)} className="w-full flex items-center justify-between p-4 hover:bg-stone-50 transition-colors">
               <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4 text-stone-500" />
-                <span className="font-medium text-stone-700 text-sm">Search Transactions</span>
+                <span className="font-medium text-stone-700 text-sm">{tr('searchTransactions', selectedLanguage)}</span>
               </div>
               {showFilters ? <ChevronUp className="w-4 h-4 text-stone-500" /> : <ChevronDown className="w-4 h-4 text-stone-500" />}
             </button>

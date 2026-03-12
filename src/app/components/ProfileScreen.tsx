@@ -20,6 +20,7 @@ import { authService } from '../services/auth';
 import { profileService, type Profile } from '../services/profile';
 import { apiariesService } from '../services/apiaries';
 import { hivesService } from '../services/hives';
+import { t } from '../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -120,38 +121,38 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-stone-50 relative">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab={activeTab} onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+      <MobileSidebar isOpen={isSidebarOpen} activeTab={activeTab} onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
 
       {/* Edit Profile Modal */}
       {showEditProfile && (
         <div className="absolute inset-0 bg-black/50 z-40" onClick={() => setShowEditProfile(false)}>
           <div className="absolute top-20 right-4 left-4 max-w-sm mx-auto bg-white rounded-2xl shadow-2xl p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-stone-800">Edit Profile</h2>
+              <h2 className="text-xl font-bold text-stone-800">{t('editProfile', selectedLanguage)}</h2>
               <button onClick={() => setShowEditProfile(false)} className="p-1 hover:bg-stone-100 rounded-lg"><X className="w-5 h-5" /></button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">Name</label>
+                <label className="block text-sm font-medium text-stone-700 mb-2">{t('name', selectedLanguage)}</label>
                 <input type="text" value={editName} onChange={e => setEditName(e.target.value)} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">Email</label>
+                <label className="block text-sm font-medium text-stone-700 mb-2">{t('email', selectedLanguage)}</label>
                 <input type="email" value={editEmail} onChange={e => setEditEmail(e.target.value)} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">Phone</label>
+                <label className="block text-sm font-medium text-stone-700 mb-2">{t('phone', selectedLanguage)}</label>
                 <input type="tel" value={editPhone} onChange={e => setEditPhone(e.target.value)} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">District</label>
+                <label className="block text-sm font-medium text-stone-700 mb-2">{t('district', selectedLanguage)}</label>
                 <input type="text" value={editDistrict} onChange={e => setEditDistrict(e.target.value)} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none" />
               </div>
             </div>
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setShowEditProfile(false)} className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-3 rounded-xl font-medium">Cancel</button>
+              <button onClick={() => setShowEditProfile(false)} className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-3 rounded-xl font-medium">{t('cancel', selectedLanguage)}</button>
               <button onClick={handleSaveProfile} disabled={isSavingProfile} className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-medium disabled:opacity-70">
-                {isSavingProfile ? 'Saving...' : 'Save Changes'}
+                {isSavingProfile ? t('saving', selectedLanguage) : t('saveChanges', selectedLanguage)}
               </button>
             </div>
           </div>
@@ -167,8 +168,8 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
           <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
             isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
           <div className="px-6 pb-4 border-t border-stone-100">
-            <h1 className="text-2xl font-bold text-stone-800">Profile</h1>
-            <p className="text-stone-500 text-sm mt-1">Your account & preferences</p>
+            <h1 className="text-2xl font-bold text-stone-800">{t('profile', selectedLanguage)}</h1>
+            <p className="text-stone-500 text-sm mt-1">{t('yourAccount', selectedLanguage)}</p>
           </div>
         </div>
 
@@ -191,9 +192,9 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                 <h2 className="text-lg font-bold text-stone-800">{profile?.name || 'User'}</h2>
                 <p className="text-amber-600 text-xs font-medium capitalize">{profile?.role || 'beekeeper'}</p>
                 <div className="mt-2 grid grid-cols-1 gap-1.5 text-stone-600">
-                  <div className="flex items-center gap-2"><MapPinned className="w-3.5 h-3.5 flex-shrink-0" /><span className="text-xs">{profile?.district || 'Not set'}</span></div>
-                  <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 flex-shrink-0" /><span className="text-xs">{profile?.phone || 'Not set'}</span></div>
-                  <div className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 flex-shrink-0" /><span className="text-xs truncate">{profile?.email || 'Not set'}</span></div>
+                  <div className="flex items-center gap-2"><MapPinned className="w-3.5 h-3.5 flex-shrink-0" /><span className="text-xs">{profile?.district || t('notSet', selectedLanguage)}</span></div>
+                  <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 flex-shrink-0" /><span className="text-xs">{profile?.phone || t('notSet', selectedLanguage)}</span></div>
+                  <div className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 flex-shrink-0" /><span className="text-xs truncate">{profile?.email || t('notSet', selectedLanguage)}</span></div>
                 </div>
               </div>
             </div>
@@ -201,59 +202,59 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
           {/* Beekeeping Overview */}
           <div className="space-y-2">
-            <h3 className="text-base font-bold text-stone-800 px-1">Beekeeping Overview</h3>
+            <h3 className="text-base font-bold text-stone-800 px-1">{t('beekeepingOverview', selectedLanguage)}</h3>
             <div className="grid grid-cols-3 gap-2">
-              <StatCard label="Apiaries" value={stats.apiaries.toString()} color="emerald" />
-              <StatCard label="Hives" value={stats.hives.toString()} color="amber" />
-              <StatCard label="Clients" value={stats.clients.toString()} color="purple" />
+              <StatCard label={t('apiaries', selectedLanguage)} value={stats.apiaries.toString()} color="emerald" />
+              <StatCard label={t('hives', selectedLanguage)} value={stats.hives.toString()} color="amber" />
+              <StatCard label={t('clients', selectedLanguage)} value={stats.clients.toString()} color="purple" />
             </div>
           </div>
 
           {/* Manage Helpers */}
           {onManageHelpers && profile?.role === 'beekeeper' && (
             <button onClick={onManageHelpers} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
-              <Users className="w-5 h-5" /> Manage Helpers
+              <Users className="w-5 h-5" /> {t('manageHelpers', selectedLanguage)}
             </button>
           )}
 
           {/* Notification Settings */}
           <div className="bg-white rounded-2xl shadow-sm p-6">
-            <h3 className="text-lg font-bold text-stone-800 mb-2">Notification Settings</h3>
-            <p className="text-sm text-stone-600 mb-4">Choose which alerts you want to receive.</p>
+            <h3 className="text-lg font-bold text-stone-800 mb-2">{t('notificationSettings', selectedLanguage)}</h3>
+            <p className="text-sm text-stone-600 mb-4">{t('chooseAlerts', selectedLanguage)}</p>
             <div className="space-y-4">
-              <ToggleSetting label="Queen age alerts" description="Get notified when queen bee needs replacement" checked={notificationSettings.queenAge} onChange={() => handleToggleNotification('queenAge')} />
-              <ToggleSetting label="Pest detection alerts" description="Alerts for pest activity in hives" checked={notificationSettings.pestDetection} onChange={() => handleToggleNotification('pestDetection')} />
-              <ToggleSetting label="Inspection reminders" description="Regular hive inspection schedule reminders" checked={notificationSettings.inspectionReminders} onChange={() => handleToggleNotification('inspectionReminders')} />
-              <ToggleSetting label="Contract expiry alerts" description="Apiary rental contract expiration warnings" checked={notificationSettings.contractExpiry} onChange={() => handleToggleNotification('contractExpiry')} />
+              <ToggleSetting label={t('queenAgeAlerts', selectedLanguage)} description={t('queenReplaceDesc', selectedLanguage)} checked={notificationSettings.queenAge} onChange={() => handleToggleNotification('queenAge')} />
+              <ToggleSetting label={t('pestAlerts', selectedLanguage)} description={t('pestActivityDesc', selectedLanguage)} checked={notificationSettings.pestDetection} onChange={() => handleToggleNotification('pestDetection')} />
+              <ToggleSetting label={t('inspectionReminders', selectedLanguage)} description={t('inspScheduleDesc', selectedLanguage)} checked={notificationSettings.inspectionReminders} onChange={() => handleToggleNotification('inspectionReminders')} />
+              <ToggleSetting label={t('contractAlerts', selectedLanguage)} description={t('contractExpiryDesc', selectedLanguage)} checked={notificationSettings.contractExpiry} onChange={() => handleToggleNotification('contractExpiry')} />
             </div>
           </div>
 
           {/* Data & Privacy */}
           <div className="bg-white rounded-2xl shadow-sm p-6">
-            <h3 className="text-lg font-bold text-stone-800 mb-4">Data & Privacy</h3>
+            <h3 className="text-lg font-bold text-stone-800 mb-4">{t('dataPrivacy', selectedLanguage)}</h3>
             <div className="space-y-3">
-              <DataButton icon={<Download className="w-5 h-5 text-emerald-600" />} iconBg="bg-emerald-100" title="Export My Data" subtitle="Download all your beekeeping data" />
-              <DataButton icon={<FileText className="w-5 h-5 text-blue-600" />} iconBg="bg-blue-100" title="Download Reports" subtitle="Generate activity and financial reports" />
-              <DataButton icon={<Shield className="w-5 h-5 text-amber-600" />} iconBg="bg-amber-100" title="Privacy Policy" subtitle="View our privacy policy" />
-              <DataButton icon={<FileText className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-100" title="Terms & Conditions" subtitle="Read terms and conditions" />
+              <DataButton icon={<Download className="w-5 h-5 text-emerald-600" />} iconBg="bg-emerald-100" title={t('exportData', selectedLanguage)} subtitle={t('exportDataDesc', selectedLanguage)} />
+              <DataButton icon={<FileText className="w-5 h-5 text-blue-600" />} iconBg="bg-blue-100" title={t('downloadReports', selectedLanguage)} subtitle={t('downloadReportsDesc', selectedLanguage)} />
+              <DataButton icon={<Shield className="w-5 h-5 text-amber-600" />} iconBg="bg-amber-100" title={t('privacyPolicy', selectedLanguage)} subtitle={t('privacyPolicyDesc', selectedLanguage)} />
+              <DataButton icon={<FileText className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-100" title={t('termsConditions', selectedLanguage)} subtitle={t('termsDesc', selectedLanguage)} />
             </div>
           </div>
 
           {/* Account Actions */}
           <div className="bg-white rounded-2xl shadow-sm p-6">
-            <h3 className="text-lg font-bold text-stone-800 mb-4">Account Actions</h3>
+            <h3 className="text-lg font-bold text-stone-800 mb-4">{t('accountActions', selectedLanguage)}</h3>
             <div className="space-y-3">
               <button onClick={() => setShowPasswordForm(true)} className="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 rounded-xl transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><Key className="w-5 h-5 text-blue-600" /></div>
-                  <p className="font-medium text-stone-800">Change Password</p>
+                  <p className="font-medium text-stone-800">{t('changePassword', selectedLanguage)}</p>
                 </div>
                 <span className="text-stone-400">›</span>
               </button>
               <button onClick={handleSignOut} className="w-full flex items-center justify-between p-4 bg-red-50 hover:bg-red-100 rounded-xl transition-colors border-2 border-red-200">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center"><LogOut className="w-5 h-5 text-red-600" /></div>
-                  <p className="font-medium text-red-700">Sign Out</p>
+                  <p className="font-medium text-red-700">{t('signOut', selectedLanguage)}</p>
                 </div>
                 <span className="text-red-400">›</span>
               </button>
@@ -263,7 +264,7 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
           {/* App Version */}
           <div className="text-center py-4">
             <p className="text-sm text-stone-500">ApiCore v1.0.0</p>
-            <p className="text-xs text-stone-400 mt-1">Beekeeping Management System</p>
+            <p className="text-xs text-stone-400 mt-1">{t('beekeepingMgmtSystem', selectedLanguage)}</p>
           </div>
         </div>
       </div>
@@ -331,13 +332,13 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center">
       <div className="bg-white w-full max-w-md rounded-t-2xl p-5">
-        <div className="flex items-center justify-between mb-4"><h3 className="font-bold text-stone-800">Change Password</h3><button onClick={onClose}><X className="w-5 h-5" /></button></div>
-        {success ? <p className="text-emerald-600 text-center py-4">Password changed successfully!</p> :
+        <div className="flex items-center justify-between mb-4"><h3 className="font-bold text-stone-800">{t('changePassword', 'en')}</h3><button onClick={onClose}><X className="w-5 h-5" /></button></div>
+        {success ? <p className="text-emerald-600 text-center py-4">{t('passwordChangedSuccess', 'en')}</p> :
         <form onSubmit={submit} className="space-y-3">
           {error && <p className="text-red-500 text-sm">{error}</p>}
-          <input type="password" value={f.currentPassword} onChange={e => setF(p => ({ ...p, currentPassword: e.target.value }))} placeholder="Current Password" className="w-full border rounded-xl px-3 py-2 text-sm" />
-          <input type="password" value={f.newPassword} onChange={e => setF(p => ({ ...p, newPassword: e.target.value }))} placeholder="New Password" className="w-full border rounded-xl px-3 py-2 text-sm" />
-          <input type="password" value={f.confirmPassword} onChange={e => setF(p => ({ ...p, confirmPassword: e.target.value }))} placeholder="Confirm New Password" className="w-full border rounded-xl px-3 py-2 text-sm" />
+          <input type="password" value={f.currentPassword} onChange={e => setF(p => ({ ...p, currentPassword: e.target.value }))} placeholder={t('currentPasswordLabel', 'en')} className="w-full border rounded-xl px-3 py-2 text-sm" />
+          <input type="password" value={f.newPassword} onChange={e => setF(p => ({ ...p, newPassword: e.target.value }))} placeholder={t('newPasswordLabel', 'en')} className="w-full border rounded-xl px-3 py-2 text-sm" />
+          <input type="password" value={f.confirmPassword} onChange={e => setF(p => ({ ...p, confirmPassword: e.target.value }))} placeholder={t('confirmNewPassword', 'en')} className="w-full border rounded-xl px-3 py-2 text-sm" />
           <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-2.5 rounded-xl font-medium disabled:opacity-60">{saving ? 'Saving...' : 'Change Password'}</button>
         </form>}
       </div>

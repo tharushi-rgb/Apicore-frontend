@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft, ArrowRight, Check, Eye, EyeOff } from 'lucide-react';
 import { authService } from '../services/auth';
+import { t } from '../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 
@@ -130,7 +131,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
   };
   const pwdStr = getPwdStrength(password);
 
-  const stepLabels = ['Personal Details', 'Beekeeping Profile', 'Location & Review'];
+  const stepLabels = [t('personalDetails', selectedLanguage), t('beekeepingProfile', selectedLanguage), t('locationReview', selectedLanguage)];
 
   const handleNext = async () => {
     if (currentStep === 1) {
@@ -191,10 +192,10 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
       <div className="w-[min(92vw,22rem)] h-full bg-stone-50 shadow-2xl relative flex flex-col">
         <LangSelector />
         <div className="px-[6%] pt-[0.75rem] pb-[1rem] shrink-0">
-          <h1 className="text-[1.875rem] font-bold text-stone-800 text-center mb-4 italic capitalize leading-tight">{role} Registration</h1>
+          <h1 className="text-[1.875rem] font-bold text-stone-800 text-center mb-4 italic capitalize leading-tight">{role === 'beekeeper' ? t('beekeeperRegistration', selectedLanguage) : t('landownerRegistration', selectedLanguage)}</h1>
           <div className="max-w-md mx-auto">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[0.875rem] text-stone-600 font-medium">Step {currentStep} of {TOTAL_STEPS}</span>
+              <span className="text-[0.875rem] text-stone-600 font-medium">{t('step', selectedLanguage)} {currentStep} {t('stepOf', selectedLanguage)} {TOTAL_STEPS}</span>
               <span className="text-[0.875rem] text-stone-600 font-medium">{stepLabels[currentStep - 1]}</span>
             </div>
             <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
@@ -209,29 +210,29 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
             {currentStep === 1 && (
               <>
                 <div>
-                  <label className={labelClass}>Full Name <span className="text-red-500">*</span></label>
-                  <input {...register('fullName',{required:'Full name is required'})} className={inputClass} placeholder="Enter your full name" />
+                  <label className={labelClass}>{t('fullName', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <input {...register('fullName',{required:t('nameRequired', selectedLanguage)})} className={inputClass} placeholder={t('enterFullName', selectedLanguage)} />
                   {errors.fullName && <p className="text-red-500 text-[0.75rem] mt-1">{errors.fullName.message}</p>}
                 </div>
                 <div>
-                  <label className={labelClass}>NIC Number <span className="text-red-500">*</span></label>
-                  <input {...register('nicNumber', {required: 'NIC number is required', pattern: {value: /^\d{12}$/, message: 'Must be 12 digits'}})} className={inputClass} placeholder="200012345678" maxLength={12} />
+                  <label className={labelClass}>{t('nic', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <input {...register('nicNumber', {required: t('nicRequired', selectedLanguage), pattern: {value: /^\d{12}$/, message: t('must12Digits', selectedLanguage)}})} className={inputClass} placeholder="200012345678" maxLength={12} />
                   {errors.nicNumber && <p className="text-red-500 text-[0.75rem] mt-1">{errors.nicNumber.message}</p>}
                 </div>
                 <div>
-                  <label className={labelClass}>Email / Phone <span className="text-red-500">*</span></label>
-                  <input {...register('email',{required:'Email/Phone is required'})} className={inputClass} placeholder="your@email.com or 94771234567" />
+                  <label className={labelClass}>{t('emailPhone', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <input {...register('email',{required:t('emailRequired', selectedLanguage)})} className={inputClass} placeholder={t('emailPhonePlaceholder', selectedLanguage)} />
                   {errors.email && <p className="text-red-500 text-[0.75rem] mt-1">{errors.email.message}</p>}
                 </div>
                 <div>
-                  <label className={labelClass}>Phone Number <span className="text-red-500">*</span></label>
-                  <input {...register('phoneNumber', {required: 'Phone number is required', pattern: {value: /^\d{12}$/, message: 'Must be 12 digits (e.g. 94771234567)'}})} className={inputClass} placeholder="94774567890" maxLength={12} />
+                  <label className={labelClass}>{t('phone', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <input {...register('phoneNumber', {required: t('phoneRequired', selectedLanguage), pattern: {value: /^\d{12}$/, message: t('must12DigitsPhone', selectedLanguage)}})} className={inputClass} placeholder="94774567890" maxLength={12} />
                   {errors.phoneNumber && <p className="text-red-500 text-[0.75rem] mt-1">{errors.phoneNumber.message}</p>}
                 </div>
                 <div>
-                  <label className={labelClass}>Password <span className="text-red-500">*</span></label>
+                  <label className={labelClass}>{t('password', selectedLanguage)} <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <input type={showPwd?'text':'password'} {...register('password',{required:'Password is required',minLength:{value:8,message:'Min 8 characters'}, maxLength:{value:16, message: 'Max 16 characters'}, pattern:{value:/^[a-zA-Z0-9]+$/, message: 'Alphanumeric only'}})} className={`${inputClass} pr-12`} placeholder="8-16 Alphanumeric" />
+                    <input type={showPwd?'text':'password'} {...register('password',{required:t('passwordRequired', selectedLanguage),minLength:{value:8,message:t('minChars', selectedLanguage)}, maxLength:{value:16, message: t('maxChars', selectedLanguage)}, pattern:{value:/^[a-zA-Z0-9]+$/, message: t('alphanumericOnly', selectedLanguage)}})} className={`${inputClass} pr-12`} placeholder={t('alphanumericPwd', selectedLanguage)} />
                     <button type="button" onClick={()=>setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500">
                       {showPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -239,9 +240,9 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                   {errors.password && <p className="text-red-500 text-[0.75rem] mt-1">{errors.password.message}</p>}
                 </div>
                 <div>
-                  <label className={labelClass}>Confirm Password <span className="text-red-500">*</span></label>
+                  <label className={labelClass}>{t('confirmPassword', selectedLanguage)} <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <input type={showConfirm?'text':'password'} {...register('confirmPassword',{required:'Confirm password',validate:v=>v===password||'Passwords do not match'})} className={`${inputClass} pr-12`} placeholder="Confirm your password" />
+                    <input type={showConfirm?'text':'password'} {...register('confirmPassword',{required:t('confirmPwdReq', selectedLanguage),validate:v=>v===password||t('passwordsNoMatch', selectedLanguage)})} className={`${inputClass} pr-12`} placeholder={t('confirmPwdPlaceholder', selectedLanguage)} />
                     <button type="button" onClick={()=>setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500">
                       {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -254,19 +255,19 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
             {currentStep === 2 && (
               <>
                 <div>
-                  <label className={labelClass}>Preferred Language <span className="text-red-500">*</span></label>
-                  <select {...register('preferredLanguage', {required: 'Preferred language is required'})} defaultValue="en" className={selectClass}>
-                    <option value="">Select language</option>
-                    <option value="en">English</option>
-                    <option value="si">Sinhala (සිංහල)</option>
-                    <option value="ta">Tamil (தமிழ்)</option>
+                  <label className={labelClass}>{t('preferredLanguage', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <select {...register('preferredLanguage', {required: t('prefLangRequired', selectedLanguage)})} defaultValue="en" className={selectClass}>
+                    <option value="">{t('selectLanguage', selectedLanguage)}</option>
+                    <option value="en">{t('englishLang', selectedLanguage)}</option>
+                    <option value="si">{t('sinhalaLang', selectedLanguage)}</option>
+                    <option value="ta">{t('tamilLang', selectedLanguage)}</option>
                   </select>
                   {errors.preferredLanguage && <p className="text-red-500 text-[0.75rem] mt-1">{errors.preferredLanguage.message}</p>}
                 </div>
                 <div>
-                  <label className={labelClass}>Age Group <span className="text-red-500">*</span></label>
-                  <select {...register('ageGroup', {required: 'Age group is required'})} className={selectClass}>
-                    <option value="">Select age group</option>
+                  <label className={labelClass}>{t('ageGroup', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <select {...register('ageGroup', {required: t('ageRequired', selectedLanguage)})} className={selectClass}>
+                    <option value="">{t('selectAgeGroup', selectedLanguage)}</option>
                     <option value="18-30">18 – 30</option>
                     <option value="31-50">31 – 50</option>
                     <option value="51-65">51 – 65</option>
@@ -275,36 +276,36 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                   {errors.ageGroup && <p className="text-red-500 text-[0.75rem] mt-1">{errors.ageGroup.message}</p>}
                 </div>
                 <div>
-                  <label className={labelClass}>Beekeeping Nature <span className="text-red-500">*</span></label>
-                  <select {...register('beekeepingNature', {required: 'Nature is required'})} className={selectClass}>
-                    <option value="">Select nature</option>
-                    <option value="hobbyist">Hobbyist</option>
-                    <option value="commercial">Commercial</option>
+                  <label className={labelClass}>{t('beekeepingNature', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <select {...register('beekeepingNature', {required: t('natureRequired', selectedLanguage)})} className={selectClass}>
+                    <option value="">{t('selectNature', selectedLanguage)}</option>
+                    <option value="hobbyist">{t('hobbyist', selectedLanguage)}</option>
+                    <option value="commercial">{t('commercial', selectedLanguage)}</option>
                   </select>
                   {errors.beekeepingNature && <p className="text-red-500 text-[0.75rem] mt-1">{errors.beekeepingNature.message}</p>}
                 </div>
                 <div>
-                  <label className={labelClass}>Primary Bee Species <span className="text-red-500">*</span></label>
-                  <select {...register('primaryBeeSpecies', {required: 'Species is required'})} className={selectClass}>
-                    <option value="">Select species</option>
-                    <option value="apis_cerana">Apis cerana (Mee Bee)</option>
-                    <option value="tetragonula">Tetragonula (Kaneyawa)</option>
+                  <label className={labelClass}>{t('primaryBeeSpecies', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <select {...register('primaryBeeSpecies', {required: t('speciesRequired', selectedLanguage)})} className={selectClass}>
+                    <option value="">{t('selectSpecies', selectedLanguage)}</option>
+                    <option value="apis_cerana">{t('apisCerana', selectedLanguage)}</option>
+                    <option value="tetragonula">{t('tetragonula', selectedLanguage)}</option>
                   </select>
                   {errors.primaryBeeSpecies && <p className="text-red-500 text-[0.75rem] mt-1">{errors.primaryBeeSpecies.message}</p>}
                 </div>
                 <div>
-                  <label className={labelClass}>Business Reg. No (Optional)</label>
-                  <input {...register('businessRegNo')} className={inputClass} placeholder="BR number if available" />
+                  <label className={labelClass}>{t('businessRegNo', selectedLanguage)}</label>
+                  <input {...register('businessRegNo')} className={inputClass} placeholder={t('brPlaceholder', selectedLanguage)} />
                 </div>
                 <div>
-                  <label className={labelClass}>NVQ Level / Training (Optional)</label>
+                  <label className={labelClass}>{t('nvqLevel', selectedLanguage)}</label>
                   <select {...register('nvqLevel')} className={selectClass}>
-                    <option value="">Select training level</option>
-                    <option value="academic_degree">Academic Degree</option>
-                    <option value="dept_agriculture">Dept. of Agriculture Trained</option>
-                    <option value="nvq3">NVQ Level 3</option>
-                    <option value="nvq4">NVQ Level 4</option>
-                    <option value="none">None</option>
+                    <option value="">{t('selectTrainingLevel', selectedLanguage)}</option>
+                    <option value="academic_degree">{t('academicDegree', selectedLanguage)}</option>
+                    <option value="dept_agriculture">{t('deptAgriculture', selectedLanguage)}</option>
+                    <option value="nvq3">{t('nvq3', selectedLanguage)}</option>
+                    <option value="nvq4">{t('nvq4', selectedLanguage)}</option>
+                    <option value="none">{t('noneOption', selectedLanguage)}</option>
                   </select>
                 </div>
               </>
@@ -313,48 +314,48 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
             {currentStep === 3 && (
               <>
                 <div>
-                  <label className={labelClass}>Province <span className="text-red-500">*</span></label>
-                  <select {...register('province', {required: 'Province is required'})} 
+                  <label className={labelClass}>{t('province', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <select {...register('province', {required: t('provinceRequired', selectedLanguage)})} 
                     onChange={(e) => {
                       register('province').onChange(e);
                       setValue('district', '');
                       setValue('dsDivision', '');
                     }}
                     className={selectClass}>
-                    <option value="">Select province</option>
+                    <option value="">{t('selectProvince', selectedLanguage)}</option>
                     {Object.keys(districtsByProvince).map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                   {errors.province && <p className="text-red-500 text-[0.75rem] mt-1">{errors.province.message}</p>}
                 </div>
 
                 <div>
-                  <label className={labelClass}>District <span className="text-red-500">*</span></label>
-                  <select {...register('district', {required: 'District is required'})} 
+                  <label className={labelClass}>{t('district', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <select {...register('district', {required: t('districtRequired', selectedLanguage)})} 
                     disabled={!selectedProvince}
                     onChange={(e) => {
                       register('district').onChange(e);
                       setValue('dsDivision', '');
                     }}
                     className={selectClass}>
-                    <option value="">Select district</option>
+                    <option value="">{t('selectDistrictReg', selectedLanguage)}</option>
                     {districts.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
                   {errors.district && <p className="text-red-500 text-[0.75rem] mt-1">{errors.district.message}</p>}
                 </div>
 
                 <div>
-                  <label className={labelClass}>Divisional Secretariat (DS) <span className="text-red-500">*</span></label>
-                  <select {...register('dsDivision', {required: 'DS Division is required'})} 
+                  <label className={labelClass}>{t('dsLabel', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <select {...register('dsDivision', {required: t('dsRequired', selectedLanguage)})} 
                     disabled={!selectedDistrict}
                     className={selectClass}>
-                    <option value="">Select DS division</option>
+                    <option value="">{t('selectDSDivision', selectedLanguage)}</option>
                     {dsDivisions.map(ds => <option key={ds} value={ds}>{ds}</option>)}
                   </select>
                   {errors.dsDivision && <p className="text-red-500 text-[0.75rem] mt-1">{errors.dsDivision.message}</p>}
                 </div>
 
                 <div className="bg-white/80 rounded-xl p-4 border border-stone-200 space-y-2 mt-4">
-                  <h3 className="font-bold text-stone-800 text-sm border-b border-stone-100 pb-1">Registration Summary</h3>
+                  <h3 className="font-bold text-stone-800 text-sm border-b border-stone-100 pb-1">{t('registrationSummary', selectedLanguage)}</h3>
                   <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs">
                     <span className="text-stone-500">Name:</span><span className="text-stone-800 font-semibold truncate">{watch('fullName') || '—'}</span>
                     <span className="text-stone-500">NIC:</span><span className="text-stone-800 font-semibold">{watch('nicNumber') || '—'}</span>
@@ -381,15 +382,15 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
         <div className="px-[6%] pb-[2rem] space-y-3 shrink-0">
           {currentStep < TOTAL_STEPS ? (
             <button onClick={handleNext} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl shadow-lg min-h-[3.5rem] font-medium text-[1.125rem] flex items-center justify-center gap-2">
-              Next <ArrowRight className="w-5 h-5" />
+              {t('next', selectedLanguage)} <ArrowRight className="w-5 h-5" />
             </button>
           ) : (
             <button onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl shadow-lg min-h-[3.5rem] font-medium text-[1.125rem] flex items-center justify-center gap-2 disabled:opacity-50">
-              {isSubmitting ? 'Registering...' : <><Check className="w-5 h-5" /> Register</>}
+              {isSubmitting ? t('registering', selectedLanguage) : <><Check className="w-5 h-5" /> {t('registerBtn', selectedLanguage)}</>}
             </button>
           )}
           <button onClick={currentStep===1?onBack:()=>setCurrentStep(currentStep - 1)} className="w-full bg-white hover:bg-stone-50 text-stone-700 py-4 rounded-xl border-2 border-stone-300 min-h-[3.5rem] font-medium text-[1.125rem] flex items-center justify-center gap-2">
-            <ArrowLeft className="w-5 h-5" /> Back
+            <ArrowLeft className="w-5 h-5" /> {t('back', selectedLanguage)}
           </button>
         </div>
       </div>

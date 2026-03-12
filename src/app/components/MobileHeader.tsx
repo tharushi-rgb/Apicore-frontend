@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Bell, MapPin, Menu, X, AlertCircle, AlertTriangle, Info } from 'lucide-react';
 import { notificationsService, type Notification } from '../services/notifications';
+import { t } from '../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 
@@ -29,9 +30,9 @@ export function MobileHeader({
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return t('goodMorning', selectedLanguage);
+    if (hour < 17) return t('goodAfternoon', selectedLanguage);
+    return t('goodEvening', selectedLanguage);
   };
 
   const fetchNotifications = async () => {
@@ -91,7 +92,7 @@ export function MobileHeader({
               {district && (
                 <p className="text-stone-600 text-[0.875rem] flex items-center gap-1 mt-1">
                   <MapPin className="w-4 h-4" />
-                  District: {district}
+                  {t('districtLabel', selectedLanguage)}: {district}
                 </p>
               )}
             </div>
@@ -157,7 +158,7 @@ export function MobileHeader({
           >
             <div className="sticky top-0 bg-white rounded-t-2xl px-5 pt-4 pb-3 border-b border-stone-100 z-10">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-stone-800">Notifications</h2>
+                <h2 className="text-lg font-bold text-stone-800">{t('notifications', selectedLanguage)}</h2>
                 <button onClick={() => setShowNotifications(false)} className="p-1 hover:bg-stone-100 rounded-lg">
                   <X className="w-5 h-5 text-stone-500" />
                 </button>
@@ -168,7 +169,7 @@ export function MobileHeader({
               {recentNotifications.length === 0 ? (
                 <div className="text-center py-8">
                   <Bell className="w-10 h-10 text-stone-300 mx-auto mb-2" />
-                  <p className="text-stone-500 text-sm">No notifications</p>
+                  <p className="text-stone-500 text-sm">{t('noNotifications', selectedLanguage)}</p>
                 </div>
               ) : (
                 recentNotifications.map(n => {
@@ -214,7 +215,7 @@ export function MobileHeader({
                   onClick={() => { setShowNotifications(false); onViewAllNotifications(); }}
                   className="w-full text-center text-sm font-medium text-amber-600 hover:text-amber-700 py-2"
                 >
-                  View All Notifications
+                  {t('viewAllNotifications', selectedLanguage)}
                 </button>
               </div>
             )}

@@ -22,6 +22,7 @@ import { authService } from '../services/auth';
 import { hivesService } from '../services/hives';
 import { apiariesService } from '../services/apiaries';
 import { harvestsService, type Harvest } from '../services/harvests';
+import { t } from '../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'harvest' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -190,6 +191,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
         onNavigate={onNavigate}
         onClose={() => setIsSidebarOpen(false)}
         onLogout={onLogout}
+        lang={selectedLanguage}
       />
 
       <div className="h-full overflow-y-auto pb-8">
@@ -207,8 +209,8 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
           {/* Harvest Title Section */}
           <div className="px-6 pb-4 border-t border-stone-100">
-            <h1 className="text-2xl font-bold text-stone-800">Harvest</h1>
-            <p className="text-stone-500 text-sm mt-1">Record and track harvest yields</p>
+            <h1 className="text-2xl font-bold text-stone-800">{t('harvest', selectedLanguage)}</h1>
+            <p className="text-stone-500 text-sm mt-1">{t('recordTrackHarvest', selectedLanguage)}</p>
           </div>
         </div>
 
@@ -217,25 +219,25 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
           {/* Section 1: Harvest Summary */}
           <div className="grid grid-cols-2 gap-3">
             <SummaryCard
-              label="Total Harvest (This Month)"
+              label={t('totalHarvestMonth', selectedLanguage)}
               value={`${totalHarvest.toFixed(2)} kg`}
               bgColor="bg-amber-50"
               textColor="text-amber-700"
             />
             <SummaryCard
-              label="Honey Harvested"
+              label={t('honeyHarvested', selectedLanguage)}
               value={`${honeyHarvested.toFixed(2)} kg`}
               bgColor="bg-emerald-50"
               textColor="text-emerald-700"
             />
             <SummaryCard
-              label="Wax Harvested"
+              label={t('waxHarvested', selectedLanguage)}
               value={`${waxHarvested.toFixed(2)} kg`}
               bgColor="bg-blue-50"
               textColor="text-blue-700"
             />
             <SummaryCard
-              label="Harvest Sessions"
+              label={t('harvestSessions', selectedLanguage)}
               value={harvestSessions.toString()}
               bgColor="bg-purple-50"
               textColor="text-purple-700"
@@ -249,7 +251,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
               className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
               <Plus className="w-5 h-5" />
-              <span>Record New Harvest</span>
+              <span>{t('recordNewHarvest', selectedLanguage)}</span>
             </button>
           )}
 
@@ -258,7 +260,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
             <div className="bg-white rounded-2xl shadow-sm p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-stone-800">
-                  {editingHarvest ? 'Edit Harvest' : 'Record New Harvest'}
+                  {editingHarvest ? t('editHarvest', selectedLanguage) : t('recordNewHarvest', selectedLanguage)}
                 </h2>
                 <button
                   onClick={() => {
@@ -276,16 +278,16 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                 {/* Harvest Details */}
                 <div className="space-y-4">
                   <h3 className="font-bold text-stone-800 pb-2 border-b-2 border-amber-200">
-                    Harvest Details
+                    {t('harvestDetails', selectedLanguage)}
                   </h3>
 
                   <div>
                     <label className="block text-stone-700 font-medium mb-2">
-                      Harvest Date <span className="text-red-500">*</span>
+                      {t('harvestDate', selectedLanguage)} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="date"
-                      {...register('harvestDate', { required: 'Date is required' })}
+                      {...register('harvestDate', { required: t('dateRequired', selectedLanguage) })}
                       className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
                     />
                     {errors.harvestDate && (
@@ -295,17 +297,17 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
                   <div>
                     <label className="block text-stone-700 font-medium mb-2">
-                      Harvest Type <span className="text-red-500">*</span>
+                      {t('harvestType', selectedLanguage)} <span className="text-red-500">*</span>
                     </label>
                     <select
-                      {...register('harvestType', { required: 'Type is required' })}
+                      {...register('harvestType', { required: t('typeRequired', selectedLanguage) })}
                       onChange={(e) => setHarvestType(e.target.value)}
                       className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
                     >
-                      {!editingHarvest && <option value="">Select type</option>}
-                      <option value="honey">Honey</option>
-                      <option value="wax">Wax</option>
-                      <option value="other">Other</option>
+                      {!editingHarvest && <option value="">{t('selectType', selectedLanguage)}</option>}
+                      <option value="honey">{t('honey', selectedLanguage)}</option>
+                      <option value="wax">{t('wax', selectedLanguage)}</option>
+                      <option value="other">{t('other', selectedLanguage)}</option>
                     </select>
                     {errors.harvestType && (
                       <p className="text-red-500 text-sm mt-1">{errors.harvestType.message}</p>
@@ -315,13 +317,13 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                   {harvestType === 'other' && (
                     <div>
                       <label className="block text-stone-700 font-medium mb-2">
-                        Other Harvest Type <span className="text-red-500">*</span>
+                        {t('otherHarvestType', selectedLanguage)} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        {...register('otherHarvestType', { required: 'Other type is required' })}
+                        {...register('otherHarvestType', { required: t('typeRequired', selectedLanguage) })}
                         className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
-                        placeholder="Enter type"
+                        placeholder={t('enterType', selectedLanguage)}
                       />
                       {errors.otherHarvestType && (
                         <p className="text-red-500 text-sm mt-1">{errors.otherHarvestType.message}</p>
@@ -332,12 +334,12 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-stone-700 font-medium mb-2">
-                        Quantity <span className="text-red-500">*</span>
+                        {t('quantity', selectedLanguage)} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="number"
                         step="0.1"
-                        {...register('quantity', { required: 'Quantity is required', min: 0.1 })}
+                        {...register('quantity', { required: t('quantityRequired', selectedLanguage), min: 0.1 })}
                         className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
                         placeholder="0.0"
                       />
@@ -346,13 +348,13 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                       )}
                     </div>
                     <div>
-                      <label className="block text-stone-700 font-medium mb-2">Unit</label>
+                      <label className="block text-stone-700 font-medium mb-2">{t('unit', selectedLanguage)}</label>
                       {harvestType === 'other' ? (
                         <input
                           type="text"
                           {...register('customUnit')}
                           className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
-                          placeholder="Enter unit"
+                          placeholder={t('enterUnit', selectedLanguage)}
                         />
                       ) : (
                         <input
@@ -369,15 +371,15 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                 {/* Surplus Listing */}
                 <div className="space-y-4">
                   <h3 className="font-bold text-stone-800 pb-2 border-b-2 border-amber-200">
-                    Surplus Listing
+                    {t('surplusListing', selectedLanguage)}
                   </h3>
 
                   <div className="p-4 bg-emerald-50 border-2 border-emerald-200 rounded-xl">
                     <div className="flex items-start justify-between gap-4 mb-3">
                       <div className="flex-1">
-                        <p className="font-medium text-stone-800 mb-1">Show to Buyers</p>
+                        <p className="font-medium text-stone-800 mb-1">{t('showToBuyers', selectedLanguage)}</p>
                         <p className="text-sm text-stone-600">
-                          When turned on, this harvest will be listed as available surplus for buyers.
+                          {t('showToBuyersDesc', selectedLanguage)}
                         </p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -406,12 +408,12 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                 {/* Hive/Apiary Association */}
                 <div className="space-y-4">
                   <h3 className="font-bold text-stone-800 pb-2 border-b-2 border-amber-200">
-                    Hive / Apiary Association
+                    {t('hiveApiaryAssociation', selectedLanguage)}
                   </h3>
 
                   <div>
                     <label className="block text-stone-700 font-medium mb-3">
-                      Link Harvest To
+                      {t('linkHarvestTo', selectedLanguage)}
                     </label>
                     <div className="grid grid-cols-3 gap-3">
                       <label className="cursor-pointer">
@@ -423,7 +425,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                           className="sr-only peer"
                         />
                         <div className="p-3 bg-white border-2 border-stone-200 rounded-xl peer-checked:border-amber-500 peer-checked:bg-amber-50 transition-all text-center text-sm">
-                          Specific Hive
+                          {t('specificHive', selectedLanguage)}
                         </div>
                       </label>
                       <label className="cursor-pointer">
@@ -435,7 +437,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                           className="sr-only peer"
                         />
                         <div className="p-3 bg-white border-2 border-stone-200 rounded-xl peer-checked:border-amber-500 peer-checked:bg-amber-50 transition-all text-center text-sm">
-                          Apiary
+                          {t('apiary', selectedLanguage)}
                         </div>
                       </label>
                       <label className="cursor-pointer">
@@ -447,7 +449,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                           className="sr-only peer"
                         />
                         <div className="p-3 bg-white border-2 border-stone-200 rounded-xl peer-checked:border-amber-500 peer-checked:bg-amber-50 transition-all text-center text-sm">
-                          Not Linked
+                          {t('notLinkedLabel', selectedLanguage)}
                         </div>
                       </label>
                     </div>
@@ -455,12 +457,12 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
                   {linkType === 'hive' && (
                     <div>
-                      <label className="block text-stone-700 font-medium mb-2">Select Hive</label>
+                      <label className="block text-stone-700 font-medium mb-2">{t('selectHive', selectedLanguage)}</label>
                       <select
                         {...register('hiveId')}
                         className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
                       >
-                        {!editingHarvest && <option value="">Select hive</option>}
+                        {!editingHarvest && <option value="">{t('selectHive', selectedLanguage)}</option>}
                         {hives.map((hive) => (
                           <option key={hive.id} value={hive.id}>
                             {hive.name} ({hive.apiary})
@@ -472,12 +474,12 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
                   {linkType === 'apiary' && (
                     <div>
-                      <label className="block text-stone-700 font-medium mb-2">Select Apiary</label>
+                      <label className="block text-stone-700 font-medium mb-2">{t('selectApiary', selectedLanguage)}</label>
                       <select
                         {...register('apiaryId')}
                         className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
                       >
-                        {!editingHarvest && <option value="">Select apiary</option>}
+                        {!editingHarvest && <option value="">{t('selectApiary', selectedLanguage)}</option>}
                         {apiaries.map((apiary) => (
                           <option key={apiary.id} value={apiary.id}>
                             {apiary.name}
@@ -491,30 +493,30 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                 {/* Harvest Method & Notes */}
                 <div className="space-y-4">
                   <h3 className="font-bold text-stone-800 pb-2 border-b-2 border-amber-200">
-                    Harvest Method & Notes
+                    {t('harvestMethodNotes', selectedLanguage)}
                   </h3>
 
                   <div>
-                    <label className="block text-stone-700 font-medium mb-2">Harvest Method</label>
+                    <label className="block text-stone-700 font-medium mb-2">{t('harvestMethod', selectedLanguage)}</label>
                     <select
                       {...register('harvestMethod')}
                       className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
                     >
-                      <option value="">Select method</option>
-                      <option value="frame">Frame extraction</option>
-                      <option value="crush">Crush & strain</option>
-                      <option value="pot">Pot harvest</option>
-                      <option value="other">Other</option>
+                      <option value="">{t('selectMethod', selectedLanguage)}</option>
+                      <option value="frame">{t('frameExtraction', selectedLanguage)}</option>
+                      <option value="crush">{t('crushStrain', selectedLanguage)}</option>
+                      <option value="pot">{t('potHarvest', selectedLanguage)}</option>
+                      <option value="other">{t('other', selectedLanguage)}</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-stone-700 font-medium mb-2">Notes</label>
+                    <label className="block text-stone-700 font-medium mb-2">{t('notes', selectedLanguage)}</label>
                     <textarea
                       {...register('notes')}
                       rows={4}
                       className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors resize-none"
-                      placeholder="Harvest conditions, comb condition, moisture concerns…"
+                      placeholder={t('harvestNotesPlaceholder', selectedLanguage)}
                     />
                   </div>
                 </div>
@@ -522,11 +524,11 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                 {/* Media Upload */}
                 <div className="space-y-4">
                   <h3 className="font-bold text-stone-800 pb-2 border-b-2 border-amber-200">
-                    Media Upload
+                    {t('mediaUpload', selectedLanguage)}
                   </h3>
 
                   <div>
-                    <label className="block text-stone-700 font-medium mb-3">Harvest Images</label>
+                    <label className="block text-stone-700 font-medium mb-3">{t('harvestImages', selectedLanguage)}</label>
                     <div className="space-y-3">
                       {uploadedImages.length > 0 && (
                         <div className="flex flex-wrap gap-2">
@@ -547,7 +549,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                           className="flex-1 bg-white border-2 border-stone-200 hover:border-amber-500 py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
                         >
                           <Camera className="w-5 h-5 text-stone-600" />
-                          <span className="text-stone-700 font-medium">Camera</span>
+                          <span className="text-stone-700 font-medium">{t('cameraBtn', selectedLanguage)}</span>
                         </button>
                         <button
                           type="button"
@@ -555,7 +557,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                           className="flex-1 bg-white border-2 border-stone-200 hover:border-amber-500 py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
                         >
                           <Upload className="w-5 h-5 text-stone-600" />
-                          <span className="text-stone-700 font-medium">Gallery</span>
+                          <span className="text-stone-700 font-medium">{t('galleryBtn', selectedLanguage)}</span>
                         </button>
                       </div>
                     </div>
@@ -573,13 +575,13 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                     }}
                     className="flex-1 bg-stone-200 hover:bg-stone-300 text-stone-700 py-3 rounded-xl font-medium transition-colors"
                   >
-                    Cancel
+                    {t('cancel', selectedLanguage)}
                   </button>
                   <button
                     type="submit"
                     className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-medium transition-colors"
                   >
-                    {editingHarvest ? 'Update Harvest' : 'Save Harvest'}
+                    {editingHarvest ? t('updateHarvest', selectedLanguage) : t('saveHarvest', selectedLanguage)}
                   </button>
                 </div>
               </form>
@@ -594,7 +596,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
             >
               <div className="flex items-center gap-2">
                 <Filter className="w-5 h-5 text-stone-600" />
-                <span className="font-medium text-stone-800">Filter & Search</span>
+                <span className="font-medium text-stone-800">{t('filterSearch', selectedLanguage)}</span>
               </div>
               {showFilters ? (
                 <ChevronUp className="w-5 h-5 text-stone-600" />
@@ -611,7 +613,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                     type="text"
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
-                    placeholder="Search harvest records..."
+                    placeholder={t('searchHarvestRecords', selectedLanguage)}
                     className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 transition-colors"
                   />
                 </div>
@@ -622,16 +624,16 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                     onChange={(e) => setFilterType(e.target.value)}
                     className="px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 transition-colors"
                   >
-                    <option value="">All Types</option>
-                    <option value="honey">Honey</option>
-                    <option value="wax">Wax</option>
-                    <option value="other">Other</option>
+                    <option value="">{t('allTypes', selectedLanguage)}</option>
+                    <option value="honey">{t('honey', selectedLanguage)}</option>
+                    <option value="wax">{t('wax', selectedLanguage)}</option>
+                    <option value="other">{t('other', selectedLanguage)}</option>
                   </select>
 
                   <select className="px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 transition-colors">
-                    <option value="">Surplus Status</option>
-                    <option value="listed">Listed for Buyers</option>
-                    <option value="internal">Internal Use</option>
+                    <option value="">{t('surplusStatus', selectedLanguage)}</option>
+                    <option value="listed">{t('listedForBuyers', selectedLanguage)}</option>
+                    <option value="internal">{t('internalUse', selectedLanguage)}</option>
                   </select>
                 </div>
               </div>
@@ -640,7 +642,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
           {/* Section 4: Harvest Records List */}
           <div className="space-y-4">
-            <h2 className="text-lg font-bold text-stone-800">Harvest Records</h2>
+            <h2 className="text-lg font-bold text-stone-800">{t('harvestRecords', selectedLanguage)}</h2>
 
             {filteredHarvests.length > 0 ? (
               <div className="space-y-3">
@@ -670,7 +672,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                       </div>
                       <div className="flex items-center gap-1">
                         <MapPin className="w-4 h-4" />
-                        <span>{record.hive_name || record.apiary_name || 'Not linked'}</span>
+                        <span>{record.hive_name || record.apiary_name || t('notLinkedTxt', selectedLanguage)}</span>
                       </div>
                     </div>
 
@@ -687,7 +689,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                     <div className="flex gap-2">
                       <button className="flex-1 flex items-center justify-center gap-2 py-2 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors text-sm font-medium text-stone-700">
                         <Eye className="w-4 h-4" />
-                        <span>View Details</span>
+                        <span>{t('viewDetails', selectedLanguage)}</span>
                       </button>
                       <button
                         onClick={() => {
@@ -697,7 +699,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                         className="flex-1 flex items-center justify-center gap-2 py-2 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors text-sm font-medium text-amber-700"
                       >
                         <Edit className="w-4 h-4" />
-                        <span>Edit</span>
+                        <span>{t('edit', selectedLanguage)}</span>
                       </button>
                     </div>
                   </div>
@@ -708,15 +710,15 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                 <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Package className="w-10 h-10 text-amber-600" />
                 </div>
-                <p className="text-lg font-bold text-stone-800 mb-2">No harvest records yet</p>
+                <p className="text-lg font-bold text-stone-800 mb-2">{t('noHarvestRecords', selectedLanguage)}</p>
                 <p className="text-stone-600 mb-6">
-                  Record your first harvest to track production and performance
+                  {t('recordFirstHarvestDesc', selectedLanguage)}
                 </p>
                 <button
                   onClick={() => setShowRecordForm(true)}
                   className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-medium transition-colors"
                 >
-                  Record Harvest
+                  {t('recordHarvestBtn', selectedLanguage)}
                 </button>
               </div>
             )}

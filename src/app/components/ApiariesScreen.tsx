@@ -17,6 +17,7 @@ import { MobileHeader } from './MobileHeader';
 import { MobileSidebar } from './MobileSidebar';
 import { apiariesService, type Apiary } from '../services/apiaries';
 import { authService } from '../services/auth';
+import { t } from '../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -66,7 +67,7 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
 
   return (
     <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab={activeTab} onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+      <MobileSidebar isOpen={isSidebarOpen} activeTab={activeTab} onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
 
       <div className="h-full overflow-y-auto pb-24">
         {/* Header */}
@@ -74,17 +75,17 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
           <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
             isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
           <div className="px-6 pb-4 border-t border-stone-100">
-            <h1 className="text-2xl font-bold text-stone-800">Apiaries</h1>
-            <p className="text-stone-500 text-sm mt-1">Manage all registered apiaries</p>
+            <h1 className="text-2xl font-bold text-stone-800">{t('apiaries', selectedLanguage)}</h1>
+            <p className="text-stone-500 text-sm mt-1">{t('manageApiaries', selectedLanguage)}</p>
           </div>
         </div>
 
         <div className="px-4 py-4 space-y-4">
           {/* Summary Cards - Compact 3-column Grid */}
           <div className="grid grid-cols-3 gap-2">
-            <SummaryCard title="Total" value={totalApiaries.toString()} color="emerald" />
-            <SummaryCard title="With Hives" value={apiariesWithHives.toString()} color="amber" />
-            <SummaryCard title="Action Req." value={expiredApiaries.toString()} color="red" alert={expiredApiaries > 0} />
+            <SummaryCard title={t('total', selectedLanguage)} value={totalApiaries.toString()} color="emerald" />
+            <SummaryCard title={t('withHives', selectedLanguage)} value={apiariesWithHives.toString()} color="amber" />
+            <SummaryCard title={t('actionReq', selectedLanguage)} value={expiredApiaries.toString()} color="red" alert={expiredApiaries > 0} />
           </div>
 
           {apiaries.length === 0 ? (
@@ -96,14 +97,14 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                   <HiveIcon className="w-8 h-8 text-amber-400 absolute bottom-0 right-0" />
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-stone-800 mb-2">No apiaries created yet</h2>
-              <p className="text-stone-600 mb-6">Add your first apiary to start managing hives</p>
+              <h2 className="text-xl font-bold text-stone-800 mb-2">{t('noApiariesCreated', selectedLanguage)}</h2>
+              <p className="text-stone-600 mb-6">{t('addFirstApiary', selectedLanguage)}</p>
               <button
                 onClick={onCreateApiary}
                 className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-medium inline-flex items-center gap-2 transition-colors"
               >
                 <Plus className="w-5 h-5" />
-                Add Apiary
+                {t('addApiary', selectedLanguage)}
               </button>
             </div>
           ) : (
@@ -113,7 +114,7 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-stone-400" />
                 <input
                   type="text"
-                  placeholder="Search apiaries, districts, areas..."
+                  placeholder={t('searchApiaries', selectedLanguage)}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white"
@@ -123,15 +124,14 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
               {filtered.length === 0 ? (
                 <div className="bg-white rounded-2xl p-12 text-center">
                   <MapPin className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-stone-800 mb-2">No apiaries found</h3>
-                  <p className="text-stone-600">Try adjusting your search filters</p>
+                  <h3 className="text-lg font-semibold text-stone-800 mb-2">{t('noApiariesFound', selectedLanguage)}</h3>
+                  <p className="text-stone-600">{t('tryAdjusting', selectedLanguage)}</p>
                 </div>
               ) : (
                 filtered.map((apiary) => (
                   <ApiaryCard
                     key={apiary.id}
-                    apiary={apiary}
-                    onView={() => onViewApiary?.(apiary.id)}
+                    apiary={apiary}                    lang={selectedLanguage}                    onView={() => onViewApiary?.(apiary.id)}
                     onEdit={() => onEditApiary?.(apiary)}
                     onAddHive={() => onAddHive?.(apiary)}
                     getWeatherIcon={getWeatherIcon}
@@ -170,14 +170,14 @@ function SummaryCard({ title, value, color, alert }: { title: string; value: str
   );
 }
 
-function ApiaryCard({ apiary, onView, onEdit, onAddHive, getWeatherIcon }: {
-  apiary: Apiary; onView: () => void; onEdit: () => void; onAddHive: () => void;
+function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon }: {
+  apiary: Apiary; lang: Language; onView: () => void; onEdit: () => void; onAddHive: () => void;
   getWeatherIcon: (condition: string) => React.ReactNode;
 }) {
   const statusConfig: Record<string, { label: string; textColor: string; bgColor: string }> = {
-    active: { label: 'Active', textColor: 'text-emerald-700', bgColor: 'bg-emerald-50' },
-    empty: { label: 'Empty', textColor: 'text-stone-700', bgColor: 'bg-stone-50' },
-    expired: { label: 'Expired – Action Required', textColor: 'text-red-700', bgColor: 'bg-red-50' },
+    active: { label: t('active', lang), textColor: 'text-emerald-700', bgColor: 'bg-emerald-50' },
+    empty: { label: t('empty', lang), textColor: 'text-stone-700', bgColor: 'bg-stone-50' },
+    expired: { label: t('expired', lang), textColor: 'text-red-700', bgColor: 'bg-red-50' },
   };
   const config = statusConfig[apiary.status] || statusConfig.active;
 
@@ -226,12 +226,12 @@ function ApiaryCard({ apiary, onView, onEdit, onAddHive, getWeatherIcon }: {
         {/* Hives Snapshot */}
         {apiary.status === 'empty' || (apiary.hive_count || 0) === 0 ? (
           <div className="p-3 bg-stone-100 rounded-lg">
-            <p className="text-stone-600 text-sm font-medium">No hives added</p>
+            <p className="text-stone-600 text-sm font-medium">{t('noHivesAdded', lang)}</p>
           </div>
         ) : (
           <div className="flex items-center gap-4">
             <div className="flex-1 p-3 bg-amber-50 rounded-lg">
-              <p className="text-xs text-amber-700 mb-1">Total Hives</p>
+              <p className="text-xs text-amber-700 mb-1">{t('totalHivesLabel', lang)}</p>
               <p className="text-2xl font-bold text-amber-900">{apiary.hive_count || 0}</p>
             </div>
           </div>
@@ -242,7 +242,7 @@ function ApiaryCard({ apiary, onView, onEdit, onAddHive, getWeatherIcon }: {
           <div className="p-3 bg-emerald-50 rounded-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-emerald-700 mb-1">Primary Forage</p>
+                <p className="text-xs text-emerald-700 mb-1">{t('primaryForage', lang)}</p>
                 <p className="font-bold text-emerald-900">{apiary.forage_primary || 'Mixed'}</p>
               </div>
               {apiary.blooming_window && (
@@ -259,7 +259,7 @@ function ApiaryCard({ apiary, onView, onEdit, onAddHive, getWeatherIcon }: {
         {apiary.status === 'expired' && (
           <div className="p-3 bg-red-100 rounded-lg flex items-start gap-2">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-800 font-medium">Contract renewal required</p>
+            <p className="text-sm text-red-800 font-medium">{t('contractRenewal', lang)}</p>
           </div>
         )}
 
@@ -270,21 +270,21 @@ function ApiaryCard({ apiary, onView, onEdit, onAddHive, getWeatherIcon }: {
             className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
           >
             <Eye className="w-4 h-4" />
-            <span className="text-sm">View</span>
+            <span className="text-sm">{t('view', lang)}</span>
           </button>
           <button
             onClick={onEdit}
             className="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-700 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
           >
             <Pencil className="w-4 h-4" />
-            <span className="text-sm">Edit</span>
+            <span className="text-sm">{t('edit', lang)}</span>
           </button>
           <button
             onClick={onAddHive}
             className="flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
           >
             <HiveIcon className="w-4 h-4" />
-            <span className="text-sm">Add Hive</span>
+            <span className="text-sm">{t('addHive', lang)}</span>
           </button>
         </div>
       </div>

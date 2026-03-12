@@ -1,5 +1,6 @@
 import React from 'react';
 import { Home, MapPin, Hexagon as HiveIcon, Calendar, DollarSign, Users, User, LogOut } from 'lucide-react';
+import { t, type Language } from '../i18n';
 
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
@@ -9,6 +10,7 @@ interface MobileSidebarProps {
   onNavigate: (tab: NavTab) => void;
   onClose: () => void;
   onLogout?: () => void;
+  lang?: Language;
 }
 
 function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
@@ -27,7 +29,7 @@ function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; labe
   );
 }
 
-export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout }: MobileSidebarProps) {
+export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout, lang = 'en' }: MobileSidebarProps) {
   const nav = (tab: NavTab) => { onNavigate(tab); onClose(); };
 
   // Lock body scroll when open so the page behind doesn't scroll
@@ -61,13 +63,13 @@ export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout
           </div>
 
           <nav className="py-4 flex-1 overflow-y-auto">
-            <NavItem icon={<Home className="w-5 h-5" />}       label="Dashboard" active={activeTab === 'dashboard'} onClick={() => nav('dashboard')} />
-            <NavItem icon={<MapPin className="w-5 h-5" />}     label="Apiaries"  active={activeTab === 'apiaries'}  onClick={() => nav('apiaries')}  />
-            <NavItem icon={<HiveIcon className="w-5 h-5" />}   label="Hives"     active={activeTab === 'hives'}     onClick={() => nav('hives')}     />
-            <NavItem icon={<Calendar className="w-5 h-5" />}   label="Planning"  active={activeTab === 'planning'}  onClick={() => nav('planning')}  />
-            <NavItem icon={<DollarSign className="w-5 h-5" />} label="Finance"   active={activeTab === 'finance'}   onClick={() => nav('finance')}   />
-            <NavItem icon={<Users className="w-5 h-5" />}      label="Clients"   active={activeTab === 'clients'}   onClick={() => nav('clients')}   />
-            <NavItem icon={<User className="w-5 h-5" />}       label="Profile"   active={activeTab === 'profile'}   onClick={() => nav('profile')}   />
+            <NavItem icon={<Home className="w-5 h-5" />}       label={t('dashboard', lang)} active={activeTab === 'dashboard'} onClick={() => nav('dashboard')} />
+            <NavItem icon={<MapPin className="w-5 h-5" />}     label={t('apiaries', lang)}  active={activeTab === 'apiaries'}  onClick={() => nav('apiaries')}  />
+            <NavItem icon={<HiveIcon className="w-5 h-5" />}   label={t('hives', lang)}     active={activeTab === 'hives'}     onClick={() => nav('hives')}     />
+            <NavItem icon={<Calendar className="w-5 h-5" />}   label={t('planning', lang)}  active={activeTab === 'planning'}  onClick={() => nav('planning')}  />
+            <NavItem icon={<DollarSign className="w-5 h-5" />} label={t('finance', lang)}   active={activeTab === 'finance'}   onClick={() => nav('finance')}   />
+            <NavItem icon={<Users className="w-5 h-5" />}      label={t('clients', lang)}   active={activeTab === 'clients'}   onClick={() => nav('clients')}   />
+            <NavItem icon={<User className="w-5 h-5" />}       label={t('profile', lang)}   active={activeTab === 'profile'}   onClick={() => nav('profile')}   />
           </nav>
 
           <div className="p-4 border-t border-stone-200 bg-stone-50 flex-shrink-0">
@@ -77,7 +79,7 @@ export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout
                 className="w-full flex items-center justify-center gap-2 py-3 mb-3 rounded-lg bg-red-50 text-red-700 font-semibold hover:bg-red-100 transition-colors"
               >
                 <LogOut className="w-5 h-5" />
-                <span>Log out</span>
+                <span>{t('logout', lang)}</span>
               </button>
             )}
             <p className="text-xs text-stone-600 text-center">ApiCore v1.0.0</p>

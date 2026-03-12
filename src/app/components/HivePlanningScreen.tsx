@@ -9,6 +9,7 @@ import { MapPin, Hexagon as HiveIcon, CloudRain, Sun, Cloud, Wind, Droplets, The
 import { ForecastDays14 } from './ForecastDays14';
 import { ForecastHourly } from './ForecastHourly';
 import { MapViewer } from './MapViewer';
+import { t } from '../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -205,14 +206,14 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab="planning" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+      <MobileSidebar isOpen={isSidebarOpen} activeTab="planning" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
 
       <div className="bg-white shadow-sm shrink-0 z-30">
         <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
           isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
         <div className="px-4 pb-3 border-t border-stone-100">
-          <h1 className="text-[1.1rem] font-bold text-stone-800">Hive Planning</h1>
-          <p className="text-stone-500 text-[0.75rem] mt-0.5">Plan and analyze locations</p>
+          <h1 className="text-[1.1rem] font-bold text-stone-800">{t('hivePlanning', selectedLanguage)}</h1>
+          <p className="text-stone-500 text-[0.75rem] mt-0.5">{t('planAndAnalyze', selectedLanguage)}</p>
         </div>
       </div>
 
@@ -334,12 +335,12 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
                     {/* 14-Day Forecast */}
                     {analysis.weather.days.length > 0 && (
-                      <ForecastDays14 days={analysis.weather.days} />
+                      <ForecastDays14 days={analysis.weather.days} lang={selectedLanguage} />
                     )}
 
                     {/* Hourly Forecast (Today + Tomorrow) */}
                     {analysis.weather.hourly.length > 0 && (
-                      <ForecastHourly hourly={analysis.weather.hourly} initialShowCount={6} />
+                      <ForecastHourly hourly={analysis.weather.hourly} initialShowCount={6} lang={selectedLanguage} />
                     )}
 
                     {/* Forage Information */}

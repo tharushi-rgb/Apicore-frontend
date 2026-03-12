@@ -3,6 +3,7 @@ import { Plus, Edit2, Trash2, Search, X, Phone, MapPin, Calendar, CheckCircle, C
 import { MobileHeader } from './MobileHeader';
 import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
+import { t } from '../i18n';
 import { clientsService, type ClientService } from '../services/clients';
 
 type Language = 'en' | 'si' | 'ta';
@@ -30,7 +31,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
     return true;
   });
 
-  const handleDelete = async (id: number) => { if (!confirm('Delete?')) return; await clientsService.delete(id); fetchServices(); };
+  const handleDelete = async (id: number) => { if (!confirm(t('deleteQ', selectedLanguage))) return; await clientsService.delete(id); fetchServices(); };
 
   const handleStatusChange = async (id: number, status: string) => {
     await clientsService.updateStatus(id, status);
@@ -42,37 +43,37 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24 relative overflow-hidden">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab="clients" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+      <MobileSidebar isOpen={isSidebarOpen} activeTab="clients" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
 
       <div className="bg-white shadow-sm sticky top-0 z-30">
         <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
         isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
         <div className="px-6 pb-4 border-t border-stone-100">
-          <h1 className="text-2xl font-bold text-stone-800">Client Services</h1>
-          <p className="text-stone-500 text-sm mt-1">Manage client requests</p>
+          <h1 className="text-2xl font-bold text-stone-800">{t('clients', selectedLanguage)}</h1>
+          <p className="text-stone-500 text-sm mt-1">{t('manageClientRequests', selectedLanguage)}</p>
         </div>
       </div>
 
       <div className="px-4 py-6 space-y-4">
         <div className="grid grid-cols-2 gap-2">
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold">{services.length}</p><p className="text-xs text-stone-500">Total</p></div>
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold text-amber-600">{services.filter(s=>s.status==='pending').length}</p><p className="text-xs text-stone-500">Pending</p></div>
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold text-blue-600">{services.filter(s=>s.status==='in_progress').length}</p><p className="text-xs text-stone-500">Active</p></div>
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold text-emerald-600">{services.filter(s=>s.status==='completed').length}</p><p className="text-xs text-stone-500">Done</p></div>
+          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold">{services.length}</p><p className="text-xs text-stone-500">{t('total', selectedLanguage)}</p></div>
+          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold text-amber-600">{services.filter(s=>s.status==='pending').length}</p><p className="text-xs text-stone-500">{t('pending', selectedLanguage)}</p></div>
+          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold text-blue-600">{services.filter(s=>s.status==='in_progress').length}</p><p className="text-xs text-stone-500">{t('active', selectedLanguage)}</p></div>
+          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold text-emerald-600">{services.filter(s=>s.status==='completed').length}</p><p className="text-xs text-stone-500">{t('done', selectedLanguage)}</p></div>
         </div>
 
         <div className="flex gap-2">
           <div className="flex-1 relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-            <input value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm focus:border-amber-500 focus:outline-none" placeholder="Search..." /></div>
+            <input value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm focus:border-amber-500 focus:outline-none" placeholder={t('search', selectedLanguage)} /></div>
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm">
-            <option value="all">All</option><option value="pending">Pending</option><option value="in_progress">Active</option><option value="completed">Done</option><option value="cancelled">Cancelled</option>
+            <option value="all">{t('all', selectedLanguage)}</option><option value="pending">{t('pending', selectedLanguage)}</option><option value="in_progress">{t('active', selectedLanguage)}</option><option value="completed">{t('done', selectedLanguage)}</option><option value="cancelled">{t('cancelled', selectedLanguage)}</option>
           </select>
         </div>
 
-        <button onClick={() => setShowForm(true)} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2"><Plus className="w-5 h-5" /> New Client Service</button>
+        <button onClick={() => setShowForm(true)} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2"><Plus className="w-5 h-5" /> {t('newClientService', selectedLanguage)}</button>
 
         {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div> :
-          filtered.length === 0 ? <p className="text-center text-stone-500 py-8">No client services found</p> :
+          filtered.length === 0 ? <p className="text-center text-stone-500 py-8">{t('noClientServices', selectedLanguage)}</p> :
           <div className="space-y-3">{filtered.map(s => (
             <div key={s.id} className="bg-white rounded-xl p-4 shadow-sm">
               <div className="flex items-start justify-between mb-2">
@@ -92,9 +93,9 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
               {s.notes && <p className="text-xs text-stone-500 mt-1">{s.notes}</p>}
               {s.status !== 'completed' && s.status !== 'cancelled' && (
                 <div className="flex gap-2 mt-2">
-                  {s.status === 'pending' && <button onClick={() => handleStatusChange(s.id, 'in_progress')} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-lg">Start</button>}
-                  {s.status === 'in_progress' && <button onClick={() => handleStatusChange(s.id, 'completed')} className="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded-lg">Complete</button>}
-                  <button onClick={() => handleStatusChange(s.id, 'cancelled')} className="text-xs bg-red-50 text-red-600 px-2 py-1 rounded-lg">Cancel</button>
+                  {s.status === 'pending' && <button onClick={() => handleStatusChange(s.id, 'in_progress')} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-lg">{t('start', selectedLanguage)}</button>}
+                  {s.status === 'in_progress' && <button onClick={() => handleStatusChange(s.id, 'completed')} className="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded-lg">{t('complete', selectedLanguage)}</button>}
+                  <button onClick={() => handleStatusChange(s.id, 'cancelled')} className="text-xs bg-red-50 text-red-600 px-2 py-1 rounded-lg">{t('cancel', selectedLanguage)}</button>
                 </div>
               )}
             </div>
@@ -123,24 +124,24 @@ function ClientServiceForm({ initial, onClose, onSaved }: { initial?: ClientServ
   };
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center"><div className="bg-white w-full max-w-md rounded-t-2xl p-5 max-h-[85vh] overflow-y-auto">
-      <div className="flex items-center justify-between mb-4"><h3 className="font-bold text-stone-800">{initial ? 'Edit' : 'New'} Client Service</h3><button onClick={onClose}><X className="w-5 h-5" /></button></div>
+      <div className="flex items-center justify-between mb-4"><h3 className="font-bold text-stone-800">{initial ? t('editClientService', 'en') : t('newClientService', 'en')}</h3><button onClick={onClose}><X className="w-5 h-5" /></button></div>
       <form onSubmit={submit} className="space-y-3">
-        <input value={f.client_name} onChange={e=>setF(p=>({...p,client_name:e.target.value}))} placeholder="Client Name *" className="w-full border rounded-xl px-3 py-2 text-sm" />
+        <input value={f.client_name} onChange={e=>setF(p=>({...p,client_name:e.target.value}))} placeholder={`${t('clientName', 'en')} *`} className="w-full border rounded-xl px-3 py-2 text-sm" />
         <div className="grid grid-cols-2 gap-2">
-          <input value={f.client_contact} onChange={e=>setF(p=>({...p,client_contact:e.target.value}))} placeholder="Phone" className="border rounded-xl px-3 py-2 text-sm" />
-          <input value={f.client_email} onChange={e=>setF(p=>({...p,client_email:e.target.value}))} placeholder="Email" type="email" className="border rounded-xl px-3 py-2 text-sm" />
+          <input value={f.client_contact} onChange={e=>setF(p=>({...p,client_contact:e.target.value}))} placeholder={t('phone', 'en')} className="border rounded-xl px-3 py-2 text-sm" />
+          <input value={f.client_email} onChange={e=>setF(p=>({...p,client_email:e.target.value}))} placeholder={t('email', 'en')} type="email" className="border rounded-xl px-3 py-2 text-sm" />
         </div>
         <select value={f.service_type} onChange={e=>setF(p=>({...p,service_type:e.target.value}))} className="w-full border rounded-xl px-3 py-2 text-sm">
-          <option value="hive_inspection">Hive Inspection</option><option value="swarm_removal">Swarm Removal</option><option value="colony_relocation">Colony Relocation</option>
-          <option value="honey_extraction">Honey Extraction</option><option value="consultation">Consultation</option><option value="training">Training</option><option value="other">Other</option>
+          <option value="hive_inspection">{t('hiveInspection', 'en')}</option><option value="swarm_removal">{t('swarmRemoval', 'en')}</option><option value="colony_relocation">{t('colonyRelocation', 'en')}</option>
+          <option value="honey_extraction">{t('honeyExtraction', 'en')}</option><option value="consultation">{t('consultation', 'en')}</option><option value="training">{t('training', 'en')}</option><option value="other">{t('other', 'en')}</option>
         </select>
-        <input value={f.location} onChange={e=>setF(p=>({...p,location:e.target.value}))} placeholder="Location" className="w-full border rounded-xl px-3 py-2 text-sm" />
+        <input value={f.location} onChange={e=>setF(p=>({...p,location:e.target.value}))} placeholder={t('locationLabel', 'en')} className="w-full border rounded-xl px-3 py-2 text-sm" />
         <div className="grid grid-cols-2 gap-2">
           <input type="date" value={f.scheduled_date} onChange={e=>setF(p=>({...p,scheduled_date:e.target.value}))} className="border rounded-xl px-3 py-2 text-sm" />
-          <input value={f.payment_amount} onChange={e=>setF(p=>({...p,payment_amount:e.target.value}))} placeholder="Amount (Rs.)" type="number" className="border rounded-xl px-3 py-2 text-sm" />
+          <input value={f.payment_amount} onChange={e=>setF(p=>({...p,payment_amount:e.target.value}))} placeholder={t('amountRs', 'en')} type="number" className="border rounded-xl px-3 py-2 text-sm" />
         </div>
-        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder="Notes" rows={2} className="w-full border rounded-xl px-3 py-2 text-sm" />
-        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-2.5 rounded-xl font-medium disabled:opacity-60">{saving ? 'Saving...' : 'Save'}</button>
+        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder={t('notes', 'en')} rows={2} className="w-full border rounded-xl px-3 py-2 text-sm" />
+        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-2.5 rounded-xl font-medium disabled:opacity-60">{saving ? t('saving', 'en') : t('save', 'en')}</button>
       </form>
     </div></div>
   );

@@ -4,6 +4,7 @@ import { MobileHeader } from './MobileHeader';
 import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
 import { notificationsService, type Notification } from '../services/notifications';
+import { t } from '../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -34,33 +35,33 @@ export function NotificationsScreen({ selectedLanguage, onLanguageChange, onNavi
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab="notifications" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+      <MobileSidebar isOpen={isSidebarOpen} activeTab="notifications" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
 
       <div className="bg-white shadow-sm sticky top-0 z-30">
         <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
         isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
         <div className="px-6 pb-4 border-t border-stone-100">
-          <h1 className="text-2xl font-bold text-stone-800">Notifications</h1>
-          <p className="text-stone-500 text-sm mt-1">Stay updated</p>
+          <h1 className="text-2xl font-bold text-stone-800">{t('notifications', selectedLanguage)}</h1>
+          <p className="text-stone-500 text-sm mt-1">{t('stayUpdated', selectedLanguage)}</p>
         </div>
       </div>
 
       <div className="px-4 py-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-stone-800">Notifications {unreadCount > 0 && <span className="text-sm bg-red-500 text-white px-2 py-0.5 rounded-full ml-2">{unreadCount}</span>}</h2>
+          <h2 className="text-xl font-bold text-stone-800">{t('notifications', selectedLanguage)} {unreadCount > 0 && <span className="text-sm bg-red-500 text-white px-2 py-0.5 rounded-full ml-2">{unreadCount}</span>}</h2>
           {unreadCount > 0 && (
-            <button onClick={handleMarkAllRead} className="text-sm text-amber-600 font-medium flex items-center gap-1"><CheckCheck className="w-4 h-4" /> Read All</button>
+            <button onClick={handleMarkAllRead} className="text-sm text-amber-600 font-medium flex items-center gap-1"><CheckCheck className="w-4 h-4" /> {t('readAll', selectedLanguage)}</button>
           )}
         </div>
 
         <div className="flex bg-white rounded-xl p-1 shadow-sm">
-          <button onClick={() => setFilter('all')} className={`flex-1 py-2 rounded-lg text-sm font-medium ${filter==='all' ? 'bg-amber-500 text-white' : 'text-stone-600'}`}>All ({notifications.length})</button>
-          <button onClick={() => setFilter('unread')} className={`flex-1 py-2 rounded-lg text-sm font-medium ${filter==='unread' ? 'bg-amber-500 text-white' : 'text-stone-600'}`}>Unread ({unreadCount})</button>
+          <button onClick={() => setFilter('all')} className={`flex-1 py-2 rounded-lg text-sm font-medium ${filter==='all' ? 'bg-amber-500 text-white' : 'text-stone-600'}`}>{t('all', selectedLanguage)} ({notifications.length})</button>
+          <button onClick={() => setFilter('unread')} className={`flex-1 py-2 rounded-lg text-sm font-medium ${filter==='unread' ? 'bg-amber-500 text-white' : 'text-stone-600'}`}>{t('unread', selectedLanguage)} ({unreadCount})</button>
         </div>
 
         {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div> :
           filtered.length === 0 ? (
-            <div className="text-center py-12"><Bell className="w-12 h-12 text-stone-300 mx-auto mb-3" /><p className="text-stone-500">No notifications</p></div>
+            <div className="text-center py-12"><Bell className="w-12 h-12 text-stone-300 mx-auto mb-3" /><p className="text-stone-500">{t('noNotifications', selectedLanguage)}</p></div>
           ) : (
             <div className="space-y-2">
               {filtered.map(n => (
