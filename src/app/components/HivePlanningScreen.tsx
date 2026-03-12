@@ -204,19 +204,19 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24 relative overflow-hidden">
+    <div className="h-full flex flex-col bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
       <MobileSidebar isOpen={isSidebarOpen} activeTab="planning" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
 
-      <div className="bg-white shadow-sm sticky top-0 z-30">
+      <div className="bg-white shadow-sm shrink-0 z-30">
         <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
           isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
-        <div className="px-6 pb-4 border-t border-stone-100">
-          <h1 className="text-2xl font-bold text-stone-800">Hive Planning</h1>
-          <p className="text-stone-500 text-sm mt-1">Plan and analyze locations</p>
+        <div className="px-4 pb-3 border-t border-stone-100">
+          <h1 className="text-[1.1rem] font-bold text-stone-800">Hive Planning</h1>
+          <p className="text-stone-500 text-[0.75rem] mt-0.5">Plan and analyze locations</p>
         </div>
       </div>
 
-      <div className="px-4 py-6 space-y-4">
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
 
         {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div> : (
           <>
@@ -313,20 +313,20 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
                     {/* Current Weather */}
                     {analysis.weather.current && (
-                      <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <h3 className="font-bold text-stone-800 mb-3 flex items-center gap-2"><Thermometer className="w-4 h-4 text-amber-500" /> Current Weather</h3>
+                      <div className="bg-white rounded-xl p-3 shadow-sm">
+                        <h3 className="font-bold text-stone-800 mb-2 text-[0.875rem] flex items-center gap-2"><Thermometer className="w-3.5 h-3.5 text-amber-500" /> Current Weather</h3>
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <WeatherIcon code={analysis.weather.current.wcode} className="w-10 h-10" />
+                          <div className="flex items-center gap-2">
+                            <WeatherIcon code={analysis.weather.current.wcode} className="w-8 h-8" />
                             <div>
-                              <p className="text-3xl font-bold text-stone-800">{analysis.weather.current.temp}°C</p>
-                              <p className={`text-xs px-2 py-0.5 rounded inline-block border ${riskBg(analysis.weather.current.tempRisk.color)}`}>{analysis.weather.current.tempRisk.label}</p>
+                              <p className="text-[1.6rem] font-bold leading-none text-stone-800">{analysis.weather.current.temp}°C</p>
+                              <p className={`text-[0.7rem] px-1.5 py-0.5 rounded inline-block border ${riskBg(analysis.weather.current.tempRisk.color)}`}>{analysis.weather.current.tempRisk.label}</p>
                             </div>
                           </div>
-                          <div className="text-right space-y-1 text-sm">
-                            <p className="flex items-center gap-1 justify-end"><Droplets className="w-3.5 h-3.5 text-blue-400" /> {analysis.weather.current.humidity}%</p>
-                            <p className="flex items-center gap-1 justify-end"><Wind className="w-3.5 h-3.5 text-stone-400" /> {analysis.weather.current.wind} km/h</p>
-                            <p className={`text-xs px-2 py-0.5 rounded inline-block border ${riskBg(analysis.weather.current.humidityStatus.color)}`}>{analysis.weather.current.humidityStatus.label}</p>
+                          <div className="text-right space-y-1">
+                            <p className="flex items-center gap-1 justify-end text-[0.8rem]"><Droplets className="w-3 h-3 text-blue-400" /> {analysis.weather.current.humidity}%</p>
+                            <p className="flex items-center gap-1 justify-end text-[0.8rem]"><Wind className="w-3 h-3 text-stone-400" /> {analysis.weather.current.wind} km/h</p>
+                            <p className={`text-[0.7rem] px-1.5 py-0.5 rounded inline-block border ${riskBg(analysis.weather.current.humidityStatus.color)}`}>{analysis.weather.current.humidityStatus.label}</p>
                           </div>
                         </div>
                       </div>
