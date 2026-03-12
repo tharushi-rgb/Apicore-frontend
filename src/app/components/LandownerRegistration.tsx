@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, Check, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Eye, EyeOff } from 'lucide-react';
 import { authService } from '../services/auth';
 import { t } from '../i18n';
 
@@ -15,30 +15,90 @@ interface LandownerRegistrationProps {
 
 interface FormData {
   fullName: string;
+  phoneNumber: string;
+  nicNumber: string;
   email: string;
+  preferredLanguage: string;
+  ageGroup: string;
+  businessRegNo: string;
+  province: string;
+  district: string;
+  dsDivision: string;
   password: string;
   confirmPassword: string;
 }
 
-export function LandownerRegistration({
-  selectedLanguage,
-  onLanguageChange,
-  onBack,
-  onSuccess,
-}: LandownerRegistrationProps) {
+const districtsByProvince: Record<string, string[]> = {
+  'Central': ['Kandy', 'Matale', 'Nuwara Eliya'],
+  'Eastern': ['Ampara', 'Batticaloa', 'Trincomalee'],
+  'North Central': ['Anuradhapura', 'Polonnaruwa'],
+  'Northern': ['Jaffna', 'Kilinochchi', 'Mannar', 'Mullaitivu', 'Vavuniya'],
+  'North Western': ['Kurunegala', 'Puttalam'],
+  'Sabaragamuwa': ['Kegalle', 'Ratnapura'],
+  'Southern': ['Galle', 'Hambantota', 'Matara'],
+  'Uva': ['Badulla', 'Monaragala'],
+  'Western': ['Colombo', 'Gampaha', 'Kalutara'],
+};
+
+const dsDivisionsByDistrict: Record<string, string[]> = {
+  'Colombo': ['Colombo','Dehiwala','Homagama','Kaduwela','Kesbewa','Kolonnawa','Maharagama','Moratuwa','Padukka','Ratmalana','Seethawaka','Sri Jayawardenepura Kotte','Thimbirigasyaya'],
+  'Gampaha': ['Attanagalla','Biyagama','Divulapitiya','Dompe','Gampaha','Ja-Ela','Katana','Kelaniya','Mahara','Minuwangoda','Mirigama','Negombo','Wattala'],
+  'Kalutara': ['Agalawatta','Bandaragama','Beruwala','Bulathsinhala','Dodangoda','Horana','Ingiriya','Kalutara','Madurawela','Mathugama','Palindanuwara','Panadura','Walallavita'],
+  'Kandy': ['Akurana','Delthota','Doluwa','Ganga Ihala Korale','Harispattuwa','Hatharaliyadda','Kundasale','Medadumbara','Minipe','Pasbage Korale','Pathadumbara','Pathahewaheta','Poojapitiya','Udapalatha','Ududumbara','Udunuwara','Yatinuwara'],
+  'Matale': ['Ambanganga Korale','Dambulla','Galewela','Laggala-Pallegama','Matale','Naula','Pallepola','Rattota','Ukuwela','Wilgamuwa'],
+  'Nuwara Eliya': ['Ambagamuwa','Hanguranketha','Kothmale','Nuwara Eliya','Walapane'],
+  'Galle': ['Akmeemana','Ambalangoda','Baddegama','Balapitiya','Benthota','Bope-Poddala','Elpitiya','Galle','Habaraduwa','Hikkaduwa','Imaduwa','Karandeniya','Nagoda','Neluwa','Niyagama','Thawalama','Welivitiya-Divithura'],
+  'Matara': ['Akuressa','Athuraliya','Devinuwara','Dickwella','Hakmana','Kamburupitiya','Kirinda Puhulwella','Kotapola','Malimbada','Matara Four Gravets','Mulatiyana','Pasgoda','Pitabeddara','Thihagoda','Weligama','Welipitiya'],
+  'Hambantota': ['Ambalantota','Angunakolapelessa','Beliatta','Hambantota','Katuwana','Lunugamvehera','Okewela','Sooriyawewa','Tangalle','Tissamaharama','Walasmulla','Weeraketiya'],
+  'Jaffna': ['Delft','Island North','Island South','Jaffna','Karainagar','Nallur','Thenmaradchi','Vadamaradchi East','Vadamaradchi North','Vadamaradchi South-West','Valikamam East','Valikamam North','Valikamam South','Valikamam South-West','Valikamam West'],
+  'Kilinochchi': ['Kandavalai','Karachchi','Pachchilaipalli','Poonakary'],
+  'Mannar': ['Madhu','Mannar','Nanattan','Musali'],
+  'Vavuniya': ['Vavuniya','Vavuniya North','Vavuniya South','Vengalacheddikulam'],
+  'Mullaitivu': ['Maritimepattu','Oddusuddan','Puthukudiyiruppu','Thunukkai','Welioya'],
+  'Batticaloa': ['Batticaloa','Eravur Pattu','Eravur Town','Kattankudy','Koralai Pattu','Koralai Pattu Central','Koralai Pattu North','Koralai Pattu South','Manmunai North','Manmunai Pattu','Manmunai South West','Manmunai West','Porativu Pattu'],
+  'Ampara': ['Addalaichenai','Akkayarapattu','Alayadiwembu','Ampara','Damana','Dehiattakandiya','Kalmunai','Karaitivu','Lahugala','Mahaoya','Navithanveli','Nintavur','Padiyathalawa','Pottuvil','Sainthamaruthu','Sammanthurai','Thirukkovil','Uhana'],
+  'Trincomalee': ['Gomarankadawala','Kantale','Kinniya','Kuchchaveli','Morawewa','Muttur','Padavi Sri Pura','Seruvila','Thampalagamuwa','Trincomalee Town and Gravets','Verugal'],
+  'Kurunegala': ['Alawwa','Bingiriya','Ehetuwewa','Galgamuwa','Ganewatta','Giribawa','Ibbagamuwa','Kuliyapitiya East','Kuliyapitiya West','Kurunegala','Mahawa','Mallawapitiya','Maspotha','Mawathagama','Narammala','Nikaweratiya','Pannala','Polgahawela','Polpithigama','Ridigama','Udubaddawa','Wariyapola'],
+  'Puttalam': ['Anamaduwa','Arachchikattuwa','Chilaw','Dankotuwa','Kalpitiya','Madampe','Nawagattegama','Pallama','Puttalam','Vanathavilluwa','Wennappuwa'],
+  'Anuradhapura': ['Anuradhapura','Galenbindunuwewa','Galnewa','Horowpothana','Ipalogama','Kahatagasdigiliya','Kebithigollewa','Kekirawa','Mahavilachchiya','Medawachchiya','Mihintale','Nachchaduwa','Nochchiyagama','Nuwaragam Palatha Central','Nuwaragam Palatha East','Padaviya','Palagala','Rajanganaya','Rambewa','Thalawa','Thambuttegama','Thirappane'],
+  'Polonnaruwa': ['Dimbulagala','Elahera','Hingurakgoda','Medirigiriya','Polonnaruwa','Thamankaduwa','Welikanda'],
+  'Badulla': ['Badulla','Bandarawela','Ella','Haldummulla','Hali-Ela','Haputale','Kandaketiya','Lunugala','Mahiyanganaya','Meegahakivula','Passara','Rideemaliyadda','Soranathota','Uva-Paranagama','Welimada'],
+  'Monaragala': ['Badalkumbura','Bibile','Buttala','Katharagama','Madulla','Medagama','Monaragala','Sevanagala','Siyambalanduwa','Thanamalwila','Wellawaya'],
+  'Ratnapura': ['Ayagama','Balangoda','Eheliyagoda','Elapatha','Embilipitiya','Godakawela','Imbulpe','Kahawatta','Kuruwita','Kiriella','Kolonne','Nivithigala','Opanayaka','Pelmadulla','Ratnapura','Weligepola'],
+  'Kegalle': ['Aranayaka','Bulathkohupitiya','Dehiovita','Deraniyagala','Galigamuwa','Kegalle','Mawanella','Rambukkana','Ruwanwella','Warakapola','Yatiyanthota'],
+};
+
+const TOTAL_STEPS = 4;
+
+export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBack, onSuccess }: LandownerRegistrationProps) {
+  const [currentStep, setCurrentStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<FormData>({ mode: 'onBlur' });
+  const { register, handleSubmit, watch, setValue, formState: { errors }, trigger } = useForm<FormData>({ mode: 'onBlur' });
 
   const password = watch('password');
+  const selectedProvince = watch('province');
+  const selectedDistrict = watch('district');
+  const districts = selectedProvince ? districtsByProvince[selectedProvince] || [] : [];
+  const dsDivisions = selectedDistrict ? dsDivisionsByDistrict[selectedDistrict] || [] : [];
+
+  const stepLabels = ['Personal Details', 'Profile', 'Location & Password', 'Summary'];
+
+  const handleNext = async () => {
+    if (currentStep === 1) {
+      const valid = await trigger(['fullName', 'phoneNumber', 'nicNumber', 'email']);
+      if (valid) setCurrentStep(2);
+    } else if (currentStep === 2) {
+      const valid = await trigger(['preferredLanguage', 'ageGroup']);
+      if (valid) setCurrentStep(3);
+    } else if (currentStep === 3) {
+      const valid = await trigger(['province', 'district', 'dsDivision', 'password', 'confirmPassword']);
+      if (valid) setCurrentStep(4);
+    }
+  };
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
@@ -48,8 +108,15 @@ export function LandownerRegistration({
         name: data.fullName,
         email: data.email,
         password: data.password,
+        phone: data.phoneNumber,
+        nic_number: data.nicNumber,
+        province: data.province,
+        district: data.district,
+        ds_division: data.dsDivision,
+        preferred_language: data.preferredLanguage || 'en',
+        age_group: data.ageGroup,
+        business_reg_no: data.businessRegNo || undefined,
         role: 'landowner',
-        preferred_language: 'en',
         known_bee_allergy: 'no',
       });
       localStorage.removeItem('auth_token');
@@ -65,173 +132,239 @@ export function LandownerRegistration({
     setIsSubmitting(false);
   };
 
-  const inputClass =
-    'w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-emerald-500 focus:outline-none text-[1rem]';
-  const labelClass = 'block text-stone-700 mb-1.5 text-[0.875rem] font-medium';
+  const ic = 'w-full px-3 py-2 bg-white border border-stone-200 rounded-lg focus:border-emerald-500 focus:outline-none text-[0.875rem]';
+  const sc = 'w-full px-3 py-2 bg-white border border-stone-200 rounded-lg focus:border-emerald-500 focus:outline-none text-[0.875rem]';
+  const lc = 'block text-stone-700 mb-1 text-[0.8rem] font-medium';
+  const ec = 'text-red-500 text-[0.7rem] mt-0.5';
 
   return (
     <div className="h-screen bg-stone-900 flex justify-center overflow-hidden">
-      <div className="w-[min(92vw,22rem)] h-full bg-stone-50 shadow-2xl relative flex flex-col">
-        {/* Language selector */}
-        <div className="w-full px-[5%] pt-[1rem] flex justify-end shrink-0">
-          {(['en', 'si', 'ta'] as const).map((lang) => (
-            <button
-              key={lang}
-              onClick={() => onLanguageChange(lang)}
-              className={`px-3 py-2 rounded-lg transition-all min-w-[48px] min-h-[44px] ${
-                selectedLanguage === lang
-                  ? 'bg-amber-500 text-white shadow-md'
-                  : 'bg-white/70 text-stone-700 hover:bg-white'
-              }`}
-            >
-              {lang === 'en' ? 'EN' : lang === 'si' ? 'සිං' : 'த'}
+      <div className="w-[min(92vw,22rem)] h-full bg-stone-50 shadow-2xl flex flex-col">
+
+        {/* Language Selector */}
+        <div className="w-full px-4 pt-2.5 flex justify-end shrink-0 gap-1">
+          {(['en', 'si', 'ta'] as const).map(l => (
+            <button key={l} onClick={() => onLanguageChange(l)}
+              className={`px-2.5 py-1 rounded-lg text-xs transition-all min-w-[36px] ${selectedLanguage === l ? 'bg-amber-500 text-white shadow' : 'bg-white/70 text-stone-700 hover:bg-white'}`}>
+              {l === 'en' ? 'EN' : l === 'si' ? 'සිං' : 'த'}
             </button>
           ))}
         </div>
 
-        {/* Scrollable form body */}
-        <div className="flex-1 flex flex-col items-center justify-center px-[6%] pb-[2rem] overflow-y-auto">
-          <div className="w-full max-w-md">
-            <h1 className="text-[1.875rem] font-bold text-stone-800 text-center mb-8 italic leading-tight">
-              {t('landownerRegistration', selectedLanguage)}
-            </h1>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {/* Full Name */}
-              <div>
-                <label className={labelClass}>
-                  {t('fullName', selectedLanguage)} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  {...register('fullName', { required: t('nameRequired', selectedLanguage) })}
-                  className={inputClass}
-                  placeholder={t('enterFullName', selectedLanguage)}
-                  disabled={isSubmitting}
-                />
-                {errors.fullName && (
-                  <p className="text-red-500 text-[0.75rem] mt-1">{errors.fullName.message}</p>
-                )}
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className={labelClass}>
-                  {t('email', selectedLanguage)} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  {...register('email', {
-                    required: t('emailRequired', selectedLanguage),
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: t('invalidEmail', selectedLanguage),
-                    },
-                  })}
-                  className={inputClass}
-                  placeholder={t('emailPlaceholder', selectedLanguage)}
-                  disabled={isSubmitting}
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-[0.75rem] mt-1">{errors.email.message}</p>
-                )}
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className={labelClass}>
-                  {t('password', selectedLanguage)} <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    {...register('password', {
-                      required: t('passwordRequired', selectedLanguage),
-                      minLength: { value: 8, message: t('minChars', selectedLanguage) },
-                      maxLength: { value: 16, message: t('maxChars', selectedLanguage) },
-                      pattern: {
-                        value: /^[a-zA-Z0-9]+$/,
-                        message: t('alphanumericOnly', selectedLanguage),
-                      },
-                    })}
-                    className={`${inputClass} pr-12`}
-                    placeholder={t('alphanumericPwd', selectedLanguage)}
-                    disabled={isSubmitting}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-red-500 text-[0.75rem] mt-1">{errors.password.message}</p>
-                )}
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <label className={labelClass}>
-                  {t('confirmPassword', selectedLanguage)} <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type={showConfirm ? 'text' : 'password'}
-                    {...register('confirmPassword', {
-                      required: t('confirmPwdPlease', selectedLanguage),
-                      validate: (v) => v === password || t('passwordsNoMatch', selectedLanguage),
-                    })}
-                    className={`${inputClass} pr-12`}
-                    placeholder={t('confirmPasswordPlaceholder', selectedLanguage)}
-                    disabled={isSubmitting}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500"
-                  >
-                    {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-                {errors.confirmPassword && (
-                  <p className="text-red-500 text-[0.75rem] mt-1">{errors.confirmPassword.message}</p>
-                )}
-              </div>
-
-              {error && (
-                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
-                  <p className="text-red-700 text-[0.875rem] font-medium">{error}</p>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl shadow-lg min-h-[3.5rem] font-medium text-[1.125rem] flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {isSubmitting ? (
-                  t('creatingAccount', selectedLanguage)
-                ) : (
-                  <>
-                    <Check className="w-5 h-5" />
-                    {t('createAccount', selectedLanguage)}
-                  </>
-                )}
-              </button>
-            </form>
+        {/* Header + Progress */}
+        <div className="px-4 pt-2 pb-2.5 shrink-0">
+          <h1 className="text-[1.1rem] font-bold text-stone-800 text-center mb-2 leading-tight">
+            {t('landownerRegistration', selectedLanguage)}
+          </h1>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[0.7rem] text-stone-500">{t('step', selectedLanguage)} {currentStep}/{TOTAL_STEPS}</span>
+            <span className="text-[0.7rem] text-stone-500">{stepLabels[currentStep - 1]}</span>
+          </div>
+          <div className="h-1.5 bg-stone-200 rounded-full overflow-hidden">
+            <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${(currentStep / TOTAL_STEPS) * 100}%` }} />
           </div>
         </div>
 
-        {/* Back button */}
-        <div className="px-[6%] pb-[2rem] shrink-0">
-          <button
-            onClick={onBack}
-            className="w-full bg-white hover:bg-stone-50 text-stone-700 py-4 rounded-xl border-2 border-stone-300 min-h-[3.5rem] font-medium text-[1.125rem] flex items-center justify-center gap-2"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            {t('back', selectedLanguage)}
+        {/* Form Body */}
+        <div className="flex-1 overflow-y-auto px-4 pb-2">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5">
+
+            {/* ── Step 1: Personal Details ── */}
+            {currentStep === 1 && (
+              <>
+                <div>
+                  <label className={lc}>{t('fullName', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <input {...register('fullName', { required: t('nameRequired', selectedLanguage) })}
+                    className={ic} placeholder={t('enterFullName', selectedLanguage)} />
+                  {errors.fullName && <p className={ec}>{errors.fullName.message}</p>}
+                </div>
+                <div>
+                  <label className={lc}>{t('phone', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <input {...register('phoneNumber', {
+                    required: t('phoneRequired', selectedLanguage),
+                    pattern: { value: /^\d{12}$/, message: t('must12DigitsPhone', selectedLanguage) }
+                  })} className={ic} placeholder="94774567890" maxLength={12} inputMode="numeric" />
+                  {errors.phoneNumber && <p className={ec}>{errors.phoneNumber.message}</p>}
+                </div>
+                <div>
+                  <label className={lc}>{t('nic', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <input {...register('nicNumber', {
+                    required: t('nicRequired', selectedLanguage),
+                    pattern: { value: /^\d{12}$/, message: t('must12Digits', selectedLanguage) }
+                  })} className={ic} placeholder="200012345678" maxLength={12} inputMode="numeric" />
+                  {errors.nicNumber && <p className={ec}>{errors.nicNumber.message}</p>}
+                </div>
+                <div>
+                  <label className={lc}>{t('emailPhone', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <input {...register('email', { required: t('emailRequired', selectedLanguage) })}
+                    className={ic} placeholder={t('emailPhonePlaceholder', selectedLanguage)} />
+                  {errors.email && <p className={ec}>{errors.email.message}</p>}
+                </div>
+              </>
+            )}
+
+            {/* ── Step 2: Profile ── */}
+            {currentStep === 2 && (
+              <>
+                <div>
+                  <label className={lc}>{t('preferredLanguage', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <select {...register('preferredLanguage', { required: t('prefLangRequired', selectedLanguage) })}
+                    defaultValue="en" className={sc}>
+                    <option value="">{t('selectLanguage', selectedLanguage)}</option>
+                    <option value="en">{t('englishLang', selectedLanguage)}</option>
+                    <option value="si">{t('sinhalaLang', selectedLanguage)}</option>
+                    <option value="ta">{t('tamilLang', selectedLanguage)}</option>
+                  </select>
+                  {errors.preferredLanguage && <p className={ec}>{errors.preferredLanguage.message}</p>}
+                </div>
+                <div>
+                  <label className={lc}>{t('ageGroup', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <select {...register('ageGroup', { required: t('ageRequired', selectedLanguage) })} className={sc}>
+                    <option value="">{t('selectAgeGroup', selectedLanguage)}</option>
+                    <option value="18-30">18 – 30</option>
+                    <option value="31-50">31 – 50</option>
+                    <option value="51-65">51 – 65</option>
+                    <option value="65+">65+</option>
+                  </select>
+                  {errors.ageGroup && <p className={ec}>{errors.ageGroup.message}</p>}
+                </div>
+                <div>
+                  <label className={lc}>{t('businessRegNo', selectedLanguage)} <span className="text-stone-400 text-[0.7rem]">(optional)</span></label>
+                  <input {...register('businessRegNo')}
+                    className={ic} placeholder={t('brPlaceholder', selectedLanguage)} />
+                </div>
+              </>
+            )}
+
+            {/* ── Step 3: Location & Password ── */}
+            {currentStep === 3 && (
+              <>
+                <div>
+                  <label className={lc}>{t('province', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <select {...register('province', { required: t('provinceRequired', selectedLanguage) })}
+                    onChange={e => { register('province').onChange(e); setValue('district', ''); setValue('dsDivision', ''); }}
+                    className={sc}>
+                    <option value="">{t('selectProvince', selectedLanguage)}</option>
+                    {Object.keys(districtsByProvince).map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                  {errors.province && <p className={ec}>{errors.province.message}</p>}
+                </div>
+                <div>
+                  <label className={lc}>{t('district', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <select {...register('district', { required: t('districtRequired', selectedLanguage) })}
+                    disabled={!selectedProvince}
+                    onChange={e => { register('district').onChange(e); setValue('dsDivision', ''); }}
+                    className={sc}>
+                    <option value="">{t('selectDistrictReg', selectedLanguage)}</option>
+                    {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                  {errors.district && <p className={ec}>{errors.district.message}</p>}
+                </div>
+                <div>
+                  <label className={lc}>{t('dsLabel', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <select {...register('dsDivision', { required: t('dsRequired', selectedLanguage) })}
+                    disabled={!selectedDistrict}
+                    className={sc}>
+                    <option value="">{t('selectDSDivision', selectedLanguage)}</option>
+                    {dsDivisions.map(ds => <option key={ds} value={ds}>{ds}</option>)}
+                  </select>
+                  {errors.dsDivision && <p className={ec}>{errors.dsDivision.message}</p>}
+                </div>
+                <div>
+                  <label className={lc}>{t('password', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <div className="relative">
+                    <input type={showPassword ? 'text' : 'password'}
+                      {...register('password', {
+                        required: t('passwordRequired', selectedLanguage),
+                        minLength: { value: 8, message: t('minChars', selectedLanguage) },
+                        maxLength: { value: 16, message: t('maxChars', selectedLanguage) },
+                        pattern: { value: /^[a-zA-Z0-9]+$/, message: t('alphanumericOnly', selectedLanguage) }
+                      })}
+                      className={`${ic} pr-10`} placeholder={t('alphanumericPwd', selectedLanguage)} />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400">
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {errors.password && <p className={ec}>{errors.password.message}</p>}
+                </div>
+                <div>
+                  <label className={lc}>{t('confirmPassword', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <div className="relative">
+                    <input type={showConfirm ? 'text' : 'password'}
+                      {...register('confirmPassword', {
+                        required: t('confirmPwdReq', selectedLanguage),
+                        validate: v => v === password || t('passwordsNoMatch', selectedLanguage)
+                      })}
+                      className={`${ic} pr-10`} placeholder={t('confirmPwdPlaceholder', selectedLanguage)} />
+                    <button type="button" onClick={() => setShowConfirm(!showConfirm)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400">
+                      {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && <p className={ec}>{errors.confirmPassword.message}</p>}
+                </div>
+              </>
+            )}
+
+            {/* ── Step 4: Summary ── */}
+            {currentStep === 4 && (
+              <>
+                <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
+                  <div className="bg-emerald-50 px-3 py-2 border-b border-stone-200">
+                    <h3 className="font-bold text-stone-800 text-[0.8rem]">{t('registrationSummary', selectedLanguage)}</h3>
+                  </div>
+                  <div className="p-3 grid grid-cols-2 gap-x-3 gap-y-2 text-[0.75rem]">
+                    <span className="text-stone-500">Name</span>
+                    <span className="text-stone-800 font-medium truncate">{watch('fullName') || '—'}</span>
+                    <span className="text-stone-500">Phone</span>
+                    <span className="text-stone-800 font-medium">{watch('phoneNumber') || '—'}</span>
+                    <span className="text-stone-500">NIC</span>
+                    <span className="text-stone-800 font-medium">{watch('nicNumber') || '—'}</span>
+                    <span className="text-stone-500">Email / Phone</span>
+                    <span className="text-stone-800 font-medium truncate">{watch('email') || '—'}</span>
+                    <span className="text-stone-500">Language</span>
+                    <span className="text-stone-800 font-medium capitalize">{watch('preferredLanguage') || '—'}</span>
+                    <span className="text-stone-500">Age Group</span>
+                    <span className="text-stone-800 font-medium">{watch('ageGroup') || '—'}</span>
+                    <span className="text-stone-500">Business Reg</span>
+                    <span className="text-stone-800 font-medium">{watch('businessRegNo') || '—'}</span>
+                    <span className="text-stone-500">Province</span>
+                    <span className="text-stone-800 font-medium">{watch('province') || '—'}</span>
+                    <span className="text-stone-500">District</span>
+                    <span className="text-stone-800 font-medium">{watch('district') || '—'}</span>
+                    <span className="text-stone-500">DS Division</span>
+                    <span className="text-stone-800 font-medium truncate">{watch('dsDivision') || '—'}</span>
+                    <span className="text-stone-500">Role</span>
+                    <span className="text-stone-800 font-medium">Landowner</span>
+                  </div>
+                </div>
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-red-700 text-[0.8rem] font-medium">{error}</p>
+                  </div>
+                )}
+              </>
+            )}
+          </form>
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="px-4 pb-4 pt-2 space-y-2 shrink-0">
+          {currentStep < TOTAL_STEPS ? (
+            <button onClick={handleNext}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg shadow font-medium text-[0.9rem] flex items-center justify-center gap-1.5">
+              {t('next', selectedLanguage)} <ArrowRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button onClick={handleSubmit(onSubmit)} disabled={isSubmitting}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg shadow font-medium text-[0.9rem] flex items-center justify-center gap-1.5 disabled:opacity-50">
+              {isSubmitting ? t('creatingAccount', selectedLanguage) : <><Check className="w-4 h-4" /> {t('createAccount', selectedLanguage)}</>}
+            </button>
+          )}
+          <button onClick={currentStep === 1 ? onBack : () => setCurrentStep(currentStep - 1)}
+            className="w-full bg-white hover:bg-stone-50 text-stone-700 py-2.5 rounded-lg border border-stone-300 font-medium text-[0.9rem] flex items-center justify-center gap-1.5">
+            <ArrowLeft className="w-4 h-4" /> {t('back', selectedLanguage)}
           </button>
         </div>
       </div>

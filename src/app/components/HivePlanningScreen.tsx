@@ -153,7 +153,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
   // Planning analysis state
   const [districts, setDistricts] = useState<District[]>([]);
-  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState(user?.district ?? '');
   const [customLat, setCustomLat] = useState('');
   const [customLng, setCustomLng] = useState('');
   const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);

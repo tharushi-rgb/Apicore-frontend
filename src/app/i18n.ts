@@ -440,6 +440,8 @@ const translations = {
   selectSpecies: { en: 'Select species', si: 'විශේෂය තෝරන්න', ta: 'Select species' },
   selectTrainingLevel: { en: 'Select training level', si: 'පුහුණු මට්ටම තෝරන්න', ta: 'Select training level' },
   registrationSummary: { en: 'Registration Summary', si: 'ලියාපදිංචි සාරාංශය', ta: 'Registration Summary' },
+  summary: { en: 'Summary', si: 'සාරාංශය', ta: 'Summary' },
+  location: { en: 'Location', si: 'පිහිටීම', ta: 'Location' },
   selectProvince: { en: 'Select province', si: 'පළාත තෝරන්න', ta: 'Select province' },
   selectDistrictReg: { en: 'Select district', si: 'දිස්ත්‍රික්කය තෝරන්න', ta: 'Select district' },
   selectDSDivision: { en: 'Select DS division', si: 'ප්‍රා.ලේ. කොට්ඨාසය තෝරන්න', ta: 'Select DS division' },

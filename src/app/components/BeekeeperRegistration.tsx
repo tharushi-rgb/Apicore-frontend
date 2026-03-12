@@ -92,7 +92,7 @@ interface FormData {
   nvqLevel: string;
 }
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
 export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBack, onSuccess, initialRole }: Props) {
   const [currentStep, setCurrentStep] = useState(1);
@@ -131,7 +131,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
   };
   const pwdStr = getPwdStrength(password);
 
-  const stepLabels = [t('personalDetails', selectedLanguage), t('beekeepingProfile', selectedLanguage), t('locationReview', selectedLanguage)];
+  const stepLabels = [t('personalDetails', selectedLanguage), t('beekeepingProfile', selectedLanguage), t('location', selectedLanguage), t('summary', selectedLanguage)];
 
   const handleNext = async () => {
     if (currentStep === 1) {
@@ -140,6 +140,9 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
     } else if (currentStep === 2) {
       const valid = await trigger(['preferredLanguage', 'ageGroup', 'primaryBeeSpecies', 'beekeepingNature']);
       if (valid) setCurrentStep(3);
+    } else if (currentStep === 3) {
+      const valid = await trigger(['province', 'district', 'dsDivision']);
+      if (valid) setCurrentStep(4);
     }
   };
 
@@ -173,39 +176,37 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
   };
 
   const LangSelector = () => (
-    <div className="w-full px-[5%] pt-[1rem] flex justify-end shrink-0">
+    <div className="w-full px-4 pt-2.5 flex justify-end shrink-0 gap-1">
       {(['en','si','ta'] as const).map(l=>(
         <button key={l} onClick={()=>onLanguageChange(l)}
-          className={`px-3 py-2 rounded-lg transition-all min-w-[48px] min-h-[44px] ${selectedLanguage===l?'bg-amber-500 text-white shadow-md':'bg-white/70 text-stone-700 hover:bg-white'}`}>
+          className={`px-2.5 py-1 rounded-lg text-xs transition-all min-w-[36px] ${selectedLanguage===l?'bg-amber-500 text-white shadow':'bg-white/70 text-stone-700 hover:bg-white'}`}>
           {l==='en'?'EN':l==='si'?'සිං':'த'}
         </button>
       ))}
     </div>
   );
 
-  const inputClass = "w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none text-[1rem]";
-  const selectClass = "w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none text-[1rem]";
-  const labelClass = "block text-stone-700 mb-1.5 text-[0.875rem] font-medium";
+  const inputClass = "w-full px-3 py-2 bg-white border border-stone-200 rounded-lg focus:border-amber-500 focus:outline-none text-[0.875rem]";
+  const selectClass = "w-full px-3 py-2 bg-white border border-stone-200 rounded-lg focus:border-amber-500 focus:outline-none text-[0.875rem]";
+  const labelClass = "block text-stone-700 mb-1 text-[0.8rem] font-medium";
 
   return (
     <div className="h-screen bg-stone-900 flex justify-center overflow-hidden">
       <div className="w-[min(92vw,22rem)] h-full bg-stone-50 shadow-2xl relative flex flex-col">
         <LangSelector />
-        <div className="px-[6%] pt-[0.75rem] pb-[1rem] shrink-0">
-          <h1 className="text-[1.875rem] font-bold text-stone-800 text-center mb-4 italic capitalize leading-tight">{role === 'beekeeper' ? t('beekeeperRegistration', selectedLanguage) : t('landownerRegistration', selectedLanguage)}</h1>
-          <div className="max-w-md mx-auto">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[0.875rem] text-stone-600 font-medium">{t('step', selectedLanguage)} {currentStep} {t('stepOf', selectedLanguage)} {TOTAL_STEPS}</span>
-              <span className="text-[0.875rem] text-stone-600 font-medium">{stepLabels[currentStep - 1]}</span>
-            </div>
-            <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
-              <div className="h-full bg-amber-500 transition-all duration-300" style={{ width: `${(currentStep / TOTAL_STEPS) * 100}%` }} />
-            </div>
+        <div className="px-4 pt-2 pb-2.5 shrink-0">
+          <h1 className="text-[1.1rem] font-bold text-stone-800 text-center mb-2 leading-tight">{role === 'beekeeper' ? t('beekeeperRegistration', selectedLanguage) : t('landownerRegistration', selectedLanguage)}</h1>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[0.7rem] text-stone-500">{t('step', selectedLanguage)} {currentStep}/{TOTAL_STEPS}</span>
+            <span className="text-[0.7rem] text-stone-500">{stepLabels[currentStep - 1]}</span>
+          </div>
+          <div className="h-1.5 bg-stone-200 rounded-full overflow-hidden">
+            <div className="h-full bg-amber-500 transition-all duration-300" style={{ width: `${(currentStep / TOTAL_STEPS) * 100}%` }} />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-[6%] pb-[1rem]">
-          <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto space-y-3">
+        <div className="flex-1 overflow-y-auto px-4 pb-2">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5">
 
             {currentStep === 1 && (
               <>
@@ -325,9 +326,8 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                     <option value="">{t('selectProvince', selectedLanguage)}</option>
                     {Object.keys(districtsByProvince).map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
-                  {errors.province && <p className="text-red-500 text-[0.75rem] mt-1">{errors.province.message}</p>}
+                  {errors.province && <p className="text-red-500 text-[0.7rem] mt-0.5">{errors.province.message}</p>}
                 </div>
-
                 <div>
                   <label className={labelClass}>{t('district', selectedLanguage)} <span className="text-red-500">*</span></label>
                   <select {...register('district', {required: t('districtRequired', selectedLanguage)})} 
@@ -340,9 +340,8 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                     <option value="">{t('selectDistrictReg', selectedLanguage)}</option>
                     {districts.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
-                  {errors.district && <p className="text-red-500 text-[0.75rem] mt-1">{errors.district.message}</p>}
+                  {errors.district && <p className="text-red-500 text-[0.7rem] mt-0.5">{errors.district.message}</p>}
                 </div>
-
                 <div>
                   <label className={labelClass}>{t('dsLabel', selectedLanguage)} <span className="text-red-500">*</span></label>
                   <select {...register('dsDivision', {required: t('dsRequired', selectedLanguage)})} 
@@ -351,46 +350,51 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                     <option value="">{t('selectDSDivision', selectedLanguage)}</option>
                     {dsDivisions.map(ds => <option key={ds} value={ds}>{ds}</option>)}
                   </select>
-                  {errors.dsDivision && <p className="text-red-500 text-[0.75rem] mt-1">{errors.dsDivision.message}</p>}
+                  {errors.dsDivision && <p className="text-red-500 text-[0.7rem] mt-0.5">{errors.dsDivision.message}</p>}
                 </div>
+              </>
+            )}
 
-                <div className="bg-white/80 rounded-xl p-4 border border-stone-200 space-y-2 mt-4">
-                  <h3 className="font-bold text-stone-800 text-sm border-b border-stone-100 pb-1">{t('registrationSummary', selectedLanguage)}</h3>
-                  <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs">
-                    <span className="text-stone-500">Name:</span><span className="text-stone-800 font-semibold truncate">{watch('fullName') || '—'}</span>
-                    <span className="text-stone-500">NIC:</span><span className="text-stone-800 font-semibold">{watch('nicNumber') || '—'}</span>
-                    <span className="text-stone-500">Email/Phone:</span><span className="text-stone-800 font-semibold truncate">{watch('email') || '—'}</span>
-                    <span className="text-stone-500">Contact:</span><span className="text-stone-800 font-semibold">{watch('phoneNumber') || '—'}</span>
-                    <span className="text-stone-500">Language:</span><span className="text-stone-800 font-semibold capitalize">{watch('preferredLanguage') || '—'}</span>
-                    <span className="text-stone-500">Age:</span><span className="text-stone-800 font-semibold">{watch('ageGroup') || '—'}</span>
-                    <span className="text-stone-500">Nature:</span><span className="text-stone-800 font-semibold capitalize">{watch('beekeepingNature') || '—'}</span>
-                    <span className="text-stone-500">Species:</span><span className="text-stone-800 font-semibold capitalize">{watch('primaryBeeSpecies')?.replace('_',' ') || '—'}</span>
-                    <span className="text-stone-500">BR No:</span><span className="text-stone-800 font-semibold">{watch('businessRegNo') || '—'}</span>
-                    <span className="text-stone-500">Training:</span><span className="text-stone-800 font-semibold capitalize">{watch('nvqLevel')?.replace('_',' ') || '—'}</span>
-                    <span className="text-stone-500">Province:</span><span className="text-stone-800 font-semibold">{watch('province') || '—'}</span>
-                    <span className="text-stone-500">District:</span><span className="text-stone-800 font-semibold">{watch('district') || '—'}</span>
-                    <span className="text-stone-500">DS Division:</span><span className="text-stone-800 font-semibold truncate">{watch('dsDivision') || '—'}</span>
+            {currentStep === 4 && (
+              <>
+                <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
+                  <div className="bg-amber-50 px-3 py-2 border-b border-stone-200">
+                    <h3 className="font-bold text-stone-800 text-[0.8rem]">{t('registrationSummary', selectedLanguage)}</h3>
+                  </div>
+                  <div className="p-3 grid grid-cols-2 gap-x-3 gap-y-2 text-[0.75rem]">
+                    <span className="text-stone-500">Name</span><span className="text-stone-800 font-medium truncate">{watch('fullName') || '—'}</span>
+                    <span className="text-stone-500">NIC</span><span className="text-stone-800 font-medium">{watch('nicNumber') || '—'}</span>
+                    <span className="text-stone-500">Email/Phone</span><span className="text-stone-800 font-medium truncate">{watch('email') || '—'}</span>
+                    <span className="text-stone-500">Contact</span><span className="text-stone-800 font-medium">{watch('phoneNumber') || '—'}</span>
+                    <span className="text-stone-500">Language</span><span className="text-stone-800 font-medium capitalize">{watch('preferredLanguage') || '—'}</span>
+                    <span className="text-stone-500">Age Group</span><span className="text-stone-800 font-medium">{watch('ageGroup') || '—'}</span>
+                    <span className="text-stone-500">Nature</span><span className="text-stone-800 font-medium capitalize">{watch('beekeepingNature') || '—'}</span>
+                    <span className="text-stone-500">Species</span><span className="text-stone-800 font-medium capitalize">{watch('primaryBeeSpecies')?.replace('_',' ') || '—'}</span>
+                    <span className="text-stone-500">BR No</span><span className="text-stone-800 font-medium">{watch('businessRegNo') || '—'}</span>
+                    <span className="text-stone-500">Training</span><span className="text-stone-800 font-medium capitalize">{watch('nvqLevel')?.replace('_',' ') || '—'}</span>
+                    <span className="text-stone-500">Province</span><span className="text-stone-800 font-medium">{watch('province') || '—'}</span>
+                    <span className="text-stone-500">District</span><span className="text-stone-800 font-medium">{watch('district') || '—'}</span>
+                    <span className="text-stone-500">DS Division</span><span className="text-stone-800 font-medium truncate">{watch('dsDivision') || '—'}</span>
                   </div>
                 </div>
-
-                {error && <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4"><p className="text-red-700 text-sm font-medium">{error}</p></div>}
+                {error && <div className="bg-red-50 border border-red-200 rounded-lg p-3"><p className="text-red-700 text-[0.8rem] font-medium">{error}</p></div>}
               </>
             )}
           </form>
         </div>
 
-        <div className="px-[6%] pb-[2rem] space-y-3 shrink-0">
+        <div className="px-4 pb-4 pt-2 space-y-2 shrink-0">
           {currentStep < TOTAL_STEPS ? (
-            <button onClick={handleNext} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl shadow-lg min-h-[3.5rem] font-medium text-[1.125rem] flex items-center justify-center gap-2">
-              {t('next', selectedLanguage)} <ArrowRight className="w-5 h-5" />
+            <button onClick={handleNext} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-lg shadow font-medium text-[0.9rem] flex items-center justify-center gap-1.5">
+              {t('next', selectedLanguage)} <ArrowRight className="w-4 h-4" />
             </button>
           ) : (
-            <button onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl shadow-lg min-h-[3.5rem] font-medium text-[1.125rem] flex items-center justify-center gap-2 disabled:opacity-50">
-              {isSubmitting ? t('registering', selectedLanguage) : <><Check className="w-5 h-5" /> {t('registerBtn', selectedLanguage)}</>}
+            <button onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-lg shadow font-medium text-[0.9rem] flex items-center justify-center gap-1.5 disabled:opacity-50">
+              {isSubmitting ? t('registering', selectedLanguage) : <><Check className="w-4 h-4" /> {t('registerBtn', selectedLanguage)}</>}
             </button>
           )}
-          <button onClick={currentStep===1?onBack:()=>setCurrentStep(currentStep - 1)} className="w-full bg-white hover:bg-stone-50 text-stone-700 py-4 rounded-xl border-2 border-stone-300 min-h-[3.5rem] font-medium text-[1.125rem] flex items-center justify-center gap-2">
-            <ArrowLeft className="w-5 h-5" /> {t('back', selectedLanguage)}
+          <button onClick={currentStep===1?onBack:()=>setCurrentStep(currentStep - 1)} className="w-full bg-white hover:bg-stone-50 text-stone-700 py-2.5 rounded-lg border border-stone-300 font-medium text-[0.9rem] flex items-center justify-center gap-1.5">
+            <ArrowLeft className="w-4 h-4" /> {t('back', selectedLanguage)}
           </button>
         </div>
       </div>

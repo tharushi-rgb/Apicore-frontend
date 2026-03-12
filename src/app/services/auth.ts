@@ -7,6 +7,8 @@ export interface User {
   phone?: string;
   nic_number?: string;
   district?: string;
+  province?: string;
+  ds_division?: string;
   preferred_language?: string;
   age_group?: string;
   known_bee_allergy?: string;
@@ -44,6 +46,8 @@ export const authService = {
       phone: payload.phone ?? null,
       nic_number: payload.nic_number ?? null,
       district: payload.district ?? null,
+      province: payload.province ?? null,
+      ds_division: payload.ds_division ?? null,
       preferred_language: payload.preferred_language ?? 'en',
       age_group: payload.age_group ?? null,
       known_bee_allergy: payload.known_bee_allergy ?? 'no',
