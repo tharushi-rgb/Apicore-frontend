@@ -340,7 +340,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
                     {/* Hourly Forecast (Today + Tomorrow) */}
                     {analysis.weather.hourly.length > 0 && (
-                      <ForecastHourly hourly={analysis.weather.hourly} initialShowCount={6} lang={selectedLanguage} />
+                      <ForecastHourly hourly={analysis.weather.hourly} lang={selectedLanguage} />
                     )}
 
                     {/* Forage Information */}

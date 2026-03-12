@@ -62,10 +62,7 @@ function heatStressExplanation(maxTemp: number, lang: Language): string {
 }
 
 export function ForecastDays14({ days, lang = 'en' }: Props) {
-  const [expanded, setExpanded] = useState(false);
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
-  const initialDays = 7;
-  const visibleDays = expanded ? days : days.slice(0, initialDays);
   const selectedDay = selectedIdx !== null ? days[selectedIdx] : null;
 
   return (
@@ -74,22 +71,14 @@ export function ForecastDays14({ days, lang = 'en' }: Props) {
       <div className="flex items-center justify-between mb-2">
         <h3 className="font-bold text-stone-800 text-[0.8rem] flex items-center gap-1.5">
           <Calendar className="w-3.5 h-3.5 text-blue-500" />
-          {expanded ? t('forecast14Day', lang) : t('forecast7Day', lang)}
+          {t('forecast14Day', lang)}
         </h3>
-        {days.length > initialDays && (
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="text-[0.65rem] bg-blue-100 text-blue-700 px-2 py-0.5 rounded hover:bg-blue-200 font-medium"
-          >
-            {expanded ? t('show7Days', lang) : t('show14Days', lang)}
-          </button>
-        )}
       </div>
 
       {/* Horizontal scroll — compact day cards like UI reference */}
       <div className="overflow-x-auto pb-1 -mx-1 px-1">
         <div className="flex gap-1.5 min-w-min">
-          {visibleDays.map((day, idx) => {
+          {days.map((day, idx) => {
             const isSelected = selectedIdx === idx;
             return (
               <button
