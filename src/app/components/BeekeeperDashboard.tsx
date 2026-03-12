@@ -98,7 +98,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative overflow-hidden">
+    <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
       {/* Mobile Sidebar */}
       <MobileSidebar
         isOpen={isSidebarOpen}
@@ -108,7 +108,9 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         onLogout={onLogout}
       />
 
+      <div className="h-full overflow-y-auto pb-24">
       {/* Header */}
+      <div className="bg-white shadow-sm sticky top-0 z-30">
       <MobileHeader
         userName={user?.name}
         district={user?.district}
@@ -118,9 +120,10 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         onViewAllNotifications={() => onNavigate('notifications')}
       />
+      </div>
 
       {/* Main Content */}
-      <div className="px-4 py-4 space-y-4">
+      <div className="px-3 py-3 space-y-3">
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" />
@@ -135,30 +138,30 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
             </div>
 
             {/* Queen Age Risk Section */}
-            <div className="bg-white rounded-xl p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-stone-800 mb-4">Queen Age Risk Status</h2>
+            <div className="bg-white rounded-xl p-3 shadow-sm">
+              <h2 className="text-[0.875rem] font-bold text-stone-800 mb-3">Queen Age Risk Status</h2>
 
               {/* Risk Tabs */}
-              <div className="flex gap-2 mb-4">
+              <div className="flex gap-1.5 mb-3">
                 <button onClick={() => setQueenRiskView('low')}
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${queenRiskView === 'low' ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-[0.75rem] font-medium transition-colors ${queenRiskView === 'low' ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
                   Low Risk
                 </button>
                 <button onClick={() => setQueenRiskView('medium')}
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${queenRiskView === 'medium' ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'}`}>
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-[0.75rem] font-medium transition-colors ${queenRiskView === 'medium' ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'}`}>
                   Medium
                 </button>
                 <button onClick={() => setQueenRiskView('high')}
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${queenRiskView === 'high' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-700 hover:bg-red-100'}`}>
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-[0.75rem] font-medium transition-colors ${queenRiskView === 'high' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-700 hover:bg-red-100'}`}>
                   High Risk
                 </button>
               </div>
 
               {/* Risk Info */}
-              <div className={`p-4 rounded-lg mb-4 ${queenRiskView === 'low' ? 'bg-emerald-50 border border-emerald-200' : queenRiskView === 'medium' ? 'bg-amber-50 border border-amber-200' : 'bg-red-50 border border-red-200'}`}>
-                {queenRiskView === 'low' && <><p className="text-emerald-900 font-medium mb-1">Age: &lt; 1.5 years • Healthy</p><p className="text-emerald-700 text-sm">No action required</p></>}
-                {queenRiskView === 'medium' && <><p className="text-amber-900 font-medium mb-1">Age: 1.5 – 2.5 years • Monitor</p><p className="text-amber-700 text-sm">Plan queen replacement</p></>}
-                {queenRiskView === 'high' && <><p className="text-red-900 font-medium mb-1">Age: &gt; 2.5 years • Critical</p><p className="text-red-700 text-sm">Change queen soon</p></>}
+              <div className={`p-3 rounded-lg mb-3 ${queenRiskView === 'low' ? 'bg-emerald-50 border border-emerald-200' : queenRiskView === 'medium' ? 'bg-amber-50 border border-amber-200' : 'bg-red-50 border border-red-200'}`}>
+                {queenRiskView === 'low' && <><p className="text-emerald-900 font-medium mb-0.5 text-[0.8rem]">Age: &lt; 1.5 years • Healthy</p><p className="text-emerald-700 text-[0.75rem]">No action required</p></>}
+                {queenRiskView === 'medium' && <><p className="text-amber-900 font-medium mb-0.5 text-[0.8rem]">Age: 1.5 – 2.5 years • Monitor</p><p className="text-amber-700 text-[0.75rem]">Plan queen replacement</p></>}
+                {queenRiskView === 'high' && <><p className="text-red-900 font-medium mb-0.5 text-[0.8rem]">Age: &gt; 2.5 years • Critical</p><p className="text-red-700 text-[0.75rem]">Change queen soon</p></>}
               </div>
 
               {/* Hive Records */}
@@ -167,10 +170,10 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
                   <p className="text-sm text-stone-500 text-center py-4">No hives in this category</p>
                 ) : (
                   queenAgeData[queenRiskView].map((hive) => (
-                    <div key={hive.hiveId} className="flex items-center justify-between p-3 bg-stone-50 rounded-lg">
-                      <div><p className="font-medium text-stone-800">{hive.hiveId}</p><p className="text-sm text-stone-600">{hive.apiaryName}</p></div>
+                    <div key={hive.hiveId} className="flex items-center justify-between p-2.5 bg-stone-50 rounded-lg">
+                      <div><p className="font-medium text-stone-800 text-[0.8rem]">{hive.hiveId}</p><p className="text-[0.7rem] text-stone-600">{hive.apiaryName}</p></div>
                       <div className="text-right">
-                        <p className="font-medium text-stone-800">{hive.queenAge} years</p>
+                        <p className="font-medium text-stone-800 text-[0.8rem]">{hive.queenAge} years</p>
                         <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${hive.riskLevel === 'low' ? 'bg-emerald-100 text-emerald-700' : hive.riskLevel === 'medium' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
                           {hive.riskLevel.toUpperCase()}
                         </span>
@@ -183,10 +186,10 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
 
             {/* Best Performing Hives */}
             {hiveChartData.length > 0 && (
-              <div className="bg-white rounded-xl p-5 shadow-sm">
-                <h2 className="text-lg font-bold text-stone-800 mb-4">Hive Overview</h2>
-                <p className="text-sm text-stone-600 mb-4">Your registered hives</p>
-                <ResponsiveContainer width="100%" height={250}>
+              <div className="bg-white rounded-xl p-3 shadow-sm">
+                <h2 className="text-[0.875rem] font-bold text-stone-800 mb-2">Hive Overview</h2>
+                <p className="text-[0.75rem] text-stone-600 mb-3">Your registered hives</p>
+                <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={hiveChartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis dataKey="hiveId" tick={{ fontSize: 12 }} stroke="#6b7280" />
@@ -199,19 +202,19 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
             )}
 
             {/* Forage Calendar */}
-            <div className="bg-white rounded-xl p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-stone-800 mb-4 flex items-center gap-2">
-                <Leaf className="w-5 h-5 text-emerald-600" /> Forage Calendar
+            <div className="bg-white rounded-xl p-3 shadow-sm">
+              <h2 className="text-[0.875rem] font-bold text-stone-800 mb-3 flex items-center gap-2">
+                <Leaf className="w-4 h-4 text-emerald-600" /> Forage Calendar
               </h2>
 
               {/* Forage Tabs */}
-              <div className="flex gap-2 mb-4">
+              <div className="flex gap-1.5 mb-3">
                 <button onClick={() => setForageTab('current')}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${forageTab === 'current' ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}>
+                  className={`flex-1 py-1.5 px-3 rounded-lg text-[0.75rem] font-medium transition-colors ${forageTab === 'current' ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}>
                   Current Blooming
                 </button>
                 <button onClick={() => setForageTab('upcoming')}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${forageTab === 'upcoming' ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}>
+                  className={`flex-1 py-1.5 px-3 rounded-lg text-[0.75rem] font-medium transition-colors ${forageTab === 'upcoming' ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}>
                   Upcoming
                 </button>
               </div>
@@ -261,19 +264,19 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-xl p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-stone-800 mb-4">Quick Actions</h2>
-              <div className="grid grid-cols-2 gap-3">
-                <button onClick={() => onNavigate('apiaries')} className="bg-emerald-50 text-emerald-700 py-3 rounded-xl font-medium hover:bg-emerald-100 transition-colors">View Apiaries</button>
-                <button onClick={() => onNavigate('hives')} className="bg-amber-50 text-amber-700 py-3 rounded-xl font-medium hover:bg-amber-100 transition-colors">View Hives</button>
-                <button onClick={() => onNavigate('planning')} className="bg-blue-50 text-blue-700 py-3 rounded-xl font-medium hover:bg-blue-100 transition-colors">Planning</button>
-                <button onClick={() => onNavigate('finance')} className="bg-purple-50 text-purple-700 py-3 rounded-xl font-medium hover:bg-purple-100 transition-colors">Finance</button>
+            <div className="bg-white rounded-xl p-3 shadow-sm">
+              <h2 className="text-[0.875rem] font-bold text-stone-800 mb-3">Quick Actions</h2>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => onNavigate('apiaries')} className="bg-emerald-50 text-emerald-700 py-2.5 rounded-xl text-[0.8rem] font-medium hover:bg-emerald-100 transition-colors">View Apiaries</button>
+                <button onClick={() => onNavigate('hives')} className="bg-amber-50 text-amber-700 py-2.5 rounded-xl text-[0.8rem] font-medium hover:bg-amber-100 transition-colors">View Hives</button>
+                <button onClick={() => onNavigate('planning')} className="bg-blue-50 text-blue-700 py-2.5 rounded-xl text-[0.8rem] font-medium hover:bg-blue-100 transition-colors">Planning</button>
+                <button onClick={() => onNavigate('finance')} className="bg-purple-50 text-purple-700 py-2.5 rounded-xl text-[0.8rem] font-medium hover:bg-purple-100 transition-colors">Finance</button>
               </div>
             </div>
 
             {/* Recent Apiaries */}
-            <div className="bg-white rounded-xl p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-stone-800 mb-4">Recent Apiaries</h2>
+            <div className="bg-white rounded-xl p-3 shadow-sm">
+              <h2 className="text-[0.875rem] font-bold text-stone-800 mb-3">Recent Apiaries</h2>
               {apiaries.length === 0 ? (
                 <p className="text-stone-500 text-center py-4">No apiaries yet. Create your first apiary!</p>
               ) : (
@@ -294,6 +297,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
             </div>
           </>
         )}
+      </div>
       </div>
     </div>
   );
@@ -319,8 +323,8 @@ function KPICard({ title, value, color, alert }: KPICardProps) {
     <div className="bg-white rounded-lg p-2.5 shadow-sm relative">
       <div className={`absolute top-0 right-0 w-1.5 h-1.5 rounded-bl-lg ${colorClasses[color]}`} />
       {alert && <AlertTriangle className="absolute top-1.5 right-1.5 w-3 h-3 text-red-500" />}
-      <p className="text-stone-600 text-[10px] mb-0.5 leading-tight">{title}</p>
-      <p className="text-xl font-bold text-stone-800 leading-none">{value}</p>
+      <p className="text-stone-600 text-[9px] mb-0.5 leading-tight">{title}</p>
+      <p className="text-[0.875rem] font-bold text-stone-800 leading-none">{value}</p>
     </div>
   );
 }

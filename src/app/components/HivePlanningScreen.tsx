@@ -216,7 +216,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
+      <div className="flex-1 overflow-y-auto px-3 py-3 pb-24 space-y-3">
 
         {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div> : (
           <>
@@ -273,42 +273,42 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                 {analysis && (
                   <>
                     {/* Suitability Score */}
-                    <div className={`rounded-xl p-4 shadow-sm border ${
+                    <div className={`rounded-xl p-3 shadow-sm border ${
                       analysis.suitability.color === 'green' || analysis.suitability.color === 'emerald' ? 'bg-emerald-50 border-emerald-200' :
                       analysis.suitability.color === 'amber' ? 'bg-amber-50 border-amber-200' :
                       'bg-red-50 border-red-200'
                     }`}>
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-bold text-lg">{analysis.suitability.label}</h3>
-                          <p className="text-sm opacity-75">Location: {analysis.location.district}</p>
+                          <h3 className="font-bold text-[0.875rem]">{analysis.suitability.label}</h3>
+                          <p className="text-[0.7rem] opacity-75">Location: {analysis.location.district}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-3xl font-bold">{analysis.suitability.score}</p>
-                          <p className="text-xs opacity-75">/ 100</p>
+                          <p className="text-[1.5rem] font-bold leading-none">{analysis.suitability.score}</p>
+                          <p className="text-[0.65rem] opacity-75">/ 100</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Zone Saturation */}
-                    <div className={`rounded-xl p-4 shadow-sm border ${
+                    <div className={`rounded-xl p-3 shadow-sm border ${
                       analysis.saturation.level === 'low' ? 'bg-emerald-50 border-emerald-200' :
                       analysis.saturation.level === 'medium' ? 'bg-amber-50 border-amber-200' :
                       'bg-red-50 border-red-200'
                     }`}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <HiveIcon className="w-5 h-5" />
-                        <h3 className="font-bold">Zone Saturation ({analysis.saturation.radiusKm}km)</h3>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <HiveIcon className="w-4 h-4" />
+                        <h3 className="font-bold text-[0.8rem]">Zone Saturation ({analysis.saturation.radiusKm}km)</h3>
                       </div>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm">{analysis.saturation.count} hives nearby</span>
+                        <span className="text-[0.75rem]">{analysis.saturation.count} hives nearby</span>
                         <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${
                           analysis.saturation.level === 'low' ? 'bg-emerald-200 text-emerald-800' :
                           analysis.saturation.level === 'medium' ? 'bg-amber-200 text-amber-800' :
                           'bg-red-200 text-red-800'
                         }`}>{analysis.saturation.level}</span>
                       </div>
-                      <p className="text-sm opacity-75">{analysis.saturation.message}</p>
+                      <p className="text-[0.7rem] opacity-75">{analysis.saturation.message}</p>
                     </div>
 
                     {/* Current Weather */}
@@ -319,7 +319,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                           <div className="flex items-center gap-2">
                             <WeatherIcon code={analysis.weather.current.wcode} className="w-8 h-8" />
                             <div>
-                              <p className="text-[1.6rem] font-bold leading-none text-stone-800">{analysis.weather.current.temp}°C</p>
+                              <p className="text-[1.35rem] font-bold leading-none text-stone-800">{analysis.weather.current.temp}°C</p>
                               <p className={`text-[0.7rem] px-1.5 py-0.5 rounded inline-block border ${riskBg(analysis.weather.current.tempRisk.color)}`}>{analysis.weather.current.tempRisk.label}</p>
                             </div>
                           </div>
@@ -343,8 +343,8 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                     )}
 
                     {/* Forage Information */}
-                    <div className="bg-white rounded-xl p-4 shadow-sm">
-                      <h3 className="font-bold text-stone-800 mb-3 flex items-center gap-2"><Leaf className="w-4 h-4 text-emerald-500" /> Forage Availability</h3>
+                    <div className="bg-white rounded-xl p-3 shadow-sm">
+                      <h3 className="font-bold text-stone-800 text-[0.8rem] mb-2 flex items-center gap-2"><Leaf className="w-3.5 h-3.5 text-emerald-500" /> Forage Availability</h3>
                       
                       {analysis.forage.current.length > 0 ? (
                         <>
