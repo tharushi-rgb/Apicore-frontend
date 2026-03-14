@@ -52,7 +52,7 @@ const translations = {
   totalApiaries: { en: 'Apiaries', si: 'වත්ත', ta: 'Apiaries' },
   totalHives: { en: 'Total Hives', si: 'මුළු මී පෙට්ටි', ta: 'Total Hives' },
   activeHives: { en: 'Active', si: 'ක්‍රියාකාරී', ta: 'Active' },
-  notInspected: { en: 'Not Insp.', si: 'පරීක්ෂා නැත', ta: 'Not Insp.' },
+  notInspected: { en: 'Not Inspected', si: 'පරීක්ෂා නැත', ta: 'Not Inspected' },
   expenses: { en: 'Expenses', si: 'වියදම්', ta: 'Expenses' },
   activeApiaries: { en: 'Active Api.', si: 'ක්‍රියා. වත්ත', ta: 'Active Api.' },
   queenAgeRisk: { en: 'Queen Age Risk Status', si: 'රැජින මැස්සාගේ වයස් අවදානම', ta: 'Queen Age Risk Status' },
