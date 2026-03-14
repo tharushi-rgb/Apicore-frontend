@@ -231,10 +231,32 @@ data is entirely manually assigned.
                                                                            indica
   -----------------------------------------------------------------------------------------------
 
-  ⚠ Correction note: The system’s source code (planning.ts) still uses
-  Cucurbita maxima for Pumpkin. The botanically correct species for Sri
-  Lanka is Cucurbita moschata, which is more tolerant of tropical heat
-  and humidity. This should be corrected in a future update.
+  ✓ Correction applied: planning.ts now uses Cucurbita moschata for
+  Pumpkin (instead of Cucurbita maxima), aligned with common tropical
+  cultivation in Sri Lanka.
+
+------------------------------------------------------------------------
+
+Scientific Verification Notes (cross-check references)
+
+The following key forage species were cross-checked against widely used
+botanical references (Kew POWO/GBIF/Wikipedia summaries) to confirm
+accepted names and bee-forage relevance:
+
+  - Cocos nucifera (Coconut): accepted species name; year-round
+    inflorescence production supports continuous pollen availability.
+  - Calotropis gigantea (Wara): accepted species name; known insect-
+    pollinated flowers and frequent bee visitation.
+  - Clitoria ternatea (Blue pea): accepted species name; prolonged
+    flowering in tropical climates with regular nectar access for bees.
+  - Nelumbo nucifera (Lotus): accepted species name; significant nectar
+    and pollen resource in wetland/tank habitats.
+  - Cucurbita moschata (Pumpkin): accepted species name for tropical
+    production systems; male flowers are important seasonal pollen source.
+
+Note: GBIF occurrence records validate presence and location. Resource
+type/availability tiers in this glossary remain beekeeper-oriented
+practical assignments, not laboratory nectar chemistry measurements.
 
 ------------------------------------------------------------------------
 

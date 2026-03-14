@@ -14,6 +14,7 @@ import {
   Hexagon as HiveIcon,
 } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
+import { PageTitleBar } from './PageTitleBar';
 import { apiariesService, type Apiary } from '../services/apiaries';
 import { authService } from '../services/auth';
 import { t } from '../i18n';
@@ -70,10 +71,7 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
         <div className="bg-white shadow-sm sticky top-0 z-30">
           <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
             activeTab={activeTab} onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
-          <div className="px-6 pb-4 border-t border-stone-100">
-            <h1 className="text-[1.1rem] font-bold text-stone-800">{t('apiaries', selectedLanguage)}</h1>
-            <p className="text-stone-500 text-[0.75rem] mt-0.5">{t('manageApiaries', selectedLanguage)}</p>
-          </div>
+          <PageTitleBar title={t('apiaries', selectedLanguage)} subtitle={t('manageApiaries', selectedLanguage)} size="sm" />
         </div>
 
         <div className="px-4 py-4 space-y-4">

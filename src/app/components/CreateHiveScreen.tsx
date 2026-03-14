@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, Loader2, MapPin, AlertTriangle } from 'lucide-react';
+import { Save, Loader2, MapPin, AlertTriangle } from 'lucide-react';
+import { MobileHeader } from './MobileHeader';
+import { PageTitleBar } from './PageTitleBar';
+import { authService } from '../services/auth';
 import { hivesService, type Hive } from '../services/hives';
 import { apiariesService, type Apiary } from '../services/apiaries';
 import { api } from '../services/api';
@@ -12,8 +15,9 @@ interface Props {
   onClose: () => void; contextApiary?: Apiary; initialHive?: Hive; onLogout: () => void;
 }
 
-export function CreateHiveScreen({ onClose, contextApiary, initialHive }: Props) {
+export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigate, onClose, contextApiary, initialHive, onLogout }: Props) {
   const isEdit = !!initialHive;
+  const user = authService.getLocalUser();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [apiaries, setApiaries] = useState<Apiary[]>([]);
@@ -107,9 +111,21 @@ export function CreateHiveScreen({ onClose, contextApiary, initialHive }: Props)
 
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex flex-col overflow-hidden">
-      <div className="bg-white shadow-sm px-4 py-3 flex items-center gap-3 shrink-0">
-        <button onClick={onClose} className="p-2 hover:bg-stone-100 rounded-lg"><ArrowLeft className="w-5 h-5 text-stone-700" /></button>
-        <h1 className="text-lg font-bold text-stone-800">{isEdit ? 'Edit Hive' : 'Create Hive'}</h1>
+      <div className="bg-white shadow-sm sticky top-0 z-30 shrink-0">
+        <MobileHeader
+          userName={user?.name}
+          roleLabel={user?.role}
+          selectedLanguage={selectedLanguage}
+          onLanguageChange={onLanguageChange}
+          activeTab="hives"
+          onNavigate={onNavigate}
+          onLogout={onLogout}
+          onViewAllNotifications={() => onNavigate('notifications')}
+        />
+        <PageTitleBar
+          title={isEdit ? 'Edit Hive' : 'Create Hive'}
+          subtitle="Hive profile, ownership, and setup details"
+        />
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">

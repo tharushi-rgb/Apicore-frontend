@@ -59,4 +59,28 @@ export const notificationsService = {
       .lt('created_at', cutoff.toISOString());
     if (error) throw new Error(error.message);
   },
+
+  async create(notification: {
+    title: string;
+    message: string;
+    notification_type?: string;
+    severity?: 'low' | 'medium' | 'high';
+    related_type?: string;
+    related_id?: number;
+  }) {
+    const userId = getUserId();
+    const { error } = await supabase.from('notifications').insert({
+      user_id: userId,
+      target_role: 'beekeeper',
+      notification_type: notification.notification_type || 'general',
+      severity: notification.severity || 'medium',
+      title: notification.title,
+      message: notification.message,
+      related_type: notification.related_type || null,
+      related_id: notification.related_id || null,
+      is_read: 0,
+      is_dismissed: 0,
+    });
+    if (error) throw new Error(error.message);
+  },
 };

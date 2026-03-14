@@ -159,7 +159,7 @@ const FORAGE_PLANTS: ForagePlant[] = [
   { name: 'Sesame',            scientific: 'Sesamum indicum',          resourceType: 'nectar',        bloomStart: 6, bloomEnd: 9,  availability: 'moderate', note: 'Yala season crop, dry zone',                                        zone: 'dry' },
   { name: 'Guava',             scientific: 'Psidium guajava',          resourceType: 'nectar',        bloomStart: 3, bloomEnd: 5,  availability: 'moderate', note: 'Home gardens and scrubland',                                        zone: 'all' },
   { name: 'Neem',              scientific: 'Azadirachta indica',       resourceType: 'nectar',        bloomStart: 2, bloomEnd: 4,  availability: 'moderate', note: 'Dry zone trees; can produce bitter honey',                          zone: 'dry' },
-  { name: 'Pumpkin',           scientific: 'Cucurbita maxima',         resourceType: 'pollen',        bloomStart: 9, bloomEnd: 12, availability: 'moderate', note: 'Maha season vegetable crop, important pollen',                      zone: 'all' },
+  { name: 'Pumpkin',           scientific: 'Cucurbita moschata',       resourceType: 'pollen',        bloomStart: 9, bloomEnd: 12, availability: 'moderate', note: 'Maha season vegetable crop, important pollen',                      zone: 'all' },
   { name: 'Sunflower',         scientific: 'Helianthus annuus',        resourceType: 'nectar',        bloomStart: 7, bloomEnd: 10, availability: 'abundant', note: 'Cultivated; excellent nectar & pollen',                             zone: 'dry' },
   { name: 'Wild Mango',        scientific: 'Mangifera zeylanica',      resourceType: 'nectar',        bloomStart: 1, bloomEnd: 3,  availability: 'moderate', note: 'Forest edges, endemic to Sri Lanka',                                zone: 'dry' },
 ];

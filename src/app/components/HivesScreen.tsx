@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
+import { PageTitleBar } from './PageTitleBar';
 import { hivesService, type Hive } from '../services/hives';
 import { authService } from '../services/auth';
 import { t } from '../i18n';
@@ -157,10 +158,7 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
         <div className="bg-white shadow-sm sticky top-0 z-30">
           <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
             activeTab={activeTab} onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
-          <div className="px-6 pb-4 border-t border-stone-100">
-            <h1 className="text-2xl font-bold text-stone-800">{t('hives', selectedLanguage)}</h1>
-            <p className="text-stone-500 text-sm mt-1">{t('allRegisteredHives', selectedLanguage)}</p>
-          </div>
+          <PageTitleBar title={t('hives', selectedLanguage)} subtitle={t('allRegisteredHives', selectedLanguage)} />
         </div>
 
         <div className="px-4 py-4 space-y-4">

@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, MapPin, Save, Loader2 } from 'lucide-react';
+import { MapPin, Save, Loader2 } from 'lucide-react';
+import { MobileHeader } from './MobileHeader';
+import { PageTitleBar } from './PageTitleBar';
+import { authService } from '../services/auth';
 import { apiariesService, type Apiary } from '../services/apiaries';
 
 type Language = 'en' | 'si' | 'ta';
@@ -102,8 +105,9 @@ function SignaturePad({ label, value, onChange }: { label: string; value: string
   );
 }
 
-export function CreateApiaryScreen({ onClose, initialApiary, onLogout }: Props) {
+export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavigate, onClose, initialApiary, onLogout }: Props) {
   const isEdit = !!initialApiary;
+  const user = authService.getLocalUser();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
@@ -144,9 +148,21 @@ export function CreateApiaryScreen({ onClose, initialApiary, onLogout }: Props) 
 
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex flex-col overflow-hidden">
-      <div className="bg-white shadow-sm px-4 py-3 flex items-center gap-3 shrink-0">
-        <button onClick={onClose} className="p-2 hover:bg-stone-100 rounded-lg"><ArrowLeft className="w-5 h-5 text-stone-700" /></button>
-        <h1 className="text-lg font-bold text-stone-800">{isEdit ? 'Edit Apiary' : 'Create Apiary'}</h1>
+      <div className="bg-white shadow-sm sticky top-0 z-30 shrink-0">
+        <MobileHeader
+          userName={user?.name}
+          roleLabel={user?.role}
+          selectedLanguage={selectedLanguage}
+          onLanguageChange={onLanguageChange}
+          activeTab="apiaries"
+          onNavigate={onNavigate}
+          onLogout={onLogout}
+          onViewAllNotifications={() => onNavigate('notifications')}
+        />
+        <PageTitleBar
+          title={isEdit ? 'Edit Apiary' : 'Create Apiary'}
+          subtitle="Apiary details and location"
+        />
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">

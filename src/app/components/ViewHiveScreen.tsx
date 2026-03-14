@@ -4,6 +4,7 @@ import { hivesService, type Hive } from '../services/hives';
 import { inspectionsService, type Inspection } from '../services/inspections';
 import { feedingsService, type Feeding, componentsService, type HiveComponent, queensService, type Queen, treatmentsService, type Treatment } from '../services/hiveDetails';
 import { transfersService, type ColonyTransfer } from '../services/transfers';
+import { notificationsService } from '../services/notifications';
 import { api } from '../services/api';
 
 type Language = 'en' | 'si' | 'ta';
@@ -68,7 +69,21 @@ function InspectionForm({ hiveId, hiveType, hiveLat, hiveLng, initial, onClose, 
       if (f.pot_condition) extraNotes.push(`Pot condition: ${f.pot_condition}`);
       if (f.entrance_activity) extraNotes.push(`Entrance activity: ${f.entrance_activity}`);
       const d: any = { hive_id: hiveId, inspection_date: f.inspection_date, colony_strength: f.colony_strength || null, queen_present: f.queen_present ? 1 : 0, pest_detected: f.pest_detected ? 1 : 0, notes: extraNotes.filter(Boolean).join('; ') || null };
-      if (initial) await inspectionsService.update(initial.id, d); else await inspectionsService.create(d);
+      if (initial) {
+        await inspectionsService.update(initial.id, d);
+      } else {
+        await inspectionsService.create(d);
+        if (f.pest_detected) {
+          await notificationsService.create({
+            title: 'Pest detected during inspection',
+            message: `Hive #${hiveId} has a new pest detection record.`,
+            notification_type: 'pest',
+            severity: 'high',
+            related_type: 'hive',
+            related_id: hiveId,
+          });
+        }
+      }
       onSaved();
     } catch { setSaving(false); }
   };

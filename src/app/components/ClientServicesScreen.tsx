@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, X, Phone, MapPin, Calendar, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
+import { PageTitleBar } from './PageTitleBar';
 import { authService } from '../services/auth';
 import { t } from '../i18n';
 import { clientsService, type ClientService } from '../services/clients';
@@ -44,10 +45,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
       <div className="bg-white shadow-sm sticky top-0 z-30">
         <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
         activeTab="clients" onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
-        <div className="px-6 pb-4 border-t border-stone-100">
-          <h1 className="text-2xl font-bold text-stone-800">{t('clients', selectedLanguage)}</h1>
-          <p className="text-stone-500 text-sm mt-1">{t('manageClientRequests', selectedLanguage)}</p>
-        </div>
+        <PageTitleBar title={t('clients', selectedLanguage)} subtitle={t('manageClientRequests', selectedLanguage)} />
       </div>
 
       <div className="px-4 py-6 space-y-4">
