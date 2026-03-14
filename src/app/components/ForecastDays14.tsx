@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Calendar, X } from 'lucide-react';
-import type { WeatherDay } from '../services/planning';
+import type { WeatherDay, WeatherHourly } from '../services/planning';
 import { t, type Language } from '../i18n';
 
 interface Props {
   days: WeatherDay[];
+  hourly: WeatherHourly[];
   lang?: Language;
 }
 
@@ -61,9 +62,11 @@ function heatStressExplanation(maxTemp: number, lang: Language): string {
   return t('heatStressLow', lang);
 }
 
-export function ForecastDays14({ days, lang = 'en' }: Props) {
+export function ForecastDays14({ days, hourly, lang = 'en' }: Props) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const [showHourlyDetails, setShowHourlyDetails] = useState(false);
   const selectedDay = selectedIdx !== null ? days[selectedIdx] : null;
+  const selectedDayHourly = selectedDay ? hourly.filter((entry) => entry.date === selectedDay.date) : [];
 
   return (
     <div className="bg-white rounded-xl p-3 shadow-sm">
@@ -83,7 +86,10 @@ export function ForecastDays14({ days, lang = 'en' }: Props) {
             return (
               <button
                 key={day.date}
-                onClick={() => setSelectedIdx(isSelected ? null : idx)}
+                onClick={() => {
+                  setSelectedIdx(isSelected ? null : idx);
+                  setShowHourlyDetails(false);
+                }}
                 className={`flex-shrink-0 w-[3.5rem] rounded-lg p-1.5 border transition-colors text-center ${
                   isSelected
                     ? 'border-amber-500 bg-amber-50'
@@ -197,6 +203,40 @@ export function ForecastDays14({ days, lang = 'en' }: Props) {
                 </div>
               )}
             </div>
+
+            {selectedDayHourly.length > 0 && (
+              <div className="mt-4 rounded-xl border border-stone-200 bg-stone-50 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[0.78rem] font-bold text-stone-800">{t('hourlyForecast', lang)}</p>
+                    <p className="text-[0.65rem] text-stone-500">Visible only for the selected day</p>
+                  </div>
+                  <button
+                    onClick={() => setShowHourlyDetails((current) => !current)}
+                    className="px-3 py-2 rounded-lg bg-white border border-stone-200 text-[0.7rem] font-medium text-stone-700"
+                  >
+                    {showHourlyDetails ? t('showLess', lang) : t('showMore', lang)}
+                  </button>
+                </div>
+
+                {showHourlyDetails && (
+                  <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+                    {selectedDayHourly.map((hour) => (
+                      <div key={`${hour.date}-${hour.time}`} className="flex items-center justify-between rounded-lg bg-white border border-stone-200 px-3 py-2">
+                        <div>
+                          <p className="text-[0.75rem] font-semibold text-stone-800">{hour.time}</p>
+                          <p className="text-[0.65rem] text-stone-500">{hour.humidity}% humidity · {hour.wind} km/h wind</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[0.75rem] font-bold text-stone-800">{hour.temp}°C</p>
+                          <p className="text-[0.65rem] text-blue-600">{hour.precip} mm</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             <button onClick={() => setSelectedIdx(null)} className="mt-4 w-full py-2 bg-stone-100 text-stone-700 rounded-xl text-[0.8rem] font-medium hover:bg-stone-200">
               {t('close', lang)}

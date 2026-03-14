@@ -4,10 +4,10 @@ import { authService } from '../services/auth';
 import { apiariesService, type Apiary } from '../services/apiaries';
 import { hivesService, type Hive } from '../services/hives';
 import { planningService, type PlanningAnalysis, type District, type GBIFForageSpecies } from '../services/planning';
-import { MapPin, Hexagon as HiveIcon, CloudRain, Sun, Cloud, Wind, Droplets, Thermometer, Search, Leaf, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, Hexagon as HiveIcon, CloudRain, Sun, Cloud, Wind, Droplets, Thermometer, Search, Leaf, ChevronDown, ChevronUp, Navigation } from 'lucide-react';
 import { ForecastDays14 } from './ForecastDays14';
-import { ForecastHourly } from './ForecastHourly';
 import { MapViewer } from './MapViewer';
+import { PROVINCES, getDistrictsByProvince, getDsDivisionsByDistrict, getDistrictCenter } from '../constants/sriLankaLocations';
 import { t } from '../i18n';
 
 type Language = 'en' | 'si' | 'ta';
@@ -55,10 +55,9 @@ function gbifGradeBadge(grade: GBIFForageSpecies['grade']) {
 
 const MONTH_ABBR = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-function GBIFForageCard({ plants, score, currentMonth }: { plants: GBIFNearbyEntry[]; score: number; currentMonth: number }) {
+function GBIFForageCard({ plants, currentMonth }: { plants: GBIFNearbyEntry[]; currentMonth: number }) {
   const [expanded, setExpanded] = useState(false);
   const blooming = plants.filter(p => currentMonth >= p.bloomStart && currentMonth <= p.bloomEnd);
-  const other    = plants.filter(p => !(currentMonth >= p.bloomStart && currentMonth <= p.bloomEnd));
   const visible  = expanded ? plants : plants.slice(0, 6);
 
   return (
@@ -78,18 +77,6 @@ function GBIFForageCard({ plants, score, currentMonth }: { plants: GBIFNearbyEnt
           <p className="text-lg font-bold text-blue-700">{plants.length}</p>
           <p className="text-xs text-stone-500">species</p>
         </div>
-      </div>
-
-      {/* Biodiversity score bar */}
-      <div className="mb-3 bg-stone-100 rounded-full h-2 overflow-hidden">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-blue-400 to-emerald-500 transition-all"
-          style={{ width: `${Math.min(100, score)}%` }}
-        />
-      </div>
-      <div className="flex items-center justify-between text-xs text-stone-500 mb-3">
-        <span>Forage Biodiversity</span>
-        <span className="font-medium text-blue-700">{score}/100</span>
       </div>
 
       {/* Currently blooming callout */}
@@ -151,18 +138,50 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
   // Planning analysis state
   const [districts, setDistricts] = useState<District[]>([]);
+  const [searchMode, setSearchMode] = useState<'admin' | 'gps'>('admin');
+  const [selectedProvince, setSelectedProvince] = useState(user?.province ?? '');
   const [selectedDistrict, setSelectedDistrict] = useState(user?.district ?? '');
+  const [selectedDsDivision, setSelectedDsDivision] = useState(user?.ds_division ?? '');
   const [customLat, setCustomLat] = useState('');
   const [customLng, setCustomLng] = useState('');
   const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState(() => {
     const d = new Date();
-    d.setDate(d.getDate() + 7);
+    d.setDate(d.getDate() + 13);
     return d.toISOString().split('T')[0];
   });
   const [analysis, setAnalysis] = useState<PlanningAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
-  const [showHourly, setShowHourly] = useState(false);
+
+  const availableDistricts = getDistrictsByProvince(selectedProvince);
+  const availableDsDivisions = getDsDivisionsByDistrict(selectedDistrict);
+
+  useEffect(() => {
+    const nextEndDate = new Date(`${startDate}T00:00:00`);
+    nextEndDate.setDate(nextEndDate.getDate() + 13);
+    setEndDate(nextEndDate.toISOString().split('T')[0]);
+  }, [startDate]);
+
+  useEffect(() => {
+    if (selectedProvince && !availableDistricts.includes(selectedDistrict)) {
+      setSelectedDistrict('');
+      setSelectedDsDivision('');
+    }
+  }, [availableDistricts, selectedDistrict, selectedProvince]);
+
+  useEffect(() => {
+    if (selectedDistrict && selectedDsDivision && !availableDsDivisions.includes(selectedDsDivision)) {
+      setSelectedDsDivision('');
+    }
+  }, [availableDsDivisions, selectedDistrict, selectedDsDivision]);
+
+  useEffect(() => {
+    if (searchMode === 'gps' && !customLat && !customLng) {
+      const center = getDistrictCenter(user?.district);
+      setCustomLat(String(center.lat));
+      setCustomLng(String(center.lng));
+    }
+  }, [customLat, customLng, searchMode, user?.district]);
 
   useEffect(() => {
     Promise.all([apiariesService.getAll(), hivesService.getAll(), planningService.getDistricts()])
@@ -173,13 +192,22 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
   const handleAnalyze = async () => {
     let lat = parseFloat(customLat);
     let lng = parseFloat(customLng);
-    const district = selectedDistrict;
+    const districtLabel = searchMode === 'admin'
+      ? [selectedDsDivision, selectedDistrict].filter(Boolean).join(', ') || selectedDistrict
+      : (selectedDistrict || 'GPS search');
 
     if (startDate && endDate && startDate > endDate) {
       return;
     }
 
-    if (selectedDistrict && (!customLat || !customLng)) {
+    if (searchMode === 'admin') {
+      if (!selectedProvince || !selectedDistrict || !selectedDsDivision) return;
+      const d = getDistrictCenter(selectedDistrict);
+      lat = d.lat;
+      lng = d.lng;
+      setCustomLat(String(d.lat));
+      setCustomLng(String(d.lng));
+    } else if (selectedDistrict && (!customLat || !customLng)) {
       const d = districts.find(dd => dd.name === selectedDistrict);
       if (d) { lat = d.lat; lng = d.lng; }
     }
@@ -188,7 +216,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
     setAnalyzing(true);
     try {
-      const result = await planningService.analyze(lat, lng, district, { startDate, endDate });
+      const result = await planningService.analyze(lat, lng, districtLabel, { startDate, endDate });
       setAnalysis(result);
     } catch (e) {
       console.error('Analysis failed:', e);
@@ -198,6 +226,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
   const handleDistrictChange = (name: string) => {
     setSelectedDistrict(name);
+    setSelectedDsDivision('');
     const d = districts.find(dd => dd.name === name);
     if (d) { setCustomLat(String(d.lat)); setCustomLng(String(d.lng)); }
   };
@@ -218,22 +247,72 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
         {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div> : (
           <>
             <>
-                {/* Location Selector */}
+                {/* Search Mode Selector */}
                 <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
-                  <h3 className="font-bold text-stone-800 flex items-center gap-2"><MapPin className="w-4 h-4 text-emerald-500" /> Select Location</h3>
-                  
-                  <select value={selectedDistrict} onChange={e => handleDistrictChange(e.target.value)}
-                    className="w-full border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
-                    <option value="">— Select a district —</option>
-                    {districts.map(d => <option key={d.name} value={d.name}>{d.name}</option>)}
-                  </select>
+                  <h3 className="font-bold text-stone-800 flex items-center gap-2"><Search className="w-4 h-4 text-emerald-500" /> Search Location</h3>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <input type="text" placeholder="Latitude" value={customLat} onChange={e => setCustomLat(e.target.value)}
-                      className="border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none" />
-                    <input type="text" placeholder="Longitude" value={customLng} onChange={e => setCustomLng(e.target.value)}
-                      className="border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none" />
+                  <div className="flex gap-2 rounded-xl bg-stone-100 p-1">
+                    <button
+                      onClick={() => setSearchMode('admin')}
+                      className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${searchMode === 'admin' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500'}`}
+                    >
+                      Province / District / DS
+                    </button>
+                    <button
+                      onClick={() => setSearchMode('gps')}
+                      className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${searchMode === 'gps' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500'}`}
+                    >
+                      GPS Coordinates
+                    </button>
                   </div>
+
+                  {searchMode === 'admin' ? (
+                    <div className="space-y-2">
+                      <select
+                        value={selectedProvince}
+                        onChange={e => setSelectedProvince(e.target.value)}
+                        className="w-full border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
+                      >
+                        <option value="">Select province</option>
+                        {PROVINCES.map(province => <option key={province} value={province}>{province}</option>)}
+                      </select>
+
+                      <select value={selectedDistrict} onChange={e => handleDistrictChange(e.target.value)}
+                        className="w-full border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
+                        <option value="">— Select a district —</option>
+                        {availableDistricts.map(d => <option key={d} value={d}>{d}</option>)}
+                      </select>
+
+                      <select
+                        value={selectedDsDivision}
+                        onChange={e => setSelectedDsDivision(e.target.value)}
+                        className="w-full border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
+                      >
+                        <option value="">Select DS division</option>
+                        {availableDsDivisions.map(ds => <option key={ds} value={ds}>{ds}</option>)}
+                      </select>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input type="text" placeholder="Latitude" value={customLat} onChange={e => setCustomLat(e.target.value)}
+                          className="border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none" />
+                        <input type="text" placeholder="Longitude" value={customLng} onChange={e => setCustomLng(e.target.value)}
+                          className="border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none" />
+                      </div>
+
+                      <MapViewer
+                        lat={customLat ? parseFloat(customLat) : undefined}
+                        lng={customLng ? parseFloat(customLng) : undefined}
+                        district={selectedDistrict || user?.district}
+                        editable={true}
+                        onLocationSelect={(lat, lng) => {
+                          setCustomLat(String(lat));
+                          setCustomLng(String(lng));
+                        }}
+                      />
+                    </>
+                  )}
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
@@ -254,39 +333,9 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                   </button>
                 </div>
 
-                {/* Interactive Map — always visible, defaults to Sri Lanka */}
-                <MapViewer
-                  lat={customLat ? parseFloat(customLat) : undefined}
-                  lng={customLng ? parseFloat(customLng) : undefined}
-                  district={selectedDistrict}
-                  editable={true}
-                  onLocationSelect={(lat, lng) => {
-                    setCustomLat(String(lat));
-                    setCustomLng(String(lng));
-                  }}
-                />
-
                 {/* Analysis Results */}
                 {analysis && (
                   <>
-                    {/* Suitability Score */}
-                    <div className={`rounded-xl p-3 shadow-sm border ${
-                      analysis.suitability.color === 'green' || analysis.suitability.color === 'emerald' ? 'bg-emerald-50 border-emerald-200' :
-                      analysis.suitability.color === 'amber' ? 'bg-amber-50 border-amber-200' :
-                      'bg-red-50 border-red-200'
-                    }`}>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-bold text-[0.875rem]">{analysis.suitability.label}</h3>
-                          <p className="text-[0.7rem] opacity-75">Location: {analysis.location.district}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[1.5rem] font-bold leading-none">{analysis.suitability.score}</p>
-                          <p className="text-[0.65rem] opacity-75">/ 100</p>
-                        </div>
-                      </div>
-                    </div>
-
                     {/* Zone Saturation */}
                     <div className={`rounded-xl p-3 shadow-sm border ${
                       analysis.saturation.level === 'low' ? 'bg-emerald-50 border-emerald-200' :
@@ -306,6 +355,24 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                         }`}>{analysis.saturation.level}</span>
                       </div>
                       <p className="text-[0.7rem] opacity-75">{analysis.saturation.message}</p>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-3 shadow-sm border border-stone-200">
+                      <h3 className="font-bold text-stone-800 text-[0.8rem] mb-2 flex items-center gap-2"><Navigation className="w-3.5 h-3.5 text-amber-500" /> Bee Temperature Guide</h3>
+                      <div className="space-y-2">
+                        {[
+                          { label: 'Optimal Foraging', value: '26–32°C', tone: 'bg-emerald-50 border-emerald-200 text-emerald-800' },
+                          { label: 'Habitat Suitability', value: '≈34°C', tone: 'bg-blue-50 border-blue-200 text-blue-800' },
+                          { label: 'Onset of Stress', value: '34–35°C', tone: 'bg-amber-50 border-amber-200 text-amber-800' },
+                          { label: 'High Risk', value: '≥35°C', tone: 'bg-orange-50 border-orange-200 text-orange-800' },
+                          { label: 'Critical Risk', value: '≥36–38°C', tone: 'bg-red-50 border-red-200 text-red-800' },
+                        ].map((item) => (
+                          <div key={item.label} className={`flex items-center justify-between rounded-lg border px-3 py-2 ${item.tone}`}>
+                            <span className="text-[0.75rem] font-medium">{item.label}</span>
+                            <span className="text-[0.75rem] font-bold">{item.value}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                     {/* Current Weather */}
@@ -331,12 +398,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
                     {/* 14-Day Forecast */}
                     {analysis.weather.days.length > 0 && (
-                      <ForecastDays14 days={analysis.weather.days} lang={selectedLanguage} />
-                    )}
-
-                    {/* Hourly Forecast (Today + Tomorrow) */}
-                    {analysis.weather.hourly.length > 0 && (
-                      <ForecastHourly hourly={analysis.weather.hourly} lang={selectedLanguage} />
+                      <ForecastDays14 days={analysis.weather.days} hourly={analysis.weather.hourly} lang={selectedLanguage} />
                     )}
 
                     {/* Forage Information */}
@@ -395,7 +457,6 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                     {analysis.forage.gbifNearby.length > 0 && (
                       <GBIFForageCard
                         plants={analysis.forage.gbifNearby}
-                        score={analysis.forage.gbifScore}
                         currentMonth={analysis.forage.month}
                       />
                     )}

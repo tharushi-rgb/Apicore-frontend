@@ -223,7 +223,7 @@ const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Se
 async function fetchWeather(lat: number, lng: number, startDate?: string, endDate?: string) {
   const today = new Date();
   const start = startDate ?? today.toISOString().split('T')[0];
-  const rawEnd = endDate ?? new Date(today.getTime() + 7 * 86400000).toISOString().split('T')[0];
+  const rawEnd = endDate ?? new Date(today.getTime() + 13 * 86400000).toISOString().split('T')[0];
   // Open-Meteo supports max 16-day forecast; cap at today+16
   const maxEnd = new Date(today.getTime() + 16 * 86400000).toISOString().split('T')[0];
   const end = rawEnd > maxEnd ? maxEnd : rawEnd;
@@ -355,7 +355,7 @@ export const planningService = {
     const gbifNearby = getNearbyGBIFForage(lat, lng);
     const gbifScore = getGBIFBiodiversityScore(lat, lng);
 
-    // Boost suitability score with biodiversity bonus (up to +15 points)
+    // Keep the suitability score internal for now; the UI no longer surfaces it directly.
     const biodiversityBonus = Math.round(gbifScore * 0.15);
     const boostedScore = Math.min(100, suit.score + biodiversityBonus);
     let boostedLabel = suit.label;
