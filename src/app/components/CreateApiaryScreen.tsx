@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Loader2, MapPin, Plus, Save, Trash2, X } from 'lucide-react';
+import { Loader2, Plus, Save, Trash2, X } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
 import { PageTitleBar } from './PageTitleBar';
-import { MapViewer } from './MapViewer';
+import { LocationSelectorField } from './LocationSelectorField';
+import { AdministrativeLocationFields } from './AdministrativeLocationFields';
 import { authService } from '../services/auth';
 import { apiariesService, type Apiary, type ApiaryForageEntry } from '../services/apiaries';
 import {
-  PROVINCES,
   getDistrictsByProvince,
   getDsDivisionsByDistrict,
-  getDistrictCenter,
 } from '../constants/sriLankaLocations';
 
 type Language = 'en' | 'si' | 'ta';
@@ -72,14 +71,9 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
   const user = authService.getLocalUser();
   const initialDistrict = initialApiary?.district || user?.district || '';
   const initialProvince = initialApiary?.province || user?.province || '';
-  const initialLocation = initialApiary?.gps_latitude != null && initialApiary?.gps_longitude != null
-    ? { lat: initialApiary.gps_latitude, lng: initialApiary.gps_longitude }
-    : getDistrictCenter(initialDistrict || user?.district);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [showMapPicker, setShowMapPicker] = useState(false);
-  const [pendingLocation, setPendingLocation] = useState(initialLocation);
   const [form, setForm] = useState<ApiaryFormState>({
     name: initialApiary?.name || '',
     province: initialProvince,
@@ -171,20 +165,6 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
     }));
   };
 
-  const openMapPicker = () => {
-    const nextLocation = form.gps_latitude && form.gps_longitude
-      ? { lat: parseFloat(form.gps_latitude), lng: parseFloat(form.gps_longitude) }
-      : getDistrictCenter(form.district || user?.district);
-    setPendingLocation(nextLocation);
-    setShowMapPicker(true);
-  };
-
-  const applySelectedLocation = () => {
-    setField('gps_latitude', pendingLocation.lat.toFixed(6));
-    setField('gps_longitude', pendingLocation.lng.toFixed(6));
-    setShowMapPicker(false);
-  };
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -260,44 +240,6 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
 
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex flex-col overflow-hidden">
-      {showMapPicker && (
-        <div className="fixed inset-0 z-50 bg-black/50 px-4 py-6 flex items-center justify-center">
-          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden max-h-full flex flex-col">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200">
-              <div>
-                <h2 className="text-base font-bold text-stone-800">Select apiary location</h2>
-                <p className="text-xs text-stone-500 mt-0.5">Tap the map and then confirm the selected point.</p>
-              </div>
-              <button onClick={() => setShowMapPicker(false)} className="p-2 rounded-lg bg-stone-100 hover:bg-stone-200">
-                <X className="w-4 h-4 text-stone-600" />
-              </button>
-            </div>
-            <div className="p-4 overflow-y-auto">
-              <MapViewer
-                lat={pendingLocation.lat}
-                lng={pendingLocation.lng}
-                district={form.district || user?.district}
-                editable
-                onLocationSelect={(lat, lng) => setPendingLocation({ lat, lng })}
-              />
-            </div>
-            <div className="px-5 py-4 border-t border-stone-200 flex items-center justify-between gap-3">
-              <div className="text-xs text-stone-500">
-                {pendingLocation.lat.toFixed(6)}, {pendingLocation.lng.toFixed(6)}
-              </div>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setShowMapPicker(false)} className="px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 text-sm font-medium">
-                  Cancel
-                </button>
-                <button type="button" onClick={applySelectedLocation} className="px-4 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-medium">
-                  Select
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="bg-white shadow-sm sticky top-0 z-30 shrink-0">
         <MobileHeader
           userName={user?.name}
@@ -324,30 +266,15 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
             <input value={form.name} onChange={(event) => setField('name', event.target.value)} className={inputClass} />
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <label className={labelClass}>Province *</label>
-              <select value={form.province} onChange={(event) => setField('province', event.target.value)} className={inputClass}>
-                <option value="">Select province</option>
-                {PROVINCES.map((province) => <option key={province} value={province}>{province}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className={labelClass}>District *</label>
-              <select value={form.district} onChange={(event) => setField('district', event.target.value)} className={inputClass}>
-                <option value="">Select district</option>
-                {districts.map((district) => <option key={district} value={district}>{district}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className={labelClass}>DS Division *</label>
-            <select value={form.ds_division} onChange={(event) => setField('ds_division', event.target.value)} className={inputClass}>
-              <option value="">Select DS division</option>
-              {dsDivisions.map((dsDivision) => <option key={dsDivision} value={dsDivision}>{dsDivision}</option>)}
-            </select>
-          </div>
+          <AdministrativeLocationFields
+            province={form.province}
+            district={form.district}
+            dsDivision={form.ds_division}
+            onProvinceChange={(value) => setField('province', value)}
+            onDistrictChange={(value) => setField('district', value)}
+            onDsDivisionChange={(value) => setField('ds_division', value)}
+            required
+          />
 
           <div>
             <label className={labelClass}>Established Date</label>
@@ -496,22 +423,17 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
             </select>
           </div>
 
-          <div className="bg-white rounded-2xl p-4 border border-stone-200 space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-semibold text-stone-800">Location</label>
-              <button type="button" onClick={openMapPicker} className="text-sm font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-800">
-                Select location
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <input value={form.gps_latitude} readOnly placeholder="Latitude" className={`${inputClass} bg-stone-50`} />
-              <input value={form.gps_longitude} readOnly placeholder="Longitude" className={`${inputClass} bg-stone-50`} />
-            </div>
-            <p className="text-xs text-stone-500 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-              Default map view opens around the registered district.
-            </p>
-          </div>
+          <LocationSelectorField
+            label="Location"
+            district={form.district || user?.district}
+            latitude={form.gps_latitude}
+            longitude={form.gps_longitude}
+            onChange={(latitude, longitude) => {
+              setField('gps_latitude', latitude);
+              setField('gps_longitude', longitude);
+            }}
+            helperText="Default map view opens around the selected district."
+          />
 
           <div className="bg-white rounded-2xl p-4 border border-stone-200 space-y-3">
             <div className="flex items-center justify-between gap-3">

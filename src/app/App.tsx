@@ -12,7 +12,6 @@ import { HivesScreen } from '@/app/components/HivesScreen';
 import { CreateApiaryScreen } from '@/app/components/CreateApiaryScreen';
 import { CreateHiveScreen } from '@/app/components/CreateHiveScreen';
 import { HivePlanningScreen } from '@/app/components/HivePlanningScreen';
-import { FinanceScreen } from '@/app/components/FinanceScreen';
 import { ProfileScreen } from '@/app/components/ProfileScreen';
 import { ViewHiveScreen } from '@/app/components/ViewHiveScreen';
 import { ViewApiaryScreen } from '@/app/components/ViewApiaryScreen';
@@ -266,18 +265,6 @@ function AdminPlanningPage({ lang, onLangChange, onLogout }: { lang: Language; o
   );
 }
 
-function AdminFinancePage({ lang, onLangChange, onLogout }: { lang: Language; onLangChange: (l: Language) => void; onLogout: () => void }) {
-  const navigate = useNavigate();
-  return (
-    <FinanceScreen
-      selectedLanguage={lang}
-      onLanguageChange={onLangChange}
-      onNavigate={(tab) => navigate(ADMIN_NAV_ROUTES[tab])}
-      onLogout={onLogout}
-    />
-  );
-}
-
 function AdminClientsPage({ lang, onLangChange, onLogout }: { lang: Language; onLangChange: (l: Language) => void; onLogout: () => void }) {
   const navigate = useNavigate();
   return (
@@ -399,7 +386,7 @@ export default function App() {
           <Route path="/hives/edit" element={<RequireAuth><AdminCreateHivePage {...ap} /></RequireAuth>} />
           <Route path="/hives/:id" element={<RequireAuth><AdminViewHivePage {...ap} /></RequireAuth>} />
           <Route path="/planning" element={<RequireAuth><AdminPlanningPage {...ap} /></RequireAuth>} />
-          <Route path="/finance" element={<RequireAuth><AdminFinancePage {...ap} /></RequireAuth>} />
+          <Route path="/finance" element={<RequireAuth><Navigate to="/hives" replace /></RequireAuth>} />
           <Route path="/clients" element={<RequireAuth><AdminClientsPage {...ap} /></RequireAuth>} />
           <Route path="/notifications" element={<RequireAuth><AdminNotificationsPage {...ap} /></RequireAuth>} />
           <Route path="/profile" element={<RequireAuth><AdminProfilePage {...ap} /></RequireAuth>} />

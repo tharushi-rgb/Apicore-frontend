@@ -1,6 +1,25 @@
 @import './tailwind.css';
 @import './theme.css';
 
+:root {
+  --app-color-primary: #f59e0b;
+  --app-color-primary-hover: #d97706;
+  --app-color-bg: #fffbeb;
+  --app-color-surface: #ffffff;
+  --app-color-text: #292524;
+  --app-color-muted: #78716c;
+  --app-color-border: #e7e5e4;
+  --app-color-ghost-hover: #f5f5f4;
+  --app-radius: 0.75rem;
+  --app-radius-lg: 1rem;
+
+  --app-text-xs: 0.72rem;
+  --app-text-sm: 0.82rem;
+  --app-text-md: 0.93rem;
+  --app-text-h2: 1.05rem;
+  --app-text-h1: 1.18rem;
+}
+
 /* Hide scrollbar utility */
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -31,4 +50,101 @@ html, body {
   position: relative;
   display: flex;
   flex-direction: column;
+}
+
+.app-h1 {
+  font-size: var(--app-text-h1);
+  line-height: 1.15;
+  font-weight: 700;
+  color: var(--app-color-text);
+}
+
+.app-h2 {
+  font-size: var(--app-text-h2);
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--app-color-text);
+}
+
+.app-subtitle {
+  font-size: var(--app-text-xs);
+  line-height: 1.2;
+  color: var(--app-color-muted);
+}
+
+.app-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: var(--app-text-sm);
+  font-weight: 500;
+  color: #44403c;
+}
+
+.app-input {
+  width: 100%;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius);
+  background: #fff;
+  padding: 0.6rem 0.8rem;
+  font-size: var(--app-text-sm);
+  color: var(--app-color-text);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.app-input:focus {
+  border-color: var(--app-color-primary);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.app-btn-primary {
+  border: none;
+  border-radius: var(--app-radius);
+  background: var(--app-color-primary);
+  color: #fff;
+  font-size: var(--app-text-sm);
+  font-weight: 600;
+  padding: 0.62rem 0.95rem;
+  transition: background 0.15s ease;
+}
+
+.app-btn-primary:hover {
+  background: var(--app-color-primary-hover);
+}
+
+.app-btn-ghost {
+  border: none;
+  border-radius: var(--app-radius);
+  background: #f5f5f4;
+  color: #44403c;
+  font-size: var(--app-text-sm);
+  font-weight: 600;
+  padding: 0.62rem 0.95rem;
+  transition: background 0.15s ease;
+}
+
+.app-btn-ghost:hover {
+  background: var(--app-color-ghost-hover);
+}
+
+.app-btn-link {
+  border: none;
+  background: transparent;
+  color: #047857;
+  font-size: var(--app-text-sm);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+}
+
+.app-btn-link:hover {
+  color: #065f46;
+}
+
+.app-card {
+  border: 1px solid var(--app-color-border);
+  background: var(--app-color-surface);
+  border-radius: var(--app-radius-lg);
+  padding: 0.85rem;
 }

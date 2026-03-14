@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Loader2, MapPin, Plus, Save, Trash2, X } from 'lucide-react';
+import { Loader2, Plus, Save, Trash2, X } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
 import { PageTitleBar } from './PageTitleBar';
-import { MapViewer } from './MapViewer';
+import { LocationSelectorField } from './LocationSelectorField';
+import { AdministrativeLocationFields } from './AdministrativeLocationFields';
 import { authService } from '../services/auth';
 import { hivesService, type Hive } from '../services/hives';
 import { apiariesService, type Apiary } from '../services/apiaries';
-import { getDistrictCenter } from '../constants/sriLankaLocations';
+import {
+  getDistrictsByProvince,
+  getDsDivisionsByDistrict,
+} from '../constants/sriLankaLocations';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -17,6 +21,9 @@ interface Props {
 }
 
 interface HiveMetadata {
+  province?: string;
+  district?: string;
+  ds_division?: string;
   hive_variant?: HiveVariant;
   ant_protection?: 'yes' | 'no';
   entrance_guard?: 'yes' | 'no' | '';
@@ -42,6 +49,9 @@ interface HiveMetadata {
 interface HiveFormState {
   hive_names: string[];
   apiary_selection: string;
+  province: string;
+  district: string;
+  ds_division: string;
   gps_latitude: string;
   gps_longitude: string;
   established_date: string;
@@ -141,15 +151,13 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
   const initialMetadata = parsedInitial.metadata;
   const initialVariant = normalizeHiveVariant(initialHive, initialMetadata);
   const initialHiveName = initialHive?.name ?? '';
-  const initialMapLocation = initialHive?.gps_latitude != null && initialHive?.gps_longitude != null
-    ? { lat: Number(initialHive.gps_latitude), lng: Number(initialHive.gps_longitude) }
-    : getDistrictCenter(contextApiary?.district || user?.district);
+  const initialProvince = initialMetadata.province || contextApiary?.province || user?.province || '';
+  const initialDistrict = initialMetadata.district || contextApiary?.district || user?.district || '';
+  const initialDsDivision = initialMetadata.ds_division || contextApiary?.ds_division || '';
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [apiaries, setApiaries] = useState<Apiary[]>([]);
-  const [showMapPicker, setShowMapPicker] = useState(false);
-  const [pendingLocation, setPendingLocation] = useState(initialMapLocation);
 
   const [form, setForm] = useState<HiveFormState>({
     hive_names: isEdit ? [initialHiveName] : [initialHiveName || 'Hive 1'],
@@ -158,6 +166,9 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
       : contextApiary?.id != null
         ? String(contextApiary.id)
         : 'standalone',
+    province: initialProvince,
+    district: initialDistrict,
+    ds_division: initialDsDivision,
     gps_latitude: toNumberString(initialHive?.gps_latitude),
     gps_longitude: toNumberString(initialHive?.gps_longitude),
     established_date: (initialHive as any)?.established_date || '',
@@ -199,6 +210,34 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
 
   useEffect(() => { apiariesService.getAll().then(setApiaries).catch(()=>{}); }, []);
 
+  const availableDistricts = getDistrictsByProvince(form.province);
+  const availableDivisions = getDsDivisionsByDistrict(form.district);
+
+  useEffect(() => {
+    if (!form.province || availableDistricts.includes(form.district)) return;
+    setForm((previous) => ({ ...previous, district: '', ds_division: '' }));
+  }, [form.province, form.district, availableDistricts]);
+
+  useEffect(() => {
+    if (!form.district || !form.ds_division || availableDivisions.includes(form.ds_division)) return;
+    setForm((previous) => ({ ...previous, ds_division: '' }));
+  }, [form.district, form.ds_division, availableDivisions]);
+
+  useEffect(() => {
+    if (isEdit) return;
+    if (!form.apiary_selection || form.apiary_selection === 'standalone') return;
+    const selectedApiary = apiaries.find((apiary) => String(apiary.id) === form.apiary_selection);
+    if (!selectedApiary) return;
+    setForm((previous) => ({
+      ...previous,
+      province: selectedApiary.province || previous.province,
+      district: selectedApiary.district || previous.district,
+      ds_division: selectedApiary.ds_division || previous.ds_division,
+      gps_latitude: selectedApiary.gps_latitude != null ? String(selectedApiary.gps_latitude) : previous.gps_latitude,
+      gps_longitude: selectedApiary.gps_longitude != null ? String(selectedApiary.gps_longitude) : previous.gps_longitude,
+    }));
+  }, [apiaries, form.apiary_selection, isEdit]);
+
   const isBoxLike = form.hive_variant === 'standard_box' || form.hive_variant === 'ulukata_pettiya';
   const isPot = form.hive_variant === 'meti_kalaya';
   const isLog = form.hive_variant === 'kitul_kota';
@@ -226,20 +265,6 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
       ...previous,
       hive_names: previous.hive_names.map((name, i) => (i === index ? value : name)),
     }));
-  };
-
-  const openMapPicker = () => {
-    const currentLocation = form.gps_latitude && form.gps_longitude
-      ? { lat: parseFloat(form.gps_latitude), lng: parseFloat(form.gps_longitude) }
-      : getDistrictCenter(contextApiary?.district || user?.district);
-    setPendingLocation(currentLocation);
-    setShowMapPicker(true);
-  };
-
-  const applyLocation = () => {
-    updateField('gps_latitude', pendingLocation.lat.toFixed(6));
-    updateField('gps_longitude', pendingLocation.lng.toFixed(6));
-    setShowMapPicker(false);
   };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -299,6 +324,10 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
       setError('Apiary selection is required');
       return;
     }
+    if (!form.province || !form.district || !form.ds_division) {
+      setError('Province, district, and DS division are required');
+      return;
+    }
     if (!form.gps_latitude || !form.gps_longitude) {
       setError('Location is required. Select the exact location on the map.');
       return;
@@ -353,6 +382,9 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
 
     try {
       const metadata: HiveMetadata = {
+        province: form.province,
+        district: form.district,
+        ds_division: form.ds_division,
         hive_variant: form.hive_variant as HiveVariant,
         ant_protection: form.ant_protection as 'yes' | 'no',
         entrance_guard: form.entrance_guard as 'yes' | 'no' | '',
@@ -429,42 +461,6 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
 
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex flex-col overflow-hidden">
-      {showMapPicker && (
-        <div className="fixed inset-0 z-50 bg-black/50 px-4 py-6 flex items-center justify-center">
-          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden max-h-full flex flex-col">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200">
-              <div>
-                <h2 className="text-base font-bold text-stone-800">Select hive location</h2>
-                <p className="text-xs text-stone-500 mt-0.5">Tap the map and confirm coordinates.</p>
-              </div>
-              <button type="button" onClick={() => setShowMapPicker(false)} className="p-2 rounded-lg bg-stone-100 hover:bg-stone-200">
-                <X className="w-4 h-4 text-stone-600" />
-              </button>
-            </div>
-            <div className="p-4 overflow-y-auto">
-              <MapViewer
-                lat={pendingLocation.lat}
-                lng={pendingLocation.lng}
-                district={contextApiary?.district || user?.district}
-                editable
-                onLocationSelect={(lat, lng) => setPendingLocation({ lat, lng })}
-              />
-            </div>
-            <div className="px-5 py-4 border-t border-stone-200 flex items-center justify-between gap-3">
-              <div className="text-xs text-stone-500">{pendingLocation.lat.toFixed(6)}, {pendingLocation.lng.toFixed(6)}</div>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setShowMapPicker(false)} className="px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 text-sm font-medium">
-                  Cancel
-                </button>
-                <button type="button" onClick={applyLocation} className="px-4 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-medium">
-                  Select
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="bg-white shadow-sm sticky top-0 z-30 shrink-0">
         <MobileHeader
           userName={user?.name}
@@ -521,6 +517,16 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
             </select>
           </div>
 
+          <AdministrativeLocationFields
+            province={form.province}
+            district={form.district}
+            dsDivision={form.ds_division}
+            onProvinceChange={(value) => updateField('province', value)}
+            onDistrictChange={(value) => updateField('district', value)}
+            onDsDivisionChange={(value) => updateField('ds_division', value)}
+            required
+          />
+
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className={labelCls}>Date Established *</label>
@@ -541,21 +547,17 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
             </div>
           </div>
 
-          <div className="bg-stone-50 rounded-xl p-3 border border-stone-200 space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-stone-700">Location / GPS *</label>
-              <button type="button" onClick={openMapPicker} className="text-sm font-medium text-emerald-700 hover:text-emerald-800 underline underline-offset-2">
-                Select location
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <input value={form.gps_latitude} readOnly placeholder="Latitude" className={`${inputCls} bg-white`} />
-              <input value={form.gps_longitude} readOnly placeholder="Longitude" className={`${inputCls} bg-white`} />
-            </div>
-            <p className="text-xs text-stone-500 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-emerald-600" /> Pin exact location for forage-distance accuracy.
-            </p>
-          </div>
+          <LocationSelectorField
+            label="Location / GPS *"
+            district={form.district || user?.district}
+            latitude={form.gps_latitude}
+            longitude={form.gps_longitude}
+            onChange={(latitude, longitude) => {
+              updateField('gps_latitude', latitude);
+              updateField('gps_longitude', longitude);
+            }}
+            helperText="Pin exact location for forage-distance accuracy."
+          />
         </div>
 
         <div className="bg-white rounded-2xl p-4 border border-stone-200 space-y-3">

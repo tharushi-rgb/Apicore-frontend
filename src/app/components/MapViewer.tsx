@@ -9,6 +9,7 @@ interface Props {
   onLocationSelect?: (lat: number, lng: number) => void;
   district?: string;
   editable?: boolean;
+  compact?: boolean;
 }
 
 // Sri Lanka center as default
@@ -29,7 +30,7 @@ const DefaultIcon = L.icon({
 
 L.Marker.prototype.setIcon(DefaultIcon);
 
-export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, district, editable = false }: Props) {
+export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, district, editable = false, compact = false }: Props) {
   const lat = latProp ?? DEFAULT_LAT;
   const lng = lngProp ?? DEFAULT_LNG;
   const hasLocation = latProp != null && lngProp != null;
@@ -128,8 +129,8 @@ export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, distri
 
       <div
         ref={mapContainer}
-        className="w-full h-72 bg-stone-100"
-        style={{ minHeight: '300px' }}
+        className={`w-full bg-stone-100 ${compact ? 'h-56' : 'h-72'}`}
+        style={{ minHeight: compact ? '220px' : '300px' }}
       />
 
       <div className="p-3 bg-stone-50 border-t border-stone-200 text-xs text-stone-600">
