@@ -117,26 +117,35 @@ function ClientServiceForm({ initial, onClose, onSaved }: { initial?: ClientServ
     } catch { setSaving(false); }
   };
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center"><div className="bg-white w-full max-w-md rounded-t-2xl p-5 max-h-[85vh] overflow-y-auto">
-      <div className="flex items-center justify-between mb-4"><h3 className="font-bold text-stone-800">{initial ? t('editClientService', 'en') : t('newClientService', 'en')}</h3><button onClick={onClose}><X className="w-5 h-5" /></button></div>
-      <form onSubmit={submit} className="space-y-3">
-        <input value={f.client_name} onChange={e=>setF(p=>({...p,client_name:e.target.value}))} placeholder={`${t('clientName', 'en')} *`} className="w-full border rounded-xl px-3 py-2 text-sm" />
-        <div className="grid grid-cols-2 gap-2">
-          <input value={f.client_contact} onChange={e=>setF(p=>({...p,client_contact:e.target.value}))} placeholder={t('phone', 'en')} className="border rounded-xl px-3 py-2 text-sm" />
-          <input value={f.client_email} onChange={e=>setF(p=>({...p,client_email:e.target.value}))} placeholder={t('email', 'en')} type="email" className="border rounded-xl px-3 py-2 text-sm" />
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center">
+      <div className="bg-white w-full max-w-md rounded-t-2xl flex flex-col max-h-[88vh]">
+        {/* Sticky header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-stone-100 flex-shrink-0">
+          <h3 className="font-bold text-sm text-stone-800">{initial ? t('editClientService', 'en') : t('newClientService', 'en')}</h3>
+          <button onClick={onClose}><X className="w-5 h-5" /></button>
         </div>
-        <select value={f.service_type} onChange={e=>setF(p=>({...p,service_type:e.target.value}))} className="w-full border rounded-xl px-3 py-2 text-sm">
-          <option value="hive_inspection">{t('hiveInspection', 'en')}</option><option value="swarm_removal">{t('swarmRemoval', 'en')}</option><option value="colony_relocation">{t('colonyRelocation', 'en')}</option>
-          <option value="honey_extraction">{t('honeyExtraction', 'en')}</option><option value="consultation">{t('consultation', 'en')}</option><option value="training">{t('training', 'en')}</option><option value="other">{t('other', 'en')}</option>
-        </select>
-        <input value={f.location} onChange={e=>setF(p=>({...p,location:e.target.value}))} placeholder={t('locationLabel', 'en')} className="w-full border rounded-xl px-3 py-2 text-sm" />
-        <div className="grid grid-cols-2 gap-2">
-          <input type="date" value={f.scheduled_date} onChange={e=>setF(p=>({...p,scheduled_date:e.target.value}))} className="border rounded-xl px-3 py-2 text-sm" />
-          <input value={f.payment_amount} onChange={e=>setF(p=>({...p,payment_amount:e.target.value}))} placeholder={t('amountRs', 'en')} type="number" className="border rounded-xl px-3 py-2 text-sm" />
+        {/* Scrollable form body */}
+        <div className="overflow-y-auto flex-1 px-4 py-3">
+          <form onSubmit={submit} className="space-y-2.5">
+            <input value={f.client_name} onChange={e=>setF(p=>({...p,client_name:e.target.value}))} placeholder={`${t('clientName', 'en')} *`} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-400 focus:outline-none" />
+            <div className="grid grid-cols-2 gap-2">
+              <input value={f.client_contact} onChange={e=>setF(p=>({...p,client_contact:e.target.value}))} placeholder={t('phone', 'en')} className="border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-400 focus:outline-none" />
+              <input value={f.client_email} onChange={e=>setF(p=>({...p,client_email:e.target.value}))} placeholder={t('email', 'en')} type="email" className="border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-400 focus:outline-none" />
+            </div>
+            <select value={f.service_type} onChange={e=>setF(p=>({...p,service_type:e.target.value}))} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+              <option value="hive_inspection">{t('hiveInspection', 'en')}</option><option value="swarm_removal">{t('swarmRemoval', 'en')}</option><option value="colony_relocation">{t('colonyRelocation', 'en')}</option>
+              <option value="honey_extraction">{t('honeyExtraction', 'en')}</option><option value="consultation">{t('consultation', 'en')}</option><option value="training">{t('training', 'en')}</option><option value="other">{t('other', 'en')}</option>
+            </select>
+            <input value={f.location} onChange={e=>setF(p=>({...p,location:e.target.value}))} placeholder={t('locationLabel', 'en')} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-400 focus:outline-none" />
+            <div className="grid grid-cols-2 gap-2">
+              <input type="date" value={f.scheduled_date} onChange={e=>setF(p=>({...p,scheduled_date:e.target.value}))} className="border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-400 focus:outline-none" />
+              <input value={f.payment_amount} onChange={e=>setF(p=>({...p,payment_amount:e.target.value}))} placeholder={t('amountRs', 'en')} type="number" className="border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-400 focus:outline-none" />
+            </div>
+            <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder={t('notes', 'en')} rows={2} className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:border-amber-400 focus:outline-none" />
+            <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-2.5 rounded-xl text-sm font-semibold disabled:opacity-60">{saving ? t('saving', 'en') : t('save', 'en')}</button>
+          </form>
         </div>
-        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder={t('notes', 'en')} rows={2} className="w-full border rounded-xl px-3 py-2 text-sm" />
-        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-2.5 rounded-xl font-medium disabled:opacity-60">{saving ? t('saving', 'en') : t('save', 'en')}</button>
-      </form>
-    </div></div>
+      </div>
+    </div>
   );
 }
