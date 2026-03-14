@@ -106,12 +106,13 @@ export function CreateHiveScreen({ onClose, contextApiary, initialHive }: Props)
   const sLabelCls = 'block text-xs font-medium text-stone-600 mb-1';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
-      <div className="bg-white shadow-sm px-4 py-3 flex items-center gap-3">
+    <div className="h-[100dvh] bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex flex-col overflow-hidden">
+      <div className="bg-white shadow-sm px-4 py-3 flex items-center gap-3 shrink-0">
         <button onClick={onClose} className="p-2 hover:bg-stone-100 rounded-lg"><ArrowLeft className="w-5 h-5 text-stone-700" /></button>
         <h1 className="text-lg font-bold text-stone-800">{isEdit ? 'Edit Hive' : 'Create Hive'}</h1>
       </div>
 
+      <div className="flex-1 min-h-0 overflow-y-auto">
       <form onSubmit={handleSubmit} className="px-4 py-6 space-y-4 pb-24">
         {error && <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm">{error}</div>}
 
@@ -316,6 +317,7 @@ export function CreateHiveScreen({ onClose, contextApiary, initialHive }: Props)
           {saving ? <><Loader2 className="w-5 h-5 animate-spin" /> Saving...</> : <><Save className="w-5 h-5" /> {isEdit ? 'Update Hive' : 'Create Hive'}</>}
         </button>
       </form>
+      </div>
     </div>
   );
 }
