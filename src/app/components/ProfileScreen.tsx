@@ -15,7 +15,6 @@ import {
   Users,
 } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
-import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
 import { profileService, type Profile } from '../services/profile';
 import { apiariesService } from '../services/apiaries';
@@ -38,7 +37,6 @@ interface NotificationSettings {
 }
 
 export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, onManageHelpers, onLogout }: Props) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -121,7 +119,6 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-stone-50 relative">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab={activeTab} onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
 
       {/* Edit Profile Modal */}
       {showEditProfile && (
@@ -165,8 +162,8 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
       <div className="h-full overflow-y-auto pb-8">
         {/* Header */}
         <div className="bg-white shadow-sm sticky top-0 z-30">
-          <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-            isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
+          <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+            activeTab={activeTab} onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
           <div className="px-6 pb-4 border-t border-stone-100">
             <h1 className="text-2xl font-bold text-stone-800">{t('profile', selectedLanguage)}</h1>
             <p className="text-stone-500 text-sm mt-1">{t('yourAccount', selectedLanguage)}</p>

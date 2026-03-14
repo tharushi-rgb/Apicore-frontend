@@ -12,7 +12,6 @@ import {
   X,
 } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
-import { MobileSidebar } from './MobileSidebar';
 import { hivesService, type Hive } from '../services/hives';
 import { authService } from '../services/auth';
 import { t } from '../i18n';
@@ -26,7 +25,6 @@ interface Props {
 }
 
 export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, onCreateHive, onViewHive, onEditHive, onLogout }: Props) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [hives, setHives] = useState<Hive[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -103,8 +101,6 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
 
   return (
     <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab={activeTab} onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
-
       {/* Filter Overlay */}
       {showFilters && (
         <div className="absolute inset-0 bg-black/50 z-40" onClick={() => setShowFilters(false)}>
@@ -159,8 +155,8 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
       <div className="h-full overflow-y-auto pb-24">
         {/* Header */}
         <div className="bg-white shadow-sm sticky top-0 z-30">
-          <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-            isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
+          <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+            activeTab={activeTab} onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
           <div className="px-6 pb-4 border-t border-stone-100">
             <h1 className="text-2xl font-bold text-stone-800">{t('hives', selectedLanguage)}</h1>
             <p className="text-stone-500 text-sm mt-1">{t('allRegisteredHives', selectedLanguage)}</p>

@@ -14,7 +14,6 @@ import {
   Hexagon as HiveIcon,
 } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
-import { MobileSidebar } from './MobileSidebar';
 import { apiariesService, type Apiary } from '../services/apiaries';
 import { authService } from '../services/auth';
 import { t } from '../i18n';
@@ -29,7 +28,6 @@ interface Props {
 }
 
 export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate, onCreateApiary, onEditApiary, onAddHive, onViewApiary, onLogout }: Props) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [apiaries, setApiaries] = useState<Apiary[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -67,13 +65,11 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
 
   return (
     <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab={activeTab} onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
-
       <div className="h-full overflow-y-auto pb-24">
         {/* Header */}
         <div className="bg-white shadow-sm sticky top-0 z-30">
-          <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-            isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
+          <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+            activeTab={activeTab} onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
           <div className="px-6 pb-4 border-t border-stone-100">
             <h1 className="text-[1.1rem] font-bold text-stone-800">{t('apiaries', selectedLanguage)}</h1>
             <p className="text-stone-500 text-[0.75rem] mt-0.5">{t('manageApiaries', selectedLanguage)}</p>

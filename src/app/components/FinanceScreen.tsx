@@ -15,7 +15,6 @@ import {
   Receipt,
 } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
-import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
 import { t as tr } from '../i18n';
 import { expensesService, type Expense } from '../services/finance';
@@ -50,7 +49,6 @@ interface Transaction {
 }
 
 export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, onLogout }: Props) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeForm, setActiveForm] = useState<'expense' | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [expenseLinkType, setExpenseLinkType] = useState<'hive' | 'apiary' | 'general'>('hive');
@@ -134,13 +132,11 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
   return (
     <div className="h-full bg-gradient-to-b from-red-50 via-amber-50 to-stone-50 relative">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab={activeTab} onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
-
       <div className="h-full overflow-y-auto pb-8">
         {/* Header */}
         <div className="bg-white shadow-sm sticky top-0 z-30">
-          <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-            isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
+          <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+            activeTab={activeTab} onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
           <div className="px-6 pb-4 border-t border-stone-100">
             <h1 className="text-2xl font-bold text-stone-800">{tr('finance', selectedLanguage)}</h1>
             <p className="text-stone-500 text-sm mt-1">{tr('trackExpenses', selectedLanguage)}</p>

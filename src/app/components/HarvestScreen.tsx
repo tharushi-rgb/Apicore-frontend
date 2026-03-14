@@ -17,7 +17,6 @@ import {
   Info,
 } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
-import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
 import { hivesService } from '../services/hives';
 import { apiariesService } from '../services/apiaries';
@@ -49,7 +48,6 @@ interface FormData {
 }
 
 export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, onLogout }: Props) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showRecordForm, setShowRecordForm] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [harvestType, setHarvestType] = useState('');
@@ -184,26 +182,17 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
   return (
     <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
-      {/* Mobile Sidebar */}
-      <MobileSidebar
-        isOpen={isSidebarOpen}
-        activeTab={activeTab}
-        onNavigate={onNavigate}
-        onClose={() => setIsSidebarOpen(false)}
-        onLogout={onLogout}
-        lang={selectedLanguage}
-      />
-
       <div className="h-full overflow-y-auto pb-8">
         {/* Header */}
         <div className="bg-white shadow-sm sticky top-0 z-30">
           <MobileHeader
             userName={user?.name}
-            district={user?.district}
+            roleLabel={user?.role}
             selectedLanguage={selectedLanguage}
             onLanguageChange={onLanguageChange}
-            isSidebarOpen={isSidebarOpen}
-            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            activeTab={activeTab}
+            onNavigate={onNavigate}
+            onLogout={onLogout}
             onViewAllNotifications={() => onNavigate('notifications')}
           />
 

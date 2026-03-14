@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Award, Hexagon as HiveIcon, ArrowLeft, Droplets, TrendingUp, DollarSign } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
-import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
 import { supabase } from '../services/supabaseClient';
 import { expensesService, incomeService } from '../services/finance';
@@ -19,7 +18,6 @@ interface Props {
 const COLORS = ['#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#3b82f6', '#ec4899'];
 
 export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate, onLogout, onBack }: Props) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'hives'>('overview');
   const user = authService.getLocalUser();
@@ -110,13 +108,11 @@ export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate
 
   return (
     <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab="dashboard" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
-
       <div className="h-full overflow-y-auto pb-8">
         {/* Header */}
         <div className="bg-white shadow-sm sticky top-0 z-30">
-          <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-            isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
+          <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+            activeTab="dashboard" onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
           <div className="px-4 pb-3 border-t border-stone-100 flex items-center gap-3">
             <button onClick={onBack} className="p-2 hover:bg-stone-100 rounded-lg"><ArrowLeft className="w-5 h-5 text-stone-700" /></button>
             <div>

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { MobileHeader } from './MobileHeader';
-import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
 import { apiariesService, type Apiary } from '../services/apiaries';
 import { hivesService, type Hive } from '../services/hives';
@@ -145,7 +144,6 @@ function GBIFForageCard({ plants, score, currentMonth }: { plants: GBIFNearbyEnt
 }
 
 export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavigate, onCreateApiary, onCreateHive, onLogout }: Props) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [apiaries, setApiaries] = useState<Apiary[]>([]);
   const [hives, setHives] = useState<Hive[]>([]);
   const [loading, setLoading] = useState(true);
@@ -206,11 +204,9 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab="planning" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
-
       <div className="bg-white shadow-sm shrink-0 z-30">
-        <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-          isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
+        <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+          activeTab="planning" onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
         <div className="px-4 pb-3 border-t border-stone-100">
           <h1 className="text-[1.1rem] font-bold text-stone-800">{t('hivePlanning', selectedLanguage)}</h1>
           <p className="text-stone-500 text-[0.75rem] mt-0.5">{t('planAndAnalyze', selectedLanguage)}</p>

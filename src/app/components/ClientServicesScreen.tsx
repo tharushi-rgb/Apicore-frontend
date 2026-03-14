@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, X, Phone, MapPin, Calendar, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
-import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
 import { t } from '../i18n';
 import { clientsService, type ClientService } from '../services/clients';
@@ -14,7 +13,6 @@ interface Props {
 }
 
 export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNavigate, onLogout }: Props) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [services, setServices] = useState<ClientService[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState<ClientService | true | false>(false);
@@ -43,11 +41,9 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24 relative overflow-hidden">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab="clients" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
-
       <div className="bg-white shadow-sm sticky top-0 z-30">
-        <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-        isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
+        <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+        activeTab="clients" onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
         <div className="px-6 pb-4 border-t border-stone-100">
           <h1 className="text-2xl font-bold text-stone-800">{t('clients', selectedLanguage)}</h1>
           <p className="text-stone-500 text-sm mt-1">{t('manageClientRequests', selectedLanguage)}</p>

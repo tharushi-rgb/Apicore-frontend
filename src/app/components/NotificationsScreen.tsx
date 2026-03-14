@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Bell, Check, CheckCheck, X } from 'lucide-react';
 import { MobileHeader } from './MobileHeader';
-import { MobileSidebar } from './MobileSidebar';
 import { authService } from '../services/auth';
 import { notificationsService, type Notification } from '../services/notifications';
 import { t } from '../i18n';
@@ -15,7 +14,6 @@ interface Props {
 }
 
 export function NotificationsScreen({ selectedLanguage, onLanguageChange, onNavigate, isHelper, onLogout }: Props) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
@@ -35,11 +33,9 @@ export function NotificationsScreen({ selectedLanguage, onLanguageChange, onNavi
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24">
-      <MobileSidebar isOpen={isSidebarOpen} activeTab="notifications" onNavigate={onNavigate} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} lang={selectedLanguage} />
-
       <div className="bg-white shadow-sm sticky top-0 z-30">
-        <MobileHeader userName={user?.name} district={user?.district} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
-        isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onViewAllNotifications={() => onNavigate('notifications')} />
+        <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+        activeTab="notifications" onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
         <div className="px-6 pb-4 border-t border-stone-100">
           <h1 className="text-2xl font-bold text-stone-800">{t('notifications', selectedLanguage)}</h1>
           <p className="text-stone-500 text-sm mt-1">{t('stayUpdated', selectedLanguage)}</p>
