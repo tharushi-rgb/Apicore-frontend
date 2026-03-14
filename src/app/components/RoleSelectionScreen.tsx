@@ -15,47 +15,47 @@ export function RoleSelectionScreen({ selectedLanguage, onLanguageChange, onBack
   const [selectedRole, setSelectedRole] = useState<'beekeeper' | 'landowner' | null>(null);
 
   return (
-    <div className="min-h-screen bg-stone-900 flex justify-center overflow-hidden">
+    <div className="h-[100dvh] bg-stone-900 flex justify-center overflow-hidden">
       <div className="w-[min(92vw,22rem)] h-full bg-stone-50 shadow-2xl relative flex flex-col">
-        <div className="w-full px-[5%] pt-[1rem] flex justify-end shrink-0">
+        <div className="w-full px-4 pt-3 pb-1 flex justify-end shrink-0 gap-1">
           {(['en', 'si', 'ta'] as const).map((l) => (
             <button key={l} onClick={() => onLanguageChange(l)}
-              className={`px-3 py-2 rounded-lg transition-all min-w-[48px] min-h-[44px] ${selectedLanguage === l ? 'bg-amber-500 text-white shadow-md' : 'bg-white/70 text-stone-700 hover:bg-white'}`}>
+              className={`px-2.5 py-1 rounded-lg transition-all min-w-[36px] text-xs ${selectedLanguage === l ? 'bg-amber-500 text-white shadow-md' : 'bg-white/70 text-stone-700 hover:bg-white'}`}>
               {l === 'en' ? 'EN' : l === 'si' ? 'සිං' : 'த'}
             </button>
           ))}
         </div>
-        <div className="flex-1 flex flex-col px-[6%] pt-[0.75rem] pb-[2rem] overflow-y-auto">
-          <h1 className="text-[1.875rem] font-bold text-stone-800 text-center mb-8 italic leading-tight">{t('chooseRole', selectedLanguage)}</h1>
-          <div className="flex-1 flex flex-col items-center justify-center space-y-4 max-w-md mx-auto w-full">
+        <div className="flex-1 min-h-0 flex flex-col px-4 pt-2 pb-4 overflow-y-auto">
+          <h1 className="text-[clamp(1.45rem,5.5vw,1.95rem)] font-bold text-stone-800 text-center mb-4 leading-tight">{t('chooseRole', selectedLanguage)}</h1>
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 max-w-md mx-auto w-full">
             <button onClick={() => setSelectedRole('beekeeper')}
-              className={`w-full bg-white rounded-2xl p-6 transition-all min-h-[10rem] flex flex-col items-center justify-center ${selectedRole === 'beekeeper' ? 'border-4 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.4)]' : 'border-2 border-stone-200 hover:border-amber-300 hover:shadow-lg'}`}>
-              <div className="flex items-center justify-center mb-4">
+              className={`w-full bg-white rounded-xl p-4 transition-all flex flex-col items-center justify-center ${selectedRole === 'beekeeper' ? 'border-2 border-amber-500 shadow-[0_0_14px_rgba(245,158,11,0.25)]' : 'border border-stone-200 hover:border-amber-300 hover:shadow-lg'}`}>
+              <div className="flex items-center justify-center mb-2.5">
                 <div className="relative">
-                  <Hexagon className="w-[4rem] h-[4rem] text-amber-500 fill-amber-500/20 stroke-[2]" />
-                  <Crown className="w-[2rem] h-[2rem] text-amber-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                  <Hexagon className="w-[clamp(2.6rem,11vw,3.4rem)] h-[clamp(2.6rem,11vw,3.4rem)] text-amber-500 fill-amber-500/20 stroke-[2]" />
+                  <Crown className="w-[clamp(1.3rem,5vw,1.75rem)] h-[clamp(1.3rem,5vw,1.75rem)] text-amber-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                 </div>
               </div>
-              <h2 className="text-[1.25rem] font-bold text-stone-800 mb-2">{t('beekeeper', selectedLanguage)}</h2>
-              <p className="text-stone-600 text-center text-[0.875rem] leading-snug">{t('beekeeperDescFull', selectedLanguage)}</p>
+              <h2 className="text-[clamp(1rem,4.2vw,1.18rem)] font-bold text-stone-800 mb-1">{t('beekeeper', selectedLanguage)}</h2>
+              <p className="text-stone-600 text-center text-[clamp(0.74rem,2.9vw,0.84rem)] leading-snug">{t('beekeeperDescFull', selectedLanguage)}</p>
             </button>
             <button onClick={() => setSelectedRole('landowner')}
-              className={`w-full bg-white rounded-2xl p-6 transition-all min-h-[10rem] flex flex-col items-center justify-center ${selectedRole === 'landowner' ? 'border-4 border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'border-2 border-stone-200 hover:border-emerald-300 hover:shadow-lg'}`}>
-              <div className="flex items-center justify-center mb-4">
-                <ClipboardCheck className="w-[4rem] h-[4rem] text-emerald-600 stroke-[1.5]" />
+              className={`w-full bg-white rounded-xl p-4 transition-all flex flex-col items-center justify-center ${selectedRole === 'landowner' ? 'border-2 border-emerald-500 shadow-[0_0_14px_rgba(16,185,129,0.25)]' : 'border border-stone-200 hover:border-emerald-300 hover:shadow-lg'}`}>
+              <div className="flex items-center justify-center mb-2.5">
+                <ClipboardCheck className="w-[clamp(2.6rem,11vw,3.4rem)] h-[clamp(2.6rem,11vw,3.4rem)] text-emerald-600 stroke-[1.5]" />
               </div>
-              <h2 className="text-[1.25rem] font-bold text-stone-800 mb-2">{t('landowner', selectedLanguage)}</h2>
-              <p className="text-stone-600 text-center text-[0.875rem] leading-snug">{t('landownerDescFull', selectedLanguage)}</p>
+              <h2 className="text-[clamp(1rem,4.2vw,1.18rem)] font-bold text-stone-800 mb-1">{t('landowner', selectedLanguage)}</h2>
+              <p className="text-stone-600 text-center text-[clamp(0.74rem,2.9vw,0.84rem)] leading-snug">{t('landownerDescFull', selectedLanguage)}</p>
             </button>
           </div>
         </div>
-        <div className="px-[6%] pb-[2rem] space-y-3 shrink-0">
+        <div className="px-4 pb-4 space-y-2.5 shrink-0">
           <button onClick={() => selectedRole && onContinue(selectedRole)} disabled={!selectedRole}
-            className={`w-full py-4 rounded-xl shadow-lg transition-all min-h-[56px] font-medium text-lg ${selectedRole ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-stone-200 text-stone-400 cursor-not-allowed'}`}>
+            className={`w-full py-2.5 rounded-lg shadow transition-all font-medium text-[0.95rem] ${selectedRole ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-stone-200 text-stone-400 cursor-not-allowed'}`}>
             {t('continueBtn', selectedLanguage)}
           </button>
-          <button onClick={onBack} className="w-full bg-white hover:bg-stone-50 text-stone-700 py-4 rounded-xl border-2 border-stone-300 transition-all min-h-[56px] font-medium text-lg flex items-center justify-center gap-2">
-            <ArrowLeft className="w-5 h-5" /> {t('back', selectedLanguage)}
+          <button onClick={onBack} className="w-full bg-white hover:bg-stone-50 text-stone-700 py-2.5 rounded-lg border border-stone-300 transition-all font-medium text-[0.95rem] flex items-center justify-center gap-1.5">
+            <ArrowLeft className="w-4 h-4" /> {t('back', selectedLanguage)}
           </button>
         </div>
       </div>

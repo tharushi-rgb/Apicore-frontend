@@ -154,7 +154,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
       <div className="w-[min(92vw,22rem)] h-full bg-stone-50 shadow-2xl flex flex-col">
 
         {/* Language Selector */}
-        <div className="w-full px-4 pt-2.5 flex justify-end shrink-0 gap-1">
+        <div className="w-full px-4 pt-2.5 pb-2 flex justify-end shrink-0 gap-1">
           {(['en', 'si', 'ta'] as const).map(l => (
             <button key={l} onClick={() => onLanguageChange(l)}
               className={`px-2.5 py-1 rounded-lg text-xs transition-all min-w-[36px] ${selectedLanguage === l ? 'bg-amber-500 text-white shadow' : 'bg-white/70 text-stone-700 hover:bg-white'}`}>
@@ -164,7 +164,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
         </div>
 
         {/* Header + Progress */}
-        <div className="px-4 pt-2 pb-2.5 shrink-0">
+        <div className="px-4 pt-3 pb-2.5 shrink-0">
           <h1 className="text-[1.1rem] font-bold text-stone-800 text-center mb-2 leading-tight">
             {t('landownerRegistration', selectedLanguage)}
           </h1>
@@ -196,7 +196,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
                   <input {...register('phoneNumber', {
                     required: t('phoneRequired', selectedLanguage),
                     pattern: { value: /^\d{12}$/, message: t('must12DigitsPhone', selectedLanguage) }
-                  })} className={ic} placeholder="94774567890" maxLength={12} inputMode="numeric" />
+                  })} className={ic} placeholder="94 77 4567890" maxLength={12} inputMode="numeric" />
                   {errors.phoneNumber && <p className={ec}>{errors.phoneNumber.message}</p>}
                 </div>
                 <div>

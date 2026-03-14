@@ -8,6 +8,9 @@ type Language = 'en' | 'si' | 'ta';
 interface MobileHeaderProps {
   userName?: string;
   district?: string;
+  roleLabel?: string;
+  showGreeting?: boolean;
+  showDistrict?: boolean;
   selectedLanguage: Language;
   onLanguageChange: (lang: Language) => void;
   isSidebarOpen: boolean;
@@ -18,6 +21,9 @@ interface MobileHeaderProps {
 export function MobileHeader({
   userName = 'Beekeeper',
   district = '',
+  roleLabel,
+  showGreeting = true,
+  showDistrict = true,
   selectedLanguage,
   onLanguageChange,
   isSidebarOpen,
@@ -86,14 +92,17 @@ export function MobileHeader({
             </button>
 
             <div className="flex-1">
-              <h1 className="text-[1.25rem] font-bold text-stone-800">
-                {getGreeting()}, {userName}
+              <h1 className="text-[1.1rem] font-semibold text-stone-800">
+                {showGreeting ? `${getGreeting()}, ${userName}` : userName}
               </h1>
-              {district && (
+              {showDistrict && district && (
                 <p className="text-stone-600 text-[0.875rem] flex items-center gap-1 mt-1">
                   <MapPin className="w-4 h-4" />
                   {t('districtLabel', selectedLanguage)}: {district}
                 </p>
+              )}
+              {!showDistrict && roleLabel && (
+                <p className="text-stone-500 text-[0.75rem] mt-0.5 capitalize">{roleLabel}</p>
               )}
             </div>
           </div>

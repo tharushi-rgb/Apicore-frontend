@@ -188,7 +188,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
   };
 
   const LangSelector = () => (
-    <div className="w-full px-4 pt-2.5 flex justify-end shrink-0 gap-1">
+    <div className="w-full px-4 pt-2.5 pb-2 flex justify-end shrink-0 gap-1">
       {(['en','si','ta'] as const).map(l=>(
         <button key={l} onClick={()=>onLanguageChange(l)}
           className={`px-2.5 py-1 rounded-lg text-xs transition-all min-w-[36px] ${selectedLanguage===l?'bg-amber-500 text-white shadow':'bg-white/70 text-stone-700 hover:bg-white'}`}>
@@ -206,7 +206,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
     <div className="h-screen bg-stone-900 flex justify-center overflow-hidden">
       <div className="w-[min(92vw,22rem)] h-full bg-stone-50 shadow-2xl relative flex flex-col">
         <LangSelector />
-        <div className="px-4 pt-2 pb-2.5 shrink-0">
+        <div className="px-4 pt-3 pb-2.5 shrink-0">
           <h1 className="text-[1.1rem] font-bold text-stone-800 text-center mb-2 leading-tight">{role === 'beekeeper' ? t('beekeeperRegistration', selectedLanguage) : t('landownerRegistration', selectedLanguage)}</h1>
           <div className="flex items-center justify-between mb-1">
             <span className="text-[0.7rem] text-stone-500">{t('step', selectedLanguage)} {currentStep}/{TOTAL_STEPS}</span>
@@ -240,7 +240,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                 </div>
                 <div>
                   <label className={labelClass}>{t('phone', selectedLanguage)} <span className="text-red-500">*</span></label>
-                  <input {...register('phoneNumber', {required: t('phoneRequired', selectedLanguage), pattern: {value: /^\d{12}$/, message: t('must12DigitsPhone', selectedLanguage)}})} className={inputClass} placeholder="94774567890" maxLength={12} />
+                  <input {...register('phoneNumber', {required: t('phoneRequired', selectedLanguage), pattern: {value: /^\d{12}$/, message: t('must12DigitsPhone', selectedLanguage)}})} className={inputClass} placeholder="94 77 456 7890" maxLength={12} />
                   {errors.phoneNumber && <p className="text-red-500 text-[0.75rem] mt-1">{errors.phoneNumber.message}</p>}
                 </div>
                 <div>

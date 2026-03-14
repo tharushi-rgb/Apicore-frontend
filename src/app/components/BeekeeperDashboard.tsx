@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { MobileHeader } from './MobileHeader';
 import { MobileSidebar } from './MobileSidebar';
@@ -28,6 +28,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
   const [loading, setLoading] = useState(true);
   const [queenRiskView, setQueenRiskView] = useState<'low' | 'medium' | 'high'>('high');
   const [forageTab, setForageTab] = useState<'current' | 'upcoming'>('current');
+  const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d'>('30d');
   const user = authService.getLocalUser();
 
   useEffect(() => {
@@ -81,18 +82,31 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
     return Math.floor((Date.now() - last.getTime()) / (1000 * 60 * 60 * 24)) > 14;
   }).length;
 
-  // KPI Cards
-  const kpiCards = useMemo(() => {
-    if (!data) return [];
-    return [
-      { title: t('totalApiaries', selectedLanguage), value: data.stats.totalApiaries.toString(), color: 'emerald' as const, alert: false },
-      { title: t('totalHives', selectedLanguage), value: data.stats.totalHives.toString(), color: 'amber' as const, alert: false },
-      { title: t('activeHives', selectedLanguage), value: data.stats.activeHives.toString(), color: 'blue' as const, alert: false },
-      { title: t('notInspected', selectedLanguage), value: notInspected14d.toString(), color: 'red' as const, alert: notInspected14d > 0 },
-      { title: t('expenses', selectedLanguage), value: `Rs.${expenses.reduce((s: number, e: any) => s + (e.amount || 0), 0).toFixed(0)}`, color: 'red' as const, alert: false },
-      { title: t('activeApiaries', selectedLanguage), value: String(data.stats.activeApiaries || 0), color: 'emerald' as const, alert: false },
-    ];
-  }, [data, notInspected14d, expenses, selectedLanguage]);
+  const rangeDays = dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
+  const rangeStart = Date.now() - (rangeDays * 24 * 60 * 60 * 1000);
+
+  const totalHiveCount = hives.length;
+  const activeHiveCount = hives.filter((h: any) => h.status === 'active').length;
+  const queenlessHiveCount = hives.filter((h: any) => h.status === 'queenless').length;
+  const inactiveHiveCount = hives.filter((h: any) => h.status !== 'active' && h.status !== 'queenless').length;
+
+  const totalApiaryCount = apiaries.length;
+  const activeApiaryCount = apiaries.filter((a: any) => a.status === 'active').length;
+  const inactiveApiaryCount = apiaries.filter((a: any) => a.status !== 'active').length;
+
+  const rangeExpenses = expenses
+    .filter((e: any) => {
+      const dt = new Date(e.expense_date || e.created_at || '').getTime();
+      return !Number.isNaN(dt) && dt >= rangeStart;
+    })
+    .reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
+
+  const rangeNotInspected = hives.filter((h: any) => {
+    if (!h.last_inspection_date) return true;
+    const last = new Date(h.last_inspection_date).getTime();
+    if (Number.isNaN(last)) return true;
+    return last < rangeStart;
+  }).length;
 
   const handleNavigate = (tab: NavTab) => {
     onNavigate(tab);
@@ -116,6 +130,9 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
       <MobileHeader
         userName={user?.name}
         district={user?.district}
+        roleLabel={user?.role || 'beekeeper'}
+        showGreeting={false}
+        showDistrict={false}
         selectedLanguage={selectedLanguage}
         onLanguageChange={onLanguageChange}
         isSidebarOpen={isSidebarOpen}
@@ -132,11 +149,38 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
           </div>
         ) : (
           <>
-            {/* KPI Cards - Compact 3-column grid */}
-            <div className="grid grid-cols-3 gap-2">
-              {kpiCards.map((card) => (
-                <KPICard key={card.title} title={card.title} value={card.value} color={card.color} alert={card.alert} />
-              ))}
+            {/* Overview Rows */}
+            <div className="space-y-2.5">
+              <div>
+                <p className="text-[0.72rem] font-semibold text-stone-600 mb-1">Hives</p>
+                <div className="grid grid-cols-3 gap-1.5 bg-amber-50 rounded-xl p-1.5 border border-amber-100">
+                  <StatBlock title={t('active', selectedLanguage)} value={activeHiveCount} tone="amber" />
+                  <StatBlock title={t('inactive', selectedLanguage)} value={inactiveHiveCount} tone="stone" />
+                  <StatBlock title={t('queenless', selectedLanguage)} value={queenlessHiveCount} tone="red" />
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[0.72rem] font-semibold text-stone-600 mb-1">Apiaries</p>
+                <div className="grid grid-cols-3 gap-1.5 bg-emerald-50 rounded-xl p-1.5 border border-emerald-100">
+                  <StatBlock title={t('active', selectedLanguage)} value={activeApiaryCount} tone="emerald" />
+                  <StatBlock title={t('inactive', selectedLanguage)} value={inactiveApiaryCount} tone="stone" />
+                  <StatBlock title={t('total', selectedLanguage)} value={totalApiaryCount} tone="blue" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <InfoBox title={t('expenses', selectedLanguage)} value={`Rs.${rangeExpenses.toFixed(0)}`} tone="rose" />
+                <InfoBox title={t('notInspected', selectedLanguage)} value={String(rangeNotInspected)} tone="orange" />
+              </div>
+
+              <div className="bg-white rounded-xl border border-stone-200 p-1.5">
+                <div className="grid grid-cols-3 gap-1">
+                  <RangeBtn active={dateRange === '7d'} onClick={() => setDateRange('7d')} label="7D" />
+                  <RangeBtn active={dateRange === '30d'} onClick={() => setDateRange('30d')} label="30D" />
+                  <RangeBtn active={dateRange === '90d'} onClick={() => setDateRange('90d')} label="90D" />
+                </div>
+              </div>
             </div>
 
             {/* Queen Age Risk Section */}
@@ -305,28 +349,41 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
   );
 }
 
-/* ─── KPI Card (Compact design from GetUIfromThis) ──────────────────────── */
-
-interface KPICardProps {
-  title: string;
-  value: string;
-  color: 'emerald' | 'amber' | 'red' | 'blue';
-  alert?: boolean;
-}
-
-function KPICard({ title, value, color, alert }: KPICardProps) {
-  const colorClasses = {
-    emerald: 'bg-emerald-500',
-    amber: 'bg-amber-500',
-    red: 'bg-red-500',
-    blue: 'bg-blue-500',
+function StatBlock({ title, value, tone }: { title: string; value: number; tone: 'amber' | 'emerald' | 'red' | 'blue' | 'stone' }) {
+  const toneClass = {
+    amber: 'bg-amber-100 text-amber-900',
+    emerald: 'bg-emerald-100 text-emerald-900',
+    red: 'bg-red-100 text-red-900',
+    blue: 'bg-blue-100 text-blue-900',
+    stone: 'bg-stone-100 text-stone-900',
   };
   return (
-    <div className="bg-white rounded-lg p-2.5 shadow-sm relative">
-      <div className={`absolute top-0 right-0 w-1.5 h-1.5 rounded-bl-lg ${colorClasses[color]}`} />
-      {alert && <AlertTriangle className="absolute top-1.5 right-1.5 w-3 h-3 text-red-500" />}
-      <p className="text-stone-600 text-[9px] mb-0.5 leading-tight">{title}</p>
-      <p className="text-[0.875rem] font-bold text-stone-800 leading-none">{value}</p>
+    <div className={`rounded-lg p-2 text-center ${toneClass[tone]}`}>
+      <p className="text-[0.62rem] font-medium opacity-80">{title}</p>
+      <p className="text-[0.95rem] font-bold leading-none mt-0.5">{value}</p>
     </div>
+  );
+}
+
+function InfoBox({ title, value, tone }: { title: string; value: string; tone: 'rose' | 'orange' }) {
+  const toneClass = tone === 'rose' ? 'bg-rose-50 border-rose-100 text-rose-900' : 'bg-orange-50 border-orange-100 text-orange-900';
+  return (
+    <div className={`rounded-xl border p-2.5 ${toneClass}`}>
+      <p className="text-[0.68rem] font-medium opacity-80">{title}</p>
+      <p className="text-[1rem] font-bold leading-none mt-1">{value}</p>
+    </div>
+  );
+}
+
+function RangeBtn({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`py-1.5 rounded-lg text-[0.72rem] font-semibold transition-colors ${
+        active ? 'bg-amber-500 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+      }`}
+    >
+      {label}
+    </button>
   );
 }
