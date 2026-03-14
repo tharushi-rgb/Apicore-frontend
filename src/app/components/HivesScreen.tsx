@@ -350,16 +350,19 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
 /* ── Sub-components ─────────────────────────────────────────── */
 
 function SummaryCard({ title, value, color, alert }: { title: string; value: string; color: 'emerald' | 'amber' | 'red' | 'blue' | 'stone' | 'orange'; alert?: boolean }) {
-  const colorClasses: Record<string, string> = {
-    emerald: 'bg-emerald-500', amber: 'bg-amber-500', red: 'bg-red-500',
-    blue: 'bg-blue-500', stone: 'bg-stone-400', orange: 'bg-orange-500',
+  const toneClasses: Record<string, string> = {
+    emerald: 'bg-emerald-50 border-emerald-100 text-emerald-900',
+    amber: 'bg-amber-50 border-amber-100 text-amber-900',
+    red: 'bg-red-50 border-red-100 text-red-900',
+    blue: 'bg-blue-50 border-blue-100 text-blue-900',
+    stone: 'bg-stone-50 border-stone-200 text-stone-900',
+    orange: 'bg-orange-50 border-orange-100 text-orange-900',
   };
   return (
-    <div className="bg-white rounded-lg p-2.5 shadow-sm relative">
-      <div className={`absolute top-0 right-0 w-1.5 h-1.5 rounded-bl-lg ${colorClasses[color]}`} />
+    <div className={`rounded-lg p-2.5 border relative ${toneClasses[color]}`}>
       {alert && <AlertTriangle className="absolute top-1.5 right-1.5 w-3 h-3 text-red-500" />}
-      <p className="text-stone-600 text-[10px] mb-0.5 leading-tight">{title}</p>
-      <p className="text-xl font-bold text-stone-800 leading-none">{value}</p>
+      <p className="text-[0.64rem] font-medium opacity-80 leading-tight">{title}</p>
+      <p className="text-[0.98rem] font-bold leading-none mt-0.5">{value}</p>
     </div>
   );
 }

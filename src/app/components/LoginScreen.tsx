@@ -40,7 +40,7 @@ export function LoginScreen({ selectedLanguage, onLanguageChange, onBackToHome, 
         <div className="w-full px-[5%] pt-[1rem] flex justify-end shrink-0">
           {(['en','si','ta'] as const).map(l=>(
             <button key={l} onClick={()=>onLanguageChange(l)}
-              className={`px-3 py-2 rounded-lg transition-all min-w-[48px] min-h-[44px] ${selectedLanguage===l?'bg-amber-500 text-white shadow-md':'bg-white/70 text-stone-700 hover:bg-white'}`}>
+              className={`px-2.5 py-1.5 rounded-lg transition-all min-w-[38px] text-[0.72rem] font-semibold ${selectedLanguage===l?'bg-amber-500 text-white shadow-sm':'bg-white/70 text-stone-700 hover:bg-white'}`}>
               {l==='en'?'EN':l==='si'?'සිං':'த'}
             </button>
           ))}
@@ -54,24 +54,24 @@ export function LoginScreen({ selectedLanguage, onLanguageChange, onBackToHome, 
                   <Hexagon className="w-[2rem] h-[2rem] text-emerald-600 fill-emerald-600/30 stroke-[2]" />
                 </div>
               </div>
-              <h1 className="text-[1.875rem] font-bold text-stone-800 text-center leading-tight">{t('loginToApiCore', selectedLanguage)}</h1>
+              <h1 className="text-[1.45rem] font-bold text-stone-800 text-center leading-tight">{t('loginToApiCore', selectedLanguage)}</h1>
             </div>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
-                <label className="block text-stone-700 mb-2 font-medium text-[0.875rem]">{t('email', selectedLanguage)} <span className="text-red-500">*</span></label>
-                <input type="text" {...register('emailOrUsername',{required: t('emailRequired', selectedLanguage)})} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none text-[1rem]" placeholder={t('emailPlaceholder', selectedLanguage)} disabled={isLoggingIn} />
+                <label className="block text-stone-700 mb-1.5 font-medium text-[0.82rem]">{t('email', selectedLanguage)} <span className="text-red-500">*</span></label>
+                <input type="text" {...register('emailOrUsername',{required: t('emailRequired', selectedLanguage)})} className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none text-[0.88rem]" placeholder={t('emailPlaceholder', selectedLanguage)} disabled={isLoggingIn} />
                 {errors.emailOrUsername && <p className="text-red-500 text-[0.75rem] mt-1">{errors.emailOrUsername.message}</p>}
               </div>
               <div>
-                <label className="block text-stone-700 mb-2 font-medium text-[0.875rem]">{t('password', selectedLanguage)} <span className="text-red-500">*</span></label>
+                <label className="block text-stone-700 mb-1.5 font-medium text-[0.82rem]">{t('password', selectedLanguage)} <span className="text-red-500">*</span></label>
                 <div className="relative">
-                  <input type={showPwd?'text':'password'} {...register('password',{required: t('passwordRequired', selectedLanguage)})} className="w-full px-4 py-3 pr-12 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none text-[1rem]" placeholder={t('passwordPlaceholder', selectedLanguage)} disabled={isLoggingIn} />
+                  <input type={showPwd?'text':'password'} {...register('password',{required: t('passwordRequired', selectedLanguage)})} className="w-full px-3.5 py-2.5 pr-11 bg-white border border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none text-[0.88rem]" placeholder={t('passwordPlaceholder', selectedLanguage)} disabled={isLoggingIn} />
                   <button type="button" onClick={()=>setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500">{showPwd?<EyeOff className="w-5 h-5"/>:<Eye className="w-5 h-5"/>}</button>
                 </div>
                 {errors.password && <p className="text-red-500 text-[0.75rem] mt-1">{errors.password.message}</p>}
               </div>
               <div className="flex justify-end">
-                <button type="button" onClick={onForgotPassword} className="text-amber-600 hover:text-amber-700 text-[0.875rem] font-medium">{t('forgotPassword', selectedLanguage)}</button>
+                <button type="button" onClick={onForgotPassword} className="text-amber-600 hover:text-amber-700 text-[0.8rem] font-medium">{t('forgotPassword', selectedLanguage)}</button>
               </div>
               {loginError && (
                 <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-center gap-2">
@@ -80,18 +80,18 @@ export function LoginScreen({ selectedLanguage, onLanguageChange, onBackToHome, 
                 </div>
               )}
               <button type="submit" disabled={isLoggingIn}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl shadow-lg min-h-[3.5rem] font-medium text-[1.125rem] disabled:opacity-50">
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl shadow-sm font-semibold text-[0.9rem] disabled:opacity-50">
                 {isLoggingIn ? t('loggingIn', selectedLanguage) : t('login', selectedLanguage)}
               </button>
             </form>
             <div className="mt-6 text-center">
-              <p className="text-stone-600 text-[0.875rem]">{t('noAccount', selectedLanguage)} <button onClick={onBackToHome} className="text-amber-600 hover:text-amber-700 font-medium">{t('createAccount', selectedLanguage)}</button></p>
+              <p className="text-stone-600 text-[0.8rem]">{t('noAccount', selectedLanguage)} <button onClick={onBackToHome} className="text-amber-600 hover:text-amber-700 font-medium">{t('createAccount', selectedLanguage)}</button></p>
             </div>
           </div>
         </div>
         <div className="px-[6%] pb-[2rem] shrink-0">
-          <button onClick={onBackToHome} className="w-full bg-white hover:bg-stone-50 text-stone-700 py-4 rounded-xl border-2 border-stone-300 min-h-[3.5rem] font-medium text-[1.125rem] flex items-center justify-center gap-2">
-            <ArrowLeft className="w-5 h-5" /> {t('backToHome', selectedLanguage)}
+          <button onClick={onBackToHome} className="w-full bg-white hover:bg-stone-50 text-stone-700 py-2.5 rounded-xl border border-stone-300 font-semibold text-[0.9rem] flex items-center justify-center gap-2">
+            <ArrowLeft className="w-4 h-4" /> {t('backToHome', selectedLanguage)}
           </button>
         </div>
       </div>

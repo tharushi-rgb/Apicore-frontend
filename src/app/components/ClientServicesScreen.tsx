@@ -50,10 +50,10 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
 
       <div className="px-4 py-6 space-y-4">
         <div className="grid grid-cols-2 gap-2">
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold">{services.length}</p><p className="text-xs text-stone-500">{t('total', selectedLanguage)}</p></div>
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold text-amber-600">{services.filter(s=>s.status==='pending').length}</p><p className="text-xs text-stone-500">{t('pending', selectedLanguage)}</p></div>
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold text-blue-600">{services.filter(s=>s.status==='in_progress').length}</p><p className="text-xs text-stone-500">{t('active', selectedLanguage)}</p></div>
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center"><p className="text-xl font-bold text-emerald-600">{services.filter(s=>s.status==='completed').length}</p><p className="text-xs text-stone-500">{t('done', selectedLanguage)}</p></div>
+          <div className="rounded-lg border border-stone-200 bg-stone-50 p-2.5 text-center"><p className="text-[0.98rem] font-bold text-stone-900">{services.length}</p><p className="text-[0.64rem] font-medium text-stone-600">{t('total', selectedLanguage)}</p></div>
+          <div className="rounded-lg border border-amber-100 bg-amber-50 p-2.5 text-center"><p className="text-[0.98rem] font-bold text-amber-900">{services.filter(s=>s.status==='pending').length}</p><p className="text-[0.64rem] font-medium text-amber-700">{t('pending', selectedLanguage)}</p></div>
+          <div className="rounded-lg border border-blue-100 bg-blue-50 p-2.5 text-center"><p className="text-[0.98rem] font-bold text-blue-900">{services.filter(s=>s.status==='in_progress').length}</p><p className="text-[0.64rem] font-medium text-blue-700">{t('active', selectedLanguage)}</p></div>
+          <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-2.5 text-center"><p className="text-[0.98rem] font-bold text-emerald-900">{services.filter(s=>s.status==='completed').length}</p><p className="text-[0.64rem] font-medium text-emerald-700">{t('done', selectedLanguage)}</p></div>
         </div>
 
         <div className="flex gap-2">
@@ -64,19 +64,19 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
           </select>
         </div>
 
-        <button onClick={() => setShowForm(true)} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2"><Plus className="w-5 h-5" /> {t('newClientService', selectedLanguage)}</button>
+        <button onClick={() => setShowForm(true)} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl text-[0.86rem] font-semibold flex items-center justify-center gap-2"><Plus className="w-4 h-4" /> {t('newClientService', selectedLanguage)}</button>
 
         {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div> :
           filtered.length === 0 ? <p className="text-center text-stone-500 py-8">{t('noClientServices', selectedLanguage)}</p> :
           <div className="space-y-3">{filtered.map(s => (
-            <div key={s.id} className="bg-white rounded-xl p-4 shadow-sm">
+            <div key={s.id} className="bg-white rounded-xl p-3 border border-stone-200 shadow-sm">
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <h3 className="font-bold text-stone-800">{s.client_name}</h3>
-                  <p className="text-sm text-stone-600 capitalize">{s.service_type.replace('_',' ')}</p>
+                  <h3 className="font-bold text-[0.88rem] text-stone-800">{s.client_name}</h3>
+                  <p className="text-[0.75rem] text-stone-600 capitalize">{s.service_type.replace('_',' ')}</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${statusColors[s.status] || ''}`}>{s.status.replace('_',' ')}</span>
+                  <span className={`px-2 py-0.5 rounded text-[0.68rem] font-medium ${statusColors[s.status] || ''}`}>{s.status.replace('_',' ')}</span>
                   <button onClick={() => setShowForm(s)} className="p-1"><Edit2 className="w-3.5 h-3.5 text-stone-500" /></button>
                   <button onClick={() => handleDelete(s.id)} className="p-1"><Trash2 className="w-3.5 h-3.5 text-red-400" /></button>
                 </div>
@@ -88,8 +88,8 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
               {s.status !== 'completed' && s.status !== 'cancelled' && (
                 <div className="flex gap-2 mt-2">
                   {s.status === 'pending' && <button onClick={() => handleStatusChange(s.id, 'in_progress')} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-lg">{t('start', selectedLanguage)}</button>}
-                  {s.status === 'in_progress' && <button onClick={() => handleStatusChange(s.id, 'completed')} className="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded-lg">{t('complete', selectedLanguage)}</button>}
-                  <button onClick={() => handleStatusChange(s.id, 'cancelled')} className="text-xs bg-red-50 text-red-600 px-2 py-1 rounded-lg">{t('cancel', selectedLanguage)}</button>
+                  {s.status === 'in_progress' && <button onClick={() => handleStatusChange(s.id, 'completed')} className="text-[0.68rem] bg-emerald-50 text-emerald-600 px-2 py-1 rounded-lg">{t('complete', selectedLanguage)}</button>}
+                  <button onClick={() => handleStatusChange(s.id, 'cancelled')} className="text-[0.68rem] bg-red-50 text-red-600 px-2 py-1 rounded-lg">{t('cancel', selectedLanguage)}</button>
                 </div>
               )}
             </div>
