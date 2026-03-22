@@ -1,0 +1,101 @@
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { ArrowLeft, Eye, EyeOff, AlertCircle, Hexagon } from 'lucide-react';
+import { authService } from '../../services/auth';
+import { t } from '../../i18n';
+
+type Language = 'en' | 'si' | 'ta';
+
+interface Props {
+  selectedLanguage: Language;
+  onLanguageChange: (lang: Language) => void;
+  onBackToHome: () => void;
+  onCreateAccount: () => void;
+  onLoginSuccess: (type: 'beekeeper' | 'landowner') => void;
+  onForgotPassword: () => void;
+}
+
+interface FormData { emailOrUsername: string; password: string; }
+
+export function LoginScreen({ selectedLanguage, onLanguageChange, onBackToHome, onCreateAccount, onLoginSuccess, onForgotPassword }: Props) {
+  const [showPwd, setShowPwd] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState('');
+
+  const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
+
+  const onSubmit = async (data: FormData) => {
+    setLoginError('');
+    setIsLoggingIn(true);
+    try {
+      const res = await authService.login(data.emailOrUsername, data.password);
+      const role = res.user.role?.toLowerCase().includes('landowner') ? 'landowner' : 'beekeeper';
+      onLoginSuccess(role as any);
+    } catch (e: any) { setLoginError(e.message || 'Invalid credentials'); }
+    setIsLoggingIn(false);
+  };
+
+  return (
+    <div className="h-screen bg-stone-900 flex justify-center overflow-hidden">
+      <div className="w-[min(92vw,22rem)] h-full bg-stone-50 shadow-2xl relative flex flex-col">
+        <div className="w-full px-[5%] pt-[1rem] pb-1 flex justify-end shrink-0">
+          {(['en','si','ta'] as const).map(l=>(
+            <button key={l} onClick={()=>onLanguageChange(l)}
+              className={`px-2.5 py-1.5 rounded-lg transition-all min-w-[38px] text-[0.76rem] font-semibold ${selectedLanguage===l?'bg-amber-500 text-white shadow-sm':'bg-white/70 text-stone-700 hover:bg-white'}`}>
+              {l==='en'?'EN':l==='si'?'සිං':'த'}
+            </button>
+          ))}
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center px-[6%] pb-[2rem] overflow-y-auto">
+          <div className="max-w-md w-full">
+            <div className="flex flex-col items-center mb-8">
+              <div className="relative mb-4">
+                <Hexagon className="w-[4rem] h-[4rem] text-amber-500 fill-amber-500/20 stroke-[2]" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Hexagon className="w-[2rem] h-[2rem] text-emerald-600 fill-emerald-600/30 stroke-[2]" />
+                </div>
+              </div>
+              <h1 className="text-[1.55rem] font-bold text-stone-800 text-center leading-tight">{t('loginToApiCore', selectedLanguage)}</h1>
+            </div>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div>
+                <label className="block text-stone-700 mb-1.5 font-medium text-[0.86rem]">{t('email', selectedLanguage)} <span className="text-red-500">*</span></label>
+                <input type="text" {...register('emailOrUsername',{required: t('emailRequired', selectedLanguage)})} className="w-full px-3.5 py-3 bg-white border border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none text-[0.92rem]" placeholder={t('emailPlaceholder', selectedLanguage)} disabled={isLoggingIn} />
+                {errors.emailOrUsername && <p className="text-red-500 text-[0.75rem] mt-1">{errors.emailOrUsername.message}</p>}
+              </div>
+              <div>
+                <label className="block text-stone-700 mb-1.5 font-medium text-[0.86rem]">{t('password', selectedLanguage)} <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <input type={showPwd?'text':'password'} {...register('password',{required: t('passwordRequired', selectedLanguage)})} className="w-full px-3.5 py-3 pr-11 bg-white border border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none text-[0.92rem]" placeholder={t('passwordPlaceholder', selectedLanguage)} disabled={isLoggingIn} />
+                  <button type="button" onClick={()=>setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500">{showPwd?<EyeOff className="w-5 h-5"/>:<Eye className="w-5 h-5"/>}</button>
+                </div>
+                {errors.password && <p className="text-red-500 text-[0.75rem] mt-1">{errors.password.message}</p>}
+              </div>
+              <div className="flex justify-end">
+                <button type="button" onClick={onForgotPassword} className="text-amber-600 hover:text-amber-700 text-[0.8rem] font-medium">{t('forgotPassword', selectedLanguage)}</button>
+              </div>
+              {loginError && (
+                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                  <p className="text-red-700 text-[0.875rem]">{loginError}</p>
+                </div>
+              )}
+              <button type="submit" disabled={isLoggingIn}
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl shadow-sm font-semibold text-[0.95rem] disabled:opacity-50">
+                {isLoggingIn ? t('loggingIn', selectedLanguage) : t('login', selectedLanguage)}
+              </button>
+            </form>
+            <div className="mt-6 text-center">
+              <p className="text-stone-600 text-[0.84rem]">{t('noAccount', selectedLanguage)} <button onClick={onCreateAccount} className="text-amber-600 hover:text-amber-700 font-medium">{t('createAccount', selectedLanguage)}</button></p>
+            </div>
+          </div>
+        </div>
+        <div className="px-[6%] pb-[2rem] shrink-0">
+          <button onClick={onBackToHome} className="w-full bg-white hover:bg-stone-50 text-stone-700 py-3 rounded-xl border border-stone-300 font-semibold text-[0.95rem] flex items-center justify-center gap-2">
+            <ArrowLeft className="w-4 h-4" /> {t('backToHome', selectedLanguage)}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

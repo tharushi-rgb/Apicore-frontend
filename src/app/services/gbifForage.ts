@@ -1,0 +1,154 @@
+import forageCsvData from '../data/forage_records_from_csv.json';
+
+// Multilingual name mapping (curated from plant-common-names.js)
+const PLANT_MULTILINGUAL_NAMES: Record<string, {
+  english: string;
+  sinhala: string;
+  tamil: string;
+}> = {
+  "Oryza sativa": { english: "Rice", sinhala: "බතුරු", tamil: "அரிசி" },
+  "Dioscorea alata": { english: "Purple Yam", sinhala: "ඇතුල්", tamil: "கருவிப்பு" },
+  "Mimosa pudica": { english: "Sensitive Plant", sinhala: "නිඩඩු", tamil: "செண்பக மொட்டு" },
+  "Calotropis gigantea": { english: "Crown Flower", sinhala: "මුතු ගෙඩි", tamil: "ஈட்டமண" },
+  "Cocos nucifera": { english: "Coconut", sinhala: "පොල", tamil: "தேங்காய்" },
+  "Lantana camara": { english: "Spanish Flag", sinhala: "ගෙරු ගෙඩි", tamil: "கொடி மணிப்பூ" },
+  "Nepenthes distillatoria": { english: "Pitcher Plant", sinhala: "පිපිබෙර", tamil: "பிளவை பூண்டு" },
+  "Barringtonia asiatica": { english: "Fish Poison Tree", sinhala: "බුරිතුඔ", tamil: "குட்டிமொட்டை" },
+  "Oryza rufipogon": { english: "Wild Rice", sinhala: "වෙනත් බතුරු", tamil: "காட்டரிசி" },
+  "Artocarpus heterophyllus": { english: "Jackfruit", sinhala: "අලුඹුටු", tamil: "பலா" },
+  "Pontederia crassipes": { english: "Water Hyacinth", sinhala: "ජල කඩුල්", tamil: "சிவன் சோணை" },
+  "Rhododendron arboreum": { english: "Tree Rhododendron", sinhala: "ගල් පූල්", tamil: "ரோடோ" },
+  "Arundina graminifolia": { english: "Bamboo Orchid", sinhala: "බැස්ස ඕකිඩ්", tamil: "உருளை மொட்டு" },
+  "Gloriosa superba": { english: "Flame Lily", sinhala: "ගිරිගිස්සි", tamil: "ஏற்றம் மலர்" },
+  "Ipomoea pes-caprae": { english: "Beach Morning Glory", sinhala: "කඩුල්", tamil: "கடல் முழி" },
+  "Melastoma malabathricum": { english: "Indian Rhododendron", sinhala: "කඩුල් පූල්", tamil: "நீலக்கொடி" },
+  "Clitoria ternatea": { english: "Butterfly Pea", sinhala: "සිතුරු පූල්", tamil: "சிநந்தி" },
+  "Tridax procumbens": { english: "Coat Buttons", sinhala: "ඩුවලුස්", tamil: "பொன்னாணி" },
+  "Sphagneticola trilobata": { english: "Wedelia", sinhala: "ගෝඩිලි", tamil: "சூரியமுகி" },
+  "Oryza eichingeri": { english: "Eichinger's Rice", sinhala: "බතුරු", tamil: "அரிசி" },
+  "Miconia crenata": { english: "Miconia", sinhala: "මිකෝනියා", tamil: "மைக்கோனியா" },
+  "Nelumbo nucifera": { english: "Sacred Lotus", sinhala: "පදුම", tamil: "அம்பிியல்" },
+  "Dioscorea esculenta": { english: "Lesser Yam", sinhala: "ඇතුල්", tamil: "சூரணக் கிழங்கு" },
+  "Solanum virginianum": { english: "Yellow Nightshade", sinhala: "තිතින් පටුටු", tamil: "தொடுவாண்டை" },
+  "Cyanthillium cinereum": { english: "Bluish Thistle", sinhala: "මාසි ගෙඩි", tamil: "கோதுரை" },
+  "Asystasia intrusa": { english: "Asystasia", sinhala: "අසිස්ටිසියා", tamil: "கண்ணிற்பூண்டு" },
+  "Aristea ecklonii": { english: "Blue Eyebright", sinhala: "නිල් දෑස", tamil: "நீல கண்" },
+  "Solanum torvum": { english: "Turkey Berry", sinhala: "බටු ගෙඩි", tamil: "சூரணக் குடையன்" },
+  "Tabernaemontana divaricata": { english: "Crape Jasmine", sinhala: "ගිරිගිස්සි", tamil: "நங்குษா" },
+  "Chromolaena odorata": { english: "Siam Weed", sinhala: "සයම් තෙලි", tamil: "சீயம் புல்" },
+  "Hellenia speciosa": { english: "Hellenia", sinhala: "හෙලනියා", tamil: "හෙලනියා" },
+  "Persicaria capitata": { english: "Bistorta", sinhala: "බිස්ටට", tamil: "பாலை" },
+  "Terminalia catappa": { english: "Tropical Almond", sinhala: "බඩු ගෙඩි", tamil: "நாடൻ വാതപ്പായ" },
+  "Solanum melongena": { english: "Brinjal", sinhala: "බටු ගෙඩි", tamil: "கத்தரிக்காய்" },
+  "Cassia fistula": { english: "Golden Shower Tree", sinhala: "අලුවහල", tamil: "கொன்னை" },
+  "Scaevola taccada": { english: "Beach Naupaka", sinhala: "සමුද්‍ර පූල්", tamil: "கடல் பூண்டு" },
+  "Couroupita guianensis": { english: "Cannonball Tree", sinhala: "බෝම්බ ගසින්", tamil: "பீரங்கி மரம்" },
+  "Mangifera indica": { english: "Mango", sinhala: "ආඹ", tamil: "மாம்பழம்" },
+  "Cerbera odollam": { english: "Suicide Tree", sinhala: "අවිස්", tamil: "ஆரளி" }
+};
+
+interface CsvHotspot {
+  lat: number;
+  lng: number;
+  count: number;
+}
+
+interface CsvForageRecord {
+  scientificName: string;
+  recordCount: number;
+  observedMonths: number[];
+  observedMonthCounts: Record<string, number>;
+  sinhalaName: string;
+  hotspots: CsvHotspot[];
+}
+
+export interface GBIFForageSpecies {
+  scientificName: string;
+  common: string; // english name or scientific name as fallback
+  english: string;
+  sinhala: string;
+  tamil: string;
+  sinhalaName?: string; // deprecated - use 'sinhala'
+  gbifCount: number;
+  observedMonths: number[];
+  hotspots: [number, number, number][];
+  popularityRank?: number;
+}
+
+// Get top 39 plants by record count (excluding "Plantae" kingdom entry)
+const TOP_40_THRESHOLD = 39;
+const CSV_RECORDS = (forageCsvData.records as CsvForageRecord[])
+  .filter((record) => !!record.scientificName && Number.isFinite(record.recordCount) && record.scientificName !== 'Plantae')
+  .sort((a, b) => b.recordCount - a.recordCount)
+  .slice(0, TOP_40_THRESHOLD);
+
+export const GBIF_FORAGE_SPECIES: Record<string, GBIFForageSpecies> = Object.fromEntries(
+  CSV_RECORDS.map((record, idx) => {
+    const names = PLANT_MULTILINGUAL_NAMES[record.scientificName] || { english: '', sinhala: '', tamil: '' };
+    
+    const normalized: GBIFForageSpecies = {
+      scientificName: record.scientificName,
+      common: names.english || record.scientificName,
+      english: names.english || '',
+      sinhala: names.sinhala || record.sinhalaName || '',
+      tamil: names.tamil || '',
+      sinhalaName: names.sinhala || record.sinhalaName || undefined,
+      gbifCount: record.recordCount,
+      observedMonths: Array.isArray(record.observedMonths) ? record.observedMonths : [],
+      hotspots: (record.hotspots || []).map((hotspot) => [hotspot.lat, hotspot.lng, hotspot.count]),
+      popularityRank: idx + 1,
+    };
+    return [record.scientificName, normalized];
+  })
+);
+
+export function getNearbyGBIFForage(
+  lat: number,
+  lng: number,
+  opts?: { currentMonthOnly?: boolean }
+): Array<GBIFForageSpecies & { scientific: string; nearbyCount: number }> {
+  const month = new Date().getMonth() + 1;
+
+  // 0.5-degree cell + neighbors
+  const cellLat = Math.round(lat * 2) / 2;
+  const cellLng = Math.round(lng * 2) / 2;
+  const nearbyCells = new Set<string>();
+  for (let dLat = -0.5; dLat <= 0.5; dLat += 0.5) {
+    for (let dLng = -0.5; dLng <= 0.5; dLng += 0.5) {
+      nearbyCells.add(`${(cellLat + dLat).toFixed(1)},${(cellLng + dLng).toFixed(1)}`);
+    }
+  }
+
+  const results: Array<GBIFForageSpecies & { scientific: string; nearbyCount: number }> = [];
+
+  for (const [scientific, species] of Object.entries(GBIF_FORAGE_SPECIES)) {
+    if (opts?.currentMonthOnly && !species.observedMonths.includes(month)) continue;
+
+    let nearbyCount = 0;
+    for (const [hotspotLat, hotspotLng, hotspotCount] of species.hotspots) {
+      const key = `${hotspotLat.toFixed(1)},${hotspotLng.toFixed(1)}`;
+      if (nearbyCells.has(key)) {
+        nearbyCount += hotspotCount;
+      }
+    }
+
+    if (nearbyCount > 0) {
+      results.push({ ...species, scientific, nearbyCount });
+    }
+  }
+
+  results.sort((left, right) => {
+    if (right.nearbyCount !== left.nearbyCount) return right.nearbyCount - left.nearbyCount;
+    return right.gbifCount - left.gbifCount;
+  });
+
+  return results;
+}
+
+export function getGBIFBiodiversityScore(lat: number, lng: number): number {
+  const nearby = getNearbyGBIFForage(lat, lng);
+  if (nearby.length === 0) return 0;
+  const richnessScore = Math.min(60, nearby.length * 4);
+  const densityScore = Math.min(20, Math.round(nearby.slice(0, 10).reduce((sum, species) => sum + species.nearbyCount, 0) / 100));
+  return Math.min(80, richnessScore + densityScore);
+}

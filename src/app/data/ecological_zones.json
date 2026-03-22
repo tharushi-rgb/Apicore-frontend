@@ -1,0 +1,26 @@
+[
+  {
+    "zone": "Rubber Zone",
+    "keyRegions": ["Kegalle", "Kalutara", "Ratnapura"],
+    "primaryForagePlants": "Rubber (Hevea brasiliensis) extra-floral nectaries",
+    "honeyFlowPeriod": "February - March"
+  },
+  {
+    "zone": "Coconut Zone",
+    "keyRegions": ["Kurunegala", "Gampaha", "Puttalam"],
+    "primaryForagePlants": "Coconut (Cocos nucifera) flowers",
+    "honeyFlowPeriod": "Year-round (pollen is abundant)"
+  },
+  {
+    "zone": "Eucalyptus / Highland",
+    "keyRegions": ["Diyatalawa", "Haputale", "Bandarawela", "Welimada"],
+    "primaryForagePlants": "Eucalyptus, Red Gum (Eucalyptus spp.)",
+    "honeyFlowPeriod": "August - September"
+  },
+  {
+    "zone": "Dry Zone Forest",
+    "keyRegions": ["Monaragala", "Buttala", "Anuradhapura", "Polonnaruwa", "Vavuniya"],
+    "primaryForagePlants": "Palu, Weera, Kon, Mora, Nelli, Wood-apple, Neem, Tamarind",
+    "honeyFlowPeriod": "June - August (Main flow); Feb - March (Minor flow)"
+  }
+]
