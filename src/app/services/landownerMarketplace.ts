@@ -615,6 +615,7 @@ export const landownerMarketplaceService = {
       id: nextContractId,
       listingId,
       bidId,
+      plot_id: plot?.id || listing.plotId,
       beekeeperName: selectedBid.beekeeperName,
       plotName: plot?.name || 'Plot',
       hiveCount: selectedBid.hivesProposed,

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Save, X, Plus, Trash2, Loader2 } from 'lucide-react';
-import { LocationSelectorField } from '../shared/LocationSelectorField';
+import { AdministrativeLocationFields } from '../shared/AdministrativeLocationFields';
 import { landownerPlotsService, type LandPlot, type ForageEntry, type WaterAvailability, type ShadeProfile, type VehicleAccess } from '../../services/landownerPlotsService';
 import { getDistrictsByProvince, getDsDivisionsByDistrict } from '../../constants/sriLankaLocations';
 import { t } from '../../i18n';
@@ -230,14 +230,14 @@ export function AddPlotScreen({
         </div>
 
         {/* Location Selection */}
-        <LocationSelectorField
+        <AdministrativeLocationFields
           province={form.province}
           district={form.district}
           dsDivision={form.ds_division}
-          onProvinceChange={val => handleInputChange('province', val)}
-          onDistrictChange={val => handleInputChange('district', val)}
-          onDsDivisionChange={val => handleInputChange('ds_division', val)}
-          selectedLanguage={selectedLanguage}
+          onProvinceChange={(val: string) => handleInputChange('province', val)}
+          onDistrictChange={(val: string) => handleInputChange('district', val)}
+          onDsDivisionChange={(val: string) => handleInputChange('ds_division', val)}
+          required
         />
 
         {/* GPS Coordinates */}

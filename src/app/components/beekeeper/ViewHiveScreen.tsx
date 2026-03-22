@@ -664,13 +664,13 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
         queen_presence: quickInspection.queen_presence,
         honey_pollen_stores: quickInspection.honey_pollen_stores,
         pest_disease_presence: quickInspection.pest_statuses,
-        pest_name: quickInspection.pest_name || null,
+        pest_name: quickInspection.pest_name || undefined,
         pest_treatment_status: quickInspection.pest_statuses.includes('under_treatment') ? 'under_treatment' : (quickInspection.pest_statuses.includes('pest_detected') ? 'pest_detected' : 'clear'),
-        treatment_used: quickInspection.treatment_used || null,
+        treatment_used: quickInspection.treatment_used || undefined,
         active_frame_count: Number(quickInspection.active_frame_count),
-        queen_cell_presence: quickInspection.queen_cell_presence || null,
-        bottom_board_cleaned: quickInspection.bottom_board_cleaned || null,
-        general_remarks: quickInspection.general_remarks || null,
+        queen_cell_presence: quickInspection.queen_cell_presence || undefined,
+        bottom_board_cleaned: quickInspection.bottom_board_cleaned || undefined,
+        general_remarks: quickInspection.general_remarks || undefined,
       });
 
       // Keep pest detection meter sticky once detected at least once.
