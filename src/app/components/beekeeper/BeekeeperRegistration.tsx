@@ -252,7 +252,10 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                 </div>
                 <div>
                   <label className={labelClass}>{t('phone', selectedLanguage)} <span className="text-red-500">*</span></label>
-                  <input {...register('phoneNumber', {required: t('phoneRequired', selectedLanguage), pattern: {value: /^\d{12}$/, message: t('must12DigitsPhone', selectedLanguage)}, onChange: (e) => {
+                  <input {...register('phoneNumber', {required: t('phoneRequired', selectedLanguage), validate: (value) => {
+                    const cleaned = value.replace(/\D/g, '');
+                    return cleaned.length === 12 || t('must12DigitsPhone', selectedLanguage);
+                  }, onChange: (e) => {
                     const formatted = formatPhoneNumber(e.target.value);
                     setValue('phoneNumber', formatted);
                   }})} className={inputClass} placeholder="94 77 456 7890" maxLength={15} />

@@ -441,7 +441,9 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
                       setField('landlord_contact', formatted);
                       if (formatted) {
                         const cleaned = formatted.replace(/\D/g, '');
-                        setPhoneValidationError(cleaned.length === 12 && isValidPhoneNumber(formatted) ? '' : '');
+                        setPhoneValidationError(!isValidPhoneNumber(formatted) || cleaned.length !== 12 ? 'Phone must be 12 digits (e.g. 94771234567)' : '');
+                      } else {
+                        setPhoneValidationError('');
                       }
                     }} 
                     placeholder="94 77 456 7890"

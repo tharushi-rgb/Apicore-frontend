@@ -164,7 +164,10 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
                   <label className={lc}>{t('phone', selectedLanguage)} <span className="text-red-500">*</span></label>
                   <input {...register('phoneNumber', {
                     required: t('phoneRequired', selectedLanguage),
-                    pattern: { value: /^\d{12}$/, message: t('must12DigitsPhone', selectedLanguage) },
+                    validate: (value) => {
+                      const cleaned = value.replace(/\D/g, '');
+                      return cleaned.length === 12 || t('must12DigitsPhone', selectedLanguage);
+                    },
                     onChange: (e) => {
                       const formatted = formatPhoneNumber(e.target.value);
                       setValue('phoneNumber', formatted);
