@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronRight, MapPin, Plus, ShieldCheck, User, Edit, Trash2, X, Save } from 'lucide-react';
+import { ChevronRight, MapPin, Plus, ShieldCheck, User, Edit, Eye, Trash2, X, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { MobileHeader } from '../shared/MobileHeader';
 import { authService } from '../../services/auth';
@@ -28,7 +28,7 @@ interface Props {
 
 interface PlotEditorState {
   isOpen: boolean;
-  mode: 'create' | 'edit';
+  mode: 'create' | 'edit' | 'view';
   plotId?: number;
   name: string;
   province: string;
@@ -218,6 +218,31 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
     setPlotEditorMessage(null);
   };
 
+  const openPlotView = (plot: LandPlot) => {
+    setPlotEditor({
+      isOpen: true,
+      mode: 'view',
+      plotId: plot.id,
+      name: plot.name,
+      province: plot.province,
+      district: plot.district,
+      dsDivision: plot.dsDivision,
+      gpsLatitude: String(plot.gpsLatitude || ''),
+      gpsLongitude: String(plot.gpsLongitude || ''),
+      totalAcreage: String(plot.totalAcreage || ''),
+      waterAvailability: plot.waterAvailability,
+      shadeProfile: plot.shadeProfile,
+      vehicleAccess: plot.vehicleAccess,
+      nightAccess: plot.nightAccess || null,
+      forageEntries: (plot.forageEntries || []).map(entry => ({
+        forage: entry.name,
+        bloomStartMonth: entry.bloomStartMonth,
+        bloomEndMonth: entry.bloomEndMonth,
+      })),
+    });
+    setPlotEditorMessage(null);
+  };
+
   const closePlotEditor = () => {
     setPlotEditor((prev) => ({ ...prev, isOpen: false }));
     setPlotEditorMessage(null);
@@ -290,6 +315,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
   };
 
   const trustScore = 92;
+  const isPlotViewMode = plotEditor.mode === 'view';
 
   if (loading) {
     return (
@@ -489,6 +515,13 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
             </div>
 
             <div className="mt-3 space-y-2.5">
+              {plotEditorMessage && !plotEditor.isOpen && (
+                <p className={`rounded-lg px-2 py-1.5 text-xs font-semibold ${
+                  plotEditorMessage.type === 'error' ? 'border border-red-200 bg-red-50 text-red-700' : 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                }`}>
+                  {plotEditorMessage.text}
+                </p>
+              )}
               {plots.length === 0 && (
                 <div className="rounded-lg border border-dashed border-stone-300 bg-stone-50 px-2 py-2 text-center">
                   <p className="text-sm font-semibold text-stone-700">No plots added</p>
@@ -512,6 +545,13 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                       </p>
                     </div>
                     <div className="flex gap-1">
+                      <button
+                        onClick={() => openPlotView(plot)}
+                        className="p-1.5 rounded-lg hover:bg-stone-100 text-stone-600 transition-colors"
+                        title="View plot"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
                       <button
                         onClick={() => openPlotEdit(plot)}
                         className="p-1.5 rounded-lg hover:bg-emerald-100 text-emerald-700 transition-colors"
@@ -555,7 +595,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
           <div className="w-full max-w-sm rounded-xl bg-white shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 flex items-center justify-between border-b border-stone-200 bg-white px-4 py-3">
               <h2 className="text-base font-bold text-stone-900">
-                {plotEditor.mode === 'create' ? 'Add New Plot' : 'Edit Plot'}
+                {plotEditor.mode === 'create' ? 'Add New Plot' : plotEditor.mode === 'edit' ? 'Edit Plot' : 'View Plot'}
               </h2>
               <button onClick={closePlotEditor} className="rounded-lg p-1 hover:bg-stone-100">
                 <X className="h-4 w-4 text-stone-500" />
@@ -578,7 +618,8 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                   value={plotEditor.name}
                   onChange={(e) => setPlotEditor((prev) => ({ ...prev, name: e.target.value }))}
                   placeholder="e.g., South Mango Orchard"
-                  className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm"
+                  disabled={isPlotViewMode}
+                  className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 />
               </div>
 
@@ -589,7 +630,8 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                   onChange={(e) => {
                     setPlotEditor((prev) => ({ ...prev, province: e.target.value, district: '', dsDivision: '' }));
                   }}
-                  className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm"
+                  disabled={isPlotViewMode}
+                  className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 >
                   <option value="">Select Province</option>
                   {PROVINCES.map((prov) => (
@@ -605,7 +647,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                   onChange={(e) => {
                     setPlotEditor((prev) => ({ ...prev, district: e.target.value, dsDivision: '' }));
                   }}
-                  disabled={!plotEditor.province}
+                  disabled={isPlotViewMode || !plotEditor.province}
                   className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 >
                   <option value="">Select District</option>
@@ -620,7 +662,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                 <select
                   value={plotEditor.dsDivision}
                   onChange={(e) => setPlotEditor((prev) => ({ ...prev, dsDivision: e.target.value }))}
-                  disabled={!plotEditor.district}
+                  disabled={isPlotViewMode || !plotEditor.district}
                   className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 >
                   <option value="">Select DS Division</option>
@@ -638,7 +680,8 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                   value={plotEditor.totalAcreage}
                   onChange={(e) => setPlotEditor((prev) => ({ ...prev, totalAcreage: e.target.value }))}
                   placeholder="5.3"
-                  className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm"
+                  disabled={isPlotViewMode}
+                  className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 />
               </div>
 
@@ -647,7 +690,8 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                 <select
                   value={plotEditor.shadeProfile}
                   onChange={(e) => setPlotEditor((prev) => ({ ...prev, shadeProfile: e.target.value }))}
-                  className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm"
+                  disabled={isPlotViewMode}
+                  className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 >
                   <option>Full Shade</option>
                   <option>Partial Shade</option>
@@ -660,7 +704,8 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                 <select
                   value={plotEditor.waterAvailability}
                   onChange={(e) => setPlotEditor((prev) => ({ ...prev, waterAvailability: e.target.value }))}
-                  className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm"
+                  disabled={isPlotViewMode}
+                  className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 >
                   <option>On-site</option>
                   <option>Within 500m</option>
@@ -673,7 +718,8 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                 <select
                   value={plotEditor.vehicleAccess}
                   onChange={(e) => setPlotEditor((prev) => ({ ...prev, vehicleAccess: e.target.value }))}
-                  className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm"
+                  disabled={isPlotViewMode}
+                  className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 >
                   <option>Lorry</option>
                   <option>Tuk-tuk</option>
@@ -681,22 +727,31 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                 </select>
               </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={savePlot}
-                  disabled={isSavingPlot}
-                  className="flex-1 rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50 flex items-center justify-center gap-1"
-                >
-                  <Save className="h-4 w-4" />
-                  {isSavingPlot ? 'Saving...' : 'Save Plot'}
-                </button>
+              {!isPlotViewMode ? (
+                <div className="flex gap-2">
+                  <button
+                    onClick={savePlot}
+                    disabled={isSavingPlot}
+                    className="flex-1 rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50 flex items-center justify-center gap-1"
+                  >
+                    <Save className="h-4 w-4" />
+                    {isSavingPlot ? 'Saving...' : 'Save Plot'}
+                  </button>
+                  <button
+                    onClick={closePlotEditor}
+                    className="flex-1 rounded-lg border border-stone-300 px-4 py-2.5 text-sm font-semibold text-stone-700 hover:bg-stone-100"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
                 <button
                   onClick={closePlotEditor}
-                  className="flex-1 rounded-lg border border-stone-300 px-4 py-2.5 text-sm font-semibold text-stone-700 hover:bg-stone-100"
+                  className="w-full rounded-lg border border-stone-300 px-4 py-2.5 text-sm font-semibold text-stone-700 hover:bg-stone-100"
                 >
-                  Cancel
+                  Close
                 </button>
-              </div>
+              )}
 
               {plotEditor.mode === 'edit' && plotEditor.plotId && (
                 <button
@@ -718,9 +773,11 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
 function ProfileInfoTile({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-white px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500">{label}</span>
-        <span className="text-sm font-semibold text-stone-900 text-right">{value}</span>
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500 shrink-0">{label}</span>
+        <span className="min-w-0 max-w-[65%] text-sm font-semibold text-stone-900 text-right break-all">
+          {value}
+        </span>
       </div>
     </div>
   );

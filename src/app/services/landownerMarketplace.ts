@@ -79,7 +79,7 @@ export interface Contract {
   status: ContractStatus;
   cash_rent_lkr?: number;
   honey_share_kgs?: number;
-  financial_terms?: string;
+  financial_terms?: FinancialTerms;
   moveOutRequestedAt?: string;
 }
 
@@ -435,21 +435,17 @@ export const landownerMarketplaceService = {
 
   deletePlot(plotId: number) {
     const { key, all, store } = getStoreForCurrentUser();
-    
-    // Check if plot is used in any active or draft listings
-    const activeListings = store.listings.filter(
-      (listing) => listing.plotId === plotId && ['draft', 'published', 'accepted', 'occupied'].includes(listing.status),
-    );
-    
-    if (activeListings.length > 0) {
-      throw new Error('Cannot delete plot with active listings. Delete or archive the listings first.');
-    }
 
-    const nextPlots = store.plots.filter((plot) => plot.id !== plotId);
+    const listingIdsToRemove = new Set(
+      store.listings.filter((listing) => listing.plotId === plotId).map((listing) => listing.id),
+    );
 
     const nextStore: MarketplaceStore = {
       ...store,
-      plots: nextPlots,
+      plots: store.plots.filter((plot) => plot.id !== plotId),
+      listings: store.listings.filter((listing) => listing.plotId !== plotId),
+      bids: store.bids.filter((bid) => !listingIdsToRemove.has(bid.listingId)),
+      contracts: store.contracts.filter((contract) => contract.plot_id !== plotId),
     };
 
     persistStore(key, all, nextStore);
@@ -621,6 +617,9 @@ export const landownerMarketplaceService = {
       hiveCount: selectedBid.hivesProposed,
       expiryLabel: 'Dec 2026',
       status: 'active',
+      financial_terms: listing.financialTerms,
+      cash_rent_lkr: listing.cashRentLkr,
+      honey_share_kgs: listing.honeyShareKg,
     };
 
     const nextStore: MarketplaceStore = {

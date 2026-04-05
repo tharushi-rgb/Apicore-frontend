@@ -605,6 +605,31 @@ function ContractsSection({
   contracts: Contract[];
   onRespond: (contractId: number, approve: boolean) => void;
 }) {
+  const formatPaymentTerms = (contract: Contract) => {
+    if (contract.financial_terms === 'cash_rent') {
+      return `Cash rent · Rs ${contract.cash_rent_lkr || 0}`;
+    }
+    if (contract.financial_terms === 'honey_share') {
+      return `Honey share · ${contract.honey_share_kgs || 0} kg`;
+    }
+    if (contract.financial_terms === 'pollination_service') {
+      return 'Pollination service';
+    }
+    return 'Payment terms not set';
+  };
+
+  const formatOngoingDays = (contract: Contract) => {
+    const bid = landownerMarketplaceService
+      .getBidsForListing(contract.listingId)
+      .find((item) => item.id === contract.bidId);
+    if (!bid?.placementStartDate) return '-';
+    const startDate = new Date(bid.placementStartDate);
+    if (Number.isNaN(startDate.getTime())) return '-';
+    const diffMs = Date.now() - startDate.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    return `${Math.max(0, diffDays)} days`;
+  };
+
   return (
     <section className="rounded-2xl border border-stone-200 bg-white px-2 py-2 shadow-sm">
       <h2 className="px-1 text-[1rem] font-bold text-stone-900">Active Contracts</h2>
@@ -622,6 +647,9 @@ function ContractsSection({
             </div>
 
             <p className="mt-1 text-[0.78rem] text-stone-500">Expiry: {contract.expiryLabel}</p>
+            <p className="mt-0.5 text-[0.78rem] text-stone-500">
+              Payment: {formatPaymentTerms(contract)} · Ongoing: {formatOngoingDays(contract)}
+            </p>
 
             {contract.status === 'moving_out_requested' && (
               <div className="mt-2 rounded-lg border border-amber-300 bg-amber-50 p-2">
