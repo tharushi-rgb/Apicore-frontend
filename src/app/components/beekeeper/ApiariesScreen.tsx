@@ -247,22 +247,22 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
 
                   <div className="flex flex-col min-w-0">
                     <p className="text-[0.85rem] font-bold text-stone-800 mb-2">Health Filters</p>
-                    <div className="flex flex-col gap-2 w-full md:w-auto">
+                    <div className="grid grid-cols-1 gap-2">
                       <button
                         onClick={() => toggleHealthFilter('queenlessOnly')}
-                        className={`w-full md:w-auto px-3.5 py-2.5 rounded-full text-[0.8rem] font-semibold transition-all whitespace-nowrap ${filters.queenlessOnly ? 'bg-red-100 text-red-900 border-2 border-red-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
+                        className={`px-3 py-2.5 rounded-full text-[0.8rem] font-semibold transition-all ${filters.queenlessOnly ? 'bg-red-100 text-red-900 border-2 border-red-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
                         Queenless Hives
                       </button>
                       <button
                         onClick={() => toggleHealthFilter('pestOnly')}
-                        className={`w-full md:w-auto px-3.5 py-2.5 rounded-full text-[0.8rem] font-semibold transition-all whitespace-nowrap ${filters.pestOnly ? 'bg-amber-100 text-amber-900 border-2 border-amber-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
+                        className={`px-3 py-2.5 rounded-full text-[0.8rem] font-semibold transition-all ${filters.pestOnly ? 'bg-amber-100 text-amber-900 border-2 border-amber-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
                         Pest Alerts
                       </button>
                       <button
                         onClick={() => toggleHealthFilter('healthyOnly')}
-                        className={`w-full md:w-auto px-3.5 py-2.5 rounded-full text-[0.8rem] font-semibold transition-all whitespace-nowrap ${filters.healthyOnly ? 'bg-emerald-100 text-emerald-900 border-2 border-emerald-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
+                        className={`px-3 py-2.5 rounded-full text-[0.8rem] font-semibold transition-all ${filters.healthyOnly ? 'bg-emerald-100 text-emerald-900 border-2 border-emerald-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
                         Healthy Only
                       </button>
