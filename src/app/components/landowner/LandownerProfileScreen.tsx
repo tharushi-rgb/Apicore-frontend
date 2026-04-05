@@ -328,6 +328,23 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
           <div className="px-4 py-4">
             <div className="-mt-12 rounded-xl border border-stone-200 bg-white p-4 shadow-sm relative overflow-hidden">
               <div className="absolute inset-x-0 top-0 h-8 bg-gradient-to-r from-emerald-50 via-teal-50 to-lime-50" />
+              
+              {/* Mode Toggle: View/Edit */}
+              <div className="relative mb-4 flex gap-2">
+                <button
+                  onClick={() => setIsEditingProfile(false)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${!isEditingProfile ? 'bg-emerald-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
+                >
+                  View Profile
+                </button>
+                <button
+                  onClick={() => setIsEditingProfile(true)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${isEditingProfile ? 'bg-emerald-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
+                >
+                  Edit Profile
+                </button>
+              </div>
+              
               <div className="relative flex items-center justify-end">
                 {!isEditingProfile ? (
                   <button
