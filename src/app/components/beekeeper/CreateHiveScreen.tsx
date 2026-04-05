@@ -272,8 +272,7 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
       province: selectedApiary.province || previous.province,
       district: selectedApiary.district || previous.district,
       ds_division: selectedApiary.ds_division || previous.ds_division,
-      gps_latitude: selectedApiary.gps_latitude != null ? String(selectedApiary.gps_latitude) : previous.gps_latitude,
-      gps_longitude: selectedApiary.gps_longitude != null ? String(selectedApiary.gps_longitude) : previous.gps_longitude,
+      // Do NOT auto-fill GPS - only use what the user explicitly sets
     }));
   }, [apiaries, form.apiary_selection, isEdit]);
 
