@@ -8,7 +8,7 @@ export interface Hive {
   apiary_id?: number;
   name: string;
   hive_type: 'box' | 'pot' | 'log' | 'stingless';
-  location_type: 'apiary-linked' | 'standalone';
+  location_type: string;
   status: 'active' | 'queenless' | 'inactive' | 'absconded';
   queen_present: number;
   queen_age?: number;
@@ -147,7 +147,7 @@ export const hivesService = {
   async moveToApiary(id: number, targetApiaryId: number) {
     const { error } = await supabase
       .from('hives')
-      .update({ apiary_id: targetApiaryId, location_type: 'apiary-linked', updated_at: new Date().toISOString() })
+      .update({ apiary_id: targetApiaryId, location_type: 'ground', updated_at: new Date().toISOString() })
       .eq('id', id);
     if (error) throw new Error(error.message);
     notificationsService.createActionNotification({

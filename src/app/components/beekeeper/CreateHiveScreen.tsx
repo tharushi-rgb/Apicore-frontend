@@ -485,7 +485,7 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
       const sharedData: any = {
         hive_type: getDbHiveType(form.hive_variant as HiveVariant),
         apiary_id: parseInt(form.apiary_selection, 10),
-        location_type: 'apiary-linked',
+        location_type: 'ground',
         status: form.status,
         queen_present: (form.queen_status && form.queen_status !== 'virgin' && form.queen_status !== '') ? 1 : 0,
         colony_strength: form.colony_strength_percent ? String(form.colony_strength_percent) : null,
