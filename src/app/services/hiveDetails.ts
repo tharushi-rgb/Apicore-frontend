@@ -1,7 +1,13 @@
 import { supabase } from './supabaseClient';
+import { authService } from './auth';
 import { notificationsService } from './notifications';
 
-export interface Feeding { id: number; hive_id: number; feeding_date: string; feed_type: string; quantity?: number; unit?: string; concentration?: string; notes?: string; created_at: string; }
+export interface Feeding { id: number; hive_id: number; user_id?: number; feeding_date: string; feed_type: string; quantity?: number; unit?: string; concentration?: string; notes?: string; created_at: string; }
+function getUserId(): number {
+  const user = authService.getLocalUser();
+  if (!user) throw new Error('Not logged in');
+  return user.id;
+}
 export const feedingsService = {
   async getByHive(hiveId: number) {
     const { data, error } = await supabase.from('feedings').select('*').eq('hive_id', hiveId).order('feeding_date', { ascending: false });
@@ -9,7 +15,8 @@ export const feedingsService = {
     return data as Feeding[];
   },
   async create(p: Partial<Feeding>) {
-    const { data, error } = await supabase.from('feedings').insert(p).select().single();
+    const userId = getUserId();
+    const { data, error } = await supabase.from('feedings').insert({ ...p, user_id: userId }).select().single();
     if (error) throw new Error(error.message);
     notificationsService.createActionNotification({ entity: 'Feeding', event: 'created', details: 'Feeding record was added.' });
     return data as Feeding;
@@ -27,7 +34,7 @@ export const feedingsService = {
   },
 };
 
-export interface HiveComponent { id: number; hive_id: number; component_type: string; quantity: number; condition: string; installed_date?: string; notes?: string; created_at: string; }
+export interface HiveComponent { id: number; hive_id: number; user_id?: number; component_type: string; quantity: number; condition: string; installed_date?: string; notes?: string; created_at: string; }
 export const componentsService = {
   async getByHive(hiveId: number) {
     const { data, error } = await supabase.from('hive_components').select('*').eq('hive_id', hiveId).order('created_at', { ascending: false });
@@ -35,7 +42,8 @@ export const componentsService = {
     return data as HiveComponent[];
   },
   async create(p: Partial<HiveComponent>) {
-    const { data, error } = await supabase.from('hive_components').insert(p).select().single();
+    const userId = getUserId();
+    const { data, error } = await supabase.from('hive_components').insert({ ...p, user_id: userId }).select().single();
     if (error) throw new Error(error.message);
     notificationsService.createActionNotification({ entity: 'Component', event: 'created', details: 'Hive component was added.' });
     return data as HiveComponent;
@@ -53,7 +61,7 @@ export const componentsService = {
   },
 };
 
-export interface Queen { id: number; hive_id: number; marking_color?: string; source?: string; introduction_date?: string; status: string; species?: string; notes?: string; created_at: string; }
+export interface Queen { id: number; hive_id: number; user_id?: number; marking_color?: string; source?: string; introduction_date?: string; status: string; species?: string; notes?: string; created_at: string; }
 export const queensService = {
   async getByHive(hiveId: number) {
     const { data, error } = await supabase.from('queens').select('*').eq('hive_id', hiveId).order('created_at', { ascending: false });
@@ -61,7 +69,8 @@ export const queensService = {
     return data as Queen[];
   },
   async create(p: Partial<Queen>) {
-    const { data, error } = await supabase.from('queens').insert(p).select().single();
+    const userId = getUserId();
+    const { data, error } = await supabase.from('queens').insert({ ...p, user_id: userId }).select().single();
     if (error) throw new Error(error.message);
     notificationsService.createActionNotification({ entity: 'Queen', event: 'created', details: 'Queen record was added.' });
     return data as Queen;
@@ -79,7 +88,7 @@ export const queensService = {
   },
 };
 
-export interface Treatment { id: number; hive_id: number; treatment_date: string; treatment_type: string; product_name?: string; dosage?: string; application_method?: string; duration_days?: number; end_date?: string; outcome?: string; notes?: string; created_at: string; }
+export interface Treatment { id: number; hive_id: number; user_id?: number; treatment_date: string; treatment_type: string; product_name?: string; dosage?: string; application_method?: string; duration_days?: number; end_date?: string; outcome?: string; notes?: string; created_at: string; }
 export const treatmentsService = {
   async getByHive(hiveId: number) {
     const { data, error } = await supabase.from('treatments').select('*').eq('hive_id', hiveId).order('treatment_date', { ascending: false });
@@ -87,7 +96,8 @@ export const treatmentsService = {
     return data as Treatment[];
   },
   async create(p: Partial<Treatment>) {
-    const { data, error } = await supabase.from('treatments').insert(p).select().single();
+    const userId = getUserId();
+    const { data, error } = await supabase.from('treatments').insert({ ...p, user_id: userId }).select().single();
     if (error) throw new Error(error.message);
     notificationsService.createActionNotification({ entity: 'Treatment', event: 'created', details: 'Treatment record was added.' });
     return data as Treatment;

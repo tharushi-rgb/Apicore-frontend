@@ -12,9 +12,8 @@
    ```
 
 2. **Set up environment variables:**
-   - The app uses Supabase for backend
-   - Configuration is already set in `src/app/services/supabaseClient.ts`
-   - No additional setup needed for frontend
+   - Copy `.env.example` to `.env`
+   - Fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from your Supabase project settings
 
 3. **Start development server:**
    ```bash
@@ -33,8 +32,8 @@
 
 1. Go to your Supabase project dashboard
 2. Navigate to SQL Editor
-3. Run the SQL from `../landowner-tables-setup.sql` to create the necessary tables for the landowner feature
-4. This includes tables for plots, listings, bids, and contracts
+3. Run the SQL from `supabase/schema-setup.sql` to create the required tables for both beekeeper and landowner features
+4. This includes tables for apiaries, hives, inspections, harvests, finances, notifications, and landowner plots/contracts
 
 ## Project Structure
 
