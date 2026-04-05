@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ChevronRight, MapPin, Plus, ShieldCheck, User, Edit, Eye, Trash2, X, Save } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import { Camera, ChevronRight, MapPin, Plus, ShieldCheck, User, Edit, Eye, Trash2, X, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { MobileHeader } from '../shared/MobileHeader';
 import { authService } from '../../services/auth';
@@ -52,6 +52,9 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
   const [plotsVersion, setPlotsVersion] = useState(0);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
 
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
@@ -122,6 +125,34 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
     if (Number.isNaN(dt.getTime())) return 'Member';
     return `Member since ${dt.toLocaleString('en-US', { month: 'short', year: 'numeric' })}`;
   }, [profile?.created_at]);
+
+  const fileToDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error('Failed to read image file'));
+    reader.readAsDataURL(file);
+  });
+
+  const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingAvatar(true);
+    setSaveMessage('');
+
+    try {
+      const imageUrl = await fileToDataUrl(file);
+      const updated = await profileService.update({ avatar_url: imageUrl });
+      setProfile(updated);
+      setSaveMessage('Profile photo updated successfully');
+    } catch (error) {
+      console.error('Failed to update profile photo:', error);
+      setSaveMessage('Failed to update profile photo');
+    } finally {
+      setIsUploadingAvatar(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
+    }
+  };
 
   const handleOpenEdit = () => {
     if (!profile) return;
@@ -402,11 +433,24 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
               <div className="flex items-start gap-3 min-w-0">
                 <div className="relative shrink-0">
                   <div className="h-14 w-14 overflow-hidden rounded-xl border border-stone-200 bg-stone-100 shadow-sm">
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-stone-200 to-stone-100">
-                      <User className="h-6 w-6 text-stone-500" />
-                    </div>
+                    {profile?.avatar_url ? (
+                      <img src={profile.avatar_url} alt={profile?.name || 'Profile'} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-stone-200 to-stone-100">
+                        <User className="h-6 w-6 text-stone-500" />
+                      </div>
+                    )}
                   </div>
                   <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full border-2 border-white bg-emerald-500" />
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    disabled={isUploadingAvatar}
+                    className="absolute -bottom-1 -left-1 h-6 w-6 rounded-full border border-white bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 disabled:opacity-60"
+                    title="Change profile photo"
+                  >
+                    <Camera className="mx-auto h-3 w-3" />
+                  </button>
                 </div>
 
                 <div className="min-w-0 flex-1 pt-0.5">
@@ -779,6 +823,14 @@ function ProfileInfoTile({ label, value }: { label: string; value: string }) {
           {value}
         </span>
       </div>
+
+      <input
+        ref={avatarInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleAvatarChange}
+        className="hidden"
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect, type ChangeEvent } from 'react';
 import {
   User,
   X,
@@ -52,11 +52,13 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
   const [editPhone, setEditPhone] = useState('');
   const [editDistrict, setEditDistrict] = useState('');
   const [stats, setStats] = useState({ apiaries: 0, hives: 0, clients: 0 });
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
     queenAge: true, pestDetection: true, inspectionReminders: true, contractExpiry: true,
   });
   const user = authService.getLocalUser();
   const activeTab: NavTab = 'profile';
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -102,6 +104,31 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
       alert('Failed to update profile');
     } finally {
       setIsSavingProfile(false);
+    }
+  };
+
+  const fileToDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error('Failed to read image file'));
+    reader.readAsDataURL(file);
+  });
+
+  const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingAvatar(true);
+    try {
+      const imageUrl = await fileToDataUrl(file);
+      const updated = await profileService.update({ avatar_url: imageUrl });
+      setProfile(updated);
+    } catch (error) {
+      console.error('Failed to update profile photo', error);
+      alert('Failed to update profile photo');
+    } finally {
+      setIsUploadingAvatar(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
     }
   };
 
@@ -180,10 +207,18 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
             </button>
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center">
-                  <User className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center overflow-hidden">
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt={profile?.name || 'Profile'} className="h-full w-full object-cover" />
+                  ) : (
+                    <User className="w-8 h-8 text-white" />
+                  )}
                 </div>
-                <button className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 hover:bg-emerald-600 rounded-full flex items-center justify-center shadow-lg transition-colors">
+                <button
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={isUploadingAvatar}
+                  className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 hover:bg-emerald-600 rounded-full flex items-center justify-center shadow-lg transition-colors disabled:opacity-70"
+                >
                   <Camera className="w-3 h-3 text-white" />
                 </button>
               </div>
@@ -249,6 +284,14 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
           </div>
         </div>
       </div>
+
+      <input
+        ref={avatarInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleAvatarChange}
+        className="hidden"
+      />
     </div>
   );
 }

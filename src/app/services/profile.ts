@@ -9,6 +9,7 @@ export interface Profile {
   years_experience?: number; nic_number?: string; age_group?: string; blood_group?: string;
   beekeeping_nature?: string; primary_bee_species?: string; nvq_level?: string;
   business_reg_no?: string;
+  avatar_url?: string;
   created_at?: string;
 }
 
@@ -23,13 +24,20 @@ export const profileService = {
     const userId = getUserId();
     const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
     if (error) throw new Error(error.message);
-    return { user: data as Profile, stats: {} };
+    const avatarKey = `profile_avatar_${userId}`;
+    const avatarUrl = (data as Profile).avatar_url || localStorage.getItem(avatarKey) || undefined;
+    if ((data as Profile).avatar_url) {
+      localStorage.setItem(avatarKey, (data as Profile).avatar_url as string);
+    }
+    return { user: { ...(data as Profile), avatar_url: avatarUrl }, stats: {} };
   },
 
   async update(p: Partial<Profile>) {
     const userId = getUserId();
     const nextPayload = { ...p };
     const current = authService.getLocalUser();
+    const avatarKey = `profile_avatar_${userId}`;
+    const avatarUrl = (nextPayload as Profile).avatar_url;
 
     // Email updates are handled via Supabase Auth. Keep users-table update independent.
     if (typeof nextPayload.email === 'string' && nextPayload.email.trim() && current?.email !== nextPayload.email.trim()) {
@@ -45,15 +53,29 @@ export const profileService = {
       .eq('id', userId)
       .select()
       .single();
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (
+        avatarUrl &&
+        (error.message.includes('avatar') || error.message.includes('schema cache') || error.message.includes('Could not find') || error.message.includes('column'))
+      ) {
+        localStorage.setItem(avatarKey, avatarUrl);
+        return { ...(current as unknown as Profile), avatar_url: avatarUrl } as Profile;
+      }
+      throw new Error(error.message);
+    }
     // Refresh local storage
     if (current) {
       const merged = {
         ...current,
         ...data,
         email: (typeof p.email === 'string' && p.email.trim()) ? p.email.trim() : (data as any).email ?? current.email,
+        avatar_url: (data as any).avatar_url ?? avatarUrl ?? (current as any).avatar_url,
       };
       localStorage.setItem('user', JSON.stringify(merged));
+    }
+
+    if (avatarUrl) {
+      localStorage.setItem(avatarKey, avatarUrl);
     }
 
     notificationsService.createActionNotification({

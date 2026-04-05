@@ -19,6 +19,7 @@ export interface User {
   nvq_level?: string;
   role: string;
   years_experience?: number;
+  avatar_url?: string;
 }
 
 function storeUser(user: User) {
