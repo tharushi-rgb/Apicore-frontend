@@ -47,7 +47,7 @@ export function NotificationsScreen({ selectedLanguage, onLanguageChange, onNavi
 
 
   return (
-    <div className={`min-h-screen ${pageGradient} pb-24`}>
+    <div className={`h-screen overflow-y-auto ${pageGradient}`}>
       <div className="bg-white shadow-sm sticky top-0 z-30">
         <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
         activeTab="notifications" onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} role={isLandowner ? 'landowner' : 'beekeeper'} theme={isLandowner ? 'green' : 'amber'} />
