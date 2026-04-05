@@ -210,13 +210,13 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
               </div>
 
               <div className="bg-white rounded-xl border border-stone-200 p-2.5 sm:p-3 shadow-sm w-full max-w-full overflow-hidden">
-                <div className="flex flex-col gap-2 w-full max-w-full md:grid md:[grid-template-columns:minmax(8rem,max-content)_minmax(12rem,1fr)_minmax(10rem,max-content)] md:gap-3 md:items-start">
-                  <div className="flex flex-col min-w-0 w-full max-w-full">
+                <div className="flex flex-wrap items-start gap-2 w-full max-w-full">
+                  <div className="flex flex-col min-w-0 w-auto max-w-full">
                     <p className="text-[0.7rem] font-bold text-stone-800 mb-0.5">Status</p>
                     <select
                       value={filters.status}
                       onChange={(event) => setFilters((previous) => ({ ...previous, status: event.target.value as typeof filters.status }))}
-                      className="w-full max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
+                      className="w-auto max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
                     >
                       <option value="all">Any</option>
                       <option value="active">Active</option>
@@ -225,21 +225,21 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                     </select>
                   </div>
 
-                  <div className="flex flex-col min-w-0 w-full max-w-full">
+                  <div className="flex flex-col min-w-0 w-auto max-w-full">
                     <p className="text-[0.7rem] font-bold text-stone-800 mb-1">Established Between</p>
                     <div className="flex flex-col gap-1">
                       <input
                         type="date"
                         value={filters.dateFrom}
                         onChange={(event) => setFilters((previous) => ({ ...previous, dateFrom: event.target.value }))}
-                        className="w-full max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
+                        className="w-[9.5rem] max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
                         placeholder="From"
                       />
                       <input
                         type="date"
                         value={filters.dateTo}
                         onChange={(event) => setFilters((previous) => ({ ...previous, dateTo: event.target.value }))}
-                        className="w-full max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
+                        className="w-[9.5rem] max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
                         placeholder="To"
                       />
                     </div>
