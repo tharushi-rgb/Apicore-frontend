@@ -234,8 +234,12 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                   {errors.nicNumber && <p className="text-red-500 text-[0.75rem] mt-1">{errors.nicNumber.message}</p>}
                 </div>
                 <div>
-                  <label className={labelClass}>{t('emailPhone', selectedLanguage)} <span className="text-red-500">*</span></label>
-                  <input {...register('email',{required:t('emailRequired', selectedLanguage)})} className={inputClass} placeholder={t('emailPhonePlaceholder', selectedLanguage)} />
+                  <label className={labelClass}>{t('email', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <input {...register('email',{required:t('emailRequired', selectedLanguage), validate: (value) => {
+                      if (!value) return t('emailRequired', selectedLanguage);
+                      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                      return emailPattern.test(value) || t('enterValidEmail', selectedLanguage);
+                    }})} className={inputClass} placeholder={t('emailPlaceholder', selectedLanguage)} />
                   {errors.email && <p className="text-red-500 text-[0.75rem] mt-1">{errors.email.message}</p>}
                 </div>
                 <div>
@@ -378,7 +382,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                   <div className="p-3 grid grid-cols-2 gap-x-3 gap-y-2 text-[0.75rem]">
                     <span className="text-stone-500">Name</span><span className="text-stone-800 font-medium truncate">{watch('fullName') || '—'}</span>
                     <span className="text-stone-500">NIC</span><span className="text-stone-800 font-medium">{watch('nicNumber') || '—'}</span>
-                    <span className="text-stone-500">Email/Phone</span><span className="text-stone-800 font-medium truncate">{watch('email') || '—'}</span>
+                    <span className="text-stone-500">Email</span><span className="text-stone-800 font-medium truncate">{watch('email') || '—'}</span>
                     <span className="text-stone-500">Contact</span><span className="text-stone-800 font-medium">{watch('phoneNumber') || '—'}</span>
                     <span className="text-stone-500">Language</span><span className="text-stone-800 font-medium capitalize">{watch('preferredLanguage') || '—'}</span>
                     <span className="text-stone-500">Age Group</span><span className="text-stone-800 font-medium">{watch('ageGroup') || '—'}</span>

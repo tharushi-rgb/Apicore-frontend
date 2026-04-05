@@ -169,7 +169,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
                   {errors.nicNumber && <p className={ec}>{errors.nicNumber.message}</p>}
                 </div>
                 <div>
-                  <label className={lc}>{t('emailPhone', selectedLanguage)} <span className="text-red-500">*</span></label>
+                  <label className={lc}>{t('email', selectedLanguage)} <span className="text-red-500">*</span></label>
                   <input {...register('email', { 
                     required: t('emailRequired', selectedLanguage),
                     validate: (value) => {
@@ -303,7 +303,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
                     <span className="text-stone-800 font-medium">{watch('phoneNumber') || '—'}</span>
                     <span className="text-stone-500">NIC</span>
                     <span className="text-stone-800 font-medium">{watch('nicNumber') || '—'}</span>
-                    <span className="text-stone-500">Email / Phone</span>
+                    <span className="text-stone-500">Email</span>
                     <span className="text-stone-800 font-medium truncate">{watch('email') || '—'}</span>
                     <span className="text-stone-500">Language</span>
                     <span className="text-stone-800 font-medium capitalize">{watch('preferredLanguage') || '—'}</span>
