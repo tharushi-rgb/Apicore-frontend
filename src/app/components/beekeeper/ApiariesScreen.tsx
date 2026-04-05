@@ -212,11 +212,11 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
               <div className="bg-white rounded-xl border border-stone-200 p-4 sm:p-5 shadow-sm">
                 <div className="grid grid-cols-1 md:[grid-template-columns:minmax(9rem,max-content)_minmax(13rem,1fr)_minmax(11rem,max-content)] gap-4 md:gap-6 items-start">
                   <div className="flex flex-col min-w-0">
-                    <p className="text-[0.85rem] font-bold text-stone-800 mb-2">Status</p>
+                    <p className="text-[0.75rem] font-bold text-stone-800 mb-1">Status</p>
                     <select
                       value={filters.status}
                       onChange={(event) => setFilters((previous) => ({ ...previous, status: event.target.value as typeof filters.status }))}
-                      className="w-full md:w-44 rounded-lg border border-stone-300 px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
+                      className="md:w-auto rounded-lg border border-stone-300 px-2 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
                     >
                       <option value="all">Any</option>
                       <option value="active">Active</option>
@@ -344,7 +344,7 @@ function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon, h
         {/* Row 1: Name + Status */}
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-[0.875rem] font-bold text-stone-800 flex-1 truncate">{apiary.name}</h3>
-          <span className={`px-2 py-0.5 rounded-full text-[0.65rem] font-medium ${config.bgColor} ${config.textColor} whitespace-nowrap`}>
+          <span className={`px-1.5 py-0.5 rounded-full text-[0.6rem] font-medium ${config.bgColor} ${config.textColor} whitespace-nowrap`}>
             {config.label}
           </span>
         </div>
