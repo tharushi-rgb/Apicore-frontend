@@ -607,14 +607,16 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
   const fetchExpenses = async () => {
     try {
       setExpenses(await expensesService.getByHive(hiveId));
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch expenses:', err);
       setExpenses([]);
     }
   };
   const fetchHarvests = async () => {
     try {
       setHarvests(await harvestsService.getByHive(hiveId));
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch harvests:', err);
       setHarvests([]);
     }
   };
@@ -753,12 +755,12 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
         description: '',
         expense_date: new Date().toISOString().split('T')[0],
       }));
+      setSavingQuickExpense(false);
     } catch (error) {
       console.error('Failed to save expense:', error);
       alert(`Failed to save expense: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setSavingQuickExpense(false);
     }
-    setSavingQuickExpense(false);
   };
 
   const saveQuickHarvest = async () => {
