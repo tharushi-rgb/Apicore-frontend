@@ -47,6 +47,7 @@ export interface ListingProposal {
   bidId: number;
   listingCode: string;
   plotName: string;
+  province: string;
   hiveCount: number;
   moveInDate: string;
   moveOutDate: string;
@@ -57,6 +58,17 @@ export interface ListingProposal {
   remainingCapacity: number;
   district: string;
   dsDivision: string;
+  ownerName: string;
+  ownerContact: string;
+  financialTerms: FinancialTerms;
+  cashRentLkr?: number;
+  honeyShareKg?: number;
+  waterAvailability: LandPlot['waterAvailability'];
+  vehicleAccess: LandPlot['vehicleAccess'];
+  nightAccess: boolean;
+  gpsLatitude: number;
+  gpsLongitude: number;
+  forageEntries: LandPlot['forageEntries'];
 }
 
 export interface ListingReview {
@@ -317,6 +329,7 @@ export const beekeeperListingsService = {
         const plot = store.plots.find((item) => item.id === listing.plotId);
         const acceptedHiveCount = getAcceptedCountForListing(store, listing.id);
         const contract = store.contracts.find((item) => item.bidId === bid.id && item.listingId === listing.id);
+        const owner = ownerMeta(ownerUserId);
 
         proposals.push({
           ownerUserId,
@@ -324,6 +337,7 @@ export const beekeeperListingsService = {
           bidId: bid.id,
           listingCode: listing.listingCode,
           plotName: plot?.name || 'Plot',
+          province: plot?.province || '-',
           hiveCount: bid.hivesProposed,
           moveInDate: bid.placementStartDate,
           moveOutDate: bid.placementEndDate,
@@ -334,6 +348,17 @@ export const beekeeperListingsService = {
           remainingCapacity: Math.max(0, 10 - acceptedHiveCount),
           district: plot?.district || '-',
           dsDivision: plot?.dsDivision || '-',
+          ownerName: owner.ownerName,
+          ownerContact: owner.ownerContact,
+          financialTerms: listing.financialTerms,
+          cashRentLkr: listing.cashRentLkr,
+          honeyShareKg: listing.honeyShareKg,
+          waterAvailability: plot?.waterAvailability || 'On-site',
+          vehicleAccess: plot?.vehicleAccess || 'Lorry',
+          nightAccess: plot?.nightAccess ?? false,
+          gpsLatitude: plot?.gpsLatitude ?? 0,
+          gpsLongitude: plot?.gpsLongitude ?? 0,
+          forageEntries: plot?.forageEntries || [],
         });
       });
     });

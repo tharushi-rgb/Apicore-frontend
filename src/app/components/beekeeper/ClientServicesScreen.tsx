@@ -44,6 +44,8 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [selectedListing, setSelectedListing] = useState<ListingSummary | null>(null);
+  const [listingReviews, setListingReviews] = useState<{ rating: number; comment: string; beekeeperName: string; createdAt: string }[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   const [myLocation, setMyLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -222,6 +224,21 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
     setProposalForm({ hiveCount: '', moveInDate: '', moveOutDate: '', note: '' });
     setSuccess('');
     setError('');
+    setReviewsLoading(true);
+    try {
+      const detail = beekeeperListingsService.getListingDetail(listing.ownerUserId, listing.listingId);
+      setListingReviews(detail.reviews.map((review) => ({
+        rating: review.rating,
+        comment: review.comment,
+        beekeeperName: review.beekeeperName,
+        createdAt: review.createdAt,
+      })));
+    } catch (detailError: any) {
+      setListingReviews([]);
+      setError(detailError?.message || 'Failed to load listing details');
+    } finally {
+      setReviewsLoading(false);
+    }
   };
 
   const onSubmitProposal = () => {
@@ -536,7 +553,26 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
 
               <section className="rounded-xl border border-stone-200 p-3">
                 <p className="text-[0.68rem] text-stone-500 mb-1">Community Reviews</p>
-                <p className="text-[0.74rem] text-stone-600">No reviews yet for this plot. Be the first to place your hives here.</p>
+                {reviewsLoading ? (
+                  <p className="text-[0.74rem] text-stone-600">Loading reviews...</p>
+                ) : listingReviews.length === 0 ? (
+                  <p className="text-[0.74rem] text-stone-600">No reviews yet for this plot. Be the first to place your hives here.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {listingReviews.slice(0, 3).map((review, index) => (
+                      <div key={`${review.beekeeperName}-${review.createdAt}-${index}`} className="rounded-lg bg-stone-50 border border-stone-200 px-2.5 py-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-[0.72rem] font-semibold text-stone-800 truncate">{review.beekeeperName}</p>
+                          <span className="inline-flex items-center gap-1 text-[0.7rem] text-amber-600 font-semibold">
+                            <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" /> {review.rating.toFixed(1)}
+                          </span>
+                        </div>
+                        <p className="text-[0.72rem] text-stone-600 mt-0.5">{review.comment}</p>
+                        <p className="text-[0.64rem] text-stone-400 mt-0.5">{new Date(review.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </section>
 
               <section className="rounded-xl border border-stone-200 p-3 space-y-2">

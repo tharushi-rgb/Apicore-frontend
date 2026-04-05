@@ -117,11 +117,23 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
   const location = useLocation();
   const proposalPrefill = (location.state as any)?.prefillApiary as {
     plotName?: string;
+    province?: string;
     district?: string;
     dsDivision?: string;
     moveInDate?: string;
     moveOutDate?: string;
     hiveCount?: number;
+    ownerName?: string;
+    ownerContact?: string;
+    financialTerms?: 'cash_rent' | 'honey_share' | 'pollination_service';
+    cashRentLkr?: number;
+    honeyShareKg?: number;
+    waterAvailability?: 'On-site' | 'Within 500m' | 'Requires Manual Water';
+    vehicleAccess?: 'Lorry' | 'Tuk-tuk' | 'Footpath';
+    nightAccess?: boolean;
+    gpsLatitude?: number;
+    gpsLongitude?: number;
+    forageEntries?: ApiaryForageEntry[] | { name: string; bloomStartMonth: string; bloomEndMonth: string }[];
   } | undefined;
   const user = authService.getLocalUser();
 
@@ -133,15 +145,45 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
   const [form, setForm] = useState<ApiaryFormState>(() => {
     const base = buildApiaryFormState(initialApiary, user);
     if (!proposalPrefill || isEdit) return base;
+    const paymentTerms = proposalPrefill.financialTerms === 'cash_rent'
+      ? 'cash'
+      : proposalPrefill.financialTerms === 'honey_share'
+        ? 'honey_share'
+        : 'pollination_service';
+    const mapWaterAvailability = (value?: string) => {
+      if (!value) return base.water_availability;
+      if (value === 'Within 500m') return '<500m';
+      if (value === 'Requires Manual Water') return '>500m (Requires Manual Water)';
+      return 'On-site';
+    };
+    const forageEntries = Array.isArray(proposalPrefill.forageEntries)
+      ? proposalPrefill.forageEntries.map((entry: any) => (
+          'forageType' in entry
+            ? { forageType: entry.forageType || '', bloomingPeriod: entry.bloomingPeriod || '' }
+            : { forageType: entry.name || '', bloomingPeriod: `${entry.bloomStartMonth || ''}${entry.bloomEndMonth ? `-${entry.bloomEndMonth}` : ''}` }
+        ))
+      : base.forage_entries;
     return {
       ...base,
       name: proposalPrefill.plotName || base.name,
+      province: proposalPrefill.province || base.province,
       district: proposalPrefill.district || base.district,
       ds_division: proposalPrefill.dsDivision || base.ds_division,
+      established_date: proposalPrefill.moveInDate || base.established_date,
       contract_start: proposalPrefill.moveInDate || base.contract_start,
       contract_end: proposalPrefill.moveOutDate || base.contract_end,
       max_hive_capacity: proposalPrefill.hiveCount != null ? String(proposalPrefill.hiveCount) : base.max_hive_capacity,
       land_ownership: 'not_owned',
+      landlord_name: proposalPrefill.ownerName || base.landlord_name,
+      landlord_contact: proposalPrefill.ownerContact || base.landlord_contact,
+      payment_terms: paymentTerms,
+      payment_amount_lkr: proposalPrefill.cashRentLkr != null ? String(proposalPrefill.cashRentLkr) : base.payment_amount_lkr,
+      honey_share_kgs: proposalPrefill.honeyShareKg != null ? String(proposalPrefill.honeyShareKg) : base.honey_share_kgs,
+      water_availability: mapWaterAvailability(proposalPrefill.waterAvailability),
+      vehicle_accessibility: proposalPrefill.vehicleAccess || base.vehicle_accessibility,
+      gps_latitude: proposalPrefill.gpsLatitude != null ? String(proposalPrefill.gpsLatitude) : base.gps_latitude,
+      gps_longitude: proposalPrefill.gpsLongitude != null ? String(proposalPrefill.gpsLongitude) : base.gps_longitude,
+      forage_entries: forageEntries.length > 0 ? forageEntries : base.forage_entries,
     };
   });
 
