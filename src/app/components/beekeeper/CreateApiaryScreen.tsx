@@ -20,7 +20,7 @@ type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'cli
 
 interface Props {
   selectedLanguage: Language; onLanguageChange: (lang: Language) => void; onNavigate: (tab: NavTab) => void;
-  onClose: () => void; initialApiary?: Apiary; onLogout: () => void;
+  onClose: () => void; initialApiary?: Apiary; onLogout: () => void; onCreated?: (id: number) => void;
 }
 
 interface ApiaryFormState {
@@ -112,7 +112,7 @@ function fileToDataUrl(file: File) {
   });
 }
 
-export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavigate, onClose, initialApiary, onLogout }: Props) {
+export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavigate, onClose, initialApiary, onLogout, onCreated }: Props) {
   const isEdit = !!initialApiary;
   const location = useLocation();
   const proposalPrefill = (location.state as any)?.prefillApiary as {
@@ -328,9 +328,12 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
       if (isEdit && initialApiary) {
         await apiariesService.update(initialApiary.id, payload);
       } else {
-        await apiariesService.create(payload);
+        const created = await apiariesService.create(payload);
+        onCreated?.(created.id);
       }
-      onClose();
+      if (isEdit || !onCreated) {
+        onClose();
+      }
     } catch (submitError: any) {
       setError(submitError.message || 'Failed to save apiary');
       setSaving(false);

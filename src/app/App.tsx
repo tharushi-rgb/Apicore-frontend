@@ -197,6 +197,7 @@ function AdminCreateApiaryPage({ lang, onLangChange, onLogout }: { lang: Languag
       onLogout={onLogout}
       onNavigate={(tab) => navigate(ADMIN_NAV_ROUTES[tab])}
       onClose={() => navigate('/apiaries')}
+      onCreated={(id) => navigate(`/apiaries/${id}`)}
       initialApiary={editApiary}
     />
   );

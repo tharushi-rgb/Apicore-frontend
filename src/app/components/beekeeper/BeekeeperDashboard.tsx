@@ -140,6 +140,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         { data: harvests, error: harvestError },
         { data: allExpenses, error: expenseError },
         { data: inspections, error: inspectionError },
+        { data: apiaryRows, error: apiaryError },
       ] = await Promise.all([
         supabase
           .from('harvests')
@@ -153,11 +154,16 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
           .from('inspections')
           .select('hive_id, apiary_id, pest_detected, hives(id, name, apiary_id, apiaries(id, name)), apiaries(id, name)')
           .eq('user_id', userId),
+        supabase
+          .from('apiaries')
+          .select('id, district, area, forage_primary')
+          .eq('user_id', userId),
       ]);
 
       if (harvestError) console.warn('Harvest error:', harvestError);
       if (expenseError) console.warn('Expense error:', expenseError);
       if (inspectionError) console.warn('Inspection error:', inspectionError);
+      if (apiaryError) console.warn('Apiary error:', apiaryError);
 
       // ── Hive rankings ──────────────────────────────────────────────
       // Harvest: highest total qty per hive
@@ -273,8 +279,29 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         }
       });
 
+      (apiaryRows ?? []).forEach((apiary: any) => {
+        const district = (apiary.district || 'Unknown').trim();
+        const area = (apiary.area || district || 'Unknown').trim();
+        const key = `${district}|${area}`;
+        if (!forageAreaMap[key]) {
+          forageAreaMap[key] = {
+            id: Object.keys(forageAreaMap).length + 1,
+            district,
+            area,
+            display: area === district ? district : `${area}, ${district}`,
+            totalYield: 0,
+            records: 0,
+            forageRecords: [],
+          };
+        }
+        forageAreaMap[key].records += 1;
+        if (apiary.forage_primary && !forageAreaMap[key].forageRecords.includes(apiary.forage_primary)) {
+          forageAreaMap[key].forageRecords.push(apiary.forage_primary);
+        }
+      });
+
       const forageAreaRankData = Object.values(forageAreaMap)
-        .sort((a, b) => b.totalYield - a.totalYield)
+        .sort((a, b) => (b.totalYield - a.totalYield) || (b.records - a.records))
         .map((entry, index) => ({ ...entry, id: index + 1 }));
       setForageAreaRank(forageAreaRankData);
       console.log('Forage area rank set:', forageAreaRankData.length, 'entries');

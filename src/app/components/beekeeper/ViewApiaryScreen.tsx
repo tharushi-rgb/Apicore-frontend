@@ -62,8 +62,8 @@ export function ViewApiaryScreen({ onBack, onAddHive, onEditApiary, onViewHive, 
         ]);
         setApiary(a);
         // Only show hives if apiary is active
-        const filteredHives = a.status === 'active' 
-          ? h.filter((hv: Hive) => hv.apiary_id === apiaryId)
+        const filteredHives = a.status === 'active'
+          ? h.filter((hv: Hive) => Number(hv.apiary_id) === apiaryId)
           : [];
         setHives(filteredHives);
         await loadHistory();
