@@ -806,7 +806,7 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
               </div>
             </div>
 
-            <div>
+            <div className="sm:border-l sm:border-stone-200 sm:pl-4">
               <label className={`${labelCls} min-h-[3rem]`}>Ant Protection *</label>
               <div className="flex gap-2">
                 {['yes', 'no'].map((value) => (
