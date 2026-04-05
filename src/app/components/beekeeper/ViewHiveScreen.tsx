@@ -757,6 +757,7 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
       console.error('Failed to save expense:', error);
       alert(`Failed to save expense: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setSavingQuickExpense(false);
+    }
     setSavingQuickExpense(false);
   };
 
@@ -786,6 +787,7 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
       console.error('Failed to save harvest:', error);
       alert(`Failed to save harvest: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setSavingQuickHarvest(false);
+    }
     setSavingQuickHarvest(false);
   };
 
@@ -826,6 +828,7 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
       console.error('Failed to save queen:', error);
       alert(`Failed to save queen: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setSavingQuickQueen(false);
+    }
     setSavingQuickQueen(false);
   };
 
