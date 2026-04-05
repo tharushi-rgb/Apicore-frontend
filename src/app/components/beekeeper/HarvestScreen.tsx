@@ -676,7 +676,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
                     {/* Actions */}
                     <div className="flex gap-2">
-                      <button className="flex-1 flex items-center justify-center gap-2 py-2 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors text-sm font-medium text-stone-700">
+                      <button className="flex-1 flex items-center justify-center gap-1 py-2 bg-stone-100 hover:bg-stone-200 rounded-full transition-colors text-sm font-medium text-stone-700 min-h-9">
                         <Eye className="w-4 h-4" />
                         <span>{t('viewDetails', selectedLanguage)}</span>
                       </button>
@@ -685,7 +685,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                           setEditingHarvest(record);
                           setShowRecordForm(true);
                         }}
-                        className="flex-1 flex items-center justify-center gap-2 py-2 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors text-sm font-medium text-amber-700"
+                        className="flex-1 flex items-center justify-center gap-1 py-2 bg-amber-100 hover:bg-amber-200 rounded-full transition-colors text-sm font-medium text-amber-700 min-h-9"
                       >
                         <Edit className="w-4 h-4" />
                         <span>{t('edit', selectedLanguage)}</span>

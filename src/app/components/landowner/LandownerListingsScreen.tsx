@@ -586,7 +586,7 @@ function ActionBtn({
   return (
     <button
       onClick={onClick}
-      className={`btn-compact inline-flex items-center justify-center gap-1 rounded-full border ${
+      className={`btn-compact inline-flex items-center justify-center gap-1 rounded-full border min-h-9 px-4 ${
         danger ? 'border-red-300 bg-red-50 text-red-700' : 'border-emerald-300 bg-emerald-50 text-emerald-700'
       }`}
     >

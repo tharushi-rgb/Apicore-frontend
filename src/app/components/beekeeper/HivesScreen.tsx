@@ -358,18 +358,18 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
 
                       {/* Actions */}
                       <div className="flex items-center gap-2 pt-1.5">
-                        <button onClick={() => onViewHive(hive.id)} className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-1.5">
-                          <Eye className="w-3.5 h-3.5" /><span className="text-xs">{t('view', selectedLanguage)}</span>
+                        <button onClick={() => onViewHive(hive.id)} className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-2 rounded-full font-medium transition-colors flex items-center justify-center gap-1 text-xs min-h-9">
+                          <Eye className="w-3.5 h-3.5" /><span>{t('view', selectedLanguage)}</span>
                         </button>
                         <button
                           onClick={() => onEditHive?.(hive)}
-                          className="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-700 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-1.5"
+                          className="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-700 py-2 rounded-full font-medium transition-colors flex items-center justify-center gap-1 text-xs min-h-9"
                         >
-                          <Pencil className="w-3.5 h-3.5" /><span className="text-xs">{t('edit', selectedLanguage)}</span>
+                          <Pencil className="w-3.5 h-3.5" /><span>{t('edit', selectedLanguage)}</span>
                         </button>
                         <button
                           onClick={() => { setActiveHiveId(hive.id); setShowHiveActions(true); }}
-                          className="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 p-2 rounded-lg transition-colors"
+                          className="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 p-2 rounded-full transition-colors min-h-9 flex items-center justify-center"
                         >
                           <MoreVertical className="w-3.5 h-3.5" />
                         </button>

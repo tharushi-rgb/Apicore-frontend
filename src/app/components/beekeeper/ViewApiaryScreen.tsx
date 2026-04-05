@@ -297,14 +297,14 @@ export function ViewApiaryScreen({ onBack, onAddHive, onEditApiary, onViewHive, 
                     </div>
                     <p className="text-sm text-stone-500">{h.queen_present ? 'Queen present' : 'Queenless'}</p>
                     <div className="mt-3 flex gap-2">
-                      <button onClick={() => onViewHive(h.id)} className="inline-flex items-center gap-1 rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-50">
+                      <button onClick={() => onViewHive(h.id)} className="inline-flex items-center gap-1 rounded-full border border-amber-300 px-4 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-50 min-h-9">
                         <Eye className="w-3.5 h-3.5" />
                         View
                       </button>
                       <button
                         onClick={() => onEditHive?.(h)}
                         disabled={!onEditHive}
-                        className="inline-flex items-center gap-1 rounded-lg border border-stone-300 px-3 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-1 rounded-full border border-stone-300 px-4 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-100 disabled:opacity-50 disabled:cursor-not-allowed min-h-9"
                       >
                         <Pencil className="w-3.5 h-3.5" />
                         Edit

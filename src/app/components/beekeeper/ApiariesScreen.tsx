@@ -404,15 +404,15 @@ function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon, h
         {/* Action buttons */}
         <div className="flex gap-2 pt-0.5">
           <button onClick={onView}
-            className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-1.5 rounded-lg text-[0.75rem] font-medium transition-colors flex items-center justify-center gap-1">
+            className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-1.5 rounded-full text-[0.75rem] font-medium transition-colors flex items-center justify-center gap-1 min-h-9">
             <Eye className="w-3.5 h-3.5" />{t('view', lang)}
           </button>
           <button onClick={onEdit}
-            className="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-700 py-1.5 rounded-lg text-[0.75rem] font-medium transition-colors flex items-center justify-center gap-1">
+            className="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-700 py-1.5 rounded-full text-[0.75rem] font-medium transition-colors flex items-center justify-center gap-1 min-h-9">
             <Pencil className="w-3.5 h-3.5" />{t('edit', lang)}
           </button>
           <button onClick={onAddHive}
-            className="flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 py-1.5 rounded-lg text-[0.75rem] font-medium transition-colors flex items-center justify-center gap-1">
+            className="flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 py-1.5 rounded-full text-[0.75rem] font-medium transition-colors flex items-center justify-center gap-1 min-h-9">
             <HiveIcon className="w-3.5 h-3.5" />{t('addHive', lang)}
           </button>
         </div>
