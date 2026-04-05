@@ -489,13 +489,15 @@ export function LandownerListingsScreen({
             </div>
 
             {editorMode !== 'view' && (
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => saveListing('draft')}
-                  className="rounded-xl border border-stone-300 bg-white py-2.5 text-sm font-semibold text-stone-800"
-                >
-                  Save as Draft
-                </button>
+              <div className={`mt-3 ${form.listingId && listings.find((l) => l.id === form.listingId)?.status === 'published' ? 'grid grid-cols-1' : 'grid grid-cols-2'} gap-2`}>
+                {(!form.listingId || listings.find((l) => l.id === form.listingId)?.status === 'draft') && (
+                  <button
+                    onClick={() => saveListing('draft')}
+                    className="rounded-xl border border-stone-300 bg-white py-2.5 text-sm font-semibold text-stone-800"
+                  >
+                    Save as Draft
+                  </button>
+                )}
                 <button
                   onClick={() => saveListing('published')}
                   className="rounded-xl bg-emerald-700 py-2.5 text-sm font-semibold text-white"
