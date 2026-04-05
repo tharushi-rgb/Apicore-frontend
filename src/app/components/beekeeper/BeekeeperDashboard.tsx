@@ -312,6 +312,29 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
 
   const hives = data?.hives || [];
   const apiaries = data?.apiaries || [];
+  const forageAreaDisplay = (() => {
+    if (forageAreaRank.length > 0) return forageAreaRank;
+    const fallbackMap: Record<string, ForageAreaEntry> = {};
+    apiaries.forEach((apiary: any) => {
+      const district = (apiary.district || 'Unknown').trim();
+      const area = (apiary.area || district || 'Unknown').trim();
+      const key = `${district}|${area}`;
+      if (!fallbackMap[key]) {
+        fallbackMap[key] = {
+          id: Object.keys(fallbackMap).length + 1,
+          district,
+          area,
+          display: area === district ? district : `${area}, ${district}`,
+          totalYield: 0,
+          records: 0,
+          forageRecords: [],
+        };
+      }
+      fallbackMap[key].records += 1;
+    });
+    return Object.values(fallbackMap).sort((a, b) => b.records - a.records).map((entry, index) => ({ ...entry, id: index + 1 }));
+  })();
+  const isForageAreaFallback = forageAreaRank.length === 0 && forageAreaDisplay.length > 0;
 
   const queenAgeData = {
     low: hives.filter((h: any) => h.queen_age_risk === 'low').map((h: any) => ({
@@ -573,11 +596,11 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
                     </button>
                   )}
                 </div>
-                {forageAreaRank.length === 0 ? (
+                {forageAreaDisplay.length === 0 ? (
                   <p className="text-center text-stone-400 text-[0.75rem] py-3">No area yield data available</p>
                 ) : (
                   <div className="space-y-2">
-                    {forageAreaRank.slice(0, 3).map((area, idx) => (
+                    {forageAreaDisplay.slice(0, 3).map((area, idx) => (
                       <button
                         key={`${area.district}-${area.area}-${idx}`}
                         onClick={() => setShowAreaPerformanceOverlay(true)}
@@ -585,10 +608,16 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
                       >
                         <div className="flex items-center justify-between gap-2">
                           <p className="text-[0.78rem] font-semibold text-stone-800 truncate">#{idx + 1} {area.display}</p>
-                          <p className="text-[0.75rem] font-bold text-emerald-700">{area.totalYield.toFixed(1)} kg</p>
+                          <p className="text-[0.75rem] font-bold text-emerald-700">
+                            {isForageAreaFallback ? `${area.records} apiaries` : `${area.totalYield.toFixed(1)} kg`}
+                          </p>
                         </div>
                         <p className="text-[0.68rem] text-stone-600 mt-0.5 truncate">
-                          {area.forageRecords.length > 0 ? `Recorded forage: ${area.forageRecords.join(', ')}` : 'No forage names recorded yet'}
+                          {isForageAreaFallback
+                            ? 'Based on registered apiaries'
+                            : area.forageRecords.length > 0
+                              ? `Recorded forage: ${area.forageRecords.join(', ')}`
+                              : 'No forage names recorded yet'}
                         </p>
                       </button>
                     ))}
