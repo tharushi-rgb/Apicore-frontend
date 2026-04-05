@@ -308,7 +308,11 @@ function FeedingForm({ hiveId, initial, onClose, onSaved }: { hiveId: number; in
       const d: any = { hive_id: hiveId, feeding_date: f.feeding_date, feed_type: f.feed_type, quantity: f.quantity ? parseFloat(f.quantity) : null, unit: f.unit, concentration: f.concentration || null, notes: f.notes || null };
       if (initial) await feedingsService.update(initial.id, d); else await feedingsService.create(d);
       onSaved();
-    } catch { setSaving(false); }
+    } catch (error) { 
+      console.error('Failed to save feeding:', error);
+      alert(`Failed to save feeding: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setSaving(false); 
+    }
   };
   return (
     <div className="absolute inset-0 bg-black/50 z-50 flex items-end justify-center"><div className="bg-white w-full max-w-md rounded-t-2xl p-3 max-h-[85vh] overflow-y-auto">
@@ -342,7 +346,11 @@ function ComponentForm({ hiveId, initial, onClose, onSaved }: { hiveId: number; 
       const d: any = { hive_id: hiveId, component_type: f.component_type, quantity: parseInt(f.quantity) || 1, condition: f.condition, installed_date: f.installed_date, notes: f.notes || null };
       if (initial) await componentsService.update(initial.id, d); else await componentsService.create(d);
       onSaved();
-    } catch { setSaving(false); }
+    } catch (error) { 
+      console.error('Failed to save component:', error);
+      alert(`Failed to save component: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setSaving(false); 
+    }
   };
   return (
     <div className="absolute inset-0 bg-black/50 z-50 flex items-end justify-center"><div className="bg-white w-full max-w-md rounded-t-2xl p-3 max-h-[85vh] overflow-y-auto">
@@ -377,7 +385,11 @@ function QueenForm({ hiveId, initial, onClose, onSaved }: { hiveId: number; init
       const d: any = { hive_id: hiveId, marking_color: f.marking_color || null, source: f.source || null, introduction_date: f.introduction_date, status: f.status, species: f.species || null, notes: f.notes || null };
       if (initial) await queensService.update(initial.id, d); else await queensService.create(d);
       onSaved();
-    } catch { setSaving(false); }
+    } catch (error) { 
+      console.error('Failed to save queen:', error);
+      alert(`Failed to save queen: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setSaving(false); 
+    }
   };
   return (
     <div className="absolute inset-0 bg-black/50 z-50 flex items-end justify-center"><div className="bg-white w-full max-w-md rounded-t-2xl p-3 max-h-[85vh] overflow-y-auto">
@@ -417,7 +429,11 @@ function TreatmentForm({ hiveId, initial, onClose, onSaved }: { hiveId: number; 
       const d: any = { hive_id: hiveId, treatment_type: f.treatment_type, treatment_date: f.treatment_date, product_name: f.product_name || null, dosage: f.dosage || null, application_method: f.application_method || null, end_date: f.end_date || null, outcome: f.outcome || null, notes: f.notes || null };
       if (initial) await treatmentsService.update(initial.id, d); else await treatmentsService.create(d);
       onSaved();
-    } catch { setSaving(false); }
+    } catch (error) { 
+      console.error('Failed to save treatment:', error);
+      alert(`Failed to save treatment: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setSaving(false); 
+    }
   };
   return (
     <div className="absolute inset-0 bg-black/50 z-50 flex items-end justify-center"><div className="bg-white w-full max-w-md rounded-t-2xl p-3 max-h-[85vh] overflow-y-auto">
@@ -449,7 +465,11 @@ function TransferForm({ hiveId, onClose, onSaved }: { hiveId: number; onClose: (
     try {
       await transfersService.create({ source_hive_id: hiveId, target_hive_id: parseInt(f.target_hive_id), transfer_date: f.transfer_date, transferType: f.transfer_type, queenMoved: f.queen_moved, broodFramesMoved: parseInt(f.brood_frames_moved) || 0, notes: f.notes || undefined });
       onSaved();
-    } catch { setSaving(false); }
+    } catch (error) { 
+      console.error('Failed to save transfer:', error);
+      alert(`Failed to save transfer: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setSaving(false); 
+    }
   };
   return (
     <div className="absolute inset-0 bg-black/50 z-50 flex items-end justify-center"><div className="bg-white w-full max-w-md rounded-t-2xl p-3 max-h-[85vh] overflow-y-auto">
@@ -485,7 +505,11 @@ function MoveHiveForm({ hiveId, onClose, onSaved }: { hiveId: number; onClose: (
     try {
       await hivesService.moveToApiary(hiveId, parseInt(targetApiaryId, 10));
       onSaved();
-    } catch { setSaving(false); }
+    } catch (error) { 
+      console.error('Failed to move hive:', error);
+      alert(`Failed to move hive: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setSaving(false); 
+    }
   };
   return (
     <div className="absolute inset-0 bg-black/50 z-50 flex items-end justify-center"><div className="bg-white w-full max-w-md rounded-t-2xl p-3 max-h-[85vh] overflow-y-auto">
@@ -573,13 +597,13 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
   const [showTransferForm, setShowTransferForm] = useState(false);
   const [showMoveForm, setShowMoveForm] = useState(false);
 
-  const fetchHive = async () => { try { const h = await hivesService.getById(hiveId); setHive(h); } catch {} };
-  const fetchInspections = async () => { try { setInspections(await inspectionsService.getByHive(hiveId)); } catch {} };
-  const fetchFeedings = async () => { try { setFeedings(await feedingsService.getByHive(hiveId)); } catch {} };
-  const fetchComponents = async () => { try { setComponents(await componentsService.getByHive(hiveId)); } catch {} };
-  const fetchQueens = async () => { try { setQueens(await queensService.getByHive(hiveId)); } catch {} };
-  const fetchTreatments = async () => { try { setTreatments(await treatmentsService.getByHive(hiveId)); } catch {} };
-  const fetchTransfers = async () => { try { setTransfers(await transfersService.getAll(hiveId)); } catch {} };
+  const fetchHive = async () => { try { const h = await hivesService.getById(hiveId); setHive(h); } catch (err) { console.error('Failed to fetch hive:', err); } };
+  const fetchInspections = async () => { try { setInspections(await inspectionsService.getByHive(hiveId)); } catch (err) { console.error('Failed to fetch inspections:', err); } };
+  const fetchFeedings = async () => { try { setFeedings(await feedingsService.getByHive(hiveId)); } catch (err) { console.error('Failed to fetch feedings:', err); } };
+  const fetchComponents = async () => { try { setComponents(await componentsService.getByHive(hiveId)); } catch (err) { console.error('Failed to fetch components:', err); } };
+  const fetchQueens = async () => { try { setQueens(await queensService.getByHive(hiveId)); } catch (err) { console.error('Failed to fetch queens:', err); } };
+  const fetchTreatments = async () => { try { setTreatments(await treatmentsService.getByHive(hiveId)); } catch (err) { console.error('Failed to fetch treatments:', err); } };
+  const fetchTransfers = async () => { try { setTransfers(await transfersService.getAll(hiveId)); } catch (err) { console.error('Failed to fetch transfers:', err); } };
   const fetchExpenses = async () => {
     try {
       setExpenses(await expensesService.getByHive(hiveId));
@@ -633,7 +657,13 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
   const handleDeleteHive = async () => {
     if (!hive) return;
     if (!confirm(`Delete hive "${hive.name}"? All inspections, feedings, treatments and other records will also be deleted. This cannot be undone.`)) return;
-    try { await hivesService.delete(hive.id); onBack(); } catch {}
+    try { 
+      await hivesService.delete(hive.id); 
+      onBack(); 
+    } catch (error) {
+      console.error('Failed to delete hive:', error);
+      alert(`Failed to delete hive: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
   const deleteInspection = async (id: number) => { if (!confirm('Delete this inspection?')) return; await inspectionsService.delete(id); fetchInspections(); };
   const deleteFeeding = async (id: number) => { if (!confirm('Delete?')) return; await feedingsService.delete(id); fetchFeedings(); };
@@ -694,8 +724,10 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
         treatment_used: '',
         general_remarks: '',
       }));
-    } catch {
-      // Keep lightweight behavior to match existing screen error handling.
+    } catch (error) {
+      console.error('Failed to save inspection:', error);
+      alert(`Failed to save inspection: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setSavingQuickInspection(false);
     }
     setSavingQuickInspection(false);
   };
@@ -721,9 +753,10 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
         description: '',
         expense_date: new Date().toISOString().split('T')[0],
       }));
-    } catch {
-      // Keep behavior consistent with the rest of this screen.
-    }
+    } catch (error) {
+      console.error('Failed to save expense:', error);
+      alert(`Failed to save expense: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setSavingQuickExpense(false);
     setSavingQuickExpense(false);
   };
 
@@ -749,9 +782,10 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
         notes: '',
         harvest_date: new Date().toISOString().split('T')[0],
       }));
-    } catch {
-      // Keep behavior consistent with the rest of this screen.
-    }
+    } catch (error) {
+      console.error('Failed to save harvest:', error);
+      alert(`Failed to save harvest: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setSavingQuickHarvest(false);
     setSavingQuickHarvest(false);
   };
 
@@ -788,14 +822,33 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
         breed_color: '',
         status: 'active',
       }));
-    } catch {
-      // Keep behavior consistent with the rest of this screen.
-    }
+    } catch (error) {
+      console.error('Failed to save queen:', error);
+      alert(`Failed to save queen: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setSavingQuickQueen(false);
     setSavingQuickQueen(false);
   };
 
-  const deleteExpense = async (id: number) => { if (!confirm('Delete this expense?')) return; await expensesService.delete(id); fetchExpenses(); };
-  const deleteHarvest = async (id: number) => { if (!confirm('Delete this harvest?')) return; await harvestsService.delete(id); fetchHarvests(); };
+  const deleteExpense = async (id: number) => { 
+    if (!confirm('Delete this expense?')) return; 
+    try {
+      await expensesService.delete(id); 
+      await fetchExpenses();
+    } catch (error) {
+      console.error('Failed to delete expense:', error);
+      alert(`Failed to delete expense: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+  const deleteHarvest = async (id: number) => { 
+    if (!confirm('Delete this harvest?')) return; 
+    try {
+      await harvestsService.delete(id); 
+      await fetchHarvests();
+    } catch (error) {
+      console.error('Failed to delete harvest:', error);
+      alert(`Failed to delete harvest: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
 
   const expenseCategoryOptions = [
     { value: 'fuel_transport', label: '⛽ Fuel & Transport' },

@@ -26,7 +26,15 @@ export function NotificationsScreen({ selectedLanguage, onLanguageChange, onNavi
   const accentBg = isLandowner ? 'bg-emerald-600' : 'bg-amber-500';
   const accentBorder = isLandowner ? 'border-emerald-500' : 'border-amber-500';
 
-  const fetchNotifications = async () => { try { setNotifications(await notificationsService.getAll()); } catch {} setLoading(false); };
+  const fetchNotifications = async () => {
+    try {
+      setNotifications(await notificationsService.getAll());
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => { fetchNotifications(); }, []);
 
   const filtered = filter === 'unread' ? notifications.filter(n => !n.is_read) : notifications;

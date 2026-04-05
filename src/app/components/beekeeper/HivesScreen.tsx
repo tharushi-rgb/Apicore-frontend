@@ -42,8 +42,17 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
   const activeTab: NavTab = 'hives';
 
   useEffect(() => {
-    hivesService.getAll().then(h => { setHives(h); setLoading(false); }).catch(() => setLoading(false));
-    apiariesService.getAll().then(setApiaries).catch(() => {});
+    hivesService.getAll()
+      .then(h => { setHives(h); setLoading(false); })
+      .catch((error) => {
+        console.error('Failed to load hives:', error);
+        setLoading(false);
+      });
+    apiariesService.getAll()
+      .then(setApiaries)
+      .catch((error) => {
+        console.error('Failed to load apiaries:', error);
+      });
   }, []);
 
   const filterOptions = [
@@ -381,7 +390,11 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
           onClose={() => setShowMoveForm(false)}
           onSaved={() => {
             setShowMoveForm(false);
-            hivesService.getAll().then(h => setHives(h)).catch(() => {});
+            hivesService.getAll()
+              .then(h => setHives(h))
+              .catch((error) => {
+                console.error('Failed to refresh hives:', error);
+              });
           }}
         />
       )}
@@ -413,9 +426,10 @@ function MoveHiveFormModal({ hiveId, onClose, onSaved }: { hiveId: number; onClo
     try {
       await hivesService.moveToApiary(hiveId, parseInt(targetApiaryId, 10));
       onSaved();
-    } catch {
+    } catch (error) {
+      console.error('Failed to move hive:', error);
       setSaving(false);
-      alert('Failed to move hive');
+      alert(`Failed to move hive: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 

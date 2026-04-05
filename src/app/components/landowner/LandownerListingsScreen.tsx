@@ -71,7 +71,8 @@ export function LandownerListingsScreen({
   const plots = useMemo(() => {
     try {
       return landownerMarketplaceService.getPlots();
-    } catch {
+    } catch (error) {
+      console.error('Failed to get plots:', error);
       return [];
     }
   }, [version]);
@@ -81,7 +82,8 @@ export function LandownerListingsScreen({
       const all = landownerMarketplaceService.getListings();
       if (!pendingFilterOnly) return all;
       return all.filter((listing) => landownerMarketplaceService.getBidsForListing(listing.id).some((bid) => bid.status === 'pending'));
-    } catch {
+    } catch (error) {
+      console.error('Failed to get listings:', error);
       return [];
     }
   }, [version, pendingFilterOnly]);
@@ -89,7 +91,8 @@ export function LandownerListingsScreen({
   const contracts = useMemo(() => {
     try {
       return landownerMarketplaceService.getContracts();
-    } catch {
+    } catch (error) {
+      console.error('Failed to get contracts:', error);
       return [];
     }
   }, [version]);
@@ -258,7 +261,8 @@ export function LandownerListingsScreen({
           ? 'Move-out approved. Contract marked as Completed. Both parties can leave reviews.'
           : 'Move-out request declined. Contract stays active.',
       });
-    } catch {
+    } catch (error) {
+      console.error('Failed to update move-out request:', error);
       setMessage({ type: 'error', text: 'Failed to update move-out request' });
     }
   };

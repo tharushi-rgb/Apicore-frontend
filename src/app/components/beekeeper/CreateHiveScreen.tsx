@@ -233,13 +233,21 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
         };
         setForm(rebuilt);
       })
-      .catch(() => {});
+      .catch((error) => {
+        console.error('Failed to load location context:', error);
+      });
     return () => {
       active = false;
     };
   }, [initialHive?.id, contextApiary?.id, user?.district, user?.province]);
 
-  useEffect(() => { apiariesService.getAll().then(setApiaries).catch(()=>{}); }, []);
+  useEffect(() => {
+    apiariesService.getAll()
+      .then(setApiaries)
+      .catch((error) => {
+        console.error('Failed to load apiaries:', error);
+      });
+  }, []);
 
   const availableDistricts = getDistrictsByProvince(form.province);
   const availableDivisions = getDsDivisionsByDistrict(form.district);
@@ -280,7 +288,13 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
   const [nearbyWarning, setNearbyWarning] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { hivesService.getAll().then(setAllHives).catch(() => {}); }, []);
+  useEffect(() => {
+    hivesService.getAll()
+      .then(setAllHives)
+      .catch((error) => {
+        console.error('Failed to load hives:', error);
+      });
+  }, []);
 
   useEffect(() => {
     const lat = parseFloat(form.gps_latitude);

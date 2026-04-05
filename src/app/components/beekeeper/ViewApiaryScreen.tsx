@@ -57,7 +57,8 @@ export function ViewApiaryScreen({ onBack, onAddHive, onEditApiary, onViewHive, 
     try {
       const hist = await apiariesService.getHistory(apiaryId);
       setHistory(hist);
-    } catch {
+    } catch (error) {
+      console.error('Failed to load history:', error);
       setHistory([]);
     }
   };
@@ -67,7 +68,14 @@ export function ViewApiaryScreen({ onBack, onAddHive, onEditApiary, onViewHive, 
     if (hives.length > 0) { alert('Cannot delete apiary with hives. Remove or move all hives first.'); return; }
     if (!confirm(`Delete apiary "${apiary.name}"? This cannot be undone.`)) return;
     setDeleting(true);
-    try { await apiariesService.delete(apiary.id); onBack(); } catch { setDeleting(false); }
+    try { 
+      await apiariesService.delete(apiary.id); 
+      onBack(); 
+    } catch (error) {
+      console.error('Failed to delete apiary:', error);
+      alert(`Failed to delete apiary: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setDeleting(false);
+    }
   };
 
   useEffect(() => {
@@ -83,7 +91,9 @@ export function ViewApiaryScreen({ onBack, onAddHive, onEditApiary, onViewHive, 
           : [];
         setHives(filteredHives);
         await loadHistory();
-      } catch {}
+      } catch (error) {
+        console.error('Failed to load apiary:', error);
+      }
       setLoading(false);
     };
     fetch();
@@ -104,7 +114,9 @@ export function ViewApiaryScreen({ onBack, onAddHive, onEditApiary, onViewHive, 
       setWeatherLoading(true);
       planningService.getApiaryWeather(apiary.gps_latitude!, apiary.gps_longitude!, apiary.district)
         .then(w => setWeather(w))
-        .catch(() => {})
+        .catch((error) => {
+          console.error('Failed to load weather:', error);
+        })
         .finally(() => setWeatherLoading(false));
     }
   }, [activeTab, apiary, apiaryId, weather, weatherLoading]);

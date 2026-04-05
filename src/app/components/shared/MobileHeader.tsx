@@ -47,7 +47,9 @@ export function MobileHeader({
       const all = await notificationsService.getAll();
       setNotifications(all);
       setUnreadCount(all.filter(n => !n.is_read).length);
-    } catch {}
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+    }
   };
 
   useEffect(() => {
@@ -63,7 +65,9 @@ export function MobileHeader({
       try {
         await notificationsService.markAllRead();
         setTimeout(fetchNotifications, 500);
-      } catch {}
+      } catch (error) {
+        console.error('Failed to mark notifications as read:', error);
+      }
     }
   };
 

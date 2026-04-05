@@ -93,7 +93,9 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
         setEditDsDivision((p as any).ds_division || '');
         setEditBusinessRegNo(p.business_reg_no || '');
       })
-      .catch(() => {})
+      .catch((error) => {
+        console.error('Failed to load profile:', error);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -104,7 +106,8 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
   const plots = useMemo(() => {
     try {
       return landownerMarketplaceService.getPlots();
-    } catch {
+    } catch (error) {
+      console.error('Failed to get plots:', error);
       return [];
     }
   }, [plotsVersion]);
@@ -161,7 +164,8 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
       setProfile(updated);
       setIsEditingProfile(false);
       setSaveMessage('Profile updated successfully');
-    } catch {
+    } catch (error) {
+      console.error('Failed to update profile:', error);
       setSaveMessage('Failed to update profile');
     } finally {
       setIsSaving(false);
