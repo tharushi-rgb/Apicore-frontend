@@ -209,14 +209,14 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                 />
               </div>
 
-              <div className="bg-white rounded-xl border border-stone-200 p-3 sm:p-3 shadow-sm">
-                <div className="flex flex-col gap-3 md:grid md:[grid-template-columns:minmax(9rem,max-content)_minmax(13rem,1fr)_minmax(11rem,max-content)] md:gap-4 md:items-start">
-                  <div className="flex flex-col min-w-0">
-                    <p className="text-[0.75rem] font-bold text-stone-800 mb-0.5">Status</p>
+              <div className="bg-white rounded-xl border border-stone-200 p-2.5 sm:p-3 shadow-sm w-full max-w-full overflow-hidden">
+                <div className="flex flex-col gap-2 w-full max-w-full md:grid md:[grid-template-columns:minmax(8rem,max-content)_minmax(12rem,1fr)_minmax(10rem,max-content)] md:gap-3 md:items-start">
+                  <div className="flex flex-col min-w-0 w-full max-w-full">
+                    <p className="text-[0.7rem] font-bold text-stone-800 mb-0.5">Status</p>
                     <select
                       value={filters.status}
                       onChange={(event) => setFilters((previous) => ({ ...previous, status: event.target.value as typeof filters.status }))}
-                      className="w-full sm:w-auto md:w-auto rounded-lg border border-stone-300 px-1.5 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
+                      className="w-full max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
                     >
                       <option value="all">Any</option>
                       <option value="active">Active</option>
@@ -225,44 +225,44 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                     </select>
                   </div>
 
-                  <div className="flex flex-col min-w-0">
-                    <p className="text-[0.75rem] font-bold text-stone-800 mb-1">Established Between</p>
-                    <div className="flex flex-col gap-1.5">
+                  <div className="flex flex-col min-w-0 w-full max-w-full">
+                    <p className="text-[0.7rem] font-bold text-stone-800 mb-1">Established Between</p>
+                    <div className="flex flex-col gap-1">
                       <input
                         type="date"
                         value={filters.dateFrom}
                         onChange={(event) => setFilters((previous) => ({ ...previous, dateFrom: event.target.value }))}
-                        className="w-full rounded-lg border border-stone-300 px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
+                        className="w-full max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
                         placeholder="From"
                       />
                       <input
                         type="date"
                         value={filters.dateTo}
                         onChange={(event) => setFilters((previous) => ({ ...previous, dateTo: event.target.value }))}
-                        className="w-full rounded-lg border border-stone-300 px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
+                        className="w-full max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
                         placeholder="To"
                       />
                     </div>
                   </div>
 
-                  <div className="flex flex-col min-w-0">
-                    <p className="text-[0.75rem] font-bold text-stone-800 mb-1">Health Filters</p>
-                    <div className="flex flex-wrap gap-1.5 items-center">
+                  <div className="flex flex-col min-w-0 w-full max-w-full">
+                    <p className="text-[0.7rem] font-bold text-stone-800 mb-1">Health Filters</p>
+                    <div className="flex flex-wrap gap-1 items-center">
                       <button
                         onClick={() => toggleHealthFilter('queenlessOnly')}
-                        className={`px-2.5 py-1.5 rounded-full text-[0.75rem] font-semibold transition-all whitespace-nowrap ${filters.queenlessOnly ? 'bg-red-100 text-red-900 border-2 border-red-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
+                        className={`px-2 py-1 rounded-full text-[0.7rem] font-semibold transition-all ${filters.queenlessOnly ? 'bg-red-100 text-red-900 border border-red-400 shadow-sm' : 'bg-stone-100 text-stone-700 border border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
                         Queenless Hives
                       </button>
                       <button
                         onClick={() => toggleHealthFilter('pestOnly')}
-                        className={`px-2.5 py-1.5 rounded-full text-[0.75rem] font-semibold transition-all whitespace-nowrap ${filters.pestOnly ? 'bg-amber-100 text-amber-900 border-2 border-amber-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
+                        className={`px-2 py-1 rounded-full text-[0.7rem] font-semibold transition-all ${filters.pestOnly ? 'bg-amber-100 text-amber-900 border border-amber-400 shadow-sm' : 'bg-stone-100 text-stone-700 border border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
                         Pest Alerts
                       </button>
                       <button
                         onClick={() => toggleHealthFilter('healthyOnly')}
-                        className={`px-2.5 py-1.5 rounded-full text-[0.75rem] font-semibold transition-all whitespace-nowrap ${filters.healthyOnly ? 'bg-emerald-100 text-emerald-900 border-2 border-emerald-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
+                        className={`px-2 py-1 rounded-full text-[0.7rem] font-semibold transition-all ${filters.healthyOnly ? 'bg-emerald-100 text-emerald-900 border border-emerald-400 shadow-sm' : 'bg-stone-100 text-stone-700 border border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
                         Healthy Only
                       </button>
