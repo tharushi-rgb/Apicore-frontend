@@ -22,36 +22,33 @@ export function LocationSelectorField({
 }: LocationSelectorFieldProps) {
   const [showMapPicker, setShowMapPicker] = useState(false);
 
-  const [pendingLocation, setPendingLocation] = useState(() => {
+  const [pendingLocation, setPendingLocation] = useState<{ lat: number; lng: number } | null>(() => {
     if (latitude && longitude) {
       return { lat: parseFloat(latitude), lng: parseFloat(longitude) };
     }
-    return getDistrictCenter(district);
+    return null; // No pre-selected location if GPS is empty
   });
 
   const openMapPicker = () => {
-    const fallback = getDistrictCenter(district);
-    const nextLocation = latitude && longitude
-      ? { lat: parseFloat(latitude), lng: parseFloat(longitude) }
-      : fallback;
-    setPendingLocation(nextLocation);
+    if (latitude && longitude) {
+      // If GPS is already set, use it
+      setPendingLocation({ lat: parseFloat(latitude), lng: parseFloat(longitude) });
+    } else {
+      // If GPS is NOT set, use district center as reference only, not selection
+      setPendingLocation(getDistrictCenter(district));
+    }
     setShowMapPicker(true);
-  };
-
-  const applyLocation = () => {
-    onChange(pendingLocation.lat.toFixed(6), pendingLocation.lng.toFixed(6));
-    setShowMapPicker(false);
   };
 
   return (
     <>
-      {showMapPicker && (
+      {showMapPicker && pendingLocation && (
         <div className="absolute inset-0 z-50 bg-black/50 flex items-center justify-center px-3 py-4">
           <div className="w-[min(92vw,22rem)] bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-stone-200">
               <div>
                 <h2 className="text-[0.95rem] font-semibold text-stone-800">Select location</h2>
-                <p className="text-[0.72rem] text-stone-500">Tap map and confirm coordinates.</p>
+                <p className="text-[0.72rem] text-stone-500">{latitude && longitude ? 'Adjust or confirm location' : 'Tap map to select location'}</p>
               </div>
               <button
                 type="button"
@@ -87,7 +84,10 @@ export function LocationSelectorField({
                 </button>
                 <button
                   type="button"
-                  onClick={applyLocation}
+                  onClick={() => {
+                    onChange(pendingLocation.lat.toFixed(6), pendingLocation.lng.toFixed(6));
+                    setShowMapPicker(false);
+                  }}
                   className="app-btn-primary px-3 py-2"
                 >
                   Select
