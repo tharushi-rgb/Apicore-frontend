@@ -7,7 +7,7 @@ import { expensesService } from '../../services/finance';
 import { apiariesService } from '../../services/apiaries';
 import { authService } from '../../services/auth';
 import { supabase } from '../../services/supabaseClient';
-import { AlertTriangle, Bug, ClipboardList, Hexagon as HiveIcon, Leaf, Sprout, Wallet, Wheat, X } from 'lucide-react';
+import { AlertTriangle, ClipboardList, Hexagon as HiveIcon, Leaf, Sprout, Wallet, Wheat, X } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { t } from '../../i18n';
@@ -402,7 +402,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
                     <StatBlock title={t('active', selectedLanguage)} value={activeHiveCount} tone="amber" icon={HiveIcon} />
                     <StatBlock title={t('inactive', selectedLanguage)} value={inactiveHiveCount} tone="stone" icon={ClipboardList} />
                     <StatBlock title={t('queenless', selectedLanguage)} value={queenlessHiveCount} tone="red" icon={AlertTriangle} />
-                    <StatBlock title={t('pests', selectedLanguage)} value={pestAlertCount} tone="red" icon={Bug} />
+                    <StatBlock title={t('pests', selectedLanguage)} value={pestAlertCount} tone="red" />
                   </div>
                 </div>
                 <div>
@@ -653,13 +653,13 @@ function StatBlock({
   title: string;
   value: number;
   tone: 'amber' | 'emerald' | 'red' | 'blue' | 'stone';
-  icon: any;
+  icon?: any;
 }) {
   const toneClass = { amber: 'bg-amber-100 text-amber-900', emerald: 'bg-emerald-100 text-emerald-900', red: 'bg-red-100 text-red-900', blue: 'bg-blue-100 text-blue-900', stone: 'bg-stone-100 text-stone-900' };
   return (
     <div className={`rounded-lg p-1.5 text-center ${toneClass[tone]}`}>
       <div className="flex items-center justify-center gap-0.5">
-        <Icon className="w-3 h-3 opacity-80" />
+        {Icon && <Icon className="w-3 h-3 opacity-80" />}
         <p className="text-caption font-medium opacity-80">{title}</p>
       </div>
       <p className="text-button leading-none mt-0.5">{value}</p>

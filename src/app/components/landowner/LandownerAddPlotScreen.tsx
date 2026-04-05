@@ -23,17 +23,6 @@ interface ForageEntry {
   bloomEndMonth: string;
 }
 
-const FORAGE_OPTIONS = [
-  'Coconut',
-  'Mango',
-  'Rubber',
-  'Cashew',
-  'Citrus',
-  'Jackfruit',
-  'Wild Flora',
-  'Tea',
-] as const;
-
 const WATER_OPTIONS = [
   'On-site',
   'Within 500m',
@@ -98,23 +87,6 @@ export function LandownerAddPlotScreen({
     setForageEntries((current) => (
       current.length === 1 ? [{ forage: '', bloomStartMonth: '', bloomEndMonth: '' }] : current.filter((_, entryIndex) => entryIndex !== index)
     ));
-  };
-
-  const handleMapClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const xRatio = (event.clientX - rect.left) / rect.width;
-    const yRatio = (event.clientY - rect.top) / rect.height;
-
-    const latMin = 5.9;
-    const latMax = 9.9;
-    const lonMin = 79.4;
-    const lonMax = 81.9;
-
-    const latitude = latMax - yRatio * (latMax - latMin);
-    const longitude = lonMin + xRatio * (lonMax - lonMin);
-
-    setGpsLatitude(latitude.toFixed(6));
-    setGpsLongitude(longitude.toFixed(6));
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -319,18 +291,9 @@ export function LandownerAddPlotScreen({
               </div>
             </div>
 
-            <div>
-              <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">Map Pin Input *</label>
-              <div
-                onClick={handleMapClick}
-                className="relative h-24 w-full cursor-crosshair rounded-lg border border-emerald-200 bg-gradient-to-br from-emerald-100 via-lime-50 to-emerald-200"
-              >
-                <div className="absolute inset-0 rounded-lg bg-[radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.12)_1px,transparent_1px)] [background-size:12px_12px] opacity-40" />
-                <div className="absolute left-1.5 top-1.5 rounded-full bg-white/90 px-2 py-0.5 text-[0.65rem] font-semibold text-emerald-800">
-                  Tap to drop pin
-                </div>
-              </div>
-            </div>
+            <p className="text-[0.72rem] text-stone-500">
+              Enter GPS latitude and longitude above.
+            </p>
 
             <div>
               <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">Total Acreage *</label>
@@ -355,16 +318,12 @@ export function LandownerAddPlotScreen({
             {forageEntries.map((entry, index) => (
               <div key={`forage-${index}`} className="rounded-lg border border-stone-200 bg-stone-50 p-2">
                 <div className="grid grid-cols-[1fr_1fr_auto] gap-1.5">
-                  <select
+                  <input
                     value={entry.forage}
                     onChange={(event) => updateForage(index, 'forage', event.target.value)}
+                    placeholder="Forage name"
                     className="rounded-md border border-stone-300 px-2 py-2 text-[0.8rem] focus:border-emerald-600 focus:outline-none"
-                  >
-                    <option value="">Select forage</option>
-                    {FORAGE_OPTIONS.map((option) => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
+                  />
 
                   <div className="relative">
                     <CalendarRange className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-stone-400" />
