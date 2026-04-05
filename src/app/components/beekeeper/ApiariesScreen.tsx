@@ -209,14 +209,14 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                 />
               </div>
 
-              <div className="bg-white rounded-xl border border-stone-200 p-4 sm:p-5 shadow-sm">
-                <div className="grid grid-cols-1 md:[grid-template-columns:minmax(9rem,max-content)_minmax(13rem,1fr)_minmax(11rem,max-content)] gap-4 md:gap-6 items-start">
+              <div className="bg-white rounded-xl border border-stone-200 p-3 sm:p-3 shadow-sm">
+                <div className="grid grid-cols-1 md:[grid-template-columns:minmax(9rem,max-content)_minmax(13rem,1fr)_minmax(11rem,max-content)] gap-3 md:gap-4 items-start">
                   <div className="flex flex-col min-w-0">
-                    <p className="text-[0.75rem] font-bold text-stone-800 mb-1">Status</p>
+                    <p className="text-[0.75rem] font-bold text-stone-800 mb-0.5">Status</p>
                     <select
                       value={filters.status}
                       onChange={(event) => setFilters((previous) => ({ ...previous, status: event.target.value as typeof filters.status }))}
-                      className="md:w-auto rounded-lg border border-stone-300 px-2 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
+                      className="md:w-auto rounded-lg border border-stone-300 px-1.5 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
                     >
                       <option value="all">Any</option>
                       <option value="active">Active</option>
@@ -226,43 +226,43 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                   </div>
 
                   <div className="flex flex-col min-w-0">
-                    <p className="text-[0.85rem] font-bold text-stone-800 mb-2">Established Between</p>
-                    <div className="flex flex-col gap-2">
+                    <p className="text-[0.75rem] font-bold text-stone-800 mb-1">Established Between</p>
+                    <div className="flex flex-col gap-1.5">
                       <input
                         type="date"
                         value={filters.dateFrom}
                         onChange={(event) => setFilters((previous) => ({ ...previous, dateFrom: event.target.value }))}
-                        className="w-full rounded-lg border border-stone-300 px-3.5 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
+                        className="w-full rounded-lg border border-stone-300 px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
                         placeholder="From"
                       />
                       <input
                         type="date"
                         value={filters.dateTo}
                         onChange={(event) => setFilters((previous) => ({ ...previous, dateTo: event.target.value }))}
-                        className="w-full rounded-lg border border-stone-300 px-3.5 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
+                        className="w-full rounded-lg border border-stone-300 px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
                         placeholder="To"
                       />
                     </div>
                   </div>
 
                   <div className="flex flex-col min-w-0">
-                    <p className="text-[0.85rem] font-bold text-stone-800 mb-2">Health Filters</p>
-                    <div className="flex flex-col gap-2 w-full md:w-auto">
+                    <p className="text-[0.75rem] font-bold text-stone-800 mb-1">Health Filters</p>
+                    <div className="flex flex-col gap-1 w-full md:w-auto">
                       <button
                         onClick={() => toggleHealthFilter('queenlessOnly')}
-                        className={`w-full md:w-auto px-3.5 py-2.5 rounded-full text-[0.8rem] font-semibold transition-all whitespace-nowrap ${filters.queenlessOnly ? 'bg-red-100 text-red-900 border-2 border-red-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
+                        className={`w-full md:w-auto px-2.5 py-1.5 rounded-full text-[0.75rem] font-semibold transition-all whitespace-nowrap ${filters.queenlessOnly ? 'bg-red-100 text-red-900 border-2 border-red-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
                         Queenless Hives
                       </button>
                       <button
                         onClick={() => toggleHealthFilter('pestOnly')}
-                        className={`w-full md:w-auto px-3.5 py-2.5 rounded-full text-[0.8rem] font-semibold transition-all whitespace-nowrap ${filters.pestOnly ? 'bg-amber-100 text-amber-900 border-2 border-amber-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
+                        className={`w-full md:w-auto px-2.5 py-1.5 rounded-full text-[0.75rem] font-semibold transition-all whitespace-nowrap ${filters.pestOnly ? 'bg-amber-100 text-amber-900 border-2 border-amber-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
                         Pest Alerts
                       </button>
                       <button
                         onClick={() => toggleHealthFilter('healthyOnly')}
-                        className={`w-full md:w-auto px-3.5 py-2.5 rounded-full text-[0.8rem] font-semibold transition-all whitespace-nowrap ${filters.healthyOnly ? 'bg-emerald-100 text-emerald-900 border-2 border-emerald-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
+                        className={`w-full md:w-auto px-2.5 py-1.5 rounded-full text-[0.75rem] font-semibold transition-all whitespace-nowrap ${filters.healthyOnly ? 'bg-emerald-100 text-emerald-900 border-2 border-emerald-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
                         Healthy Only
                       </button>
@@ -340,7 +340,7 @@ function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon, h
 
   return (
     <div className={`bg-white rounded-xl shadow-sm overflow-hidden ${apiary.status === 'expired' ? 'border-l-4 border-red-400' : ''}`}>
-      <div className="p-3 space-y-2">
+      <div className="p-2.5 space-y-1.5">
         {/* Row 1: Name + Status */}
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-[0.875rem] font-bold text-stone-800 flex-1 truncate">{apiary.name}</h3>
@@ -366,7 +366,7 @@ function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon, h
         </div>
 
         {/* Row 3: Compact weather + forage strip */}
-        <div className="flex items-center gap-2 bg-stone-50 rounded-lg px-2.5 py-1.5 text-[0.72rem]">
+        <div className="flex items-center gap-1.5 bg-stone-50 rounded-lg px-2 py-1 text-[0.7rem]">
           <span className="flex items-center gap-1">
             {getWeatherIcon('sunny')}
             <span className="font-medium text-stone-700">28°C · Sunny</span>
@@ -383,37 +383,37 @@ function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon, h
         </div>
 
         {(hasQueenless || hasPestAlert) ? (
-          <div className="flex flex-wrap gap-1.5">
-            {hasQueenless && <span className="inline-flex items-center gap-1 rounded-full bg-red-50 text-red-700 text-[0.68rem] font-semibold px-2 py-0.5"><AlertTriangle className="w-3 h-3" />Queenless hive</span>}
-            {hasPestAlert && <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 text-[0.68rem] font-semibold px-2 py-0.5"><AlertCircle className="w-3 h-3" />Pest alert</span>}
+          <div className="flex flex-wrap gap-1">
+            {hasQueenless && <span className="inline-flex items-center gap-0.5 rounded-full bg-red-50 text-red-700 text-[0.65rem] font-semibold px-1.5 py-0.5"><AlertTriangle className="w-3 h-3" />Queenless hive</span>}
+            {hasPestAlert && <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-50 text-amber-700 text-[0.65rem] font-semibold px-1.5 py-0.5"><AlertCircle className="w-3 h-3" />Pest alert</span>}
           </div>
         ) : (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 text-[0.68rem] font-semibold px-2 py-0.5">
+          <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[0.65rem] font-semibold px-1.5 py-0.5">
             <BadgeCheck className="w-3 h-3" />Healthy
           </span>
         )}
 
         {/* Contract renewal warning */}
         {apiary.land_ownership === 'not_owned' && apiary.contract_end && new Date(apiary.contract_end) < new Date() && (
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-red-50 rounded-lg">
+          <div className="flex items-center gap-1 px-1.5 py-0.5 bg-red-50 rounded-lg">
             <AlertCircle className="w-3 h-3 text-red-500 flex-shrink-0" />
-            <p className="text-[0.7rem] text-red-700 font-medium">{t('contractRenewal', lang)}</p>
+            <p className="text-[0.65rem] text-red-700 font-medium">{t('contractRenewal', lang)}</p>
           </div>
         )}
 
         {/* Action buttons */}
-        <div className="flex gap-2 pt-0.5">
+        <div className="flex gap-1.5 pt-0 mt-1">
           <button onClick={onView}
-            className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-1.5 rounded-full text-[0.75rem] font-medium transition-colors flex items-center justify-center gap-1 min-h-9">
-            <Eye className="w-3.5 h-3.5" />{t('view', lang)}
+            className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-1 rounded-full text-[0.7rem] font-medium transition-colors flex items-center justify-center gap-0.5 min-h-8">
+            <Eye className="w-3 h-3" />{t('view', lang)}
           </button>
           <button onClick={onEdit}
-            className="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-700 py-1.5 rounded-full text-[0.75rem] font-medium transition-colors flex items-center justify-center gap-1 min-h-9">
-            <Pencil className="w-3.5 h-3.5" />{t('edit', lang)}
+            className="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-700 py-1 rounded-full text-[0.7rem] font-medium transition-colors flex items-center justify-center gap-0.5 min-h-8">
+            <Pencil className="w-3 h-3" />{t('edit', lang)}
           </button>
           <button onClick={onAddHive}
-            className="flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 py-1.5 rounded-full text-[0.75rem] font-medium transition-colors flex items-center justify-center gap-1 min-h-9">
-            <HiveIcon className="w-3.5 h-3.5" />{t('addHive', lang)}
+            className="flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 py-1 rounded-full text-[0.7rem] font-medium transition-colors flex items-center justify-center gap-0.5 min-h-8">
+            <HiveIcon className="w-3 h-3" />{t('addHive', lang)}
           </button>
         </div>
       </div>
