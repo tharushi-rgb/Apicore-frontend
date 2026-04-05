@@ -49,6 +49,21 @@ export const harvestsService = {
     }
   },
 
+  async getByHive(hiveId: number): Promise<Harvest[]> {
+    try {
+      const { data, error } = await supabase
+        .from('harvests')
+        .select('*')
+        .eq('hive_id', hiveId)
+        .order('harvest_date', { ascending: false });
+      if (error) throw new Error(error.message);
+      return (data ?? []) as Harvest[];
+    } catch {
+      // Table may not exist yet, return empty
+      return [];
+    }
+  },
+
   async create(payload: Partial<Harvest>): Promise<Harvest> {
     const userId = getUserId();
     const { data, error } = await supabase

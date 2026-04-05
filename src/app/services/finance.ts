@@ -44,6 +44,16 @@ export const expensesService = {
     return data as Expense[];
   },
 
+  async getByHive(hiveId: number) {
+    const { data, error } = await supabase
+      .from('expenses')
+      .select('*')
+      .eq('hive_id', hiveId)
+      .order('expense_date', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data as Expense[];
+  },
+
   async create(payload: Partial<Expense>) {
     const userId = getUserId();
     const { data, error } = await supabase

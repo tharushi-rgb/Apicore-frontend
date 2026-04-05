@@ -582,16 +582,14 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
   const fetchTransfers = async () => { try { setTransfers(await transfersService.getAll(hiveId)); } catch {} };
   const fetchExpenses = async () => {
     try {
-      const allExpenses = await expensesService.getAll();
-      setExpenses(allExpenses.filter((expense) => expense.hive_id === hiveId));
+      setExpenses(await expensesService.getByHive(hiveId));
     } catch {
       setExpenses([]);
     }
   };
   const fetchHarvests = async () => {
     try {
-      const allHarvests = await harvestsService.getAll();
-      setHarvests(allHarvests.filter((harvest) => harvest.hive_id === hiveId));
+      setHarvests(await harvestsService.getByHive(hiveId));
     } catch {
       setHarvests([]);
     }
