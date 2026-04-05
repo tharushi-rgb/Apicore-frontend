@@ -37,14 +37,15 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState({
+  const initialFilters = {
     status: 'all' as 'all' | 'active' | 'empty' | 'expired',
     queenlessOnly: false,
     pestOnly: false,
     healthyOnly: false,
     dateFrom: '',
     dateTo: '',
-  });
+  };
+  const [filters, setFilters] = useState(initialFilters);
   const user = authService.getLocalUser();
   const activeTab: NavTab = 'apiaries';
 
@@ -210,6 +211,7 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
               </div>
 
               <div className="bg-white rounded-xl border border-stone-200 p-2.5 sm:p-3 shadow-sm w-full max-w-full overflow-hidden">
+                <h3 className="text-[0.8rem] font-bold text-stone-800 mb-2">Filters &amp; Search</h3>
                 <div className="flex flex-wrap items-start gap-2 w-full max-w-full">
                   <div className="flex flex-col min-w-0 w-auto max-w-full">
                     <p className="text-[0.7rem] font-bold text-stone-800 mb-0.5">Status</p>
@@ -269,6 +271,13 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                     </div>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setFilters(initialFilters)}
+                  className="mt-2 w-full rounded-lg border border-stone-300 bg-white py-1.5 text-[0.75rem] font-semibold text-stone-700 hover:bg-stone-50"
+                >
+                  Reset Filters
+                </button>
               </div>
 
               {filtered.length === 0 ? (
