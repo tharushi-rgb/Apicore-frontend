@@ -197,14 +197,14 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
           />
 
           {/* Harvest Title Section */}
-          <div className="px-6 pb-4 border-t border-stone-100">
-            <h1 className="text-2xl font-bold text-stone-800">{t('harvest', selectedLanguage)}</h1>
-            <p className="text-stone-500 text-sm mt-1">{t('recordTrackHarvest', selectedLanguage)}</p>
+          <div className="px-2 pb-2 border-t border-stone-100">
+            <h1 className="text-[0.95rem] font-bold text-stone-800">{t('harvest', selectedLanguage)}</h1>
+            <p className="text-stone-500 text-[0.72rem] mt-0.5">{t('recordTrackHarvest', selectedLanguage)}</p>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="px-4 py-6 space-y-6">
+        <div className="px-2 py-3 space-y-4">
           {/* Section 1: Harvest Summary */}
           <div className="grid grid-cols-2 gap-3">
             <SummaryCard
@@ -237,7 +237,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
           {!showRecordForm && (
             <button
               onClick={() => setShowRecordForm(true)}
-              className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 shadow-sm"
+              className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
               <Plus className="w-5 h-5" />
               <span>{t('recordNewHarvest', selectedLanguage)}</span>
@@ -246,9 +246,9 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
           {/* Section 3: Record Harvest Form */}
           {showRecordForm && (
-            <div className="bg-white rounded-2xl shadow-sm p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-stone-800">
+            <div className="bg-white rounded-2xl shadow-sm p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-[0.95rem] font-bold text-stone-800">
                   {editingHarvest ? t('editHarvest', selectedLanguage) : t('recordNewHarvest', selectedLanguage)}
                 </h2>
                 <button
@@ -630,21 +630,21 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
           </div>
 
           {/* Section 4: Harvest Records List */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-stone-800">{t('harvestRecords', selectedLanguage)}</h2>
+          <div className="space-y-3">
+            <h2 className="text-[0.95rem] font-bold text-stone-800">{t('harvestRecords', selectedLanguage)}</h2>
 
             {filteredHarvests.length > 0 ? (
               <div className="space-y-3">
                 {filteredHarvests.map((record) => (
                   <div
                     key={record.id}
-                    className="bg-white rounded-2xl shadow-sm p-4 border-l-4 border-amber-400"
+                    className="bg-white rounded-2xl shadow-sm p-3 border-l-4 border-amber-400"
                   >
                     {/* Top Row */}
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <p className="text-lg font-bold text-stone-800">{record.harvest_type}</p>
-                        <p className="text-2xl font-bold text-amber-600">
+                        <p className="text-[0.9rem] font-bold text-stone-800">{record.harvest_type}</p>
+                        <p className="text-[1.1rem] font-bold text-amber-600">
                           {record.quantity} {record.unit}
                         </p>
                       </div>
@@ -654,7 +654,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                     </div>
 
                     {/* Second Row */}
-                    <div className="flex items-center gap-4 text-sm text-stone-600 mb-2">
+                    <div className="flex items-center gap-4 text-[0.75rem] text-stone-600 mb-2">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
                         <span>{record.harvest_date}</span>
@@ -667,7 +667,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
                     {/* Third Row */}
                     {record.notes && (
-                      <div className="text-sm text-stone-600 mb-3">
+                      <div className="text-[0.75rem] text-stone-600 mb-3">
                         <p className="truncate">
                           <span className="font-medium">Notes:</span> {record.notes}
                         </p>
@@ -676,7 +676,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
                     {/* Actions */}
                     <div className="flex gap-2">
-                      <button className="flex-1 flex items-center justify-center gap-1 py-2 bg-stone-100 hover:bg-stone-200 rounded-full transition-colors text-sm font-medium text-stone-700 min-h-9">
+                      <button className="flex-1 flex items-center justify-center gap-1 py-2 bg-stone-100 hover:bg-stone-200 rounded-full transition-colors text-[0.75rem] font-medium text-stone-700 min-h-9">
                         <Eye className="w-4 h-4" />
                         <span>{t('viewDetails', selectedLanguage)}</span>
                       </button>
@@ -685,7 +685,7 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                           setEditingHarvest(record);
                           setShowRecordForm(true);
                         }}
-                        className="flex-1 flex items-center justify-center gap-1 py-2 bg-amber-100 hover:bg-amber-200 rounded-full transition-colors text-sm font-medium text-amber-700 min-h-9"
+                        className="flex-1 flex items-center justify-center gap-1 py-2 bg-amber-100 hover:bg-amber-200 rounded-full transition-colors text-[0.75rem] font-medium text-amber-700 min-h-9"
                       >
                         <Edit className="w-4 h-4" />
                         <span>{t('edit', selectedLanguage)}</span>
@@ -695,17 +695,17 @@ export function HarvestScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
-                <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Package className="w-10 h-10 text-amber-600" />
+              <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Package className="w-9 h-9 text-amber-600" />
                 </div>
-                <p className="text-lg font-bold text-stone-800 mb-2">{t('noHarvestRecords', selectedLanguage)}</p>
-                <p className="text-stone-600 mb-6">
+                <p className="text-[0.9rem] font-bold text-stone-800 mb-2">{t('noHarvestRecords', selectedLanguage)}</p>
+                <p className="text-stone-600 text-[0.75rem] mb-5">
                   {t('recordFirstHarvestDesc', selectedLanguage)}
                 </p>
                 <button
                   onClick={() => setShowRecordForm(true)}
-                  className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-medium transition-colors"
+                  className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2.5 rounded-xl font-medium text-[0.8rem] transition-colors"
                 >
                   {t('recordHarvestBtn', selectedLanguage)}
                 </button>
@@ -727,9 +727,9 @@ interface SummaryCardProps {
 
 function SummaryCard({ label, value, bgColor, textColor }: SummaryCardProps) {
   return (
-    <div className={`${bgColor} rounded-xl p-4`}>
-      <p className="text-stone-600 text-xs mb-1.5">{label}</p>
-      <p className={`text-xl font-bold ${textColor} break-words`}>{value}</p>
+    <div className={`${bgColor} rounded-xl p-3`}>
+      <p className="text-stone-600 text-[0.7rem] mb-1">{label}</p>
+      <p className={`text-[1rem] font-bold ${textColor} break-words`}>{value}</p>
     </div>
   );
 }

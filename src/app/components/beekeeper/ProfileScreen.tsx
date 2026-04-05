@@ -157,24 +157,24 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
         <div className="absolute inset-0 bg-black/50 z-40" onClick={() => setShowEditProfile(false)}>
           <div className="absolute top-20 right-4 left-4 max-w-sm mx-auto bg-white rounded-2xl shadow-2xl p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-stone-800">{t('editProfile', selectedLanguage)}</h2>
+              <h2 className="text-[0.95rem] font-bold text-stone-800">{t('editProfile', selectedLanguage)}</h2>
               <button onClick={() => setShowEditProfile(false)} className="p-1 hover:bg-stone-100 rounded-lg"><X className="w-5 h-5" /></button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">{t('name', selectedLanguage)}</label>
+                <label className="block text-[0.75rem] font-medium text-stone-700 mb-1.5">{t('name', selectedLanguage)}</label>
                 <input type="text" value={editName} onChange={e => setEditName(e.target.value)} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">{t('email', selectedLanguage)}</label>
+                <label className="block text-[0.75rem] font-medium text-stone-700 mb-1.5">{t('email', selectedLanguage)}</label>
                 <input type="email" value={editEmail} onChange={e => setEditEmail(e.target.value)} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">{t('phone', selectedLanguage)}</label>
+                <label className="block text-[0.75rem] font-medium text-stone-700 mb-1.5">{t('phone', selectedLanguage)}</label>
                 <input type="tel" value={editPhone} onChange={e => setEditPhone(formatPhoneNumber(e.target.value))} maxLength={15} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">{t('district', selectedLanguage)}</label>
+                <label className="block text-[0.75rem] font-medium text-stone-700 mb-1.5">{t('district', selectedLanguage)}</label>
                 <input type="text" value={editDistrict} onChange={e => setEditDistrict(e.target.value)} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none" />
               </div>
             </div>
@@ -279,8 +279,8 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
           {/* App Version */}
           <div className="text-center py-4">
-            <p className="text-sm text-stone-500">ApiCore v1.0.0</p>
-            <p className="text-xs text-stone-400 mt-1">{t('beekeepingMgmtSystem', selectedLanguage)}</p>
+            <p className="text-[0.75rem] text-stone-500">ApiCore v1.0.0</p>
+            <p className="text-[0.7rem] text-stone-400 mt-1">{t('beekeepingMgmtSystem', selectedLanguage)}</p>
           </div>
         </div>
       </div>
@@ -307,7 +307,7 @@ function StatCard({ label, value, color }: { label: string; value: string; color
     <div className={`${c.bg} rounded-lg p-2.5 shadow-sm relative`}>
       <div className={`absolute top-0 right-0 w-1.5 h-1.5 rounded-bl-lg ${c.accent}`} />
       <p className="text-stone-600 text-[10px] mb-0.5 leading-tight">{label}</p>
-      <p className={`text-xl font-bold ${c.text} leading-none`}>{value}</p>
+      <p className={`text-[1rem] font-bold ${c.text} leading-none`}>{value}</p>
     </div>
   );
 }
@@ -316,8 +316,8 @@ function ToggleSetting({ label, description, checked, onChange }: { label: strin
   return (
     <div className="flex items-start justify-between gap-3 pb-3 border-b border-stone-200 last:border-0 last:pb-0">
       <div className="flex-1">
-        <p className="text-sm font-medium text-stone-800 mb-0.5">{label}</p>
-        <p className="text-xs text-stone-500">{description}</p>
+        <p className="text-[0.8rem] font-medium text-stone-800 mb-0.5">{label}</p>
+        <p className="text-[0.7rem] text-stone-500">{description}</p>
       </div>
       <button onClick={onChange} className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-emerald-500' : 'bg-stone-300'}`}>
         <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${checked ? 'translate-x-5' : 'translate-x-0.5'}`} />

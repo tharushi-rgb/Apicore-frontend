@@ -78,11 +78,11 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 pb-24">
-        <section className="rounded-xl border border-emerald-200 bg-white px-4 py-3 shadow-sm">
-          <h1 className="text-base font-extrabold leading-5 text-stone-900">{displayName}</h1>
+      <div className="flex-1 overflow-y-auto px-2 py-2 pb-24">
+        <section className="rounded-xl border border-emerald-200 bg-white p-3 shadow-sm">
+          <h1 className="text-[0.95rem] font-bold leading-5 text-stone-900">{displayName}</h1>
           <p className="mt-0.5 text-xs font-semibold uppercase tracking-wide text-emerald-700">Landowner</p>
-          <p className="mt-1 text-sm text-stone-600">Summary of activity and pending actions.</p>
+          <p className="mt-1 text-[0.75rem] text-stone-600">Summary of activity and pending actions.</p>
         </section>
 
         {loading ? (
@@ -91,12 +91,12 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
           </div>
         ) : (
           <div className="mt-4 space-y-4">
-            <section className="rounded-xl border border-emerald-200 bg-white px-4 py-3 shadow-sm">
+            <section className="rounded-xl border border-emerald-200 bg-white p-3 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Hive Count</p>
-                  <p className="mt-1 text-lg font-extrabold leading-none text-stone-900">{stats.hiveCount}</p>
-                  <p className="mt-0.5 text-sm text-stone-600">Across active listings</p>
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-wide text-emerald-700">Hive Count</p>
+                  <p className="mt-1 text-[1.1rem] font-extrabold leading-none text-stone-900">{stats.hiveCount}</p>
+                  <p className="mt-0.5 text-[0.75rem] text-stone-600">Across active listings</p>
                 </div>
                 <div className="rounded-xl bg-emerald-100 p-2.5">
                   <Hexagon className="h-5 w-5 text-emerald-700" />
@@ -104,12 +104,12 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
               </div>
             </section>
 
-            <section className="rounded-xl border border-emerald-200 bg-white px-4 py-3 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">Revenue</p>
+            <section className="rounded-xl border border-emerald-200 bg-white p-3 shadow-sm">
+              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-emerald-700">Revenue</p>
               <div className="mt-2 grid grid-cols-2 gap-1.5 rounded-xl bg-emerald-50 p-1.5">
                 <button
                   onClick={() => setRevenueTab('rupees')}
-                  className={`rounded-lg px-2.5 py-2 text-sm font-semibold transition ${
+                  className={`rounded-lg px-2.5 py-2 text-[0.75rem] font-semibold transition ${
                     revenueTab === 'rupees' ? 'bg-white text-emerald-800 shadow-sm' : 'text-emerald-700'
                   }`}
                 >
@@ -120,7 +120,7 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
                 </button>
                 <button
                   onClick={() => setRevenueTab('honey_share')}
-                  className={`rounded-lg px-2.5 py-2 text-sm font-semibold transition ${
+                  className={`rounded-lg px-2.5 py-2 text-[0.75rem] font-semibold transition ${
                     revenueTab === 'honey_share' ? 'bg-white text-emerald-800 shadow-sm' : 'text-emerald-700'
                   }`}
                 >
@@ -133,8 +133,8 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
 
               <div className="mt-3 flex items-start justify-between gap-2">
                 <div>
-                  <p className="text-[1.25rem] font-extrabold leading-none text-stone-900">{revenueValue}</p>
-                  <p className="mt-1 text-sm text-stone-600">{revenueNote}</p>
+                  <p className="text-[1.1rem] font-extrabold leading-none text-stone-900">{revenueValue}</p>
+                  <p className="mt-1 text-[0.75rem] text-stone-600">{revenueNote}</p>
                 </div>
                 <div className="rounded-xl bg-emerald-100 p-2.5">
                   <GanttChartSquare className="h-5 w-5 text-emerald-700" />
@@ -144,13 +144,13 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
 
             <button
               onClick={() => navigate('/listings?filter=pending-bids')}
-              className="w-full rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-left shadow-sm transition hover:bg-amber-100/70"
+              className="w-full rounded-xl border border-amber-200 bg-amber-50 p-3 text-left shadow-sm transition hover:bg-amber-100/70"
             >
               <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Pending Bids</p>
-                  <p className="mt-1 text-lg font-extrabold leading-none text-stone-900">{stats.pendingBids}</p>
-                  <p className="mt-0.5 text-sm text-stone-600">Tap to review pending listings</p>
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-wide text-amber-700">Pending Bids</p>
+                  <p className="mt-1 text-[1.1rem] font-extrabold leading-none text-stone-900">{stats.pendingBids}</p>
+                  <p className="mt-0.5 text-[0.75rem] text-stone-600">Tap to review pending listings</p>
                 </div>
                 <div className="rounded-xl bg-amber-100 p-2.5">
                   <AlertCircle className="h-5 w-5 text-amber-700" />

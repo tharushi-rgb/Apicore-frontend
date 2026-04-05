@@ -186,11 +186,11 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                   <HiveIcon className="w-8 h-8 text-amber-400 absolute bottom-0 right-0" />
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-stone-800 mb-2">{t('noApiariesCreated', selectedLanguage)}</h2>
-              <p className="text-stone-600 mb-6">{t('addFirstApiary', selectedLanguage)}</p>
+              <h2 className="text-[0.95rem] font-bold text-stone-800 mb-2">{t('noApiariesCreated', selectedLanguage)}</h2>
+              <p className="text-stone-600 text-[0.75rem] mb-5">{t('addFirstApiary', selectedLanguage)}</p>
               <button
                 onClick={onCreateApiary}
-                className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-medium inline-flex items-center gap-2 transition-colors"
+                className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2.5 rounded-xl font-medium text-[0.8rem] inline-flex items-center gap-2 transition-colors"
               >
                 <Plus className="w-5 h-5" />
                 {t('addApiary', selectedLanguage)}

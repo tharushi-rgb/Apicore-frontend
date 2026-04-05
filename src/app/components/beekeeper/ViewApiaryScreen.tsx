@@ -219,7 +219,7 @@ export function ViewApiaryScreen({ onBack, onAddHive, onEditApiary, onViewHive, 
               <div className="max-w-4xl max-h-[80vh] relative" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={() => setSelectedImage(null)}
-                  className="absolute -top-10 right-0 text-white hover:text-gray-300 font-bold text-2xl"
+                  className="absolute -top-9 right-0 text-white hover:text-gray-300 font-bold text-[1.1rem]"
                 >
                   ✕
                 </button>
@@ -235,8 +235,8 @@ export function ViewApiaryScreen({ onBack, onAddHive, onEditApiary, onViewHive, 
 
         {/* Tabs */}
         <div className="flex bg-white rounded-xl p-1 shadow-sm">
-          <button onClick={() => setActiveTab('hives')} className={`flex-1 py-2 rounded-lg text-sm font-medium ${activeTab==='hives' ? 'bg-amber-500 text-white' : 'text-stone-600'}`}>Hives ({hives.length})</button>
-          <button onClick={() => setActiveTab('history')} className={`flex-1 py-2 rounded-lg text-sm font-medium ${activeTab==='history' ? 'bg-amber-500 text-white' : 'text-stone-600'}`}>History</button>
+          <button onClick={() => setActiveTab('hives')} className={`flex-1 py-1.5 rounded-lg text-[0.75rem] font-medium ${activeTab==='hives' ? 'bg-amber-500 text-white' : 'text-stone-600'}`}>Hives ({hives.length})</button>
+          <button onClick={() => setActiveTab('history')} className={`flex-1 py-1.5 rounded-lg text-[0.75rem] font-medium ${activeTab==='history' ? 'bg-amber-500 text-white' : 'text-stone-600'}`}>History</button>
         </div>
 
         {activeTab === 'hives' && (

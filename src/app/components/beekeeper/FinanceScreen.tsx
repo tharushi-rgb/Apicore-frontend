@@ -137,35 +137,35 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
         <div className="bg-white shadow-sm sticky top-0 z-30">
           <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
             activeTab={activeTab} onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
-          <div className="px-6 pb-4 border-t border-stone-100">
-            <h1 className="text-2xl font-bold text-stone-800">{tr('finance', selectedLanguage)}</h1>
-            <p className="text-stone-500 text-sm mt-1">{tr('trackExpenses', selectedLanguage)}</p>
+          <div className="px-2 pb-2 border-t border-stone-100">
+            <h1 className="text-[0.95rem] font-bold text-stone-800">{tr('finance', selectedLanguage)}</h1>
+            <p className="text-stone-500 text-[0.72rem] mt-0.5">{tr('trackExpenses', selectedLanguage)}</p>
           </div>
         </div>
 
-        <div className="px-4 py-6 space-y-5">
+        <div className="px-2 py-3 space-y-4">
 
           {/* Summary Banner */}
-          <div className="bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl p-5 text-white shadow-md">
+          <div className="bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl p-3 text-white shadow-md">
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
                 <TrendingDown className="w-5 h-5 opacity-80" />
-                <span className="text-sm opacity-90 font-medium">{tr('totalExpenses', selectedLanguage)}</span>
+                <span className="text-[0.75rem] opacity-90 font-medium">{tr('totalExpenses', selectedLanguage)}</span>
               </div>
-              <span className="text-xs opacity-70 bg-white/20 rounded-full px-2 py-0.5">{transactions.length} {tr('records', selectedLanguage)}</span>
+              <span className="text-[0.7rem] opacity-70 bg-white/20 rounded-full px-2 py-0.5">{transactions.length} {tr('records', selectedLanguage)}</span>
             </div>
-            <p className="text-3xl font-bold mt-1">LKR {totalExpenses.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</p>
+            <p className="text-[1.2rem] font-bold mt-1">LKR {totalExpenses.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</p>
 
             {topCategories.length > 0 && (
               <div className="mt-4 pt-4 border-t border-white/20">
-                <p className="text-xs opacity-70 mb-2 font-medium">{tr('topSpending', selectedLanguage)}</p>
+                <p className="text-[0.7rem] opacity-70 mb-2 font-medium">{tr('topSpending', selectedLanguage)}</p>
                 <div className="space-y-1.5">
                   {topCategories.map(([cat, amount]) => {
                     const pct = totalExpenses > 0 ? Math.round((amount / totalExpenses) * 100) : 0;
                     return (
                       <div key={cat} className="flex items-center gap-2">
                         <div className="flex-1">
-                          <div className="flex justify-between text-xs mb-0.5">
+                          <div className="flex justify-between text-[0.7rem] mb-0.5">
                             <span className="capitalize opacity-90">{cat}</span>
                             <span className="opacity-80">{pct}%</span>
                           </div>
@@ -173,7 +173,7 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                             <div className="h-full bg-white/70 rounded-full" style={{ width: `${pct}%` }} />
                           </div>
                         </div>
-                        <span className="text-xs opacity-80 w-24 text-right">LKR {amount.toLocaleString()}</span>
+                        <span className="text-[0.7rem] opacity-80 w-24 text-right">LKR {amount.toLocaleString()}</span>
                       </div>
                     );
                   })}
@@ -184,18 +184,18 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
           {/* Quick Stats Row */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-100">
-              <p className="text-xs text-stone-500 mb-1">{tr('thisMonth', selectedLanguage)}</p>
-              <p className="text-lg font-bold text-stone-800">
+            <div className="bg-white rounded-xl p-3 shadow-sm border border-stone-100">
+              <p className="text-[0.7rem] text-stone-500 mb-1">{tr('thisMonth', selectedLanguage)}</p>
+              <p className="text-[1rem] font-bold text-stone-800">
                 LKR {expenseData
                   .filter(e => e.expense_date?.startsWith(new Date().toISOString().slice(0, 7)))
                   .reduce((s, e) => s + (e.amount || 0), 0)
                   .toLocaleString()}
               </p>
             </div>
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-100">
-              <p className="text-xs text-stone-500 mb-1">{tr('categoriesUsed', selectedLanguage)}</p>
-              <p className="text-lg font-bold text-stone-800">{Object.keys(categoryTotals).length}</p>
+            <div className="bg-white rounded-xl p-3 shadow-sm border border-stone-100">
+              <p className="text-[0.7rem] text-stone-500 mb-1">{tr('categoriesUsed', selectedLanguage)}</p>
+              <p className="text-[1rem] font-bold text-stone-800">{Object.keys(categoryTotals).length}</p>
             </div>
           </div>
 
@@ -203,19 +203,19 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
           {activeForm === null ? (
             <button
               onClick={() => setActiveForm('expense')}
-              className="w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl font-semibold text-base transition-colors flex items-center justify-center gap-3 shadow-sm"
+              className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-semibold text-[0.8rem] transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
               <ArrowDown className="w-5 h-5" />
               {tr('recordExpense', selectedLanguage)}
             </button>
           ) : (
-            <div className="bg-white rounded-2xl shadow-sm p-6 border border-red-100">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-white rounded-2xl shadow-sm p-4 border border-red-100">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
                     <ArrowDown className="w-4 h-4 text-red-600" />
                   </div>
-                  <h2 className="text-lg font-bold text-stone-800">{tr('recordExpense', selectedLanguage)}</h2>
+                  <h2 className="text-[0.95rem] font-bold text-stone-800">{tr('recordExpense', selectedLanguage)}</h2>
                 </div>
                 <button onClick={() => { setActiveForm(null); expenseForm.reset(); }} className="p-2 hover:bg-stone-100 rounded-lg">
                   <X className="w-5 h-5 text-stone-600" />
@@ -333,7 +333,7 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                             <span>{t.date}</span>
                           </div>
                         </div>
-                        <p className="text-xl font-bold text-stone-800">LKR {t.amount.toLocaleString()}</p>
+                        <p className="text-[1rem] font-bold text-stone-800">LKR {t.amount.toLocaleString()}</p>
                         {t.notes && <p className="text-xs text-stone-500 mt-1 truncate">{t.notes}</p>}
                       </div>
                       <div className="flex gap-1.5 ml-3 flex-shrink-0">
@@ -349,13 +349,13 @@ export function FinanceScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-sm p-10 text-center border border-stone-100">
-                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Wallet className="w-8 h-8 text-red-400" />
+              <div className="bg-white rounded-2xl shadow-sm p-8 text-center border border-stone-100">
+                <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Wallet className="w-7 h-7 text-red-400" />
                 </div>
-                <p className="text-base font-bold text-stone-800 mb-1">No expenses recorded yet</p>
-                <p className="text-stone-500 text-sm mb-5">Track your apiary costs to understand spending</p>
-                <button onClick={() => setActiveForm('expense')} className="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-xl font-medium text-sm">
+                <p className="text-[0.9rem] font-bold text-stone-800 mb-1">No expenses recorded yet</p>
+                <p className="text-stone-500 text-[0.75rem] mb-5">Track your apiary costs to understand spending</p>
+                <button onClick={() => setActiveForm('expense')} className="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-xl font-medium text-[0.8rem]">
                   Record First Expense
                 </button>
               </div>

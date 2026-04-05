@@ -314,7 +314,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                   <span>Active Contracts</span>
                   <BadgeCheck className="w-4 h-4" />
                 </div>
-                <p className="text-xl font-bold text-emerald-900 leading-tight">{contractStats.activeCount}</p>
+                <p className="text-[1rem] font-bold text-emerald-900 leading-tight">{contractStats.activeCount}</p>
                 <p className="text-[0.72rem] text-emerald-700">{contractStats.activeHives} hives placed</p>
               </div>
               <div className="rounded-2xl bg-amber-50 border border-amber-100 px-3 py-2.5 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
@@ -322,7 +322,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                   <span>Pending Bids</span>
                   <Hourglass className="w-4 h-4" />
                 </div>
-                <p className="text-xl font-bold text-amber-900 leading-tight">{contractStats.pendingCount}</p>
+                <p className="text-[1rem] font-bold text-amber-900 leading-tight">{contractStats.pendingCount}</p>
                 <p className="text-[0.72rem] text-amber-700">{contractStats.pendingHives} hives requested</p>
               </div>
             </div>

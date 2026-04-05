@@ -51,23 +51,23 @@ export function NotificationsScreen({ selectedLanguage, onLanguageChange, onNavi
       <div className="bg-white shadow-sm sticky top-0 z-30">
         <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
         activeTab="notifications" onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} role={isLandowner ? 'landowner' : 'beekeeper'} theme={isLandowner ? 'green' : 'amber'} />
-        <div className="px-6 pb-4 border-t border-stone-100">
-          <h1 className="text-2xl font-bold text-stone-800">{t('notifications', selectedLanguage)}</h1>
-          <p className="text-stone-500 text-sm mt-1">{t('stayUpdated', selectedLanguage)}</p>
+        <div className="px-2 pb-2 border-t border-stone-100">
+          <h1 className="text-[0.95rem] font-bold text-stone-800">{t('notifications', selectedLanguage)}</h1>
+          <p className="text-stone-500 text-[0.72rem] mt-0.5">{t('stayUpdated', selectedLanguage)}</p>
         </div>
       </div>
 
-      <div className="px-4 py-6 space-y-4">
+      <div className="px-2 py-3 space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-stone-800">{t('notifications', selectedLanguage)} {unreadCount > 0 && <span className="text-sm bg-red-500 text-white px-2 py-0.5 rounded-full ml-2">{unreadCount}</span>}</h2>
+          <h2 className="text-[0.9rem] font-bold text-stone-800">{t('notifications', selectedLanguage)} {unreadCount > 0 && <span className="text-[0.7rem] bg-red-500 text-white px-2 py-0.5 rounded-full ml-2">{unreadCount}</span>}</h2>
           {unreadCount > 0 && (
-            <button onClick={handleMarkAllRead} className={`text-sm font-medium flex items-center gap-1 ${accentText}`}><CheckCheck className="w-4 h-4" /> {t('readAll', selectedLanguage)}</button>
+            <button onClick={handleMarkAllRead} className={`text-[0.75rem] font-medium flex items-center gap-1 ${accentText}`}><CheckCheck className="w-4 h-4" /> {t('readAll', selectedLanguage)}</button>
           )}
         </div>
 
         <div className="flex bg-white rounded-xl p-1 shadow-sm">
-          <button onClick={() => setFilter('all')} className={`flex-1 py-2 rounded-lg text-sm font-medium ${filter==='all' ? `${accentBg} text-white` : 'text-stone-600'}`}>{t('all', selectedLanguage)} ({notifications.length})</button>
-          <button onClick={() => setFilter('unread')} className={`flex-1 py-2 rounded-lg text-sm font-medium ${filter==='unread' ? `${accentBg} text-white` : 'text-stone-600'}`}>{t('unread', selectedLanguage)} ({unreadCount})</button>
+          <button onClick={() => setFilter('all')} className={`flex-1 py-1.5 rounded-lg text-[0.75rem] font-medium ${filter==='all' ? `${accentBg} text-white` : 'text-stone-600'}`}>{t('all', selectedLanguage)} ({notifications.length})</button>
+          <button onClick={() => setFilter('unread')} className={`flex-1 py-1.5 rounded-lg text-[0.75rem] font-medium ${filter==='unread' ? `${accentBg} text-white` : 'text-stone-600'}`}>{t('unread', selectedLanguage)} ({unreadCount})</button>
         </div>
 
         {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div> :
@@ -76,14 +76,14 @@ export function NotificationsScreen({ selectedLanguage, onLanguageChange, onNavi
           ) : (
             <div className="space-y-2">
               {filtered.map(n => (
-                <div key={n.id} className={`bg-white rounded-xl p-4 shadow-sm ${!n.is_read ? `border-l-4 ${accentBorder}` : ''}`}>
+                <div key={n.id} className={`bg-white rounded-xl p-3 shadow-sm ${!n.is_read ? `border-l-4 ${accentBorder}` : ''}`}>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                                                <h3 className={`text-sm ${!n.is_read ? 'font-bold text-stone-800' : 'text-stone-700'}`}>{n.title}</h3>
+                        <h3 className={`text-[0.8rem] ${!n.is_read ? 'font-bold text-stone-800' : 'text-stone-700'}`}>{n.title}</h3>
                       </div>
-                      {n.message && <p className="text-xs text-stone-500 ml-6">{n.message}</p>}
-                      <p className="text-xs text-stone-400 ml-6 mt-1">{new Date(n.created_at).toLocaleString()}</p>
+                      {n.message && <p className="text-[0.7rem] text-stone-500 ml-6">{n.message}</p>}
+                      <p className="text-[0.7rem] text-stone-400 ml-6 mt-1">{new Date(n.created_at).toLocaleString()}</p>
                     </div>
                     <div className="flex gap-1">
                       {!n.is_read && <button onClick={() => handleMarkRead(n.id)} className="p-1 hover:bg-stone-100 rounded" title="Mark read"><Check className="w-4 h-4 text-emerald-500" /></button>}

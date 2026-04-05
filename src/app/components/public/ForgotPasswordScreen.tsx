@@ -188,7 +188,7 @@ export function ForgotPasswordScreen({ selectedLanguage, onLanguageChange, onBac
               <button
                 type="submit"
                 disabled={isSending}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl shadow-lg min-h-[56px] font-medium text-lg disabled:opacity-50"
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl shadow-lg min-h-[52px] font-medium text-[0.85rem] disabled:opacity-50"
               >
                 {isSending ? 'Sending...' : t.sendLink}
               </button>
@@ -200,7 +200,7 @@ export function ForgotPasswordScreen({ selectedLanguage, onLanguageChange, onBac
             <div className="space-y-4">
               <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-4 flex flex-col items-center text-center">
                 <Mail className="w-12 h-12 text-emerald-600 mb-3" />
-                <h2 className="text-emerald-900 font-bold text-xl mb-2">{t.checkEmail}</h2>
+                <h2 className="text-emerald-900 font-bold text-[0.95rem] mb-2">{t.checkEmail}</h2>
                 <p className="text-emerald-700 text-[0.92rem]">{t.emailSent}</p>
               </div>
 

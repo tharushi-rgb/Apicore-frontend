@@ -113,18 +113,18 @@ export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate
         <div className="bg-white shadow-sm sticky top-0 z-30">
           <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
             activeTab="dashboard" onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
-          <div className="px-4 pb-3 border-t border-stone-100 flex items-center gap-3">
-            <button onClick={onBack} className="p-2 hover:bg-stone-100 rounded-lg"><ArrowLeft className="w-5 h-5 text-stone-700" /></button>
+          <div className="px-2 pb-2 border-t border-stone-100 flex items-center gap-2">
+            <button onClick={onBack} className="p-1.5 hover:bg-stone-100 rounded-lg"><ArrowLeft className="w-4 h-4 text-stone-700" /></button>
             <div>
-              <h1 className="text-xl font-bold text-stone-800">{tr('analyticsReports', selectedLanguage)}</h1>
-              <p className="text-stone-500 text-xs mt-0.5">{tr('performanceInsights', selectedLanguage)}</p>
+              <h1 className="text-[0.95rem] font-bold text-stone-800">{tr('analyticsReports', selectedLanguage)}</h1>
+              <p className="text-stone-500 text-[0.72rem] mt-0.5">{tr('performanceInsights', selectedLanguage)}</p>
             </div>
           </div>
           {/* Tab bar */}
           <div className="flex overflow-x-auto border-t border-stone-100 px-2">
             {tabs.map(t => (
               <button key={t.key} onClick={() => setActiveTab(t.key)}
-                className={`flex-shrink-0 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === t.key ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-700'}`}>
+                className={`flex-shrink-0 px-3 py-2 text-[0.75rem] font-medium border-b-2 transition-colors ${activeTab === t.key ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-700'}`}>
                 {t.label}
               </button>
             ))}
@@ -134,7 +134,7 @@ export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate
         {loading ? (
           <div className="flex justify-center items-center py-20"><div className="animate-spin h-10 w-10 border-4 border-amber-500 border-t-transparent rounded-full" /></div>
         ) : (
-          <div className="px-4 py-6 space-y-6">
+          <div className="px-2 py-3 space-y-4">
 
             {/* Overview Tab */}
             {activeTab === 'overview' && (
@@ -148,8 +148,8 @@ export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate
 
                 {/* Hive Status Donut */}
                 {hiveStats.length > 0 && (
-                  <div className="bg-white rounded-2xl shadow-sm p-5">
-                    <h3 className="font-bold text-stone-800 mb-4">{tr('hiveStatusDist', selectedLanguage)}</h3>
+                  <div className="bg-white rounded-2xl shadow-sm p-3">
+                    <h3 className="font-semibold text-[0.85rem] text-stone-800 mb-3">{tr('hiveStatusDist', selectedLanguage)}</h3>
                     <div className="flex items-center gap-4">
                       <ResponsiveContainer width={120} height={120}>
                         <PieChart>
@@ -163,9 +163,9 @@ export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate
                           <div key={s.name} className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                              <span className="text-sm capitalize text-stone-700">{s.name}</span>
+                              <span className="text-[0.75rem] capitalize text-stone-700">{s.name}</span>
                             </div>
-                            <span className="text-sm font-bold text-stone-800">{s.value}</span>
+                            <span className="text-[0.75rem] font-bold text-stone-800">{s.value}</span>
                           </div>
                         ))}
                       </div>
@@ -175,8 +175,8 @@ export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate
 
                 {/* Monthly Finance Chart */}
                 {monthlyFinance.length > 0 && (
-                  <div className="bg-white rounded-2xl shadow-sm p-5">
-                    <h3 className="font-bold text-stone-800 mb-4">Income vs Expenses (6 months)</h3>
+                  <div className="bg-white rounded-2xl shadow-sm p-3">
+                    <h3 className="font-semibold text-[0.85rem] text-stone-800 mb-3">Income vs Expenses (6 months)</h3>
                     <ResponsiveContainer width="100%" height={200}>
                       <BarChart data={monthlyFinance} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -188,8 +188,8 @@ export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate
                       </BarChart>
                     </ResponsiveContainer>
                     <div className="flex gap-4 justify-center mt-2">
-                      <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-emerald-500" /><span className="text-xs text-stone-600">Income</span></div>
-                      <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-red-500" /><span className="text-xs text-stone-600">Expenses</span></div>
+                      <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-emerald-500" /><span className="text-[0.7rem] text-stone-600">Income</span></div>
+                      <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-red-500" /><span className="text-[0.7rem] text-stone-600">Expenses</span></div>
                     </div>
                   </div>
                 )}
@@ -199,24 +199,24 @@ export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate
             {/* Hives Tab */}
             {activeTab === 'hives' && (
               <>
-                <div className="bg-white rounded-2xl shadow-sm p-5">
-                  <h3 className="font-bold text-stone-800 mb-4 flex items-center gap-2">
-                    <Award className="w-5 h-5 text-amber-500" /> Best Performing Hives
+                <div className="bg-white rounded-2xl shadow-sm p-3">
+                  <h3 className="font-semibold text-[0.85rem] text-stone-800 mb-3 flex items-center gap-2">
+                    <Award className="w-4 h-4 text-amber-500" /> Best Performing Hives
                   </h3>
                   {bestHives.length === 0 ? (
-                    <div className="text-center py-8"><HiveIcon className="w-10 h-10 text-stone-300 mx-auto mb-2" /><p className="text-stone-500 text-sm">No harvest data yet</p></div>
+                    <div className="text-center py-6"><HiveIcon className="w-9 h-9 text-stone-300 mx-auto mb-2" /><p className="text-stone-500 text-[0.75rem]">No harvest data yet</p></div>
                   ) : (
                     <div className="space-y-3">
                       {bestHives.map((h, i) => (
                         <div key={i} className="flex items-center gap-3 p-3 bg-stone-50 rounded-xl">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-amber-500 text-white' : i === 1 ? 'bg-stone-300 text-white' : i === 2 ? 'bg-orange-400 text-white' : 'bg-stone-200 text-stone-600'}`}>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-[0.75rem] ${i === 0 ? 'bg-amber-500 text-white' : i === 1 ? 'bg-stone-300 text-white' : i === 2 ? 'bg-orange-400 text-white' : 'bg-stone-200 text-stone-600'}`}>
                             {i + 1}
                           </div>
                           <div className="flex-1">
-                            <p className="font-medium text-stone-800">{h.name}</p>
-                            <p className="text-xs text-stone-500">{h.count} harvest{h.count !== 1 ? 's' : ''}</p>
+                            <p className="font-medium text-[0.8rem] text-stone-800">{h.name}</p>
+                            <p className="text-[0.7rem] text-stone-500">{h.count} harvest{h.count !== 1 ? 's' : ''}</p>
                           </div>
-                          <span className="font-bold text-amber-600">{h.total.toFixed(1)} kg</span>
+                          <span className="font-bold text-[0.8rem] text-amber-600">{h.total.toFixed(1)} kg</span>
                         </div>
                       ))}
                     </div>
@@ -224,8 +224,8 @@ export function AnalyticsScreen({ selectedLanguage, onLanguageChange, onNavigate
                 </div>
 
                 {hiveStats.length > 0 && (
-                  <div className="bg-white rounded-2xl shadow-sm p-5">
-                    <h3 className="font-bold text-stone-800 mb-4">Hive Status Breakdown</h3>
+                  <div className="bg-white rounded-2xl shadow-sm p-3">
+                    <h3 className="font-semibold text-[0.85rem] text-stone-800 mb-3">Hive Status Breakdown</h3>
                     <ResponsiveContainer width="100%" height={180}>
                       <BarChart data={hiveStats} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -257,10 +257,10 @@ function KpiCard({ label, value, color, icon }: { label: string; value: string; 
   };
   const c = colorMap[color] || 'bg-stone-50 text-stone-700';
   return (
-    <div className={`${c.split(' ')[0]} rounded-xl p-4`}>
-      <div className={`${c.split(' ')[1]} mb-2`}>{icon}</div>
-      <p className="text-stone-600 text-xs mb-1">{label}</p>
-      <p className={`text-lg font-bold ${c.split(' ')[1]} break-words`}>{value}</p>
+    <div className={`${c.split(' ')[0]} rounded-xl p-3`}>
+      <div className={`${c.split(' ')[1]} mb-1.5`}>{icon}</div>
+      <p className="text-stone-600 text-[0.7rem] mb-1">{label}</p>
+      <p className={`text-[1rem] font-bold ${c.split(' ')[1]} break-words`}>{value}</p>
     </div>
   );
 }
