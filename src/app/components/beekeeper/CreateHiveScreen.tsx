@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { AlertTriangle, Loader2, Plus, Save, Trash2, X } from 'lucide-react';
 import { MobileHeader } from '../shared/MobileHeader';
 import { PageTitleBar } from '../shared/PageTitleBar';
@@ -203,6 +204,8 @@ function buildHiveFormState(initialHive?: Hive, contextApiary?: Apiary, user?: {
 
 export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigate, onClose, contextApiary, initialHive, onLogout }: Props) {
   const isEdit = !!initialHive;
+  const location = useLocation();
+  const prefillApiaryId = (location.state as { apiaryId?: number } | null)?.apiaryId;
   const user = authService.getLocalUser();
 
   const [saving, setSaving] = useState(false);
@@ -248,6 +251,15 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
         console.error('Failed to load apiaries:', error);
       });
   }, []);
+
+  useEffect(() => {
+    if (isEdit || !prefillApiaryId) return;
+    setForm((previous) => (
+      previous.apiary_selection
+        ? previous
+        : { ...previous, apiary_selection: String(prefillApiaryId) }
+    ));
+  }, [isEdit, prefillApiaryId]);
 
   const availableDistricts = getDistrictsByProvince(form.province);
   const availableDivisions = getDsDivisionsByDistrict(form.district);
