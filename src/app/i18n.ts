@@ -308,6 +308,7 @@ const translations = {
 
   // ── Profile Page ─────────────────────────────────────────────────────
   yourAccount: { en: 'Your account & preferences', si: 'ඔබේ ගිණුම සහ මනාපයන්', ta: 'உங்கள் கணக்கு & விருப்பங்கள்' },
+  viewProfile: { en: 'View Profile', si: 'පැතිකඩ බලන්න', ta: 'சுயவிவரம் பார்க்க' },
   editProfile: { en: 'Edit Profile', si: 'පැතිකඩ සංස්කරණය', ta: 'சுயவிவரம் திருத்து' },
   name: { en: 'Name', si: 'නම', ta: 'பெயர்' },
   saveChanges: { en: 'Save Changes', si: 'වෙනස්කම් සුරකින්න', ta: 'மாற்றங்களை சேமி' },

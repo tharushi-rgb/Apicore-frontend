@@ -6,6 +6,7 @@ import { authService } from '../../services/auth';
 import { profileService, type Profile } from '../../services/profile';
 import { landownerMarketplaceService, type LandPlot } from '../../services/landownerMarketplace';
 import { PROVINCES, getDistrictsByProvince, getDsDivisionsByDistrict } from '../../constants/sriLankaLocations';
+import { t } from '../../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -335,13 +336,13 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                   onClick={() => setIsEditingProfile(false)}
                   className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${!isEditingProfile ? 'bg-emerald-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
                 >
-                  View Profile
+                  {t('viewProfile', selectedLanguage)}
                 </button>
                 <button
                   onClick={() => setIsEditingProfile(true)}
                   className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${isEditingProfile ? 'bg-emerald-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
                 >
-                  Edit Profile
+                  {t('editProfile', selectedLanguage)}
                 </button>
               </div>
               
