@@ -205,7 +205,7 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
             <div className="grid grid-cols-3 gap-2">
               <StatCard label={t('apiaries', selectedLanguage)} value={stats.apiaries.toString()} color="emerald" />
               <StatCard label={t('hives', selectedLanguage)} value={stats.hives.toString()} color="amber" />
-              <StatCard label={t('clients', selectedLanguage)} value={stats.clients.toString()} color="purple" />
+              <StatCard label={t('findingLand', selectedLanguage)} value={stats.clients.toString()} color="purple" />
             </div>
           </div>
 

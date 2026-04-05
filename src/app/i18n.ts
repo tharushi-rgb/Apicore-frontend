@@ -7,7 +7,7 @@ const translations = {
   hives: { en: 'Hives', si: 'මීමැස්සන් පෙට්ටි', ta: 'தேன்கூடுகள்' },
   planning: { en: 'Planning', si: 'සැලසුම් කිරීම', ta: 'திட்டமிடல்' },
   finance: { en: 'Finance', si: 'මුදල්', ta: 'நிதி' },
-  clients: { en: 'Client Services', si: 'සේවාලාභී සේවා', ta: 'வாடிக்கையாளர் சேவைகள்' },
+  findingLand: { en: 'Finding Land', si: 'ඉඩම ගැනීම', ta: 'நிலம் கண்டுபிடிப்பு' },
   notifications: { en: 'Notifications', si: 'දැනුම්දීම්', ta: 'அறிவிப்புகள்' },
   profile: { en: 'Profile', si: 'පැතිකඩ', ta: 'சுயவிவரம்' },
   logout: { en: 'Logout', si: 'පිටවීම', ta: 'வெளியேறு' },
@@ -192,7 +192,7 @@ const translations = {
   passwordRequired: { en: 'Password is required', si: 'මුරපදය අවශ්‍යයි', ta: 'கடவுச்சொல் தேவை' },
 
   // ── Role Selection ───────────────────────────────────────────────────────
-  beekeeperDescFull: { en: 'Manage apiaries, hives, finances, and client services.', si: 'වත්ත, මී පෙට්ටි, මුදල්, සහ සේවාලාභී සේවා කළමනාකරණය කරන්න.', ta: 'பண்ணைகள், தேன்கூடுகள், நிதி மற்றும் வாடிக்கையாளர் சேவைகளை நிர்வகிக்கவும்.' },
+  beekeeperDescFull: { en: 'Manage apiaries, hives, finances, and find land.', si: 'වත්ත, මී පෙට්ටි, මුදල්, සහ ඉඩම ගැනිම කළමනාකරණය කරන්න.', ta: 'பண்ணைகள், தேன்கூடுகள், நிதி மற்றும் நிலம் கண்டுபிடிப்பு நிர්வகிக்கவும்.' },
   landownerDescFull: { en: 'Offer your land for beekeeping activities and earn shared benefits.', si: 'ඔබේ ඉඩම මී මැසි පාලන ක්‍රියාකාරකම් සඳහා ලබා දී ප්‍රතිලාභ ලබන්න.', ta: 'தேனீ வளர்ப்பு நடவடிக்கைகளுக்காக உங்கள் நிலத்தை வழங்கி பகிர்ந்த நன்மைகளை பெறுங்கள்.' },
   continueBtn: { en: 'Continue', si: 'ඉදිරියට', ta: 'தொடர்க' },
 
@@ -329,15 +329,15 @@ const translations = {
   changePassword: { en: 'Change Password', si: 'මුරපදය වෙනස් කරන්න', ta: 'கடவுச்சொல் மாற்று' },
   signOut: { en: 'Sign Out', si: 'පිටවීම', ta: 'வெளியேறு' },
 
-  // ── Client Services ──────────────────────────────────────────────────
-  manageClientRequests: { en: 'Manage client requests', si: 'සේවාලාභී ඉල්ලීම් කළමනාකරණය', ta: 'வாடிக்கையாளர் கோரிக்கைகளை நிர்வகிக்கவும்' },
+  // ── Finding Land ─────────────────────────────────────────────────────
+  manageLandRequests: { en: 'Manage land requests', si: 'ඉඩම් ඉල්ලීම් කළමනාකරණය', ta: 'நிலக் கோரிக்கைகளை நிர்வகிக்கவும்' },
   pending: { en: 'Pending', si: 'පොරොත්තුවේ', ta: 'நிலுவையில்' },
   done: { en: 'Done', si: 'සම්පූර්ණයි', ta: 'முடிந்தது' },
   cancelled: { en: 'Cancelled', si: 'අවලංගු කළා', ta: 'ரத்து செய்யப்பட்டது' },
-  newClientService: { en: 'New Client Service', si: 'නව සේවාලාභී සේවාව', ta: 'புதிய வாடிக்கையாளர் சேவை' },
-  editClientService: { en: 'Edit Client Service', si: 'සේවාලාභී සේවාව සංස්කරණය', ta: 'வாடிக்கையாளர் சேவை திருத்து' },
-  clientName: { en: 'Client Name', si: 'සේවාලාභියාගේ නම', ta: 'வாடிக்கையாளர் பெயர்' },
-  serviceType: { en: 'Service Type', si: 'සේවා වර්ගය', ta: 'சேவை வகை' },
+  newLandListing: { en: 'New Land Listing', si: 'නව ඉඩම් ලැයිස්තුව', ta: 'புதிய நிலப் பட்டியல்' },
+  editLandListing: { en: 'Edit Land Listing', si: 'ඉඩම් ලැයිස්තුව සංස්කරණය', ta: 'நிலப் பட்டியல் திருத்து' },
+  landOwnerName: { en: 'Landowner Name', si: 'ඉඩම් අයිතිකරුගේ නම', ta: 'நிலவுரிமையாளர் பெயர்' },
+  listingType: { en: 'Listing Type', si: 'ලැයිස්තු වර්ගය', ta: 'பட்டியல் வகை' },
   start: { en: 'Start', si: 'ආරම්භ කරන්න', ta: 'தொடங்கவும்' },
   complete: { en: 'Complete', si: 'සම්පූර්ණ කරන්න', ta: 'முடிக்கவும்' },
   deleteQ: { en: 'Delete?', si: 'මකන්නද?', ta: 'நீக்கவா?' },
@@ -380,14 +380,14 @@ const translations = {
   honey: { en: 'Honey', si: 'මී පැණි', ta: 'தேன்' },
   wax: { en: 'Wax', si: 'ඉටි', ta: 'மெழுகு' },
 
-  // ── Client Services (extended) ───────────────────────────────────────
+  // ── Finding Land (extended) ──────────────────────────────────────────
   hiveInspection: { en: 'Hive Inspection', si: 'මී පෙට්ටි පරීක්ෂාව', ta: 'தேன்கூடு ஆய்வு' },
   swarmRemoval: { en: 'Swarm Removal', si: 'රංචු ඉවත් කිරීම', ta: 'கூட்டம் அகற்றல்' },
   colonyRelocation: { en: 'Colony Relocation', si: 'රංචු ස්ථාන මාරුව', ta: 'கூட்டம் இடமாற்றம்' },
   honeyExtraction: { en: 'Honey Extraction', si: 'මී පැණි උපුටා ගැනීම', ta: 'தேன் பிரித்தெடுத்தல்' },
   consultation: { en: 'Consultation', si: 'උපදේශනය', ta: 'ஆலோசனை' },
   training: { en: 'Training', si: 'පුහුණුව', ta: 'பயிற்சி' },
-  noClientServices: { en: 'No client services found', si: 'සේවාලාභී සේවා හමු නොවීය', ta: 'வாடிக்கையாளர் சேవைகள் கிடைக்கவில்லை' },
+  noLandListings: { en: 'No land listings found', si: 'ඉඩම් ලැයිස්තුව හමු නොවීය', ta: 'நிலப் பட்டியல் கிடைக்கவில்லை' },
   amountRs: { en: 'Amount (Rs.)', si: 'මුදල (රු.)', ta: 'தொகை (ரூ.)' },
 
   // ── Profile (extended) ───────────────────────────────────────────────
