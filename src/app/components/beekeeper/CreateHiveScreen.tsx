@@ -462,7 +462,7 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
         apiary_id: parseInt(form.apiary_selection, 10),
         location_type: 'apiary-linked',
         status: form.status,
-        queen_present: form.queen_status === 'virgin' ? 0 : 1,
+        queen_present: (form.queen_status && form.queen_status !== 'virgin' && form.queen_status !== '') ? 1 : 0,
         colony_strength: form.colony_strength_percent ? String(form.colony_strength_percent) : null,
         gps_latitude: parseFloat(gpsLat),
         gps_longitude: parseFloat(gpsLng),

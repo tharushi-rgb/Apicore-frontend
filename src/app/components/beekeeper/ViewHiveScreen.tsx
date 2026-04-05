@@ -847,6 +847,15 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
             <div><p className="text-xs text-stone-500">Queen</p><p className="font-medium text-sm">{hive.queen_present ? 'Present' : 'Absent'}</p></div>
             <div><p className="text-xs text-stone-500">Strength</p><p className="font-medium text-sm capitalize">{hive.colony_strength || 'N/A'}</p></div>
           </div>
+          {hive.gps_latitude && hive.gps_longitude && (
+            <div className="pt-2 border-t border-stone-100 flex items-start gap-2">
+              <MapPin className="w-3.5 h-3.5 text-stone-500 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-stone-500">Location</p>
+                <p className="font-medium text-sm text-stone-700 font-mono text-[0.7rem] break-all">{hive.gps_latitude.toFixed(6)}, {hive.gps_longitude.toFixed(6)}</p>
+              </div>
+            </div>
+          )}
           <div>
             <p className="text-xs text-stone-500">Notes</p>
             <p className="text-xs text-stone-600 bg-stone-50 p-1.5 rounded-lg">{cleanHiveNotes || 'No notes'}</p>
