@@ -21,6 +21,14 @@ import { t } from '../../i18n';
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
+const formatPhoneNumber = (value: string): string => {
+  const cleaned = value.replace(/\D/g, '');
+  if (cleaned.length <= 2) return cleaned;
+  if (cleaned.length <= 5) return `${cleaned.slice(0, 2)} ${cleaned.slice(2)}`;
+  if (cleaned.length <= 8) return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}`;
+  return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8, 12)}`;
+};
+
 interface Props {
   selectedLanguage: Language; onLanguageChange: (lang: Language) => void; onNavigate: (tab: NavTab) => void;
   onLogout: () => void;
@@ -136,7 +144,7 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
               </div>
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-2">{t('phone', selectedLanguage)}</label>
-                <input type="tel" value={editPhone} onChange={e => setEditPhone(e.target.value)} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none" />
+                <input type="tel" value={editPhone} onChange={e => setEditPhone(formatPhoneNumber(e.target.value))} maxLength={15} className="w-full px-4 py-3 bg-white border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-2">{t('district', selectedLanguage)}</label>

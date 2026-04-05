@@ -31,6 +31,14 @@ interface FormData {
 
 const TOTAL_STEPS = 4;
 
+const formatPhoneNumber = (value: string): string => {
+  const cleaned = value.replace(/\D/g, '');
+  if (cleaned.length <= 2) return cleaned;
+  if (cleaned.length <= 5) return `${cleaned.slice(0, 2)} ${cleaned.slice(2)}`;
+  if (cleaned.length <= 8) return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}`;
+  return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8, 12)}`;
+};
+
 export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBack, onSuccess }: LandownerRegistrationProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
@@ -156,8 +164,12 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
                   <label className={lc}>{t('phone', selectedLanguage)} <span className="text-red-500">*</span></label>
                   <input {...register('phoneNumber', {
                     required: t('phoneRequired', selectedLanguage),
-                    pattern: { value: /^\d{12}$/, message: t('must12DigitsPhone', selectedLanguage) }
-                  })} className={ic} placeholder="94 77 4567890" maxLength={12} inputMode="numeric" />
+                    pattern: { value: /^\d{12}$/, message: t('must12DigitsPhone', selectedLanguage) },
+                    onChange: (e) => {
+                      const formatted = formatPhoneNumber(e.target.value);
+                      setValue('phoneNumber', formatted);
+                    }
+                  })} className={ic} placeholder="94 77 456 7890" maxLength={15} inputMode="numeric" />
                   {errors.phoneNumber && <p className={ec}>{errors.phoneNumber.message}</p>}
                 </div>
                 <div>

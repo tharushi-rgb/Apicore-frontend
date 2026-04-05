@@ -88,6 +88,14 @@ function getInitialForageEntries(initialApiary?: Apiary): ApiaryForageEntry[] {
   return [{ forageType: '', bloomingPeriod: '' }];
 }
 
+function formatPhoneNumber(value: string): string {
+  const cleaned = value.replace(/\D/g, '');
+  if (cleaned.length <= 2) return cleaned;
+  if (cleaned.length <= 5) return `${cleaned.slice(0, 2)} ${cleaned.slice(2)}`;
+  if (cleaned.length <= 8) return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}`;
+  return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8, 12)}`;
+}
+
 function isValidPhoneNumber(phone: string): boolean {
   if (!phone || typeof phone !== 'string') return false;
   const cleaned = phone.replace(/\D/g, '');
@@ -167,19 +175,6 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
 
   const setField = <K extends keyof ApiaryFormState>(key: K, value: ApiaryFormState[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setField('landlord_contact', value);
-    
-    if (value.trim() === '') {
-      setPhoneValidationError('');
-    } else if (!isValidPhoneNumber(value)) {
-      setPhoneValidationError('Enter a valid phone number (+94 format, 9-12 digits)');
-    } else {
-      setPhoneValidationError('');
-    }
   };
 
   const updateForageEntry = (index: number, key: keyof ApiaryForageEntry, value: string) => {
@@ -441,8 +436,15 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
                   <label className={labelClass}>Contact Number *</label>
                   <input 
                     value={form.landlord_contact} 
-                    onChange={handlePhoneChange} 
-                    placeholder="+94 123456789"
+                    onChange={(e) => {
+                      const formatted = formatPhoneNumber(e.target.value);
+                      setField('landlord_contact', formatted);
+                      if (formatted) {
+                        const cleaned = formatted.replace(/\D/g, '');
+                        setPhoneValidationError(cleaned.length === 12 && isValidPhoneNumber(formatted) ? '' : '');
+                      }
+                    }} 
+                    placeholder="94 77 456 7890"
                     maxLength={15}
                     className={`${inputClass} ${phoneValidationError ? 'border-red-500 bg-red-50/30' : ''}`}
                   />

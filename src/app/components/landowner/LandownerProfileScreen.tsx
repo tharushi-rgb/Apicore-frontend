@@ -10,6 +10,14 @@ import { PROVINCES, getDistrictsByProvince, getDsDivisionsByDistrict } from '../
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 
+const formatPhoneNumber = (value: string): string => {
+  const cleaned = value.replace(/\D/g, '');
+  if (cleaned.length <= 2) return cleaned;
+  if (cleaned.length <= 5) return `${cleaned.slice(0, 2)} ${cleaned.slice(2)}`;
+  if (cleaned.length <= 8) return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}`;
+  return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8, 12)}`;
+};
+
 interface Props {
   selectedLanguage: Language;
   onLanguageChange: (lang: Language) => void;
@@ -716,8 +724,15 @@ function ProfileEditInputTile({
         <input
           value={value}
           type={type}
-          onChange={(event) => onChange(event.target.value)}
+          onChange={(event) => {
+            let newValue = event.target.value;
+            if (type === 'tel') {
+              newValue = formatPhoneNumber(newValue);
+            }
+            onChange(newValue);
+          }}
           placeholder={placeholder}
+          maxLength={type === 'tel' ? 15 : undefined}
           className="min-w-0 flex-1 bg-transparent text-right text-sm font-semibold text-stone-900 placeholder:text-stone-400 focus:outline-none"
         />
       </div>
