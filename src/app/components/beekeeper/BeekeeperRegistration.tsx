@@ -226,7 +226,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 pb-2">
-          <div className="min-h-full flex flex-col justify-center py-2">
+          <div className="min-h-full flex flex-col justify-start py-2">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5">
 
             {currentStep === 1 && (
