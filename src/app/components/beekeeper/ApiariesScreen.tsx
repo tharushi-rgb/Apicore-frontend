@@ -209,14 +209,14 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                 />
               </div>
 
-              <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3 shadow-sm">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="bg-white rounded-xl border border-stone-200 p-4 space-y-4 shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[0.7rem] font-semibold text-stone-600 mb-1">Status</p>
+                    <p className="text-[0.8rem] font-semibold text-stone-700 mb-2">Status</p>
                     <select
                       value={filters.status}
                       onChange={(event) => setFilters((previous) => ({ ...previous, status: event.target.value as typeof filters.status }))}
-                      className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full rounded-lg border border-stone-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
                     >
                       <option value="all">Any</option>
                       <option value="active">Active</option>
@@ -225,25 +225,25 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                     </select>
                   </div>
                   <div>
-                    <p className="text-[0.7rem] font-semibold text-stone-600 mb-1">Established Between</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input type="date" value={filters.dateFrom} onChange={(event) => setFilters((previous) => ({ ...previous, dateFrom: event.target.value }))} className="w-full rounded-lg border border-stone-200 px-2.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
-                      <input type="date" value={filters.dateTo} onChange={(event) => setFilters((previous) => ({ ...previous, dateTo: event.target.value }))} className="w-full rounded-lg border border-stone-200 px-2.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
+                    <p className="text-[0.8rem] font-semibold text-stone-700 mb-2">Established Between</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <input type="date" value={filters.dateFrom} onChange={(event) => setFilters((previous) => ({ ...previous, dateFrom: event.target.value }))} className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white" />
+                      <input type="date" value={filters.dateTo} onChange={(event) => setFilters((previous) => ({ ...previous, dateTo: event.target.value }))} className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white" />
                     </div>
                   </div>
-                  <div>
-                    <p className="text-[0.7rem] font-semibold text-stone-600 mb-1">Health Filters</p>
-                    <div className="flex flex-wrap gap-2">
-                      <button onClick={() => toggleHealthFilter('queenlessOnly')} className={`px-3 py-1.5 rounded-full text-[0.72rem] font-semibold transition-colors ${filters.queenlessOnly ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-stone-100 text-stone-700'}`}>
-                        Queenless Hives
-                      </button>
-                      <button onClick={() => toggleHealthFilter('pestOnly')} className={`px-3 py-1.5 rounded-full text-[0.72rem] font-semibold transition-colors ${filters.pestOnly ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-stone-100 text-stone-700'}`}>
-                        Pest Alerts
-                      </button>
-                      <button onClick={() => toggleHealthFilter('healthyOnly')} className={`px-3 py-1.5 rounded-full text-[0.72rem] font-semibold transition-colors ${filters.healthyOnly ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-stone-100 text-stone-700'}`}>
-                        Healthy Only
-                      </button>
-                    </div>
+                </div>
+                <div>
+                  <p className="text-[0.8rem] font-semibold text-stone-700 mb-2.5">Health Filters</p>
+                  <div className="flex flex-wrap gap-2.5">
+                    <button onClick={() => toggleHealthFilter('queenlessOnly')} className={`px-4 py-2 rounded-full text-[0.8rem] font-semibold transition-colors ${filters.queenlessOnly ? 'bg-red-100 text-red-800 border border-red-300' : 'bg-stone-100 text-stone-700 border border-stone-200 hover:bg-stone-150'}`}>
+                      Queenless Hives
+                    </button>
+                    <button onClick={() => toggleHealthFilter('pestOnly')} className={`px-4 py-2 rounded-full text-[0.8rem] font-semibold transition-colors ${filters.pestOnly ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-stone-100 text-stone-700 border border-stone-200 hover:bg-stone-150'}`}>
+                      Pest Alerts
+                    </button>
+                    <button onClick={() => toggleHealthFilter('healthyOnly')} className={`px-4 py-2 rounded-full text-[0.8rem] font-semibold transition-colors ${filters.healthyOnly ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-stone-100 text-stone-700 border border-stone-200 hover:bg-stone-150'}`}>
+                      Healthy Only
+                    </button>
                   </div>
                 </div>
               </div>
