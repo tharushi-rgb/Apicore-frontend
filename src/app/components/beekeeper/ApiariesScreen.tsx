@@ -210,13 +210,13 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
               </div>
 
               <div className="bg-white rounded-xl border border-stone-200 p-3 sm:p-3 shadow-sm">
-                <div className="grid grid-cols-1 md:[grid-template-columns:minmax(9rem,max-content)_minmax(13rem,1fr)_minmax(11rem,max-content)] gap-3 md:gap-4 items-start">
+                <div className="flex flex-col gap-3 md:grid md:[grid-template-columns:minmax(9rem,max-content)_minmax(13rem,1fr)_minmax(11rem,max-content)] md:gap-4 md:items-start">
                   <div className="flex flex-col min-w-0">
                     <p className="text-[0.75rem] font-bold text-stone-800 mb-0.5">Status</p>
                     <select
                       value={filters.status}
                       onChange={(event) => setFilters((previous) => ({ ...previous, status: event.target.value as typeof filters.status }))}
-                      className="md:w-auto rounded-lg border border-stone-300 px-1.5 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
+                      className="w-full sm:w-auto md:w-auto rounded-lg border border-stone-300 px-1.5 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
                     >
                       <option value="all">Any</option>
                       <option value="active">Active</option>
@@ -247,22 +247,22 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
 
                   <div className="flex flex-col min-w-0">
                     <p className="text-[0.75rem] font-bold text-stone-800 mb-1">Health Filters</p>
-                    <div className="flex flex-col gap-1 w-full md:w-auto">
+                    <div className="flex flex-wrap gap-1.5 items-center">
                       <button
                         onClick={() => toggleHealthFilter('queenlessOnly')}
-                        className={`w-full md:w-auto px-2.5 py-1.5 rounded-full text-[0.75rem] font-semibold transition-all whitespace-nowrap ${filters.queenlessOnly ? 'bg-red-100 text-red-900 border-2 border-red-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
+                        className={`px-2.5 py-1.5 rounded-full text-[0.75rem] font-semibold transition-all whitespace-nowrap ${filters.queenlessOnly ? 'bg-red-100 text-red-900 border-2 border-red-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
                         Queenless Hives
                       </button>
                       <button
                         onClick={() => toggleHealthFilter('pestOnly')}
-                        className={`w-full md:w-auto px-2.5 py-1.5 rounded-full text-[0.75rem] font-semibold transition-all whitespace-nowrap ${filters.pestOnly ? 'bg-amber-100 text-amber-900 border-2 border-amber-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
+                        className={`px-2.5 py-1.5 rounded-full text-[0.75rem] font-semibold transition-all whitespace-nowrap ${filters.pestOnly ? 'bg-amber-100 text-amber-900 border-2 border-amber-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
                         Pest Alerts
                       </button>
                       <button
                         onClick={() => toggleHealthFilter('healthyOnly')}
-                        className={`w-full md:w-auto px-2.5 py-1.5 rounded-full text-[0.75rem] font-semibold transition-all whitespace-nowrap ${filters.healthyOnly ? 'bg-emerald-100 text-emerald-900 border-2 border-emerald-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
+                        className={`px-2.5 py-1.5 rounded-full text-[0.75rem] font-semibold transition-all whitespace-nowrap ${filters.healthyOnly ? 'bg-emerald-100 text-emerald-900 border-2 border-emerald-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
                         Healthy Only
                       </button>
