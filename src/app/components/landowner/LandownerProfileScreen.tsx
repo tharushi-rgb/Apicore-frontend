@@ -83,6 +83,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
   });
   const [plotEditorMessage, setPlotEditorMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSavingPlot, setIsSavingPlot] = useState(false);
+  const [plotSearch, setPlotSearch] = useState('');
 
   useEffect(() => {
     profileService.get()
@@ -558,6 +559,18 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
               </button>
             </div>
 
+            <div className="mt-3">
+              <div className="relative">
+                <MapPin className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-stone-400" />
+                <input
+                  value={plotSearch}
+                  onChange={(event) => setPlotSearch(event.target.value)}
+                  placeholder="Search plots by name, district, or forage"
+                  className="w-full rounded-lg border border-stone-200 bg-white py-2 pl-9 pr-3 text-[0.78rem] text-stone-700 focus:border-emerald-600 focus:outline-none"
+                />
+              </div>
+            </div>
+
             <div className="mt-3 space-y-2.5">
               {plotEditorMessage && !plotEditor.isOpen && (
                 <p className={`rounded-lg px-2 py-1.5 text-xs font-semibold ${
@@ -573,7 +586,19 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                 </div>
               )}
 
-              {plots.map((plot) => (
+              {plots
+                .filter((plot) => {
+                  const query = plotSearch.trim().toLowerCase();
+                  if (!query) return true;
+                  const forageText = plot.forageEntries.map((entry) => entry.name).join(' ').toLowerCase();
+                  return (
+                    plot.name.toLowerCase().includes(query) ||
+                    plot.district.toLowerCase().includes(query) ||
+                    plot.province.toLowerCase().includes(query) ||
+                    forageText.includes(query)
+                  );
+                })
+                .map((plot) => (
                 <div
                   key={plot.id}
                   className="w-full rounded-lg border border-stone-200 bg-white px-3 py-2.5 hover:border-emerald-200 hover:shadow-sm transition-all"
@@ -623,7 +648,6 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
 
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-stone-700">
                     <span className="font-semibold text-stone-900">{plot.totalAcreage} acres</span>
-                    <span>{plot.shadeProfile}</span>
                     <span>{plot.waterAvailability}</span>
                   </div>
                 </div>
@@ -730,20 +754,6 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">Sun Exposure</label>
-                <select
-                  value={plotEditor.shadeProfile}
-                  onChange={(e) => setPlotEditor((prev) => ({ ...prev, shadeProfile: e.target.value }))}
-                  disabled={isPlotViewMode}
-                  className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
-                >
-                  <option>Full Shade</option>
-                  <option>Partial Shade</option>
-                  <option>Full Sun</option>
-                </select>
-              </div>
-
-              <div>
                 <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">Water Availability</label>
                 <select
                   value={plotEditor.waterAvailability}
@@ -824,13 +834,6 @@ function ProfileInfoTile({ label, value }: { label: string; value: string }) {
         </span>
       </div>
 
-      <input
-        ref={avatarInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleAvatarChange}
-        className="hidden"
-      />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, MapPin, AlertTriangle, Loader2, ChevronRight, Eye, Zap } from 'lucide-react';
+import { Plus, MapPin, AlertTriangle, Loader2, ChevronRight, Eye, Zap, Search } from 'lucide-react';
 import { MobileHeader } from '../shared/MobileHeader';
 import { landownerPlotsService, type LandPlot } from '../../services/landownerPlotsService';
 import { landownerMarketplaceService, type Contract } from '../../services/landownerMarketplace';
@@ -37,6 +37,8 @@ export function LandownerPlotsScreen({
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [plotSearch, setPlotSearch] = useState('');
+  const [plotStatus, setPlotStatus] = useState<'all' | 'active' | 'inactive'>('all');
 
   const loadData = async () => {
     try {
@@ -85,6 +87,19 @@ export function LandownerPlotsScreen({
   const totalHives = plots.reduce((sum, p) => sum + p.hiveCount, 0);
   const totalRevenue = plots.reduce((sum, p) => sum + p.revenue, 0);
 
+  const filteredPlots = plots.filter(({ plot, activeContracts }) => {
+    if (plotStatus === 'active' && activeContracts === 0) return false;
+    if (plotStatus === 'inactive' && activeContracts > 0) return false;
+    const query = plotSearch.trim().toLowerCase();
+    if (!query) return true;
+    const forageText = (plot.forage_entries || []).map((entry) => entry.name).join(' ').toLowerCase();
+    return (
+      plot.name.toLowerCase().includes(query) ||
+      plot.district?.toLowerCase().includes(query) ||
+      forageText.includes(query)
+    );
+  });
+
   if (loading) {
     return (
       <div className="h-[100dvh] bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex items-center justify-center">
@@ -132,11 +147,36 @@ export function LandownerPlotsScreen({
             </button>
           </div>
 
-          {plots.length === 0 ? (
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <div className="relative min-w-[12rem] flex-1">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-stone-400" />
+              <input
+                value={plotSearch}
+                onChange={(event) => setPlotSearch(event.target.value)}
+                placeholder="Search plots by name, district, or forage"
+                className="w-full rounded-lg border border-stone-200 bg-white py-1.5 pl-8 pr-3 text-[0.75rem] text-stone-700 focus:border-emerald-600 focus:outline-none"
+              />
+            </div>
+            <select
+              value={plotStatus}
+              onChange={(event) => setPlotStatus(event.target.value as typeof plotStatus)}
+              className="rounded-lg border border-stone-200 bg-white px-2 py-1.5 text-[0.75rem] text-stone-700 focus:border-emerald-600 focus:outline-none"
+            >
+              <option value="all">Any status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+
+          {filteredPlots.length === 0 ? (
             <div className="bg-white rounded-xl p-8 text-center shadow-sm border border-stone-100">
               <MapPin className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-              <p className="text-stone-600 font-medium mb-2">No plots registered yet</p>
-              <p className="text-xs text-stone-500 mb-4">Create your first plot to start listing for beekeepers</p>
+              <p className="text-stone-600 font-medium mb-2">
+                {totalPlots === 0 ? 'No plots registered yet' : 'No plots match your filters'}
+              </p>
+              <p className="text-xs text-stone-500 mb-4">
+                {totalPlots === 0 ? 'Create your first plot to start listing for beekeepers' : 'Try adjusting your search or status filter.'}
+              </p>
               <button
                 onClick={onAddPlot}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium text-sm mx-auto transition-colors"
@@ -146,7 +186,7 @@ export function LandownerPlotsScreen({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {plots.map(({ plot, hiveCount, maxCapacity, occupancyPercent, activeContracts, revenue }) => (
+              {filteredPlots.map(({ plot, hiveCount, maxCapacity, occupancyPercent, activeContracts, revenue }) => (
                 <div
                   key={plot.id}
                   className="bg-white rounded-xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-md transition-shadow flex flex-col"

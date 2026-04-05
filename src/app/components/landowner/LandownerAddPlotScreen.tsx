@@ -29,7 +29,6 @@ const WATER_OPTIONS = [
   'Requires Manual Water',
 ] as const;
 
-const SHADE_OPTIONS = ['Full Shade', 'Partial Shade', 'Full Sun'] as const;
 const VEHICLE_OPTIONS = ['Lorry', 'Tuk-tuk', 'Footpath'] as const;
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
 
@@ -51,7 +50,7 @@ export function LandownerAddPlotScreen({
   const [gpsLongitude, setGpsLongitude] = useState('');
   const [totalAcreage, setTotalAcreage] = useState('');
   const [waterAvailability, setWaterAvailability] = useState('On-site');
-  const [shadeProfile, setShadeProfile] = useState('Partial Shade');
+  const [shadeProfile] = useState('Partial Shade');
   const [vehicleAccess, setVehicleAccess] = useState('Lorry');
   const [nightAccess, setNightAccess] = useState<boolean | null>(null);
   const [forageEntries, setForageEntries] = useState<ForageEntry[]>([{ forage: '', bloomStartMonth: '', bloomEndMonth: '' }]);
@@ -140,8 +139,8 @@ export function LandownerAddPlotScreen({
       return;
     }
 
-    if (!waterAvailability || !shadeProfile || !vehicleAccess) {
-      setError('Water, shade, and vehicle access selections are required');
+    if (!waterAvailability || !vehicleAccess) {
+      setError('Water availability and vehicle access selections are required');
       return;
     }
 
@@ -371,15 +370,6 @@ export function LandownerAddPlotScreen({
                 <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">Water Availability *</label>
                 <select value={waterAvailability} onChange={(event) => setWaterAvailability(event.target.value)} className="w-full rounded-lg border border-stone-300 px-2.5 py-2.5 text-[0.88rem] focus:border-emerald-600 focus:outline-none">
                   {WATER_OPTIONS.map((option) => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">Shade Profile *</label>
-                <select value={shadeProfile} onChange={(event) => setShadeProfile(event.target.value)} className="w-full rounded-lg border border-stone-300 px-2.5 py-2.5 text-[0.88rem] focus:border-emerald-600 focus:outline-none">
-                  {SHADE_OPTIONS.map((option) => (
                     <option key={option} value={option}>{option}</option>
                   ))}
                 </select>

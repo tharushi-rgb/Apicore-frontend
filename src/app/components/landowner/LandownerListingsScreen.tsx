@@ -6,6 +6,7 @@ import {
   HandCoins,
   MapPin,
   Pencil,
+  Search,
   ShieldCheck,
   Trash2,
   X,
@@ -67,6 +68,8 @@ export function LandownerListingsScreen({
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [isBidsOpen, setIsBidsOpen] = useState(false);
   const [activeListingForBids, setActiveListingForBids] = useState<Listing | null>(null);
+  const [listingSearch, setListingSearch] = useState('');
+  const [listingStatusFilter, setListingStatusFilter] = useState<'all' | ListingStatus>('all');
 
   const plots = useMemo(() => {
     try {
@@ -87,6 +90,25 @@ export function LandownerListingsScreen({
       return [];
     }
   }, [version, pendingFilterOnly]);
+
+  const filteredListings = useMemo(() => {
+    const query = listingSearch.trim().toLowerCase();
+    return listings.filter((listing) => {
+      if (listingStatusFilter !== 'all' && listing.status !== listingStatusFilter) return false;
+      if (!query) return true;
+      const plot = plots.find((item) => item.id === listing.plotId);
+      const terms = [
+        listing.listingCode,
+        plot?.name,
+        plot?.district,
+        plot?.dsDivision,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return terms.includes(query);
+    });
+  }, [listings, listingSearch, listingStatusFilter, plots]);
 
   const contracts = useMemo(() => {
     try {
@@ -321,6 +343,28 @@ export function LandownerListingsScreen({
           </section>
         ) : (
           <section className="rounded-xl border border-stone-200 bg-white px-2 py-2 shadow-sm">
+            <div className="flex flex-wrap items-center gap-2 border-b border-stone-200 px-1 pb-2">
+              <div className="relative min-w-[12rem] flex-1">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-stone-400" />
+                <input
+                  value={listingSearch}
+                  onChange={(event) => setListingSearch(event.target.value)}
+                  placeholder="Search listing, plot, or location"
+                  className="w-full rounded-lg border border-stone-300 bg-white py-1.5 pl-8 pr-3 text-[0.75rem] text-stone-700 focus:border-emerald-600 focus:outline-none"
+                />
+              </div>
+              <select
+                value={listingStatusFilter}
+                onChange={(event) => setListingStatusFilter(event.target.value as typeof listingStatusFilter)}
+                className="rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-[0.75rem] text-stone-700 focus:border-emerald-600 focus:outline-none"
+              >
+                <option value="all">Any status</option>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+                <option value="accepted">Accepted</option>
+                <option value="expired">Expired</option>
+              </select>
+            </div>
             <div className="grid grid-cols-[1.2fr_1fr_auto] gap-2 border-b border-stone-200 px-1 pb-1">
               <p className="text-caption uppercase tracking-[0.05em] text-stone-500">Listing</p>
               <p className="text-caption uppercase tracking-[0.05em] text-stone-500">Location</p>
@@ -328,7 +372,7 @@ export function LandownerListingsScreen({
             </div>
 
             <div className="divide-y divide-stone-100 max-h-96 overflow-y-auto">
-              {listings.map((listing) => {
+              {filteredListings.map((listing) => {
                 const plot = plots.find((item) => item.id === listing.plotId);
                 const listingBids = landownerMarketplaceService.getBidsForListing(listing.id);
                 const pendingCount = listingBids.filter((bid) => bid.status === 'pending').length;
@@ -372,7 +416,7 @@ export function LandownerListingsScreen({
                 );
               })}
 
-              {listings.length === 0 && (
+              {filteredListings.length === 0 && (
                 <div className="px-2 py-6 text-center text-body text-stone-500">No listings to show.</div>
               )}
             </div>
@@ -415,7 +459,7 @@ export function LandownerListingsScreen({
                   <p className="text-xs font-semibold text-emerald-900">Plot Summary</p>
                   <p className="mt-1 text-sm text-stone-700">{selectedPlot.name}</p>
                   <p className="text-xs text-stone-600 inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{selectedPlot.district} / {selectedPlot.dsDivision}</p>
-                  <p className="text-xs text-stone-600 mt-0.5">Water: {selectedPlot.waterAvailability} · Shade: {selectedPlot.shadeProfile}</p>
+                  <p className="text-xs text-stone-600 mt-0.5">Water: {selectedPlot.waterAvailability}</p>
                 </div>
               )}
 

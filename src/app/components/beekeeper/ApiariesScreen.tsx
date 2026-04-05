@@ -38,7 +38,7 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const initialFilters = {
-    status: 'all' as 'all' | 'active' | 'empty' | 'expired',
+    status: 'all' as 'all' | 'active' | 'inactive' | 'empty' | 'expired',
     queenlessOnly: false,
     pestOnly: false,
     healthyOnly: false,
@@ -222,6 +222,7 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                     >
                       <option value="all">Any</option>
                       <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
                       <option value="empty">Empty</option>
                       <option value="expired">Expired</option>
                     </select>
