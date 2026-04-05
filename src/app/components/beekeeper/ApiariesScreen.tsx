@@ -209,36 +209,35 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                 />
               </div>
 
-              <div className="bg-white rounded-xl border border-stone-200 p-5 space-y-5 shadow-sm">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Status Filter */}
-                  <div className="flex flex-col">
-                    <p className="text-[0.85rem] font-bold text-stone-800 mb-3">Status</p>
-                    <select
-                      value={filters.status}
-                      onChange={(event) => setFilters((previous) => ({ ...previous, status: event.target.value as typeof filters.status }))}
-                      className="w-full rounded-lg border border-stone-300 px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
-                    >
-                      <option value="all">Any</option>
-                      <option value="active">Active</option>
-                      <option value="empty">Empty</option>
-                      <option value="expired">Expired</option>
-                    </select>
-                  </div>
+              <div className="bg-white rounded-xl border border-stone-200 p-5 space-y-4 shadow-sm">
+                {/* Row 1: Status Filter */}
+                <div className="flex flex-col">
+                  <p className="text-[0.85rem] font-bold text-stone-800 mb-3">Status</p>
+                  <select
+                    value={filters.status}
+                    onChange={(event) => setFilters((previous) => ({ ...previous, status: event.target.value as typeof filters.status }))}
+                    className="w-full rounded-lg border border-stone-300 px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
+                  >
+                    <option value="all">Any</option>
+                    <option value="active">Active</option>
+                    <option value="empty">Empty</option>
+                    <option value="expired">Expired</option>
+                  </select>
+                </div>
 
-                  {/* Date Range Filter */}
-                  <div className="flex flex-col">
-                    <p className="text-[0.85rem] font-bold text-stone-800 mb-3">Established Between</p>
-                    <div className="flex gap-3">
-                      <input type="date" value={filters.dateFrom} onChange={(event) => setFilters((previous) => ({ ...previous, dateFrom: event.target.value }))} className="flex-1 rounded-lg border border-stone-300 px-3.5 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors" />
-                      <input type="date" value={filters.dateTo} onChange={(event) => setFilters((previous) => ({ ...previous, dateTo: event.target.value }))} className="flex-1 rounded-lg border border-stone-300 px-3.5 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors" />
-                    </div>
+                {/* Row 2: Date Range Filter - Stacked vertically */}
+                <div className="flex flex-col">
+                  <p className="text-[0.85rem] font-bold text-stone-800 mb-3">Established Between</p>
+                  <div className="flex flex-col gap-2">
+                    <input type="date" value={filters.dateFrom} onChange={(event) => setFilters((previous) => ({ ...previous, dateFrom: event.target.value }))} className="w-full rounded-lg border border-stone-300 px-3.5 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors" placeholder="From" />
+                    <input type="date" value={filters.dateTo} onChange={(event) => setFilters((previous) => ({ ...previous, dateTo: event.target.value }))} className="w-full rounded-lg border border-stone-300 px-3.5 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors" placeholder="To" />
                   </div>
+                </div>
 
-                  {/* Health Filters */}
-                  <div className="flex flex-col">
-                    <p className="text-[0.85rem] font-bold text-stone-800 mb-3">Health Filters</p>
-                    <div className="flex flex-wrap gap-2 auto-rows-max">
+                {/* Row 3: Health Filters */}
+                <div className="flex flex-col">
+                  <p className="text-[0.85rem] font-bold text-stone-800 mb-3">Health Filters</p>
+                  <div className="flex flex-wrap gap-2 auto-rows-max">
                       <button onClick={() => toggleHealthFilter('queenlessOnly')} className={`px-3.5 py-2.5 rounded-full text-[0.8rem] font-semibold transition-all whitespace-nowrap ${filters.queenlessOnly ? 'bg-red-100 text-red-900 border-2 border-red-400 shadow-sm' : 'bg-stone-100 text-stone-700 border-2 border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}>
                         Queenless Hives
                       </button>
@@ -250,7 +249,6 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                       </button>
                     </div>
                   </div>
-                </div>
               </div>
 
               {filtered.length === 0 ? (
