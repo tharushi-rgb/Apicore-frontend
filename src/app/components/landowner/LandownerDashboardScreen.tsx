@@ -46,9 +46,12 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
   const user = authService.getLocalUser();
 
   useEffect(() => {
-    const loadStats = () => {
+    const loadStats = async () => {
       try {
-        setStats(landownerMarketplaceService.getDashboardStats());
+        const data = await landownerMarketplaceService.getDashboardStats();
+        setStats(data);
+      } catch (error) {
+        console.error('Failed to load dashboard stats:', error);
       } finally {
         setLoading(false);
       }

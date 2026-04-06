@@ -1,9 +1,10 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import {
   Check,
   Eye,
   FilePlus2,
   HandCoins,
+  Loader2,
   MapPin,
   Pencil,
   Search,
@@ -15,8 +16,10 @@ import { MobileHeader } from '../shared/MobileHeader';
 import { authService } from '../../services/auth';
 import {
   landownerMarketplaceService,
+  type Bid,
   type Contract,
   type FinancialTerms,
+  type LandPlot,
   type Listing,
   type ListingStatus,
 } from '../../services/landownerMarketplace';
@@ -61,63 +64,76 @@ export function LandownerListingsScreen({
 }: Props) {
   const user = authService.getLocalUser();
 
-  const [version, setVersion] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [plots, setPlots] = useState<LandPlot[]>([]);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [bidsCache, setBidsCache] = useState<Record<number, Bid[]>>({});
+
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>('create');
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [isBidsOpen, setIsBidsOpen] = useState(false);
   const [activeListingForBids, setActiveListingForBids] = useState<Listing | null>(null);
+  const [activeBids, setActiveBids] = useState<Bid[]>([]);
   const [listingSearch, setListingSearch] = useState('');
   const [listingStatusFilter, setListingStatusFilter] = useState<'all' | ListingStatus>('all');
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const plots = useMemo(() => {
+  const loadData = useCallback(async () => {
+    setLoading(true);
     try {
-      return landownerMarketplaceService.getPlots();
-    } catch (error) {
-      console.error('Failed to get plots:', error);
-      return [];
-    }
-  }, [version]);
+      const [plotsData, listingsData, contractsData] = await Promise.all([
+        landownerMarketplaceService.getPlots(),
+        landownerMarketplaceService.getListings(),
+        landownerMarketplaceService.getContracts(),
+      ]);
 
-  const listings = useMemo(() => {
-    try {
-      const all = landownerMarketplaceService.getListings();
-      if (!pendingFilterOnly) return all;
-      return all.filter((listing) => landownerMarketplaceService.getBidsForListing(listing.id).some((bid) => bid.status === 'pending'));
-    } catch (error) {
-      console.error('Failed to get listings:', error);
-      return [];
-    }
-  }, [version, pendingFilterOnly]);
+      setPlots(plotsData);
+      setContracts(contractsData);
 
-  const filteredListings = useMemo(() => {
+      // Filter listings if needed and load bids
+      let filteredListings = listingsData;
+      const bidsCacheTemp: Record<number, Bid[]> = {};
+
+      for (const listing of listingsData) {
+        const bids = await landownerMarketplaceService.getBidsForListing(listing.id);
+        bidsCacheTemp[listing.id] = bids;
+      }
+
+      if (pendingFilterOnly) {
+        filteredListings = listingsData.filter((listing) =>
+          bidsCacheTemp[listing.id]?.some((bid) => bid.status === 'pending')
+        );
+      }
+
+      setListings(filteredListings);
+      setBidsCache(bidsCacheTemp);
+    } catch (error) {
+      console.error('Failed to load data:', error);
+      setMessage({ type: 'error', text: 'Failed to load data' });
+    } finally {
+      setLoading(false);
+    }
+  }, [pendingFilterOnly]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const filteredListings = listings.filter((listing) => {
+    if (listingStatusFilter !== 'all' && listing.status !== listingStatusFilter) return false;
     const query = listingSearch.trim().toLowerCase();
-    return listings.filter((listing) => {
-      if (listingStatusFilter !== 'all' && listing.status !== listingStatusFilter) return false;
-      if (!query) return true;
-      const plot = plots.find((item) => item.id === listing.plotId);
-      const terms = [
-        listing.listingCode,
-        plot?.name,
-        plot?.district,
-        plot?.dsDivision,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      return terms.includes(query);
-    });
-  }, [listings, listingSearch, listingStatusFilter, plots]);
-
-  const contracts = useMemo(() => {
-    try {
-      return landownerMarketplaceService.getContracts();
-    } catch (error) {
-      console.error('Failed to get contracts:', error);
-      return [];
-    }
-  }, [version]);
+    if (!query) return true;
+    const plot = plots.find((item) => item.id === listing.plotId);
+    const terms = [listing.listingCode, plot?.name, plot?.district, plot?.dsDivision]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    return terms.includes(query);
+  });
 
   const selectedPlot = plots.find((plot) => plot.id === form.plotId);
 
@@ -143,9 +159,9 @@ export function LandownerListingsScreen({
     setIsEditorOpen(true);
   };
 
-  const openEdit = (listing: Listing) => {
-    const bidCount = landownerMarketplaceService.getBidsForListing(listing.id).length;
-    if (bidCount > 0) {
+  const openEdit = async (listing: Listing) => {
+    const bids = bidsCache[listing.id] || [];
+    if (bids.length > 0) {
       setMessage({
         type: 'error',
         text: 'This listing cannot be edited as proposals have already been received',
@@ -167,23 +183,26 @@ export function LandownerListingsScreen({
     setIsEditorOpen(true);
   };
 
-  const openBids = (listing: Listing) => {
+  const openBids = async (listing: Listing) => {
     setActiveListingForBids(listing);
+    const bids = bidsCache[listing.id] || await landownerMarketplaceService.getBidsForListing(listing.id);
+    setActiveBids(bids);
     setIsBidsOpen(true);
   };
 
   const closeEditor = () => setIsEditorOpen(false);
 
-  const handleDelete = (listingId: number) => {
-    const confirmed = window.confirm('Delete this listing permanently?');
-    if (!confirmed) return;
-
+  const handleDelete = async (listingId: number) => {
+    setSaving(true);
     try {
-      landownerMarketplaceService.deleteListing(listingId);
-      setVersion((value) => value + 1);
+      await landownerMarketplaceService.deleteListing(listingId);
+      setConfirmDelete(null);
       setMessage({ type: 'success', text: 'Listing deleted successfully. Pending bids were rejected automatically.' });
+      await loadData();
     } catch (error: any) {
       setMessage({ type: 'error', text: error?.message || 'Failed to delete listing' });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -207,7 +226,7 @@ export function LandownerListingsScreen({
     return '';
   };
 
-  const saveListing = (targetStatus: ListingStatus) => {
+  const saveListing = async (targetStatus: ListingStatus) => {
     setMessage(null);
 
     if (!form.plotId) {
@@ -231,63 +250,101 @@ export function LandownerListingsScreen({
       status: targetStatus,
     };
 
+    setSaving(true);
     try {
       if (editorMode === 'edit' && form.listingId) {
-        landownerMarketplaceService.updateListing(form.listingId, payload);
+        await landownerMarketplaceService.updateListing(form.listingId, payload);
         setMessage({ type: 'success', text: `Listing updated as ${targetStatus === 'draft' ? 'Draft' : 'Published'}` });
       } else {
-        landownerMarketplaceService.createListing(payload);
+        await landownerMarketplaceService.createListing(payload);
         setMessage({ type: 'success', text: targetStatus === 'draft' ? 'Listing saved as Draft' : 'Listing published successfully' });
       }
 
-      setVersion((value) => value + 1);
       setIsEditorOpen(false);
+      await loadData();
     } catch (error: any) {
       setMessage({ type: 'error', text: error?.message || 'Failed to save listing' });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const bids = activeListingForBids ? landownerMarketplaceService.getBidsForListing(activeListingForBids.id) : [];
-
-  const handleAcceptBid = (bidId: number) => {
+  const handleAcceptBid = async (bidId: number) => {
     if (!activeListingForBids) return;
 
+    setSaving(true);
     try {
-      landownerMarketplaceService.acceptBid(activeListingForBids.id, bidId);
-      setVersion((value) => value + 1);
+      await landownerMarketplaceService.acceptBid(activeListingForBids.id, bidId);
       setMessage({ type: 'success', text: 'Bid accepted. Listing and contract updated.' });
+      setIsBidsOpen(false);
+      await loadData();
     } catch (error: any) {
       setMessage({ type: 'error', text: error?.message || 'Failed to accept bid' });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleRejectBid = (bidId: number) => {
+  const handleRejectBid = async (bidId: number) => {
     if (!activeListingForBids) return;
 
+    setSaving(true);
     try {
-      landownerMarketplaceService.rejectBid(activeListingForBids.id, bidId);
-      setVersion((value) => value + 1);
+      await landownerMarketplaceService.rejectBid(activeListingForBids.id, bidId);
       setMessage({ type: 'success', text: 'Bid rejected and removed.' });
+      // Refresh bids
+      const bids = await landownerMarketplaceService.getBidsForListing(activeListingForBids.id);
+      setActiveBids(bids);
+      setBidsCache((prev) => ({ ...prev, [activeListingForBids.id]: bids }));
     } catch (error: any) {
       setMessage({ type: 'error', text: error?.message || 'Failed to reject bid' });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleMoveOutResponse = (contractId: number, approve: boolean) => {
+  const handleMoveOutResponse = async (contractId: number, approve: boolean) => {
+    setSaving(true);
     try {
-      landownerMarketplaceService.respondMoveOut(contractId, approve);
-      setVersion((value) => value + 1);
+      await landownerMarketplaceService.respondMoveOut(contractId, approve);
       setMessage({
         type: 'success',
         text: approve
           ? 'Move-out approved. Contract marked as Completed. Both parties can leave reviews.'
           : 'Move-out request declined. Contract stays active.',
       });
+      await loadData();
     } catch (error) {
       console.error('Failed to update move-out request:', error);
       setMessage({ type: 'error', text: 'Failed to update move-out request' });
+    } finally {
+      setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="h-[100dvh] bg-gradient-to-b from-emerald-50 via-green-50 to-white flex flex-col overflow-hidden">
+        <div className="bg-white shadow-sm">
+          <MobileHeader
+            userName={user?.name}
+            roleLabel="Landowner"
+            selectedLanguage={selectedLanguage}
+            onLanguageChange={onLanguageChange}
+            activeTab="clients"
+            onNavigate={onNavigate}
+            onLogout={onLogout}
+            onViewAllNotifications={() => onNavigate('notifications')}
+            role="landowner"
+            theme="green"
+          />
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-700" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-emerald-50 via-green-50 to-white flex flex-col overflow-hidden">
@@ -374,7 +431,7 @@ export function LandownerListingsScreen({
             <div className="divide-y divide-stone-100 max-h-96 overflow-y-auto">
               {filteredListings.map((listing) => {
                 const plot = plots.find((item) => item.id === listing.plotId);
-                const listingBids = landownerMarketplaceService.getBidsForListing(listing.id);
+                const listingBids = bidsCache[listing.id] || [];
                 const pendingCount = listingBids.filter((bid) => bid.status === 'pending').length;
 
                 return (
@@ -407,7 +464,7 @@ export function LandownerListingsScreen({
                       )}
                       <ActionBtn
                         label="Delete"
-                        onClick={() => handleDelete(listing.id)}
+                        onClick={() => setConfirmDelete(listing.id)}
                         icon={<Trash2 className="h-3.5 w-3.5" />}
                         danger
                       />
@@ -423,8 +480,35 @@ export function LandownerListingsScreen({
           </section>
         )}
 
-        <ContractsSection contracts={contracts} onRespond={handleMoveOutResponse} />
+        <ContractsSection contracts={contracts} onRespond={handleMoveOutResponse} saving={saving} />
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {confirmDelete !== null && (
+        <div className="absolute inset-0 z-50 bg-black/50 px-3 py-6 flex items-center justify-center" onClick={() => setConfirmDelete(null)}>
+          <div className="bg-white rounded-xl p-4 shadow-2xl max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-bold text-stone-900">Delete Listing?</h3>
+            <p className="mt-2 text-sm text-stone-600">This will permanently delete this listing and reject any pending bids.</p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="rounded-lg border border-stone-300 bg-white py-2 text-sm font-semibold text-stone-700"
+                disabled={saving}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(confirmDelete)}
+                className="rounded-lg bg-red-600 py-2 text-sm font-semibold text-white inline-flex items-center justify-center gap-2"
+                disabled={saving}
+              >
+                {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isEditorOpen && (
         <div className="absolute inset-0 z-50 bg-black/50 px-3 py-6" onClick={closeEditor}>
@@ -537,15 +621,19 @@ export function LandownerListingsScreen({
                 {(!form.listingId || listings.find((l) => l.id === form.listingId)?.status === 'draft') && (
                   <button
                     onClick={() => saveListing('draft')}
-                    className="rounded-xl border border-stone-300 bg-white py-2.5 text-sm font-semibold text-stone-800"
+                    className="rounded-xl border border-stone-300 bg-white py-2.5 text-sm font-semibold text-stone-800 inline-flex items-center justify-center gap-2"
+                    disabled={saving}
                   >
+                    {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                     Save as Draft
                   </button>
                 )}
                 <button
                   onClick={() => saveListing('published')}
-                  className="rounded-xl bg-emerald-700 py-2.5 text-sm font-semibold text-white"
+                  className="rounded-xl bg-emerald-700 py-2.5 text-sm font-semibold text-white inline-flex items-center justify-center gap-2"
+                  disabled={saving}
                 >
+                  {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                   Publish
                 </button>
               </div>
@@ -565,7 +653,7 @@ export function LandownerListingsScreen({
             </div>
 
             <div className="mt-3 max-h-[70vh] space-y-2.5 overflow-y-auto pr-1">
-              {bids.map((bid) => (
+              {activeBids.map((bid) => (
                 <div key={bid.id} className="rounded-xl border border-stone-200 bg-stone-50 p-3">
                   <div className="flex items-center justify-between gap-2">
                     <div>
@@ -593,13 +681,16 @@ export function LandownerListingsScreen({
                       <button
                         onClick={() => handleAcceptBid(bid.id)}
                         className="inline-flex items-center justify-center gap-1 rounded-lg bg-emerald-700 py-2 text-[0.78rem] font-semibold text-white"
+                        disabled={saving}
                       >
+                        {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                         <Check className="h-3.5 w-3.5" />
                         Accept
                       </button>
                       <button
                         onClick={() => handleRejectBid(bid.id)}
                         className="inline-flex items-center justify-center gap-1 rounded-lg border border-red-300 bg-white py-2 text-[0.78rem] font-semibold text-red-700"
+                        disabled={saving}
                       >
                         <X className="h-3.5 w-3.5" />
                         Reject
@@ -609,7 +700,7 @@ export function LandownerListingsScreen({
                 </div>
               ))}
 
-              {bids.length === 0 && <p className="text-[0.74rem] text-stone-500 text-center py-4">No bids yet for this listing.</p>}
+              {activeBids.length === 0 && <p className="text-[0.74rem] text-stone-500 text-center py-4">No bids yet for this listing.</p>}
             </div>
           </div>
         </div>
@@ -645,9 +736,11 @@ function ActionBtn({
 function ContractsSection({
   contracts,
   onRespond,
+  saving,
 }: {
   contracts: Contract[];
   onRespond: (contractId: number, approve: boolean) => void;
+  saving: boolean;
 }) {
   const formatPaymentTerms = (contract: Contract) => {
     if (contract.financial_terms === 'cash_rent') {
@@ -660,18 +753,6 @@ function ContractsSection({
       return 'Pollination service';
     }
     return 'Payment terms not set';
-  };
-
-  const formatOngoingDays = (contract: Contract) => {
-    const bid = landownerMarketplaceService
-      .getBidsForListing(contract.listingId)
-      .find((item) => item.id === contract.bidId);
-    if (!bid?.placementStartDate) return '-';
-    const startDate = new Date(bid.placementStartDate);
-    if (Number.isNaN(startDate.getTime())) return '-';
-    const diffMs = Date.now() - startDate.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    return `${Math.max(0, diffDays)} days`;
   };
 
   return (
@@ -692,7 +773,7 @@ function ContractsSection({
 
             <p className="mt-1 text-[0.78rem] text-stone-500">Expiry: {contract.expiryLabel}</p>
             <p className="mt-0.5 text-[0.78rem] text-stone-500">
-              Payment: {formatPaymentTerms(contract)} · Ongoing: {formatOngoingDays(contract)}
+              Payment: {formatPaymentTerms(contract)}
             </p>
 
             {contract.status === 'moving_out_requested' && (
@@ -701,13 +782,16 @@ function ContractsSection({
                 <div className="mt-1.5 grid grid-cols-2 gap-2">
                   <button
                     onClick={() => onRespond(contract.id, true)}
-                    className="rounded-lg bg-emerald-700 py-2 text-[0.78rem] font-semibold text-white"
+                    className="rounded-lg bg-emerald-700 py-2 text-[0.78rem] font-semibold text-white inline-flex items-center justify-center gap-1"
+                    disabled={saving}
                   >
+                    {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                     Approve Move-Out
                   </button>
                   <button
                     onClick={() => onRespond(contract.id, false)}
                     className="rounded-lg border border-stone-300 bg-white py-2 text-[0.78rem] font-semibold text-stone-700"
+                    disabled={saving}
                   >
                     Decline
                   </button>

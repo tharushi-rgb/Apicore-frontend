@@ -11,6 +11,7 @@ import {
   Bug,
   X,
   ArrowRightLeft,
+  Loader2,
 } from 'lucide-react';
 import { MobileHeader } from '../shared/MobileHeader';
 import { PageTitleBar } from '../shared/PageTitleBar';
@@ -38,6 +39,8 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
   const [activeHiveId, setActiveHiveId] = useState<number | null>(null);
   const [activeFilter, setActiveFilter] = useState('all');
   const [selectedApiaryFilter, setSelectedApiaryFilter] = useState<number | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const user = authService.getLocalUser();
   const activeTab: NavTab = 'hives';
 
@@ -93,17 +96,18 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
   });
 
   const handleDeleteHive = async () => {
-    if (!activeHiveId) return;
-    const confirmed = window.confirm(t('deleteConfirm', selectedLanguage));
-    if (!confirmed) return;
+    if (!confirmDelete) return;
     try {
-      await hivesService.delete(activeHiveId);
-      setHives(prev => prev.filter(h => h.id !== activeHiveId));
+      await hivesService.delete(confirmDelete);
+      setHives(prev => prev.filter(h => h.id !== confirmDelete));
       setShowHiveActions(false);
       setActiveHiveId(null);
+      setConfirmDelete(null);
+      setMessage({ type: 'success', text: 'Hive deleted successfully' });
     } catch (error) {
       console.error('Failed to delete hive', error);
-      alert('Failed to delete hive');
+      setMessage({ type: 'error', text: 'Failed to delete hive' });
+      setConfirmDelete(null);
     }
   };
 
@@ -117,6 +121,30 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
 
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative overflow-hidden">
+      {/* Message Display */}
+      {message && (
+        <div className={`absolute top-20 left-4 right-4 z-50 rounded-lg px-3 py-2 text-sm font-medium ${message.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
+          <div className="flex items-center justify-between">
+            <span>{message.text}</span>
+            <button onClick={() => setMessage(null)} className="p-1 hover:bg-black/5 rounded"><X className="w-4 h-4" /></button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {confirmDelete !== null && (
+        <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center px-4" onClick={() => setConfirmDelete(null)}>
+          <div className="bg-white rounded-xl p-4 shadow-2xl max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-bold text-stone-900">{t('deleteConfirm', selectedLanguage)}</h3>
+            <p className="mt-2 text-sm text-stone-600">This action cannot be undone.</p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button onClick={() => setConfirmDelete(null)} className="rounded-lg border border-stone-300 bg-white py-2 text-sm font-semibold text-stone-700">Cancel</button>
+              <button onClick={handleDeleteHive} className="rounded-lg bg-red-600 py-2 text-sm font-semibold text-white">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Filter Overlay */}
       {showFilters && (
         <div className="absolute inset-0 bg-black/50 z-40" onClick={() => setShowFilters(false)}>
@@ -193,7 +221,7 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
               >
                 <ArrowRightLeft className="w-3.5 h-3.5" /> Move Hive
               </button>
-              <button onClick={handleDeleteHive} className="w-full text-left px-3 py-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-sm">
+              <button onClick={() => { setConfirmDelete(activeHiveId); setShowHiveActions(false); }} className="w-full text-left px-3 py-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-sm">
                 {t('deleteHive', selectedLanguage)}
               </button>
               <button onClick={() => setShowHiveActions(false)} className="w-full text-left px-3 py-2 rounded-lg bg-stone-50 hover:bg-stone-100 text-stone-600 text-sm">
@@ -414,6 +442,7 @@ function MoveHiveFormModal({ hiveId, onClose, onSaved }: { hiveId: number; onClo
   const [saving, setSaving] = useState(false);
   const [apiaries, setApiaries] = useState<Apiary[]>([]);
   const [targetApiaryId, setTargetApiaryId] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     apiariesService.getAll().then(setApiaries).catch(() => setApiaries([]));
@@ -423,13 +452,14 @@ function MoveHiveFormModal({ hiveId, onClose, onSaved }: { hiveId: number; onClo
     e.preventDefault();
     if (!targetApiaryId) return;
     setSaving(true);
+    setError('');
     try {
       await hivesService.moveToApiary(hiveId, parseInt(targetApiaryId, 10));
       onSaved();
-    } catch (error) {
-      console.error('Failed to move hive:', error);
+    } catch (err) {
+      console.error('Failed to move hive:', err);
       setSaving(false);
-      alert(`Failed to move hive: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setError(err instanceof Error ? err.message : 'Failed to move hive');
     }
   };
 
@@ -445,6 +475,11 @@ function MoveHiveFormModal({ hiveId, onClose, onSaved }: { hiveId: number; onClo
         <div className="mb-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
           <p className="text-xs text-amber-700">Select the destination apiary and confirm. This moves the current hive without splitting.</p>
         </div>
+        {error && (
+          <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-xs text-red-700">{error}</p>
+          </div>
+        )}
         <form onSubmit={submit} className="space-y-2">
           <select
             required
@@ -457,7 +492,8 @@ function MoveHiveFormModal({ hiveId, onClose, onSaved }: { hiveId: number; onClo
               <option key={apiary.id} value={apiary.id}>{apiary.name}</option>
             ))}
           </select>
-          <button type="submit" disabled={saving || !targetApiaryId} className="w-full bg-amber-500 text-white py-2.5 rounded-xl font-medium disabled:opacity-60">
+          <button type="submit" disabled={saving || !targetApiaryId} className="w-full bg-amber-500 text-white py-2.5 rounded-xl font-medium disabled:opacity-60 inline-flex items-center justify-center gap-2">
+            {saving && <Loader2 className="w-4 h-4 animate-spin" />}
             {saving ? 'Moving...' : 'Move Hive'}
           </button>
         </form>

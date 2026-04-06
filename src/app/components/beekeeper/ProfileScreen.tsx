@@ -53,6 +53,7 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
   const [editDistrict, setEditDistrict] = useState('');
   const [stats, setStats] = useState({ apiaries: 0, hives: 0, clients: 0 });
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
     queenAge: true, pestDetection: true, inspectionReminders: true, contractExpiry: true,
   });
@@ -99,9 +100,10 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
       });
       setProfile(updated);
       setShowEditProfile(false);
+      setMessage({ type: 'success', text: 'Profile updated successfully' });
     } catch (error) {
       console.error('Failed to update profile', error);
-      alert('Failed to update profile');
+      setMessage({ type: 'error', text: 'Failed to update profile' });
     } finally {
       setIsSavingProfile(false);
     }
@@ -123,9 +125,10 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
       const imageUrl = await fileToDataUrl(file);
       const updated = await profileService.update({ avatar_url: imageUrl });
       setProfile(updated);
+      setMessage({ type: 'success', text: 'Profile photo updated' });
     } catch (error) {
       console.error('Failed to update profile photo', error);
-      alert('Failed to update profile photo');
+      setMessage({ type: 'error', text: 'Failed to update profile photo' });
     } finally {
       setIsUploadingAvatar(false);
       if (avatarInputRef.current) avatarInputRef.current.value = '';
@@ -151,6 +154,16 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-stone-50 relative">
+
+      {/* Message Display */}
+      {message && (
+        <div className={`absolute top-2 left-4 right-4 z-50 rounded-lg px-3 py-2 text-sm font-medium ${message.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
+          <div className="flex items-center justify-between">
+            <span>{message.text}</span>
+            <button onClick={() => setMessage(null)} className="p-1 hover:bg-black/5 rounded"><X className="w-4 h-4" /></button>
+          </div>
+        </div>
+      )}
 
       {/* Edit Profile Modal */}
       {showEditProfile && (

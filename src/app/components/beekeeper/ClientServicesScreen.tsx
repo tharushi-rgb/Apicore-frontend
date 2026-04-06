@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   BadgeCheck,
   Droplets,
   Filter,
   Hourglass,
+  Loader2,
   Moon,
   Search,
   ShieldCheck,
@@ -38,6 +39,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
 
   const [tab, setTab] = useState<'find' | 'proposals'>('find');
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
   const [listings, setListings] = useState<ListingSummary[]>([]);
   const [proposals, setProposals] = useState<ListingProposal[]>([]);
@@ -47,6 +49,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
   const [listingReviews, setListingReviews] = useState<{ rating: number; comment: string; beekeeperName: string; createdAt: string }[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [confirmMoveOut, setConfirmMoveOut] = useState<ListingProposal | null>(null);
 
   const [myLocation, setMyLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationDenied, setLocationDenied] = useState(false);
@@ -67,22 +70,26 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
     note: '',
   });
 
-  const loadData = () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      setListings(beekeeperListingsService.getPublishedListings());
-      setProposals(beekeeperListingsService.getMyProposals());
+      const [listingsData, proposalsData] = await Promise.all([
+        beekeeperListingsService.getPublishedListings(),
+        beekeeperListingsService.getMyProposals(),
+      ]);
+      setListings(listingsData);
+      setProposals(proposalsData);
       setError('');
     } catch (loadError: any) {
       setError(loadError?.message || 'Failed to load listings');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const locationOptions = useMemo(() => {
     const values = new Set<string>();
@@ -219,14 +226,14 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
     );
   };
 
-  const openListing = (listing: ListingSummary) => {
+  const openListing = async (listing: ListingSummary) => {
     setSelectedListing(listing);
     setProposalForm({ hiveCount: '', moveInDate: '', moveOutDate: '', note: '' });
     setSuccess('');
     setError('');
     setReviewsLoading(true);
     try {
-      const detail = beekeeperListingsService.getListingDetail(listing.ownerUserId, listing.listingId);
+      const detail = await beekeeperListingsService.getListingDetail(listing.ownerUserId, listing.listingId);
       setListingReviews(detail.reviews.map((review) => ({
         rating: review.rating,
         comment: review.comment,
@@ -241,18 +248,31 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
     }
   };
 
-  const onSubmitProposal = () => {
+  const onSubmitProposal = async () => {
     if (!selectedListing) return;
     const hiveCount = Number(proposalForm.hiveCount);
-    if (!Number.isFinite(hiveCount) || hiveCount <= 0) return setError('Hive count is mandatory');
-    if (!proposalForm.moveInDate || !proposalForm.moveOutDate) return setError('Placement dates are mandatory');
-    if (proposalForm.moveInDate > proposalForm.moveOutDate) return setError('Move-out date must be after move-in date');
+    if (!Number.isFinite(hiveCount) || hiveCount <= 0) {
+      setError('Hive count is mandatory');
+      return;
+    }
+    if (!proposalForm.moveInDate || !proposalForm.moveOutDate) {
+      setError('Placement dates are mandatory');
+      return;
+    }
+    if (proposalForm.moveInDate > proposalForm.moveOutDate) {
+      setError('Move-out date must be after move-in date');
+      return;
+    }
 
     const remaining = selectedListing.maxHiveCapacity - selectedListing.acceptedHiveCount;
-    if (hiveCount > remaining) return setError(`Hive count cannot exceed remaining capacity (${remaining})`);
+    if (hiveCount > remaining) {
+      setError(`Hive count cannot exceed remaining capacity (${remaining})`);
+      return;
+    }
 
+    setSaving(true);
     try {
-      beekeeperListingsService.submitProposal({
+      await beekeeperListingsService.submitProposal({
         ownerUserId: selectedListing.ownerUserId,
         listingId: selectedListing.listingId,
         hiveCount,
@@ -260,24 +280,29 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
         moveOutDate: proposalForm.moveOutDate,
         note: proposalForm.note,
       });
-      loadData();
+      await loadData();
       setError('');
       setSuccess('Your proposal has been submitted. You will be notified once the landowner responds.');
     } catch (submitError: any) {
       setError(submitError?.message || 'Failed to submit proposal');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const onRequestMoveOut = (proposal: ListingProposal) => {
+  const onRequestMoveOut = async (proposal: ListingProposal) => {
     if (!proposal.contractId) return;
-    if (!window.confirm('Request move-out for this active contract?')) return;
+    setSaving(true);
     try {
-      beekeeperListingsService.requestMoveOut(proposal.ownerUserId, proposal.contractId);
-      loadData();
+      await beekeeperListingsService.requestMoveOut(proposal.ownerUserId, proposal.contractId);
+      await loadData();
       setSuccess('Move-out request sent to landowner. Awaiting approval.');
       setError('');
+      setConfirmMoveOut(null);
     } catch (moveOutError: any) {
       setError(moveOutError?.message || 'Failed to request move-out');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -357,7 +382,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
             </div>
 
             {loading ? (
-              <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div>
+              <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-amber-500" /></div>
             ) : filteredListings.length === 0 ? (
               <p className="text-center text-stone-500 py-8 text-sm">No published listings match your search or filters.</p>
             ) : (
@@ -429,7 +454,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                       <button onClick={() => navigate('/apiaries/new', { state: { prefillApiary: proposal } })} className="rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1.5 text-[0.68rem] font-semibold text-emerald-700">Go to My Apiary</button>
 
                       {proposal.contractStatus === 'active' && proposal.contractId && (
-                        <button onClick={() => onRequestMoveOut(proposal)} className="rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[0.68rem] font-semibold text-amber-700">Request Move-Out</button>
+                        <button onClick={() => setConfirmMoveOut(proposal)} className="rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[0.68rem] font-semibold text-amber-700">Request Move-Out</button>
                       )}
 
                       {proposal.contractStatus === 'moving_out_requested' && (
@@ -445,6 +470,33 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
           </section>
         )}
       </div>
+
+      {/* Move-Out Confirmation Modal */}
+      {confirmMoveOut && (
+        <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center px-4" onClick={() => setConfirmMoveOut(null)}>
+          <div className="bg-white rounded-xl p-4 shadow-2xl max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-bold text-stone-900">Request Move-Out?</h3>
+            <p className="mt-2 text-sm text-stone-600">This will send a move-out request to the landowner for this active contract.</p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setConfirmMoveOut(null)}
+                className="rounded-lg border border-stone-300 bg-white py-2 text-sm font-semibold text-stone-700"
+                disabled={saving}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => onRequestMoveOut(confirmMoveOut)}
+                className="rounded-lg bg-amber-500 py-2 text-sm font-semibold text-white inline-flex items-center justify-center gap-2"
+                disabled={saving}
+              >
+                {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showFilters && (
         <div className="absolute inset-0 bg-black/50 z-50 px-3 py-4" onClick={() => setShowFilters(false)}>
@@ -604,7 +656,10 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                       <textarea rows={3} value={proposalForm.note} onChange={(event) => setProposalForm((current) => ({ ...current, note: event.target.value }))} className="mt-1 w-full rounded-lg border border-stone-300 px-2.5 py-2 text-[0.75rem]" placeholder="Optional message" />
                     </label>
 
-                    <button onClick={onSubmitProposal} className="w-full rounded-xl bg-emerald-600 py-2.5 text-[0.78rem] font-semibold text-white">Submit Proposal</button>
+                    <button onClick={onSubmitProposal} disabled={saving} className="w-full rounded-xl bg-emerald-600 py-2.5 text-[0.78rem] font-semibold text-white inline-flex items-center justify-center gap-2">
+                      {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                      Submit Proposal
+                    </button>
                   </>
                 )}
               </section>

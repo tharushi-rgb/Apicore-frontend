@@ -1,4 +1,6 @@
+import { supabase } from './supabaseClient';
 import { authService } from './auth';
+import { notificationsService } from './notifications';
 import {
   type Bid,
   type Contract,
@@ -6,10 +8,7 @@ import {
   type LandPlot,
   type Listing,
   type ShadeProfile,
-  landownerMarketplaceService,
 } from './landownerMarketplace';
-
-const REVIEWS_KEY = 'apicore_listing_reviews_v1';
 
 type ContractStatus = Contract['status'];
 
@@ -72,8 +71,8 @@ export interface ListingProposal {
 }
 
 export interface ListingReview {
-  id: string;
-  listingKey: string;
+  id: number;
+  listingId: number;
   beekeeperUserId: number;
   beekeeperName: string;
   rating: number;
@@ -90,330 +89,359 @@ interface ProposalPayload {
   note?: string;
 }
 
-interface AllStore {
-  plots: LandPlot[];
-  listings: Listing[];
-  bids: Bid[];
-  contracts: Contract[];
-  counters: {
-    plot: number;
-    listing: number;
-    bid: number;
-    contract: number;
-  };
-}
-
 function getCurrentUser() {
   const user = authService.getLocalUser();
   if (!user) throw new Error('Not logged in');
   return user;
 }
 
-function listingKey(ownerUserId: number, listingId: number) {
-  return `${ownerUserId}:${listingId}`;
+function makeListingCode(id: number): string {
+  return `LST-${String(id).padStart(4, '0')}`;
 }
 
-function readRawStore(): Record<string, AllStore> {
-  try {
-    const raw = localStorage.getItem('apicore_landowner_marketplace_v1');
-    return raw ? (JSON.parse(raw) as Record<string, AllStore>) : {};
-  } catch {
-    return {};
-  }
-}
-
-function writeRawStore(data: Record<string, AllStore>) {
-  localStorage.setItem('apicore_landowner_marketplace_v1', JSON.stringify(data));
-}
-
-function readReviews(): Record<string, ListingReview[]> {
-  try {
-    const raw = localStorage.getItem(REVIEWS_KEY);
-    return raw ? (JSON.parse(raw) as Record<string, ListingReview[]>) : {};
-  } catch {
-    return {};
-  }
-}
-
-function writeReviews(data: Record<string, ListingReview[]>) {
-  localStorage.setItem(REVIEWS_KEY, JSON.stringify(data));
-}
-
-function normalizeStatus(listing: Listing): Listing['status'] {
-  if (listing.status !== 'published' || !listing.availabilityEndDate) return listing.status;
-  const expiry = new Date(listing.availabilityEndDate);
-  if (!Number.isNaN(expiry.getTime()) && expiry < new Date()) return 'expired';
-  return listing.status;
-}
-
-function ownerMeta(ownerUserId: number) {
-  return {
-    ownerName: `Landowner ${ownerUserId}`,
-    ownerRating: 4.4 + (ownerUserId % 6) * 0.1,
-    ownerReviewCount: 6 + (ownerUserId % 12),
-    ownerVerified: ownerUserId % 2 === 0,
-    ownerContact: `+94 7${String(ownerUserId).padStart(8, '0').slice(-8)}`,
-    ownerYearsActive: 1 + (ownerUserId % 7),
-  };
-}
-
-function paymentLabel(listing: Listing) {
-  if (listing.financialTerms === 'cash_rent') return `Rs. ${(listing.cashRentLkr || 0).toLocaleString()}/mo`;
-  if (listing.financialTerms === 'honey_share') return `${listing.honeyShareKg || 0}% Honey Share`;
+function paymentLabel(financialTerms: FinancialTerms, cashRentLkr?: number, honeyShareKg?: number): string {
+  if (financialTerms === 'cash_rent') return `Rs. ${(cashRentLkr || 0).toLocaleString()}/mo`;
+  if (financialTerms === 'honey_share') return `${honeyShareKg || 0}% Honey Share`;
   return 'Free - Pollination';
 }
 
-function getAcceptedCountForListing(store: AllStore, listingId: number) {
-  return store.bids
-    .filter((bid) => bid.listingId === listingId && bid.status === 'accepted')
-    .reduce((sum, bid) => sum + (bid.hivesProposed || 0), 0);
-}
-
 export const beekeeperListingsService = {
-  getPublishedListings() {
-    // Ensure seed data exists for the current session.
-    try {
-      landownerMarketplaceService.getListings();
-    } catch {
-      // no-op
-    }
+  async getPublishedListings(): Promise<ListingSummary[]> {
+    // Get all published listings with their plots and owner info
+    const { data, error } = await supabase
+      .from('landowner_listings')
+      .select(`
+        *,
+        landowner_plots(*),
+        users(id, name, phone, created_at)
+      `)
+      .eq('status', 'published')
+      .order('created_at', { ascending: false });
 
-    const all = readRawStore();
+    if (error) throw new Error(error.message);
+
     const output: ListingSummary[] = [];
 
-    Object.entries(all).forEach(([ownerKey, store]) => {
-      const ownerUserId = Number(ownerKey);
-      if (!Number.isFinite(ownerUserId)) return;
+    for (const row of (data || [])) {
+      const plot = row.landowner_plots;
+      const owner = row.users;
+      if (!plot) continue;
 
-      store.listings.forEach((listing) => {
-        if (normalizeStatus(listing) !== 'published') return;
+      // Get accepted hive count for this listing
+      const { data: acceptedBids } = await supabase
+        .from('landowner_bids')
+        .select('hives_proposed')
+        .eq('listing_id', row.id)
+        .eq('status', 'accepted');
 
-        const plot = store.plots.find((item) => item.id === listing.plotId);
-        if (!plot) return;
+      const acceptedHiveCount = (acceptedBids || []).reduce((sum: number, b: any) => sum + (b.hives_proposed || 0), 0);
 
-        const acceptedHiveCount = getAcceptedCountForListing(store, listing.id);
-        const meta = ownerMeta(ownerUserId);
+      // Get review count for owner
+      const { count: reviewCount } = await supabase
+        .from('listing_reviews')
+        .select('id', { count: 'exact', head: true })
+        .eq('owner_user_id', row.user_id);
 
-        output.push({
-          id: listingKey(ownerUserId, listing.id),
-          ownerUserId,
-          listingId: listing.id,
-          plotId: plot.id,
-          listingCode: listing.listingCode,
-          plotName: plot.name,
-          district: plot.district,
-          dsDivision: plot.dsDivision,
-          coordinates: { lat: plot.gpsLatitude, lng: plot.gpsLongitude },
-          forageNames: plot.forageEntries.map((entry) => entry.name).filter(Boolean),
-          shadeProfile: plot.shadeProfile,
-          hasWaterOnSite: plot.waterAvailability === 'On-site',
-          vehicleAccess: plot.vehicleAccess,
-          nightAccess: plot.nightAccess,
-          paymentLabel: paymentLabel(listing),
-          financialTerms: listing.financialTerms,
-          ownerName: meta.ownerName,
-          ownerRating: Number(meta.ownerRating.toFixed(1)),
-          ownerReviewCount: meta.ownerReviewCount,
-          ownerVerified: meta.ownerVerified,
-          ownerContact: meta.ownerContact,
-          ownerYearsActive: meta.ownerYearsActive,
-          image: plot.images[0],
-          maxHiveCapacity: 10,
-          acceptedHiveCount,
-        });
+      // Calculate owner's years active
+      const ownerCreatedAt = owner?.created_at ? new Date(owner.created_at) : new Date();
+      const yearsActive = Math.max(1, Math.floor((Date.now() - ownerCreatedAt.getTime()) / (365.25 * 24 * 60 * 60 * 1000)));
+
+      output.push({
+        id: `${row.user_id}:${row.id}`,
+        ownerUserId: row.user_id,
+        listingId: row.id,
+        plotId: plot.id,
+        listingCode: row.listing_code || makeListingCode(row.id),
+        plotName: plot.name,
+        district: plot.district || '',
+        dsDivision: plot.ds_division || '',
+        coordinates: { lat: plot.gps_latitude || 0, lng: plot.gps_longitude || 0 },
+        forageNames: (plot.forage_entries || []).map((e: any) => e.name).filter(Boolean),
+        shadeProfile: plot.shade_profile || 'Full Sun',
+        hasWaterOnSite: plot.water_availability === 'On-site',
+        vehicleAccess: plot.vehicle_access || 'Lorry',
+        nightAccess: plot.night_access || false,
+        paymentLabel: paymentLabel(row.financial_terms, row.cash_rent_lkr, row.honey_share_kg),
+        financialTerms: row.financial_terms,
+        ownerName: owner?.name || `Landowner ${row.user_id}`,
+        ownerRating: 4.5, // Default rating - could be calculated from reviews
+        ownerReviewCount: reviewCount || 0,
+        ownerVerified: true, // Could be based on verification status
+        ownerContact: owner?.phone || '',
+        ownerYearsActive: yearsActive,
+        image: (plot.images || [])[0],
+        maxHiveCapacity: 10, // Default capacity
+        acceptedHiveCount,
       });
-    });
+    }
 
     return output.sort((a, b) => a.listingCode.localeCompare(b.listingCode));
   },
 
-  getListingDetail(ownerUserId: number, listingId: number) {
-    const all = readRawStore();
-    const store = all[String(ownerUserId)];
-    if (!store) throw new Error('Listing not found');
+  async getListingDetail(ownerUserId: number, listingId: number): Promise<{
+    summary: ListingSummary;
+    reviews: ListingReview[];
+  }> {
+    // Get the listing
+    const listings = await this.getPublishedListings();
+    const summary = listings.find(l => l.ownerUserId === ownerUserId && l.listingId === listingId);
 
-    const listing = store.listings.find((item) => item.id === listingId);
-    if (!listing) throw new Error('Listing not found');
+    if (!summary) throw new Error('Listing not found or not currently published');
 
-    const plot = store.plots.find((item) => item.id === listing.plotId);
-    if (!plot) throw new Error('Plot not found');
+    // Get reviews for this listing
+    const { data: reviewsData } = await supabase
+      .from('listing_reviews')
+      .select('*')
+      .eq('listing_id', listingId)
+      .order('created_at', { ascending: false });
 
-    const summary = this.getPublishedListings().find((item) => item.ownerUserId === ownerUserId && item.listingId === listingId);
-    if (!summary) throw new Error('Listing is not currently published');
+    const reviews: ListingReview[] = (reviewsData || []).map((r: any) => ({
+      id: r.id,
+      listingId: r.listing_id,
+      beekeeperUserId: r.beekeeper_user_id,
+      beekeeperName: r.beekeeper_name || `Beekeeper ${r.beekeeper_user_id}`,
+      rating: r.rating,
+      comment: r.comment || '',
+      createdAt: r.created_at,
+    }));
 
-    const reviewsByListing = readReviews();
-    const key = listingKey(ownerUserId, listingId);
-
-    return {
-      summary,
-      listing,
-      plot,
-      reviews: reviewsByListing[key] || [],
-    };
+    return { summary, reviews };
   },
 
-  submitProposal(payload: ProposalPayload) {
+  async submitProposal(payload: ProposalPayload): Promise<void> {
     const user = getCurrentUser();
-    const all = readRawStore();
-    const ownerKey = String(payload.ownerUserId);
-    const store = all[ownerKey];
-    if (!store) throw new Error('Listing owner not found');
 
-    const listing = store.listings.find((item) => item.id === payload.listingId);
-    if (!listing) throw new Error('Listing not found');
+    // Check if listing exists and is published
+    const { data: listing, error: listingError } = await supabase
+      .from('landowner_listings')
+      .select('id, status, user_id')
+      .eq('id', payload.listingId)
+      .eq('user_id', payload.ownerUserId)
+      .single();
 
-    const acceptedHiveCount = getAcceptedCountForListing(store, payload.listingId);
+    if (listingError || !listing) throw new Error('Listing not found');
+    if (listing.status !== 'published') throw new Error('Listing is not accepting proposals');
+
+    // Check remaining capacity
+    const { data: acceptedBids } = await supabase
+      .from('landowner_bids')
+      .select('hives_proposed')
+      .eq('listing_id', payload.listingId)
+      .eq('status', 'accepted');
+
+    const acceptedHiveCount = (acceptedBids || []).reduce((sum: number, b: any) => sum + (b.hives_proposed || 0), 0);
     const remainingCapacity = Math.max(0, 10 - acceptedHiveCount);
+
     if (payload.hiveCount > remainingCapacity) {
       throw new Error(`Hive count exceeds remaining capacity (${remainingCapacity})`);
     }
 
-    const existingPending = store.bids.find(
-      (bid) => bid.listingId === payload.listingId
-        && bid.status === 'pending'
-        && ((bid as any).beekeeperUserId === user.id),
-    );
-    if (existingPending) {
+    // Check for existing pending proposal
+    const { data: existingPending } = await supabase
+      .from('landowner_bids')
+      .select('id')
+      .eq('listing_id', payload.listingId)
+      .eq('beekeeper_user_id', user.id)
+      .eq('status', 'pending');
+
+    if (existingPending && existingPending.length > 0) {
       throw new Error('You already have a pending proposal for this listing');
     }
 
-    const nextBidId = (store.counters?.bid || 0) + 1;
-    const bid: Bid = {
-      id: nextBidId,
-      listingId: payload.listingId,
-      beekeeperName: user.name || `Beekeeper ${user.id}`,
-      verified: true,
-      rating: 4.7,
-      fullName: user.name || `Beekeeper ${user.id}`,
-      beekeepingNature: 'Commercial',
-      trainingLevel: 'APICore Certified',
-      primaryBeeSpecies: 'Apis cerana',
-      district: user.district || 'Unknown',
-      reviews: 0,
-      previousListings: 0,
-      hivesProposed: payload.hiveCount,
-      placementStartDate: payload.moveInDate,
-      placementEndDate: payload.moveOutDate,
-      note: payload.note || '',
-      submittedAt: new Date().toISOString(),
-      status: 'pending',
-      ...( { beekeeperUserId: user.id } as any ),
-    };
+    // Create the bid
+    const { error: bidError } = await supabase
+      .from('landowner_bids')
+      .insert({
+        listing_id: payload.listingId,
+        beekeeper_user_id: user.id,
+        beekeeper_name: user.name || `Beekeeper ${user.id}`,
+        verified: true,
+        rating: 4.7,
+        full_name: user.name || `Beekeeper ${user.id}`,
+        beekeeping_nature: 'Commercial',
+        training_level: 'APICore Certified',
+        primary_bee_species: 'Apis cerana',
+        district: user.district || 'Unknown',
+        reviews: 0,
+        previous_listings: 0,
+        hives_proposed: payload.hiveCount,
+        placement_start_date: payload.moveInDate,
+        placement_end_date: payload.moveOutDate,
+        note: payload.note || '',
+        submitted_at: new Date().toISOString(),
+        status: 'pending',
+        created_at: new Date().toISOString(),
+      });
 
-    const nextStore: AllStore = {
-      ...store,
-      bids: [bid, ...store.bids],
-      counters: { ...store.counters, bid: nextBidId },
-    };
+    if (bidError) throw new Error(bidError.message);
 
-    all[ownerKey] = nextStore;
-    writeRawStore(all);
-    return bid;
+    notificationsService.createActionNotification({
+      entity: 'Proposal',
+      event: 'created',
+      details: 'Your proposal has been submitted successfully.',
+      severity: 'low',
+    });
   },
 
-  getMyProposals() {
+  async getMyProposals(): Promise<ListingProposal[]> {
     const user = getCurrentUser();
-    const all = readRawStore();
+
+    // Get all bids by this user
+    const { data: bids, error: bidsError } = await supabase
+      .from('landowner_bids')
+      .select(`
+        *,
+        landowner_listings(*, landowner_plots(*), users(name, phone))
+      `)
+      .eq('beekeeper_user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (bidsError) throw new Error(bidsError.message);
+
     const proposals: ListingProposal[] = [];
 
-    Object.entries(all).forEach(([ownerKey, store]) => {
-      const ownerUserId = Number(ownerKey);
-      if (!Number.isFinite(ownerUserId)) return;
+    for (const bid of (bids || [])) {
+      const listing = bid.landowner_listings;
+      if (!listing) continue;
 
-      store.bids.forEach((bid) => {
-        if ((bid as any).beekeeperUserId !== user.id) return;
+      const plot = listing.landowner_plots;
+      const owner = listing.users;
 
-        const listing = store.listings.find((item) => item.id === bid.listingId);
-        if (!listing) return;
+      // Get accepted hive count
+      const { data: acceptedBids } = await supabase
+        .from('landowner_bids')
+        .select('hives_proposed')
+        .eq('listing_id', listing.id)
+        .eq('status', 'accepted');
 
-        const plot = store.plots.find((item) => item.id === listing.plotId);
-        const acceptedHiveCount = getAcceptedCountForListing(store, listing.id);
-        const contract = store.contracts.find((item) => item.bidId === bid.id && item.listingId === listing.id);
-        const owner = ownerMeta(ownerUserId);
+      const acceptedHiveCount = (acceptedBids || []).reduce((sum: number, b: any) => sum + (b.hives_proposed || 0), 0);
 
-        proposals.push({
-          ownerUserId,
-          listingId: listing.id,
-          bidId: bid.id,
-          listingCode: listing.listingCode,
-          plotName: plot?.name || 'Plot',
-          province: plot?.province || '-',
-          hiveCount: bid.hivesProposed,
-          moveInDate: bid.placementStartDate,
-          moveOutDate: bid.placementEndDate,
-          submittedAt: bid.submittedAt,
-          status: bid.status,
-          contractId: contract?.id,
-          contractStatus: contract?.status,
-          remainingCapacity: Math.max(0, 10 - acceptedHiveCount),
-          district: plot?.district || '-',
-          dsDivision: plot?.dsDivision || '-',
-          ownerName: owner.ownerName,
-          ownerContact: owner.ownerContact,
-          financialTerms: listing.financialTerms,
-          cashRentLkr: listing.cashRentLkr,
-          honeyShareKg: listing.honeyShareKg,
-          waterAvailability: plot?.waterAvailability || 'On-site',
-          vehicleAccess: plot?.vehicleAccess || 'Lorry',
-          nightAccess: plot?.nightAccess ?? false,
-          gpsLatitude: plot?.gpsLatitude ?? 0,
-          gpsLongitude: plot?.gpsLongitude ?? 0,
-          forageEntries: plot?.forageEntries || [],
-        });
+      // Get contract if bid is accepted
+      let contract: any = null;
+      if (bid.status === 'accepted') {
+        const { data: contracts } = await supabase
+          .from('landowner_contracts')
+          .select('*')
+          .eq('listing_id', listing.id)
+          .eq('bid_id', bid.id)
+          .single();
+        contract = contracts;
+      }
+
+      proposals.push({
+        ownerUserId: listing.user_id,
+        listingId: listing.id,
+        bidId: bid.id,
+        listingCode: listing.listing_code || makeListingCode(listing.id),
+        plotName: plot?.name || 'Plot',
+        province: plot?.province || '-',
+        hiveCount: bid.hives_proposed,
+        moveInDate: bid.placement_start_date,
+        moveOutDate: bid.placement_end_date,
+        submittedAt: bid.submitted_at || bid.created_at,
+        status: bid.status,
+        contractId: contract?.id,
+        contractStatus: contract?.status,
+        remainingCapacity: Math.max(0, 10 - acceptedHiveCount),
+        district: plot?.district || '-',
+        dsDivision: plot?.ds_division || '-',
+        ownerName: owner?.name || `Landowner ${listing.user_id}`,
+        ownerContact: owner?.phone || '',
+        financialTerms: listing.financial_terms,
+        cashRentLkr: listing.cash_rent_lkr,
+        honeyShareKg: listing.honey_share_kg,
+        waterAvailability: plot?.water_availability || 'On-site',
+        vehicleAccess: plot?.vehicle_access || 'Lorry',
+        nightAccess: plot?.night_access ?? false,
+        gpsLatitude: plot?.gps_latitude ?? 0,
+        gpsLongitude: plot?.gps_longitude ?? 0,
+        forageEntries: plot?.forage_entries || [],
       });
-    });
+    }
 
     return proposals.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
   },
 
-  requestMoveOut(ownerUserId: number, contractId: number) {
-    const all = readRawStore();
-    const ownerKey = String(ownerUserId);
-    const store = all[ownerKey];
-    if (!store) throw new Error('Contract owner not found');
+  async requestMoveOut(ownerUserId: number, contractId: number): Promise<void> {
+    const user = getCurrentUser();
 
-    const contract = store.contracts.find((item) => item.id === contractId);
-    if (!contract) throw new Error('Contract not found');
+    // Get the contract
+    const { data: contract, error: contractError } = await supabase
+      .from('landowner_contracts')
+      .select('*')
+      .eq('id', contractId)
+      .eq('user_id', ownerUserId)
+      .single();
+
+    if (contractError || !contract) throw new Error('Contract not found');
+    if (contract.beekeeper_user_id !== user.id) throw new Error('You are not authorized to request move-out for this contract');
     if (contract.status !== 'active') throw new Error('Move-out can only be requested for active contracts');
 
-    const nextContracts = store.contracts.map((item) => (
-      item.id === contractId
-        ? { ...item, status: 'moving_out_requested' as ContractStatus, moveOutRequestedAt: new Date().toISOString() }
-        : item
-    ));
+    const { error: updateError } = await supabase
+      .from('landowner_contracts')
+      .update({
+        status: 'moving_out_requested',
+        move_out_requested_at: new Date().toISOString(),
+      })
+      .eq('id', contractId);
 
-    all[ownerKey] = { ...store, contracts: nextContracts };
-    writeRawStore(all);
+    if (updateError) throw new Error(updateError.message);
+
+    notificationsService.createActionNotification({
+      entity: 'Contract',
+      event: 'updated',
+      details: 'Move-out request sent to landowner.',
+      severity: 'low',
+    });
   },
 
-  submitReview(ownerUserId: number, listingId: number, rating: number, comment: string) {
+  async submitReview(ownerUserId: number, listingId: number, rating: number, comment: string): Promise<void> {
     const user = getCurrentUser();
-    const myProposal = this.getMyProposals().find(
-      (proposal) => proposal.ownerUserId === ownerUserId
-        && proposal.listingId === listingId
-        && proposal.contractStatus === 'completed',
-    );
 
-    if (!myProposal) throw new Error('Review is allowed only after move-out is completed');
+    // Check if user has a completed contract for this listing
+    const { data: contract } = await supabase
+      .from('landowner_contracts')
+      .select('id')
+      .eq('listing_id', listingId)
+      .eq('beekeeper_user_id', user.id)
+      .eq('status', 'completed')
+      .single();
 
-    const key = listingKey(ownerUserId, listingId);
-    const reviews = readReviews();
-    const existing = reviews[key] || [];
-    const already = existing.some((item) => item.beekeeperUserId === user.id);
-    if (already) throw new Error('You already submitted a review for this plot');
+    if (!contract) {
+      throw new Error('Review is allowed only after move-out is completed');
+    }
 
-    const nextReview: ListingReview = {
-      id: `${Date.now()}-${user.id}`,
-      listingKey: key,
-      beekeeperUserId: user.id,
-      beekeeperName: user.name || `Beekeeper ${user.id}`,
-      rating,
-      comment: comment.trim(),
-      createdAt: new Date().toISOString(),
-    };
+    // Check if already reviewed
+    const { data: existingReview } = await supabase
+      .from('listing_reviews')
+      .select('id')
+      .eq('listing_id', listingId)
+      .eq('beekeeper_user_id', user.id);
 
-    reviews[key] = [nextReview, ...existing];
-    writeReviews(reviews);
-    return nextReview;
+    if (existingReview && existingReview.length > 0) {
+      throw new Error('You already submitted a review for this plot');
+    }
+
+    // Submit review
+    const { error } = await supabase
+      .from('listing_reviews')
+      .insert({
+        listing_id: listingId,
+        owner_user_id: ownerUserId,
+        beekeeper_user_id: user.id,
+        beekeeper_name: user.name || `Beekeeper ${user.id}`,
+        rating,
+        comment: comment.trim(),
+        created_at: new Date().toISOString(),
+      });
+
+    if (error) throw new Error(error.message);
+
+    notificationsService.createActionNotification({
+      entity: 'Review',
+      event: 'created',
+      details: 'Your review has been submitted.',
+      severity: 'low',
+    });
   },
 };

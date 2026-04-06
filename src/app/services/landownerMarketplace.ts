@@ -1,4 +1,6 @@
+import { supabase } from './supabaseClient';
 import { authService } from './auth';
+import { notificationsService } from './notifications';
 
 export type WaterAvailability = 'On-site' | 'Within 500m' | 'Requires Manual Water';
 export type ShadeProfile = 'Full Shade' | 'Partial Shade' | 'Full Sun';
@@ -49,6 +51,7 @@ export interface Listing {
 export interface Bid {
   id: number;
   listingId: number;
+  beekeeperUserId?: number;
   beekeeperName: string;
   verified: boolean;
   rating: number;
@@ -72,6 +75,7 @@ export interface Contract {
   listingId: number;
   bidId: number;
   plot_id: number;
+  beekeeperUserId?: number;
   beekeeperName: string;
   plotName: string;
   hiveCount: number;
@@ -83,283 +87,120 @@ export interface Contract {
   moveOutRequestedAt?: string;
 }
 
-interface MarketplaceStore {
-  plots: LandPlot[];
-  listings: Listing[];
-  bids: Bid[];
-  contracts: Contract[];
-  counters: {
-    plot: number;
-    listing: number;
-    bid: number;
-    contract: number;
-  };
-}
-
-const STORAGE_KEY = 'apicore_landowner_marketplace_v1';
-
-function getUserId() {
+function getUserId(): number {
   const user = authService.getLocalUser();
   if (!user) throw new Error('Not logged in');
   return user.id;
 }
 
-function readAllData(): Record<string, MarketplaceStore> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Record<string, MarketplaceStore>) : {};
-  } catch {
-    return {};
-  }
-}
-
-function writeAllData(data: Record<string, MarketplaceStore>) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-function todayIso() {
-  return new Date().toISOString();
-}
-
-function makeListingCode(id: number) {
+function makeListingCode(id: number): string {
   return `LST-${String(id).padStart(4, '0')}`;
 }
 
-function createSeedStore(): MarketplaceStore {
-  const now = todayIso();
-  const plots: LandPlot[] = [
-    {
-      id: 1,
-      name: 'North Coconut Grove',
-      province: 'Southern Province',
-      district: 'Matara',
-      dsDivision: 'Matara Four Gravets',
-      gpsLatitude: 5.9549,
-      gpsLongitude: 80.555,
-      totalAcreage: 8.5,
-      forageEntries: [{ name: 'Coconut Palm', bloomStartMonth: 'Jan', bloomEndMonth: 'Dec' }],
-      waterAvailability: 'On-site',
-      shadeProfile: 'Partial Shade',
-      vehicleAccess: 'Lorry',
-      nightAccess: true,
-      images: [],
-      createdAt: now,
-    },
-    {
-      id: 2,
-      name: 'East Rubber Estate',
-      province: 'Sabaragamuwa Province',
-      district: 'Ratnapura',
-      dsDivision: 'Ratnapura',
-      gpsLatitude: 6.6828,
-      gpsLongitude: 80.3992,
-      totalAcreage: 12,
-      forageEntries: [{ name: 'Rubber (Hevea)', bloomStartMonth: 'Mar', bloomEndMonth: 'Oct' }],
-      waterAvailability: 'Within 500m',
-      shadeProfile: 'Full Shade',
-      vehicleAccess: 'Lorry',
-      nightAccess: false,
-      images: [],
-      createdAt: now,
-    },
-    {
-      id: 3,
-      name: 'South Mango Orchard',
-      province: 'Southern Province',
-      district: 'Hambantota',
-      dsDivision: 'Hambantota',
-      gpsLatitude: 6.1246,
-      gpsLongitude: 81.1185,
-      totalAcreage: 5.3,
-      forageEntries: [{ name: 'Mango', bloomStartMonth: 'Feb', bloomEndMonth: 'May' }],
-      waterAvailability: 'Requires Manual Water',
-      shadeProfile: 'Full Sun',
-      vehicleAccess: 'Tuk-tuk',
-      nightAccess: false,
-      images: [],
-      createdAt: now,
-    },
-  ];
-
-  const listings: Listing[] = [
-    {
-      id: 1,
-      listingCode: makeListingCode(1),
-      plotId: 1,
-      financialTerms: 'honey_share',
-      honeyShareKg: 80,
-      sprayingClauseAgreed: true,
-      status: 'published',
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      id: 2,
-      listingCode: makeListingCode(2),
-      plotId: 2,
-      financialTerms: 'cash_rent',
-      cashRentLkr: 15000,
-      sprayingClauseAgreed: true,
-      status: 'accepted',
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      id: 3,
-      listingCode: makeListingCode(3),
-      plotId: 3,
-      financialTerms: 'pollination_service',
-      sprayingClauseAgreed: true,
-      status: 'draft',
-      createdAt: now,
-      updatedAt: now,
-    },
-  ];
-
-  const bids: Bid[] = [
-    {
-      id: 1,
-      listingId: 1,
-      beekeeperName: 'Saman Perera',
-      verified: true,
-      rating: 4.8,
-      fullName: 'Saman Perera',
-      beekeepingNature: 'Commercial',
-      trainingLevel: 'NVQ Level 4',
-      primaryBeeSpecies: 'Apis cerana',
-      district: 'Galle',
-      reviews: 18,
-      previousListings: 5,
-      hivesProposed: 4,
-      placementStartDate: '2026-04-01',
-      placementEndDate: '2026-09-30',
-      note: 'Can begin setup next week. Team has transport and frames ready.',
-      submittedAt: now,
-      status: 'pending',
-    },
-    {
-      id: 2,
-      listingId: 1,
-      beekeeperName: 'Lanka Honey Co.',
-      verified: true,
-      rating: 4.6,
-      fullName: 'Lanka Honey Cooperative',
-      beekeepingNature: 'Cooperative',
-      trainingLevel: 'Department Certified',
-      primaryBeeSpecies: 'Apis mellifera',
-      district: 'Matara',
-      reviews: 41,
-      previousListings: 12,
-      hivesProposed: 3,
-      placementStartDate: '2026-04-10',
-      placementEndDate: '2026-10-10',
-      note: 'Interested in medium-term placement with honey-share split.',
-      submittedAt: now,
-      status: 'pending',
-    },
-    {
-      id: 3,
-      listingId: 1,
-      beekeeperName: 'AgroTrade Ltd.',
-      verified: false,
-      rating: 4.1,
-      fullName: 'AgroTrade Ltd.',
-      beekeepingNature: 'Contract',
-      trainingLevel: 'In-house Training',
-      primaryBeeSpecies: 'Apis cerana',
-      district: 'Hambantota',
-      reviews: 7,
-      previousListings: 2,
-      hivesProposed: 3,
-      placementStartDate: '2026-05-01',
-      placementEndDate: '2026-08-30',
-      note: 'Can provide own night-security support if required.',
-      submittedAt: now,
-      status: 'pending',
-    },
-    {
-      id: 4,
-      listingId: 2,
-      beekeeperName: 'Kamal Gunasekara',
-      verified: true,
-      rating: 4.9,
-      fullName: 'Kamal Gunasekara',
-      beekeepingNature: 'Commercial',
-      trainingLevel: 'NVQ Level 5',
-      primaryBeeSpecies: 'Apis mellifera',
-      district: 'Ratnapura',
-      reviews: 25,
-      previousListings: 8,
-      hivesProposed: 8,
-      placementStartDate: '2026-01-10',
-      placementEndDate: '2026-12-10',
-      note: 'Long-term managed operation with periodic inspections.',
-      submittedAt: now,
-      status: 'accepted',
-    },
-  ];
-
-  const contracts: Contract[] = [
-    {
-      id: 1,
-      listingId: 1,
-      bidId: 4,
-      plot_id: 1,
-      beekeeperName: 'Kamal Gunasekara',
-      plotName: 'North Coconut Grove',
-      hiveCount: 8,
-      expiryLabel: 'Dec 2026',
-      status: 'active',
-      financial_terms: 'honey_share',
-      honey_share_kgs: 80,
-    },
-    {
-      id: 2,
-      listingId: 2,
-      bidId: 4,
-      plot_id: 2,
-      beekeeperName: 'Suresh Perera',
-      plotName: 'East Rubber Estate',
-      hiveCount: 4,
-      expiryLabel: 'Aug 2026',
-      status: 'moving_out_requested',
-      financial_terms: 'cash_rent',
-      cash_rent_lkr: 15000,
-      moveOutRequestedAt: now,
-    },
-  ];
-
+// Map database row to LandPlot interface
+function mapDbToPlot(row: any): LandPlot {
   return {
-    plots,
-    listings,
-    bids,
-    contracts,
-    counters: {
-      plot: 3,
-      listing: 3,
-      bid: 4,
-      contract: 2,
-    },
+    id: row.id,
+    name: row.name,
+    province: row.province || '',
+    district: row.district || '',
+    dsDivision: row.ds_division || '',
+    gpsLatitude: row.gps_latitude || 0,
+    gpsLongitude: row.gps_longitude || 0,
+    totalAcreage: row.total_acreage || 0,
+    forageEntries: row.forage_entries || [],
+    waterAvailability: row.water_availability || 'On-site',
+    shadeProfile: row.shade_profile || 'Full Sun',
+    vehicleAccess: row.vehicle_access || 'Lorry',
+    nightAccess: row.night_access || false,
+    images: row.images || [],
+    createdAt: row.created_at,
   };
 }
 
-function getStoreForCurrentUser() {
-  const userId = getUserId();
-  const all = readAllData();
-  const key = String(userId);
-  if (!all[key]) {
-    all[key] = createSeedStore();
-    writeAllData(all);
-  }
-  return { key, all, store: all[key] };
+// Map LandPlot to database row format
+function mapPlotToDb(plot: Omit<LandPlot, 'id' | 'createdAt'>): any {
+  return {
+    name: plot.name,
+    province: plot.province,
+    district: plot.district,
+    ds_division: plot.dsDivision,
+    gps_latitude: plot.gpsLatitude,
+    gps_longitude: plot.gpsLongitude,
+    total_acreage: plot.totalAcreage,
+    forage_entries: plot.forageEntries,
+    water_availability: plot.waterAvailability,
+    shade_profile: plot.shadeProfile,
+    vehicle_access: plot.vehicleAccess,
+    night_access: plot.nightAccess,
+    images: plot.images,
+  };
 }
 
-function persistStore(key: string, all: Record<string, MarketplaceStore>, store: MarketplaceStore) {
-  all[key] = store;
-  writeAllData(all);
+// Map database row to Listing interface
+function mapDbToListing(row: any): Listing {
+  return {
+    id: row.id,
+    listingCode: row.listing_code || makeListingCode(row.id),
+    plotId: row.plot_id,
+    financialTerms: row.financial_terms || 'cash_rent',
+    cashRentLkr: row.cash_rent_lkr,
+    honeyShareKg: row.honey_share_kg,
+    sprayingClauseAgreed: row.spraying_clause_agreed || false,
+    status: row.status || 'draft',
+    availabilityEndDate: row.availability_end_date,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }
 
-function listingWithDerivedStatus(listing: Listing) {
+// Map database row to Bid interface
+function mapDbToBid(row: any): Bid {
+  return {
+    id: row.id,
+    listingId: row.listing_id,
+    beekeeperUserId: row.beekeeper_user_id,
+    beekeeperName: row.beekeeper_name || '',
+    verified: row.verified || false,
+    rating: row.rating || 0,
+    fullName: row.full_name || row.beekeeper_name || '',
+    beekeepingNature: row.beekeeping_nature || '',
+    trainingLevel: row.training_level || '',
+    primaryBeeSpecies: row.primary_bee_species || '',
+    district: row.district || '',
+    reviews: row.reviews || 0,
+    previousListings: row.previous_listings || 0,
+    hivesProposed: row.hives_proposed || 0,
+    placementStartDate: row.placement_start_date || '',
+    placementEndDate: row.placement_end_date || '',
+    note: row.note || '',
+    submittedAt: row.submitted_at || row.created_at,
+    status: row.status || 'pending',
+  };
+}
+
+// Map database row to Contract interface
+function mapDbToContract(row: any): Contract {
+  return {
+    id: row.id,
+    listingId: row.listing_id,
+    bidId: row.bid_id,
+    plot_id: row.plot_id,
+    beekeeperUserId: row.beekeeper_user_id,
+    beekeeperName: row.beekeeper_name || '',
+    plotName: row.plot_name || '',
+    hiveCount: row.hive_count || 0,
+    expiryLabel: row.expiry_label || '',
+    status: row.status || 'active',
+    cash_rent_lkr: row.cash_rent_lkr,
+    honey_share_kgs: row.honey_share_kgs,
+    financial_terms: row.financial_terms,
+    moveOutRequestedAt: row.move_out_requested_at,
+  };
+}
+
+// Check if listing is expired based on availability end date
+function listingWithDerivedStatus(listing: Listing): Listing {
   if (listing.status === 'published' && listing.availabilityEndDate) {
     const now = new Date();
     const expiry = new Date(listing.availabilityEndDate);
@@ -371,100 +212,169 @@ function listingWithDerivedStatus(listing: Listing) {
 }
 
 export const landownerMarketplaceService = {
-  getPlots() {
-    const { store } = getStoreForCurrentUser();
-    return [...store.plots].sort((a, b) => b.id - a.id);
+  // ─── Plots ───────────────────────────────────────────────────────────────────
+
+  async getPlots(): Promise<LandPlot[]> {
+    const userId = getUserId();
+    const { data, error } = await supabase
+      .from('landowner_plots')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return (data || []).map(mapDbToPlot);
   },
 
-  createPlot(payload: Omit<LandPlot, 'id' | 'createdAt'>) {
-    const { key, all, store } = getStoreForCurrentUser();
-    const exists = store.plots.some(
-      (plot) => plot.name.trim().toLowerCase() === payload.name.trim().toLowerCase(),
-    );
-    if (exists) throw new Error('Land / Plot Name must be unique for your account');
+  async createPlot(payload: Omit<LandPlot, 'id' | 'createdAt'>): Promise<LandPlot> {
+    const userId = getUserId();
 
-    const id = store.counters.plot + 1;
-    const nextPlot: LandPlot = {
-      ...payload,
-      id,
-      createdAt: todayIso(),
-    };
+    // Check for unique name
+    const { data: existing } = await supabase
+      .from('landowner_plots')
+      .select('id')
+      .eq('user_id', userId)
+      .ilike('name', payload.name.trim());
 
-    const nextStore: MarketplaceStore = {
-      ...store,
-      counters: { ...store.counters, plot: id },
-      plots: [nextPlot, ...store.plots],
-    };
+    if (existing && existing.length > 0) {
+      throw new Error('Land / Plot Name must be unique for your account');
+    }
 
-    persistStore(key, all, nextStore);
-    return nextPlot;
+    const { data, error } = await supabase
+      .from('landowner_plots')
+      .insert({
+        user_id: userId,
+        ...mapPlotToDb(payload),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    notificationsService.createActionNotification({
+      entity: 'Land Plot',
+      event: 'created',
+      details: `Plot "${payload.name}" was added.`,
+      severity: 'low',
+    });
+
+    return mapDbToPlot(data);
   },
 
-  updatePlot(plotId: number, payload: Omit<LandPlot, 'id' | 'createdAt'>) {
-    const { key, all, store } = getStoreForCurrentUser();
-    const plotIndex = store.plots.findIndex((plot) => plot.id === plotId);
-    if (plotIndex === -1) throw new Error('Plot not found');
+  async updatePlot(plotId: number, payload: Omit<LandPlot, 'id' | 'createdAt'>): Promise<LandPlot> {
+    const userId = getUserId();
 
-    const currentPlot = store.plots[plotIndex];
+    // Check for unique name (excluding current plot)
+    const { data: existing } = await supabase
+      .from('landowner_plots')
+      .select('id')
+      .eq('user_id', userId)
+      .neq('id', plotId)
+      .ilike('name', payload.name.trim());
 
-    // Check for name uniqueness, but allow the same name for the same plot
-    const exists = store.plots.some(
-      (plot) => 
-        plot.id !== plotId && 
-        plot.name.trim().toLowerCase() === payload.name.trim().toLowerCase(),
-    );
-    if (exists) throw new Error('Land / Plot Name must be unique for your account');
+    if (existing && existing.length > 0) {
+      throw new Error('Land / Plot Name must be unique for your account');
+    }
 
-    const updatedPlot: LandPlot = {
-      ...payload,
-      id: plotId,
-      createdAt: currentPlot.createdAt,
-    };
+    const { data, error } = await supabase
+      .from('landowner_plots')
+      .update({
+        ...mapPlotToDb(payload),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', plotId)
+      .eq('user_id', userId)
+      .select()
+      .single();
 
-    const nextPlots = [...store.plots];
-    nextPlots[plotIndex] = updatedPlot;
+    if (error) throw new Error(error.message);
 
-    const nextStore: MarketplaceStore = {
-      ...store,
-      plots: nextPlots,
-    };
+    notificationsService.createActionNotification({
+      entity: 'Land Plot',
+      event: 'updated',
+      details: `Plot "${payload.name}" was updated.`,
+      severity: 'low',
+    });
 
-    persistStore(key, all, nextStore);
-    return updatedPlot;
+    return mapDbToPlot(data);
   },
 
-  deletePlot(plotId: number) {
-    const { key, all, store } = getStoreForCurrentUser();
+  async deletePlot(plotId: number): Promise<void> {
+    const userId = getUserId();
 
-    const listingIdsToRemove = new Set(
-      store.listings.filter((listing) => listing.plotId === plotId).map((listing) => listing.id),
-    );
+    // Check if plot has any listings
+    const { data: listings } = await supabase
+      .from('landowner_listings')
+      .select('id')
+      .eq('plot_id', plotId);
 
-    const nextStore: MarketplaceStore = {
-      ...store,
-      plots: store.plots.filter((plot) => plot.id !== plotId),
-      listings: store.listings.filter((listing) => listing.plotId !== plotId),
-      bids: store.bids.filter((bid) => !listingIdsToRemove.has(bid.listingId)),
-      contracts: store.contracts.filter((contract) => contract.plot_id !== plotId),
-    };
+    if (listings && listings.length > 0) {
+      // Delete associated bids first
+      const listingIds = listings.map((l: any) => l.id);
+      await supabase
+        .from('landowner_bids')
+        .delete()
+        .in('listing_id', listingIds);
 
-    persistStore(key, all, nextStore);
+      // Delete associated contracts
+      await supabase
+        .from('landowner_contracts')
+        .delete()
+        .eq('plot_id', plotId);
+
+      // Delete listings
+      await supabase
+        .from('landowner_listings')
+        .delete()
+        .eq('plot_id', plotId);
+    }
+
+    const { error } = await supabase
+      .from('landowner_plots')
+      .delete()
+      .eq('id', plotId)
+      .eq('user_id', userId);
+
+    if (error) throw new Error(error.message);
+
+    notificationsService.createActionNotification({
+      entity: 'Land Plot',
+      event: 'deleted',
+      details: `Plot was deleted along with associated listings.`,
+      severity: 'medium',
+    });
   },
 
-  getListings() {
-    const { store } = getStoreForCurrentUser();
-    return [...store.listings]
-      .map(listingWithDerivedStatus)
-      .sort((a, b) => b.id - a.id);
+  // ─── Listings ────────────────────────────────────────────────────────────────
+
+  async getListings(): Promise<Listing[]> {
+    const userId = getUserId();
+    const { data, error } = await supabase
+      .from('landowner_listings')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return (data || []).map(mapDbToListing).map(listingWithDerivedStatus);
   },
 
-  getListingById(listingId: number) {
-    const listing = this.getListings().find((item) => item.id === listingId);
-    if (!listing) throw new Error('Listing not found');
-    return listing;
+  async getListingById(listingId: number): Promise<Listing> {
+    const userId = getUserId();
+    const { data, error } = await supabase
+      .from('landowner_listings')
+      .select('*')
+      .eq('id', listingId)
+      .eq('user_id', userId)
+      .single();
+
+    if (error) throw new Error(error.message);
+    return listingWithDerivedStatus(mapDbToListing(data));
   },
 
-  createListing(payload: {
+  async createListing(payload: {
     plotId: number;
     financialTerms: FinancialTerms;
     cashRentLkr?: number;
@@ -472,37 +382,59 @@ export const landownerMarketplaceService = {
     sprayingClauseAgreed: boolean;
     availabilityEndDate?: string;
     status: ListingStatus;
-  }) {
-    const { key, all, store } = getStoreForCurrentUser();
-    const plot = store.plots.find((item) => item.id === payload.plotId);
-    if (!plot) throw new Error('Select a valid plot before saving');
+  }): Promise<Listing> {
+    const userId = getUserId();
 
-    const nextId = store.counters.listing + 1;
-    const nextListing: Listing = {
-      id: nextId,
-      listingCode: makeListingCode(nextId),
-      plotId: payload.plotId,
-      financialTerms: payload.financialTerms,
-      cashRentLkr: payload.cashRentLkr,
-      honeyShareKg: payload.honeyShareKg,
-      sprayingClauseAgreed: payload.sprayingClauseAgreed,
-      status: payload.status,
-      availabilityEndDate: payload.availabilityEndDate,
-      createdAt: todayIso(),
-      updatedAt: todayIso(),
-    };
+    // Verify plot exists and belongs to user
+    const { data: plot, error: plotError } = await supabase
+      .from('landowner_plots')
+      .select('id')
+      .eq('id', payload.plotId)
+      .eq('user_id', userId)
+      .single();
 
-    const nextStore: MarketplaceStore = {
-      ...store,
-      listings: [nextListing, ...store.listings],
-      counters: { ...store.counters, listing: nextId },
-    };
+    if (plotError || !plot) {
+      throw new Error('Select a valid plot before saving');
+    }
 
-    persistStore(key, all, nextStore);
-    return nextListing;
+    const now = new Date().toISOString();
+    const { data, error } = await supabase
+      .from('landowner_listings')
+      .insert({
+        user_id: userId,
+        plot_id: payload.plotId,
+        financial_terms: payload.financialTerms,
+        cash_rent_lkr: payload.cashRentLkr,
+        honey_share_kg: payload.honeyShareKg,
+        spraying_clause_agreed: payload.sprayingClauseAgreed,
+        status: payload.status,
+        availability_end_date: payload.availabilityEndDate,
+        created_at: now,
+        updated_at: now,
+      })
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    // Update listing code with the generated ID
+    const listingCode = makeListingCode(data.id);
+    await supabase
+      .from('landowner_listings')
+      .update({ listing_code: listingCode })
+      .eq('id', data.id);
+
+    notificationsService.createActionNotification({
+      entity: 'Listing',
+      event: 'created',
+      details: `Listing ${listingCode} was created.`,
+      severity: 'low',
+    });
+
+    return mapDbToListing({ ...data, listing_code: listingCode });
   },
 
-  updateListing(
+  async updateListing(
     listingId: number,
     payload: {
       plotId: number;
@@ -512,172 +444,324 @@ export const landownerMarketplaceService = {
       sprayingClauseAgreed: boolean;
       availabilityEndDate?: string;
       status: ListingStatus;
-    },
-  ) {
-    const { key, all, store } = getStoreForCurrentUser();
-    const listing = store.listings.find((item) => item.id === listingId);
-    if (!listing) throw new Error('Listing not found');
+    }
+  ): Promise<Listing> {
+    const userId = getUserId();
 
-    const hasAnyBid = store.bids.some((bid) => bid.listingId === listingId);
-    if (hasAnyBid) {
+    // Check if listing has any bids
+    const { data: bids } = await supabase
+      .from('landowner_bids')
+      .select('id')
+      .eq('listing_id', listingId);
+
+    if (bids && bids.length > 0) {
       throw new Error('This listing cannot be edited as proposals have already been received');
     }
 
-    const nextListings = store.listings.map((item) => (
-      item.id === listingId
-        ? {
-            ...item,
-            ...payload,
-            updatedAt: todayIso(),
-          }
-        : item
-    ));
+    const { data, error } = await supabase
+      .from('landowner_listings')
+      .update({
+        plot_id: payload.plotId,
+        financial_terms: payload.financialTerms,
+        cash_rent_lkr: payload.cashRentLkr,
+        honey_share_kg: payload.honeyShareKg,
+        spraying_clause_agreed: payload.sprayingClauseAgreed,
+        status: payload.status,
+        availability_end_date: payload.availabilityEndDate,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', listingId)
+      .eq('user_id', userId)
+      .select()
+      .single();
 
-    const nextStore: MarketplaceStore = {
-      ...store,
-      listings: nextListings,
-    };
+    if (error) throw new Error(error.message);
 
-    persistStore(key, all, nextStore);
-    return nextListings.find((item) => item.id === listingId) as Listing;
+    notificationsService.createActionNotification({
+      entity: 'Listing',
+      event: 'updated',
+      details: `Listing was updated.`,
+      severity: 'low',
+    });
+
+    return mapDbToListing(data);
   },
 
-  deleteListing(listingId: number) {
-    const { key, all, store } = getStoreForCurrentUser();
-    const hasAcceptedBid = store.bids.some((bid) => bid.listingId === listingId && bid.status === 'accepted');
-    if (hasAcceptedBid) {
+  async deleteListing(listingId: number): Promise<void> {
+    const userId = getUserId();
+
+    // Check if listing has accepted bids
+    const { data: acceptedBids } = await supabase
+      .from('landowner_bids')
+      .select('id')
+      .eq('listing_id', listingId)
+      .eq('status', 'accepted');
+
+    if (acceptedBids && acceptedBids.length > 0) {
       throw new Error('This listing cannot be deleted because it has an accepted bid');
     }
 
-    const nextStore: MarketplaceStore = {
-      ...store,
-      listings: store.listings.filter((item) => item.id !== listingId),
-      bids: store.bids.filter((bid) => bid.listingId !== listingId),
-      contracts: store.contracts.filter((contract) => contract.listingId !== listingId),
-    };
+    // Delete associated bids
+    await supabase
+      .from('landowner_bids')
+      .delete()
+      .eq('listing_id', listingId);
 
-    persistStore(key, all, nextStore);
+    // Delete associated contracts
+    await supabase
+      .from('landowner_contracts')
+      .delete()
+      .eq('listing_id', listingId);
+
+    const { error } = await supabase
+      .from('landowner_listings')
+      .delete()
+      .eq('id', listingId)
+      .eq('user_id', userId);
+
+    if (error) throw new Error(error.message);
+
+    notificationsService.createActionNotification({
+      entity: 'Listing',
+      event: 'deleted',
+      details: `Listing was deleted.`,
+      severity: 'medium',
+    });
   },
 
-  getBidsForListing(listingId: number) {
-    const { store } = getStoreForCurrentUser();
-    return store.bids
-      .filter((bid) => bid.listingId === listingId)
-      .sort((a, b) => b.id - a.id);
+  // ─── Bids ────────────────────────────────────────────────────────────────────
+
+  async getBidsForListing(listingId: number): Promise<Bid[]> {
+    const { data, error } = await supabase
+      .from('landowner_bids')
+      .select('*')
+      .eq('listing_id', listingId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return (data || []).map(mapDbToBid);
   },
 
-  rejectBid(listingId: number, bidId: number) {
-    const { key, all, store } = getStoreForCurrentUser();
-    const nextStore: MarketplaceStore = {
-      ...store,
-      bids: store.bids.filter((bid) => !(bid.listingId === listingId && bid.id === bidId)),
-    };
-    persistStore(key, all, nextStore);
+  async rejectBid(listingId: number, bidId: number): Promise<void> {
+    const { error } = await supabase
+      .from('landowner_bids')
+      .delete()
+      .eq('id', bidId)
+      .eq('listing_id', listingId);
+
+    if (error) throw new Error(error.message);
+
+    notificationsService.createActionNotification({
+      entity: 'Bid',
+      event: 'rejected',
+      details: `Bid was rejected and removed.`,
+      severity: 'low',
+    });
   },
 
-  acceptBid(listingId: number, bidId: number) {
-    const { key, all, store } = getStoreForCurrentUser();
-    const selectedBid = store.bids.find((bid) => bid.id === bidId && bid.listingId === listingId);
-    if (!selectedBid) throw new Error('Bid not found');
+  async acceptBid(listingId: number, bidId: number): Promise<void> {
+    const userId = getUserId();
 
-    const listing = store.listings.find((item) => item.id === listingId);
-    if (!listing) throw new Error('Listing not found');
+    // Get the bid
+    const { data: selectedBid, error: bidError } = await supabase
+      .from('landowner_bids')
+      .select('*')
+      .eq('id', bidId)
+      .eq('listing_id', listingId)
+      .single();
 
-    const acceptedBefore = store.bids
-      .filter((bid) => bid.listingId === listingId && bid.status === 'accepted')
-      .reduce((sum, bid) => sum + bid.hivesProposed, 0);
+    if (bidError || !selectedBid) throw new Error('Bid not found');
 
+    // Get the listing
+    const { data: listing, error: listingError } = await supabase
+      .from('landowner_listings')
+      .select('*, landowner_plots(name)')
+      .eq('id', listingId)
+      .single();
+
+    if (listingError || !listing) throw new Error('Listing not found');
+
+    // Calculate accepted hive count
+    const { data: acceptedBids } = await supabase
+      .from('landowner_bids')
+      .select('hives_proposed')
+      .eq('listing_id', listingId)
+      .eq('status', 'accepted');
+
+    const acceptedBefore = (acceptedBids || []).reduce((sum: number, b: any) => sum + (b.hives_proposed || 0), 0);
     const maxCapacity = 10;
-    const newTotalAccepted = acceptedBefore + selectedBid.hivesProposed;
+    const newTotalAccepted = acceptedBefore + (selectedBid.hives_proposed || 0);
     const isCapacityFull = newTotalAccepted >= maxCapacity;
 
-    const nextBids = store.bids.map((bid) => {
-      if (bid.id === bidId) return { ...bid, status: 'accepted' as BidStatus };
-      if (bid.listingId === listingId && bid.status === 'pending' && isCapacityFull) {
-        return { ...bid, status: 'rejected' as BidStatus };
-      }
-      return bid;
-    });
+    // Update the bid status
+    await supabase
+      .from('landowner_bids')
+      .update({ status: 'accepted' })
+      .eq('id', bidId);
 
+    // If capacity is full, reject other pending bids
+    if (isCapacityFull) {
+      await supabase
+        .from('landowner_bids')
+        .update({ status: 'rejected' })
+        .eq('listing_id', listingId)
+        .eq('status', 'pending')
+        .neq('id', bidId);
+    }
+
+    // Update listing status
     const nextStatus: ListingStatus = isCapacityFull ? 'occupied' : 'accepted';
-    const nextListings = store.listings.map((item) => (
-      item.id === listingId ? { ...item, status: nextStatus, updatedAt: todayIso() } : item
-    ));
+    await supabase
+      .from('landowner_listings')
+      .update({ status: nextStatus, updated_at: new Date().toISOString() })
+      .eq('id', listingId);
 
-    const plot = store.plots.find((item) => item.id === listing.plotId);
+    // Create contract
+    const plotName = listing.landowner_plots?.name || 'Plot';
+    await supabase
+      .from('landowner_contracts')
+      .insert({
+        user_id: userId,
+        listing_id: listingId,
+        bid_id: bidId,
+        plot_id: listing.plot_id,
+        beekeeper_user_id: selectedBid.beekeeper_user_id,
+        beekeeper_name: selectedBid.beekeeper_name,
+        plot_name: plotName,
+        hive_count: selectedBid.hives_proposed,
+        expiry_label: selectedBid.placement_end_date ? new Date(selectedBid.placement_end_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A',
+        status: 'active',
+        financial_terms: listing.financial_terms,
+        cash_rent_lkr: listing.cash_rent_lkr,
+        honey_share_kgs: listing.honey_share_kg,
+        created_at: new Date().toISOString(),
+      });
 
-    const nextContractId = store.counters.contract + 1;
-    const nextContract: Contract = {
-      id: nextContractId,
-      listingId,
-      bidId,
-      plot_id: plot?.id || listing.plotId,
-      beekeeperName: selectedBid.beekeeperName,
-      plotName: plot?.name || 'Plot',
-      hiveCount: selectedBid.hivesProposed,
-      expiryLabel: 'Dec 2026',
-      status: 'active',
-      financial_terms: listing.financialTerms,
-      cash_rent_lkr: listing.cashRentLkr,
-      honey_share_kgs: listing.honeyShareKg,
-    };
-
-    const nextStore: MarketplaceStore = {
-      ...store,
-      bids: nextBids,
-      listings: nextListings,
-      contracts: [nextContract, ...store.contracts],
-      counters: { ...store.counters, contract: nextContractId },
-    };
-
-    persistStore(key, all, nextStore);
-  },
-
-  getContracts() {
-    const { store } = getStoreForCurrentUser();
-    return [...store.contracts].sort((a, b) => b.id - a.id);
-  },
-
-  respondMoveOut(contractId: number, approve: boolean) {
-    const { key, all, store } = getStoreForCurrentUser();
-    const nextContracts = store.contracts.map((contract) => {
-      if (contract.id !== contractId) return contract;
-      if (approve) return { ...contract, status: 'completed' as ContractStatus };
-      return { ...contract, status: 'active' as ContractStatus, moveOutRequestedAt: undefined };
+    notificationsService.createActionNotification({
+      entity: 'Bid',
+      event: 'accepted',
+      details: `Bid accepted. Contract created with ${selectedBid.beekeeper_name}.`,
+      severity: 'low',
     });
-
-    const nextStore: MarketplaceStore = {
-      ...store,
-      contracts: nextContracts,
-    };
-
-    persistStore(key, all, nextStore);
   },
 
-  getDashboardStats() {
-    const { store } = getStoreForCurrentUser();
-    const activeListings = store.listings.filter((listing) => ['published', 'accepted', 'occupied'].includes(listing.status));
-    const activeListingIds = new Set(activeListings.map((listing) => listing.id));
+  // ─── Contracts ───────────────────────────────────────────────────────────────
 
-    const hiveCount = store.bids
-      .filter((bid) => activeListingIds.has(bid.listingId) && bid.status === 'accepted')
-      .reduce((sum, bid) => sum + bid.hivesProposed, 0);
+  async getContracts(): Promise<Contract[]> {
+    const userId = getUserId();
+    const { data, error } = await supabase
+      .from('landowner_contracts')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
 
-    const pendingBids = store.bids.filter((bid) => bid.status === 'pending').length;
+    if (error) throw new Error(error.message);
+    return (data || []).map(mapDbToContract);
+  },
 
-    const rupeesReceived = store.listings
-      .filter((listing) => ['accepted', 'occupied'].includes(listing.status) && listing.financialTerms === 'cash_rent')
-      .reduce((sum, listing) => sum + (listing.cashRentLkr || 0), 0);
+  async respondMoveOut(contractId: number, approve: boolean): Promise<void> {
+    const userId = getUserId();
+    const updateData = approve
+      ? { status: 'completed' as ContractStatus }
+      : { status: 'active' as ContractStatus, move_out_requested_at: null };
 
-    const honeyShareKg = store.listings
-      .filter((listing) => ['accepted', 'occupied'].includes(listing.status) && listing.financialTerms === 'honey_share')
-      .reduce((sum, listing) => sum + (listing.honeyShareKg || 0), 0);
+    const { error } = await supabase
+      .from('landowner_contracts')
+      .update(updateData)
+      .eq('id', contractId)
+      .eq('user_id', userId);
+
+    if (error) throw new Error(error.message);
+
+    notificationsService.createActionNotification({
+      entity: 'Contract',
+      event: approve ? 'completed' : 'updated',
+      details: approve
+        ? 'Move-out approved. Contract marked as completed.'
+        : 'Move-out request declined. Contract stays active.',
+      severity: 'low',
+    });
+  },
+
+  // ─── Dashboard Stats ─────────────────────────────────────────────────────────
+
+  async getDashboardStats(): Promise<{
+    hiveCount: number;
+    pendingBids: number;
+    rupeesReceived: number;
+    honeyShareKg: number;
+  }> {
+    const userId = getUserId();
+
+    // Get all listings for this user
+    const { data: listings } = await supabase
+      .from('landowner_listings')
+      .select('id, status, financial_terms, cash_rent_lkr, honey_share_kg')
+      .eq('user_id', userId);
+
+    if (!listings || listings.length === 0) {
+      return { hiveCount: 0, pendingBids: 0, rupeesReceived: 0, honeyShareKg: 0 };
+    }
+
+    const listingIds = listings.map((l: any) => l.id);
+    const activeListings = listings.filter((l: any) => ['published', 'accepted', 'occupied'].includes(l.status));
+    const activeListingIds = activeListings.map((l: any) => l.id);
+
+    // Get accepted bids for active listings
+    const { data: acceptedBids } = await supabase
+      .from('landowner_bids')
+      .select('hives_proposed, listing_id')
+      .in('listing_id', activeListingIds.length > 0 ? activeListingIds : [-1])
+      .eq('status', 'accepted');
+
+    const hiveCount = (acceptedBids || []).reduce((sum: number, b: any) => sum + (b.hives_proposed || 0), 0);
+
+    // Get pending bids count
+    const { count: pendingBids } = await supabase
+      .from('landowner_bids')
+      .select('id', { count: 'exact', head: true })
+      .in('listing_id', listingIds.length > 0 ? listingIds : [-1])
+      .eq('status', 'pending');
+
+    // Calculate revenue
+    const acceptedListings = listings.filter((l: any) => ['accepted', 'occupied'].includes(l.status));
+    const rupeesReceived = acceptedListings
+      .filter((l: any) => l.financial_terms === 'cash_rent')
+      .reduce((sum: number, l: any) => sum + (l.cash_rent_lkr || 0), 0);
+
+    const honeyShareKg = acceptedListings
+      .filter((l: any) => l.financial_terms === 'honey_share')
+      .reduce((sum: number, l: any) => sum + (l.honey_share_kg || 0), 0);
 
     return {
       hiveCount,
-      pendingBids,
+      pendingBids: pendingBids || 0,
       rupeesReceived,
       honeyShareKg,
     };
+  },
+
+  // ─── Get All Published Listings (for beekeepers to browse) ───────────────────
+
+  async getAllPublishedListings(): Promise<Array<{
+    listing: Listing;
+    plot: LandPlot;
+    ownerUserId: number;
+    ownerName: string;
+  }>> {
+    const { data, error } = await supabase
+      .from('landowner_listings')
+      .select('*, landowner_plots(*), users(name)')
+      .eq('status', 'published')
+      .order('created_at', { ascending: false });
+
+    if (error) throw new Error(error.message);
+
+    return (data || []).map((row: any) => ({
+      listing: listingWithDerivedStatus(mapDbToListing(row)),
+      plot: row.landowner_plots ? mapDbToPlot(row.landowner_plots) : null,
+      ownerUserId: row.user_id,
+      ownerName: row.users?.name || `Landowner ${row.user_id}`,
+    })).filter((item: any) => item.plot !== null);
   },
 };
