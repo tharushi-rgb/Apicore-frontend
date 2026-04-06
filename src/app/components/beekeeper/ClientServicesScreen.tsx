@@ -281,8 +281,11 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
         note: proposalForm.note,
       });
       await loadData();
+      setSelectedListing(null); // Close the modal
       setError('');
       setSuccess('Your proposal has been submitted. You will be notified once the landowner responds.');
+      // Scroll to top to show success message
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (submitError: any) {
       setError(submitError?.message || 'Failed to submit proposal');
     } finally {
@@ -320,7 +323,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
   };
 
   return (
-    <div className="h-[100dvh] bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 pb-24 relative overflow-hidden flex flex-col">
+    <div className="h-[100dvh] bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative overflow-hidden flex flex-col">
       <div className="bg-white shadow-sm sticky top-0 z-30">
         <MobileHeader
           userName={user?.name}
@@ -344,7 +347,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-28 space-y-3">
+      <div className="flex-1 overflow-y-auto px-4 pb-20 space-y-3">
         {error && <p className="rounded-xl bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-[0.72rem] font-medium">{error}</p>}
         {success && <p className="rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 px-3 py-2 text-[0.72rem] font-medium">{success}</p>}
 
@@ -571,11 +574,11 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
       )}
 
       {selectedListing && (
-        <div className="absolute inset-0 z-50 bg-black/50 p-2" onClick={() => setSelectedListing(null)}>
+        <div className="absolute inset-0 z-50 bg-black/50 p-2" onClick={() => { setSelectedListing(null); setError(''); }}>
           <div className="bg-white rounded-2xl h-full overflow-y-auto" onClick={(event) => event.stopPropagation()}>
             <div className="sticky top-0 bg-white border-b border-stone-200 px-3 py-2 flex items-center justify-between z-10">
               <h3 className="text-[0.88rem] font-bold text-stone-800">Listing Detail</h3>
-              <button onClick={() => setSelectedListing(null)} className="p-1 rounded-lg bg-stone-100"><X className="w-4 h-4" /></button>
+              <button onClick={() => { setSelectedListing(null); setError(''); }} className="p-1 rounded-lg bg-stone-100"><X className="w-4 h-4" /></button>
             </div>
 
             <div className="p-3 space-y-3">
@@ -629,6 +632,13 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
 
               <section className="rounded-xl border border-stone-200 p-3 space-y-2">
                 <p className="text-[0.68rem] text-stone-500">Submit Proposal</p>
+
+                {/* Show error inside modal */}
+                {error && (
+                  <div className="rounded-lg bg-red-50 border border-red-200 text-red-700 px-2.5 py-2 text-[0.72rem] font-medium">
+                    {error}
+                  </div>
+                )}
 
                 {selectedProposal?.status === 'pending' && <p className="rounded-lg bg-amber-50 border border-amber-200 text-amber-700 px-2.5 py-2 text-[0.72rem] font-semibold">Proposal Submitted - Pending Review</p>}
                 {selectedProposal?.status === 'accepted' && <p className="rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 px-2.5 py-2 text-[0.72rem] font-semibold">Your proposal was accepted.</p>}
