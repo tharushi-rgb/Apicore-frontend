@@ -81,7 +81,6 @@ export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout
             ) : (
               <>
                 <NavItem icon={<MapPin className="w-4.5 h-4.5" />} label={t('apiaries', lang)} active={activeTab === 'apiaries'} onClick={() => nav('apiaries')} theme={theme} />
-                <NavItem icon={<HiveIcon className="w-4.5 h-4.5" />} label={t('hives', lang)} active={activeTab === 'hives'} onClick={() => nav('hives')} theme={theme} />
                 <NavItem icon={<Calendar className="w-4.5 h-4.5" />} label={t('planning', lang)} active={activeTab === 'planning'} onClick={() => nav('planning')} theme={theme} />
                 <NavItem icon={<Users className="w-4.5 h-4.5" />} label={t('findingLand', lang)} active={activeTab === 'clients'} onClick={() => nav('clients')} theme={theme} />
                 <NavItem icon={<User className="w-4.5 h-4.5" />} label={t('profile', lang)} active={activeTab === 'profile'} onClick={() => nav('profile')} theme={theme} />

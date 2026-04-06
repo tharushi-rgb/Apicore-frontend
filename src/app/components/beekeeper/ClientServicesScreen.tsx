@@ -574,8 +574,8 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
       )}
 
       {selectedListing && (
-        <div className="absolute inset-0 z-50 bg-black/50 p-2" onClick={() => { setSelectedListing(null); setError(''); }}>
-          <div className="bg-white rounded-2xl h-full overflow-y-auto" onClick={(event) => event.stopPropagation()}>
+        <div className="absolute inset-0 z-50 bg-black/50 p-2 flex items-start justify-center overflow-y-auto" onClick={() => { setSelectedListing(null); setError(''); }}>
+          <div className="bg-white rounded-2xl max-h-full overflow-y-auto w-full max-w-2xl my-4" onClick={(event) => event.stopPropagation()}>
             <div className="sticky top-0 bg-white border-b border-stone-200 px-3 py-2 flex items-center justify-between z-10">
               <h3 className="text-[0.88rem] font-bold text-stone-800">Listing Detail</h3>
               <button onClick={() => { setSelectedListing(null); setError(''); }} className="p-1 rounded-lg bg-stone-100"><X className="w-4 h-4" /></button>
