@@ -40,7 +40,7 @@ export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout
   const nav = (tab: NavTab) => { onNavigate(tab); onClose(); };
   const isLandowner = role === 'landowner';
   const gradientClass = theme === 'green' ? 'from-emerald-700 to-green-700' : 'from-amber-500 to-amber-600';
-  const panelSubtitle = isLandowner ? 'Landowner' : 'Beekeeper';
+  const panelSubtitle = isLandowner ? t('landowner', lang) : t('beekeeper', lang);
 
   // Lock body scroll when open so the page behind doesn't scroll
   React.useEffect(() => {
@@ -65,7 +65,7 @@ export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout
                 <HiveIcon className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="font-bold text-white text-[1rem] leading-tight">ApiCore</h2>
+                <h2 className="font-bold text-white text-[1rem] leading-tight">{t('apiCore', lang)}</h2>
                 <p className="text-white/80 text-[0.72rem] leading-tight">{panelSubtitle}</p>
               </div>
             </div>
@@ -75,7 +75,7 @@ export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout
             <NavItem icon={<Home className="w-4.5 h-4.5" />} label={t('dashboard', lang)} active={activeTab === 'dashboard'} onClick={() => nav('dashboard')} theme={theme} />
             {isLandowner ? (
               <>
-                <NavItem icon={<Users className="w-4.5 h-4.5" />} label="Listings" active={activeTab === 'clients'} onClick={() => nav('clients')} theme={theme} />
+                <NavItem icon={<Users className="w-4.5 h-4.5" />} label={t('listings', lang)} active={activeTab === 'clients'} onClick={() => nav('clients')} theme={theme} />
                 <NavItem icon={<User className="w-4.5 h-4.5" />} label={t('profile', lang)} active={activeTab === 'profile'} onClick={() => nav('profile')} theme={theme} />
               </>
             ) : (
@@ -98,7 +98,7 @@ export function MobileSidebar({ isOpen, activeTab, onNavigate, onClose, onLogout
                 <span>{t('logout', lang)}</span>
               </button>
             )}
-            <p className="text-[0.68rem] text-stone-600 text-center">ApiCore v1.0.0</p>
+            <p className="text-[0.68rem] text-stone-600 text-center">{t('apiCoreVersion', lang)}</p>
           </div>
         </div>
 

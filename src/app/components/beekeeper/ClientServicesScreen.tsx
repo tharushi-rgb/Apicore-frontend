@@ -22,6 +22,7 @@ import {
   type ListingProposal,
   type ListingSummary,
 } from '../../services/beekeeperListings';
+import { t } from '../../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -81,7 +82,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
       setProposals(proposalsData);
       setError('');
     } catch (loadError: any) {
-      setError(loadError?.message || 'Failed to load listings');
+      setError(loadError?.message || t('failedToLoadListings', selectedLanguage));
     } finally {
       setLoading(false);
     }
@@ -252,7 +253,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
     if (!selectedListing) return;
     const hiveCount = Number(proposalForm.hiveCount);
     if (!Number.isFinite(hiveCount) || hiveCount <= 0) {
-      setError('Hive count is mandatory');
+      setError(t('hiveCountMandatory', selectedLanguage));
       return;
     }
     if (!proposalForm.moveInDate || !proposalForm.moveOutDate) {

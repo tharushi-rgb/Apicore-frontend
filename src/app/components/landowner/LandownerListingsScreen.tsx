@@ -23,6 +23,7 @@ import {
   type Listing,
   type ListingStatus,
 } from '../../services/landownerMarketplace';
+import { t } from '../../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -113,7 +114,7 @@ export function LandownerListingsScreen({
       setBidsCache(bidsCacheTemp);
     } catch (error) {
       console.error('Failed to load data:', error);
-      setMessage({ type: 'error', text: 'Failed to load data' });
+      setMessage({ type: 'error', text: t('failedToLoadData', selectedLanguage) });
     } finally {
       setLoading(false);
     }
@@ -164,7 +165,7 @@ export function LandownerListingsScreen({
     if (bids.length > 0) {
       setMessage({
         type: 'error',
-        text: 'This listing cannot be edited as proposals have already been received',
+        text: t('cannotEditListingWithBids', selectedLanguage),
       });
       return;
     }
@@ -197,30 +198,30 @@ export function LandownerListingsScreen({
     try {
       await landownerMarketplaceService.deleteListing(listingId);
       setConfirmDelete(null);
-      setMessage({ type: 'success', text: 'Listing deleted successfully. Pending bids were rejected automatically.' });
+      setMessage({ type: 'success', text: t('listingDeletedSuccess', selectedLanguage) });
       await loadData();
     } catch (error: any) {
-      setMessage({ type: 'error', text: error?.message || 'Failed to delete listing' });
+      setMessage({ type: 'error', text: error?.message || t('failedToDeleteListing', selectedLanguage) });
     } finally {
       setSaving(false);
     }
   };
 
   const validateFormForPublish = () => {
-    if (!form.plotId) return 'Select Plot is required';
+    if (!form.plotId) return t('selectPlotRequired', selectedLanguage);
 
     if (form.financialTerms === 'cash_rent') {
       const rentValue = Number(form.cashRentLkr);
-      if (!Number.isFinite(rentValue) || rentValue <= 0) return 'LKR amount per month is required';
+      if (!Number.isFinite(rentValue) || rentValue <= 0) return t('lkrAmountRequired', selectedLanguage);
     }
 
     if (form.financialTerms === 'honey_share') {
       const honeyValue = Number(form.honeyShareKg);
-      if (!Number.isFinite(honeyValue) || honeyValue <= 0) return 'Yield KG is required for Honey Share';
+      if (!Number.isFinite(honeyValue) || honeyValue <= 0) return t('yieldKgRequired', selectedLanguage);
     }
 
     if (!form.sprayingClauseAgreed) {
-      return 'You must agree to the pesticide notice clause before publishing';
+      return t('mustAgreePesticideNotice', selectedLanguage);
     }
 
     return '';
@@ -230,7 +231,7 @@ export function LandownerListingsScreen({
     setMessage(null);
 
     if (!form.plotId) {
-      setMessage({ type: 'error', text: 'Select Plot is required' });
+      setMessage({ type: 'error', text: t('selectPlotRequired', selectedLanguage) });
       return;
     }
 
@@ -254,16 +255,16 @@ export function LandownerListingsScreen({
     try {
       if (editorMode === 'edit' && form.listingId) {
         await landownerMarketplaceService.updateListing(form.listingId, payload);
-        setMessage({ type: 'success', text: `Listing updated as ${targetStatus === 'draft' ? 'Draft' : 'Published'}` });
+        setMessage({ type: 'success', text: targetStatus === 'draft' ? t('listingUpdatedDraft', selectedLanguage) : t('listingUpdatedPublished', selectedLanguage) });
       } else {
         await landownerMarketplaceService.createListing(payload);
-        setMessage({ type: 'success', text: targetStatus === 'draft' ? 'Listing saved as Draft' : 'Listing published successfully' });
+        setMessage({ type: 'success', text: targetStatus === 'draft' ? t('listingSavedDraft', selectedLanguage) : t('listingPublishedSuccess', selectedLanguage) });
       }
 
       setIsEditorOpen(false);
       await loadData();
     } catch (error: any) {
-      setMessage({ type: 'error', text: error?.message || 'Failed to save listing' });
+      setMessage({ type: 'error', text: error?.message || t('failedToSaveListing', selectedLanguage) });
     } finally {
       setSaving(false);
     }
@@ -275,11 +276,11 @@ export function LandownerListingsScreen({
     setSaving(true);
     try {
       await landownerMarketplaceService.acceptBid(activeListingForBids.id, bidId);
-      setMessage({ type: 'success', text: 'Bid accepted. Listing and contract updated.' });
+      setMessage({ type: 'success', text: t('bidAcceptedSuccess', selectedLanguage) });
       setIsBidsOpen(false);
       await loadData();
     } catch (error: any) {
-      setMessage({ type: 'error', text: error?.message || 'Failed to accept bid' });
+      setMessage({ type: 'error', text: error?.message || t('failedToAcceptBid', selectedLanguage) });
     } finally {
       setSaving(false);
     }
@@ -291,13 +292,13 @@ export function LandownerListingsScreen({
     setSaving(true);
     try {
       await landownerMarketplaceService.rejectBid(activeListingForBids.id, bidId);
-      setMessage({ type: 'success', text: 'Bid rejected and removed.' });
+      setMessage({ type: 'success', text: t('bidRejectedSuccess', selectedLanguage) });
       // Refresh bids
       const bids = await landownerMarketplaceService.getBidsForListing(activeListingForBids.id);
       setActiveBids(bids);
       setBidsCache((prev) => ({ ...prev, [activeListingForBids.id]: bids }));
     } catch (error: any) {
-      setMessage({ type: 'error', text: error?.message || 'Failed to reject bid' });
+      setMessage({ type: 'error', text: error?.message || t('failedToRejectBid', selectedLanguage) });
     } finally {
       setSaving(false);
     }
@@ -310,13 +311,13 @@ export function LandownerListingsScreen({
       setMessage({
         type: 'success',
         text: approve
-          ? 'Move-out approved. Contract marked as Completed. Both parties can leave reviews.'
-          : 'Move-out request declined. Contract stays active.',
+          ? t('moveOutApprovedSuccess', selectedLanguage)
+          : t('moveOutDeclinedSuccess', selectedLanguage),
       });
       await loadData();
     } catch (error) {
       console.error('Failed to update move-out request:', error);
-      setMessage({ type: 'error', text: 'Failed to update move-out request' });
+      setMessage({ type: 'error', text: t('failedToUpdateMoveOut', selectedLanguage) });
     } finally {
       setSaving(false);
     }
@@ -367,9 +368,9 @@ export function LandownerListingsScreen({
         <section className="rounded-xl border border-emerald-200 bg-white px-4 py-3 shadow-sm">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h1 className="text-base font-extrabold text-stone-900">Listings</h1>
+              <h1 className="text-base font-extrabold text-stone-900">{t('listings', selectedLanguage)}</h1>
               <p className="mt-1 text-sm text-stone-600">
-                {pendingFilterOnly ? 'Pending bids only' : 'Create, publish, and manage your land listings'}
+                {pendingFilterOnly ? t('pendingBidsOnly', selectedLanguage) : t('createPublishManage', selectedLanguage)}
               </p>
             </div>
             <button
@@ -377,7 +378,7 @@ export function LandownerListingsScreen({
               className="inline-flex items-center gap-1.5 rounded-full bg-emerald-700 px-3.5 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
             >
               <FilePlus2 className="h-4 w-4" />
-              Create Listing
+              {t('createListing', selectedLanguage)}
             </button>
           </div>
 
@@ -390,12 +391,12 @@ export function LandownerListingsScreen({
 
         {plots.length === 0 ? (
           <section className="rounded-xl border border-dashed border-stone-300 bg-white px-4 py-4 shadow-sm text-center">
-            <p className="text-sm font-semibold text-stone-800">You need at least one saved plot to create a listing</p>
+            <p className="text-sm font-semibold text-stone-800">{t('needAtLeastOnePlot', selectedLanguage)}</p>
             <button
               onClick={() => onNavigate('profile')}
               className="mt-2 inline-flex items-center gap-1 rounded-full border border-emerald-700 px-3 py-1.5 text-xs font-semibold text-emerald-800"
             >
-              Go to My Lands
+              {t('goToMyLands', selectedLanguage)}
             </button>
           </section>
         ) : (
@@ -406,7 +407,7 @@ export function LandownerListingsScreen({
                 <input
                   value={listingSearch}
                   onChange={(event) => setListingSearch(event.target.value)}
-                  placeholder="Search listing, plot, or location"
+                  placeholder={t('searchListingPlotLocation', selectedLanguage)}
                   className="w-full rounded-lg border border-stone-300 bg-white py-1.5 pl-8 pr-3 text-[0.75rem] text-stone-700 focus:border-emerald-600 focus:outline-none"
                 />
               </div>
@@ -415,17 +416,17 @@ export function LandownerListingsScreen({
                 onChange={(event) => setListingStatusFilter(event.target.value as typeof listingStatusFilter)}
                 className="rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-[0.75rem] text-stone-700 focus:border-emerald-600 focus:outline-none"
               >
-                <option value="all">Any status</option>
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-                <option value="accepted">Accepted</option>
-                <option value="expired">Expired</option>
+                <option value="all">{t('anyStatus', selectedLanguage)}</option>
+                <option value="draft">{t('draft', selectedLanguage)}</option>
+                <option value="published">{t('published', selectedLanguage)}</option>
+                <option value="accepted">{t('accepted', selectedLanguage)}</option>
+                <option value="expired">{t('expired', selectedLanguage)}</option>
               </select>
             </div>
             <div className="grid grid-cols-[1.2fr_1fr_auto] gap-2 border-b border-stone-200 px-1 pb-1">
-              <p className="text-caption uppercase tracking-[0.05em] text-stone-500">Listing</p>
-              <p className="text-caption uppercase tracking-[0.05em] text-stone-500">Location</p>
-              <p className="text-caption uppercase tracking-[0.05em] text-stone-500 text-right">Actions</p>
+              <p className="text-caption uppercase tracking-[0.05em] text-stone-500">{t('listing', selectedLanguage)}</p>
+              <p className="text-caption uppercase tracking-[0.05em] text-stone-500">{t('location', selectedLanguage)}</p>
+              <p className="text-caption uppercase tracking-[0.05em] text-stone-500 text-right">{t('actions', selectedLanguage)}</p>
             </div>
 
             <div className="divide-y divide-stone-100 max-h-96 overflow-y-auto">
@@ -440,7 +441,7 @@ export function LandownerListingsScreen({
                       <p className="text-button text-stone-900">{listing.listingCode}</p>
                       <p className="truncate text-body text-stone-600">{plot?.name || 'Unknown Plot'}</p>
                       <span className={`mt-0.5 inline-flex rounded-full px-1.5 py-0.25 text-xs font-semibold ${statusClass(listing.status)}`}>
-                        {statusLabel(listing.status)}
+                        {statusLabel(listing.status, selectedLanguage)}
                       </span>
                     </div>
 
@@ -453,17 +454,17 @@ export function LandownerListingsScreen({
                     </div>
 
                     <div className="flex flex-col items-end gap-tight">
-                      <ActionBtn label="View" onClick={() => openView(listing)} icon={<Eye className="h-3.5 w-3.5" />} />
-                      <ActionBtn label="Edit" onClick={() => openEdit(listing)} icon={<Pencil className="h-3.5 w-3.5" />} />
+                      <ActionBtn label={t('view', selectedLanguage)} onClick={() => openView(listing)} icon={<Eye className="h-3.5 w-3.5" />} />
+                      <ActionBtn label={t('edit', selectedLanguage)} onClick={() => openEdit(listing)} icon={<Pencil className="h-3.5 w-3.5" />} />
                       {listingBids.length > 0 && (
                         <ActionBtn
-                          label={`Bids ${pendingCount > 0 ? `(${pendingCount})` : ''}`}
+                          label={`${t('bids', selectedLanguage)} ${pendingCount > 0 ? `(${pendingCount})` : ''}`}
                           onClick={() => openBids(listing)}
                           icon={<HandCoins className="h-3.5 w-3.5" />}
                         />
                       )}
                       <ActionBtn
-                        label="Delete"
+                        label={t('delete', selectedLanguage)}
                         onClick={() => setConfirmDelete(listing.id)}
                         icon={<Trash2 className="h-3.5 w-3.5" />}
                         danger
@@ -474,28 +475,28 @@ export function LandownerListingsScreen({
               })}
 
               {filteredListings.length === 0 && (
-                <div className="px-2 py-6 text-center text-body text-stone-500">No listings to show.</div>
+                <div className="px-2 py-6 text-center text-body text-stone-500">{t('noListingsToShow', selectedLanguage)}</div>
               )}
             </div>
           </section>
         )}
 
-        <ContractsSection contracts={contracts} onRespond={handleMoveOutResponse} saving={saving} />
+        <ContractsSection contracts={contracts} onRespond={handleMoveOutResponse} saving={saving} selectedLanguage={selectedLanguage} />
       </div>
 
       {/* Delete Confirmation Modal */}
       {confirmDelete !== null && (
         <div className="absolute inset-0 z-50 bg-black/50 px-3 py-6 flex items-center justify-center" onClick={() => setConfirmDelete(null)}>
           <div className="bg-white rounded-xl p-4 shadow-2xl max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-base font-bold text-stone-900">Delete Listing?</h3>
-            <p className="mt-2 text-sm text-stone-600">This will permanently delete this listing and reject any pending bids.</p>
+            <h3 className="text-base font-bold text-stone-900">{t('deleteListing', selectedLanguage)}</h3>
+            <p className="mt-2 text-sm text-stone-600">{t('deleteListingConfirm', selectedLanguage)}</p>
             <div className="mt-4 grid grid-cols-2 gap-2">
               <button
                 onClick={() => setConfirmDelete(null)}
                 className="rounded-lg border border-stone-300 bg-white py-2 text-sm font-semibold text-stone-700"
                 disabled={saving}
               >
-                Cancel
+                {t('cancel', selectedLanguage)}
               </button>
               <button
                 onClick={() => handleDelete(confirmDelete)}
@@ -503,7 +504,7 @@ export function LandownerListingsScreen({
                 disabled={saving}
               >
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                Delete
+                {t('delete', selectedLanguage)}
               </button>
             </div>
           </div>
@@ -515,7 +516,7 @@ export function LandownerListingsScreen({
           <div className="mx-auto max-w-sm rounded-xl bg-white p-3 shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-stone-900">
-                {editorMode === 'create' ? 'Create Listing' : editorMode === 'edit' ? 'Edit Listing' : 'View Listing'}
+                {editorMode === 'create' ? t('createListing', selectedLanguage) : editorMode === 'edit' ? t('editListing', selectedLanguage) : t('viewListing', selectedLanguage)}
               </h2>
               <button onClick={closeEditor} className="rounded-lg p-1 hover:bg-stone-100">
                 <X className="h-4.5 w-4.5 text-stone-500" />
@@ -524,14 +525,14 @@ export function LandownerListingsScreen({
 
             <div className="mt-3 space-y-3">
               <label className="block">
-                <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-stone-500">Select Plot *</span>
+                <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-stone-500">{t('selectPlot', selectedLanguage)}</span>
                 <select
                   disabled={editorMode === 'view'}
                   value={form.plotId}
                   onChange={(event) => setForm((prev) => ({ ...prev, plotId: Number(event.target.value) || 0 }))}
                   className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 >
-                  <option value={0}>Select Plot</option>
+                  <option value={0}>{t('selectPlot', selectedLanguage)}</option>
                   {plots.map((plot) => (
                     <option key={plot.id} value={plot.id}>{plot.name}</option>
                   ))}
@@ -540,30 +541,30 @@ export function LandownerListingsScreen({
 
               {selectedPlot && (
                 <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5">
-                  <p className="text-xs font-semibold text-emerald-900">Plot Summary</p>
+                  <p className="text-xs font-semibold text-emerald-900">{t('plotSummary', selectedLanguage)}</p>
                   <p className="mt-1 text-sm text-stone-700">{selectedPlot.name}</p>
                   <p className="text-xs text-stone-600 inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{selectedPlot.district} / {selectedPlot.dsDivision}</p>
-                  <p className="text-xs text-stone-600 mt-0.5">Water: {selectedPlot.waterAvailability}</p>
+                  <p className="text-xs text-stone-600 mt-0.5">{t('water', selectedLanguage)}: {selectedPlot.waterAvailability}</p>
                 </div>
               )}
 
               <label className="block">
-                <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-stone-500">Financial Terms *</span>
+                <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-stone-500">{t('financialTerms', selectedLanguage)}</span>
                 <select
                   disabled={editorMode === 'view'}
                   value={form.financialTerms}
                   onChange={(event) => setForm((prev) => ({ ...prev, financialTerms: event.target.value as FinancialTerms }))}
                   className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 >
-                  <option value="cash_rent">Cash Rent</option>
-                  <option value="honey_share">Honey Share</option>
-                  <option value="pollination_service">Pollination Service</option>
+                  <option value="cash_rent">{t('cashRent', selectedLanguage)}</option>
+                  <option value="honey_share">{t('honeyShare', selectedLanguage)}</option>
+                  <option value="pollination_service">{t('pollinationService', selectedLanguage)}</option>
                 </select>
               </label>
 
               {form.financialTerms === 'cash_rent' && (
                 <label className="block">
-                  <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-stone-500">LKR Per Month *</span>
+                  <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-stone-500">{t('lkrPerMonth', selectedLanguage)}</span>
                   <input
                     disabled={editorMode === 'view'}
                     value={form.cashRentLkr}
@@ -575,7 +576,7 @@ export function LandownerListingsScreen({
 
               {form.financialTerms === 'honey_share' && (
                 <label className="block">
-                  <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-stone-500">Honey Share KG *</span>
+                  <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-stone-500">{t('honeyShareKg', selectedLanguage)}</span>
                   <input
                     disabled={editorMode === 'view'}
                     value={form.honeyShareKg}
@@ -587,12 +588,12 @@ export function LandownerListingsScreen({
 
               {form.financialTerms === 'pollination_service' && (
                 <p className="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-medium text-stone-700">
-                  Free - Barter Agreement
+                  {t('freeBarterAgreement', selectedLanguage)}
                 </p>
               )}
 
               <label className="block">
-                <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-stone-500">Availability End Date</span>
+                <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-stone-500">{t('availabilityEndDate', selectedLanguage)}</span>
                 <input
                   disabled={editorMode === 'view'}
                   type="date"
@@ -611,7 +612,7 @@ export function LandownerListingsScreen({
                   className="mt-0.5"
                 />
                 <span className="text-sm text-stone-700">
-                  I agree to provide beekeepers with 48-hour notice before any pesticide or chemical spraying on this land.
+                  {t('pesticideNotice', selectedLanguage)}
                 </span>
               </label>
             </div>
@@ -625,7 +626,7 @@ export function LandownerListingsScreen({
                     disabled={saving}
                   >
                     {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                    Save as Draft
+                    {t('saveAsDraft', selectedLanguage)}
                   </button>
                 )}
                 <button
@@ -634,7 +635,7 @@ export function LandownerListingsScreen({
                   disabled={saving}
                 >
                   {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Publish
+                  {t('publish', selectedLanguage)}
                 </button>
               </div>
             )}
@@ -646,7 +647,7 @@ export function LandownerListingsScreen({
         <div className="absolute inset-0 z-50 bg-black/50 px-3 py-6" onClick={() => setIsBidsOpen(false)}>
           <div className="mx-auto max-w-sm rounded-2xl bg-white p-4 shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h2 className="text-[1rem] font-bold text-stone-900">Incoming Bids</h2>
+              <h2 className="text-[1rem] font-bold text-stone-900">{t('incomingBids', selectedLanguage)}</h2>
               <button onClick={() => setIsBidsOpen(false)} className="rounded-lg p-1 hover:bg-stone-100">
                 <X className="h-4.5 w-4.5 text-stone-500" />
               </button>
@@ -661,7 +662,7 @@ export function LandownerListingsScreen({
                         {bid.beekeeperName}
                         {bid.verified && <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />}
                       </p>
-                      <p className="text-[0.78rem] text-stone-600">Rating {bid.rating.toFixed(1)} · {bid.reviews} reviews</p>
+                      <p className="text-[0.78rem] text-stone-600">{t('rating', selectedLanguage)} {bid.rating.toFixed(1)} · {bid.reviews} {t('reviews', selectedLanguage)}</p>
                     </div>
                     <span className={`rounded-full px-2.5 py-1 text-[0.7rem] font-semibold ${bidStatusClass(bid.status)}`}>{bid.status}</span>
                   </div>
@@ -670,10 +671,10 @@ export function LandownerListingsScreen({
                     <p>{bid.fullName}</p>
                     <p>{bid.beekeepingNature} · {bid.trainingLevel}</p>
                     <p>{bid.primaryBeeSpecies} · {bid.district}</p>
-                    <p>Previous listings: {bid.previousListings}</p>
-                    <p>Proposed: {bid.hivesProposed} hives · {bid.placementStartDate} to {bid.placementEndDate}</p>
-                    <p>Submitted: {new Date(bid.submittedAt).toLocaleDateString()}</p>
-                    {bid.note && <p className="text-stone-600">Note: {bid.note}</p>}
+                    <p>{t('previousListings', selectedLanguage)} {bid.previousListings}</p>
+                    <p>{t('proposed', selectedLanguage)} {bid.hivesProposed} {t('hives', selectedLanguage)} · {bid.placementStartDate} {t('to', selectedLanguage)} {bid.placementEndDate}</p>
+                    <p>{t('submitted', selectedLanguage)} {new Date(bid.submittedAt).toLocaleDateString()}</p>
+                    {bid.note && <p className="text-stone-600">{t('note', selectedLanguage)} {bid.note}</p>}
                   </div>
 
                   {bid.status === 'pending' && (
@@ -685,7 +686,7 @@ export function LandownerListingsScreen({
                       >
                         {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                         <Check className="h-3.5 w-3.5" />
-                        Accept
+                        {t('accept', selectedLanguage)}
                       </button>
                       <button
                         onClick={() => handleRejectBid(bid.id)}
@@ -693,14 +694,14 @@ export function LandownerListingsScreen({
                         disabled={saving}
                       >
                         <X className="h-3.5 w-3.5" />
-                        Reject
+                        {t('reject', selectedLanguage)}
                       </button>
                     </div>
                   )}
                 </div>
               ))}
 
-              {activeBids.length === 0 && <p className="text-[0.74rem] text-stone-500 text-center py-4">No bids yet for this listing.</p>}
+              {activeBids.length === 0 && <p className="text-[0.74rem] text-stone-500 text-center py-4">{t('noBidsYet', selectedLanguage)}</p>}
             </div>
           </div>
         </div>
@@ -737,48 +738,50 @@ function ContractsSection({
   contracts,
   onRespond,
   saving,
+  selectedLanguage,
 }: {
   contracts: Contract[];
   onRespond: (contractId: number, approve: boolean) => void;
   saving: boolean;
+  selectedLanguage: Language;
 }) {
   const formatPaymentTerms = (contract: Contract) => {
     if (contract.financial_terms === 'cash_rent') {
-      return `Cash rent · Rs ${contract.cash_rent_lkr || 0}`;
+      return `${t('cashRentRs', selectedLanguage)} ${contract.cash_rent_lkr || 0}`;
     }
     if (contract.financial_terms === 'honey_share') {
-      return `Honey share · ${contract.honey_share_kgs || 0} kg`;
+      return `${t('honeyShareKgLabel', selectedLanguage)} · ${contract.honey_share_kgs || 0} ${t('kg', selectedLanguage)}`;
     }
     if (contract.financial_terms === 'pollination_service') {
-      return 'Pollination service';
+      return t('pollinationServiceLabel', selectedLanguage);
     }
-    return 'Payment terms not set';
+    return t('paymentTermsNotSet', selectedLanguage);
   };
 
   return (
     <section className="rounded-2xl border border-stone-200 bg-white px-2 py-2 shadow-sm">
-      <h2 className="px-1 text-[1rem] font-bold text-stone-900">Active Contracts</h2>
+      <h2 className="px-1 text-[1rem] font-bold text-stone-900">{t('activeContracts', selectedLanguage)}</h2>
       <div className="mt-2 divide-y divide-stone-100">
         {contracts.map((contract) => (
           <div key={contract.id} className="px-1 py-3">
             <div className="flex items-center justify-between gap-2">
               <div>
                 <p className="text-[0.9rem] font-bold text-stone-900">{contract.beekeeperName}</p>
-                <p className="text-[0.82rem] text-stone-600">{contract.plotName} · {contract.hiveCount} hives</p>
+                <p className="text-[0.82rem] text-stone-600">{contract.plotName} · {contract.hiveCount} {t('hives', selectedLanguage)}</p>
               </div>
               <span className={`rounded-full px-2.5 py-1 text-[0.72rem] font-semibold ${contractStatusClass(contract.status)}`}>
-                {contract.status === 'moving_out_requested' ? 'Move-Out Requested' : contract.status}
+                {contract.status === 'moving_out_requested' ? t('moveOutRequested', selectedLanguage) : contract.status}
               </span>
             </div>
 
-            <p className="mt-1 text-[0.78rem] text-stone-500">Expiry: {contract.expiryLabel}</p>
+            <p className="mt-1 text-[0.78rem] text-stone-500">{t('expiry', selectedLanguage)} {contract.expiryLabel}</p>
             <p className="mt-0.5 text-[0.78rem] text-stone-500">
-              Payment: {formatPaymentTerms(contract)}
+              {t('payment', selectedLanguage)} {formatPaymentTerms(contract)}
             </p>
 
             {contract.status === 'moving_out_requested' && (
               <div className="mt-2 rounded-lg border border-amber-300 bg-amber-50 p-2">
-                <p className="text-[0.76rem] font-semibold text-amber-800">Move-Out Requested</p>
+                <p className="text-[0.76rem] font-semibold text-amber-800">{t('moveOutRequested', selectedLanguage)}</p>
                 <div className="mt-1.5 grid grid-cols-2 gap-2">
                   <button
                     onClick={() => onRespond(contract.id, true)}
@@ -786,14 +789,14 @@ function ContractsSection({
                     disabled={saving}
                   >
                     {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                    Approve Move-Out
+                    {t('approveMoveOut', selectedLanguage)}
                   </button>
                   <button
                     onClick={() => onRespond(contract.id, false)}
                     className="rounded-lg border border-stone-300 bg-white py-2 text-[0.78rem] font-semibold text-stone-700"
                     disabled={saving}
                   >
-                    Decline
+                    {t('decline', selectedLanguage)}
                   </button>
                 </div>
               </div>
@@ -801,18 +804,18 @@ function ContractsSection({
           </div>
         ))}
 
-        {contracts.length === 0 && <div className="px-1 py-4 text-[0.74rem] text-stone-500">No active contracts yet.</div>}
+        {contracts.length === 0 && <div className="px-1 py-4 text-[0.74rem] text-stone-500">{t('noActiveContracts', selectedLanguage)}</div>}
       </div>
     </section>
   );
 }
 
-function statusLabel(status: ListingStatus) {
-  if (status === 'draft') return 'Draft';
-  if (status === 'published') return 'Published';
-  if (status === 'accepted') return 'Accepted';
-  if (status === 'expired') return 'Expired';
-  return 'Occupied';
+function statusLabel(status: ListingStatus, selectedLanguage: Language = 'en') {
+  if (status === 'draft') return t('draft', selectedLanguage);
+  if (status === 'published') return t('published', selectedLanguage);
+  if (status === 'accepted') return t('accepted', selectedLanguage);
+  if (status === 'expired') return t('expired', selectedLanguage);
+  return t('occupied', selectedLanguage);
 }
 
 function statusClass(status: ListingStatus) {

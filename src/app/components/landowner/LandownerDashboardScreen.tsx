@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { MobileHeader } from '../shared/MobileHeader';
 import { authService } from '../../services/auth';
 import { landownerMarketplaceService } from '../../services/landownerMarketplace';
+import { t } from '../../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -60,16 +61,16 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
     loadStats();
   }, [user?.id]);
 
-  const displayName = useMemo(() => user?.name || 'Landowner', [user?.name]);
+  const displayName = useMemo(() => user?.name || t('landowner', selectedLanguage), [user?.name, selectedLanguage]);
   const revenueValue = revenueTab === 'rupees' ? formatRupees(stats.rupeesReceived) : formatHoneyKg(stats.honeyShareKg);
-  const revenueNote = revenueTab === 'rupees' ? 'Total cash rent received to date' : 'Total honey yield share received to date';
+  const revenueNote = revenueTab === 'rupees' ? t('totalCashRent', selectedLanguage) : t('totalHoneyYield', selectedLanguage);
 
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-emerald-50 via-green-50 to-white flex flex-col overflow-hidden">
       <div className="bg-white shadow-sm">
         <MobileHeader
           userName={displayName}
-          roleLabel="Landowner"
+          roleLabel={t('landowner', selectedLanguage)}
           selectedLanguage={selectedLanguage}
           onLanguageChange={onLanguageChange}
           activeTab="dashboard"
@@ -84,8 +85,8 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
       <div className="flex-1 overflow-y-auto px-2 py-2 pb-24">
         <section className="rounded-xl border border-emerald-200 bg-white p-3 shadow-sm">
           <h1 className="text-[0.95rem] font-bold leading-5 text-stone-900">{displayName}</h1>
-          <p className="mt-0.5 text-xs font-semibold uppercase tracking-wide text-emerald-700">Landowner</p>
-          <p className="mt-1 text-[0.75rem] text-stone-600">Summary of activity and pending actions.</p>
+          <p className="mt-0.5 text-xs font-semibold uppercase tracking-wide text-emerald-700">{t('landowner', selectedLanguage)}</p>
+          <p className="mt-1 text-[0.75rem] text-stone-600">{t('summaryOfActivity', selectedLanguage)}</p>
         </section>
 
         {loading ? (
@@ -97,9 +98,9 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
             <section className="rounded-xl border border-emerald-200 bg-white p-3 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[0.72rem] font-semibold uppercase tracking-wide text-emerald-700">Hive Count</p>
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-wide text-emerald-700">{t('hiveCount', selectedLanguage)}</p>
                   <p className="mt-1 text-[1.1rem] font-extrabold leading-none text-stone-900">{stats.hiveCount}</p>
-                  <p className="mt-0.5 text-[0.75rem] text-stone-600">Across active listings</p>
+                  <p className="mt-0.5 text-[0.75rem] text-stone-600">{t('acrossActiveListings', selectedLanguage)}</p>
                 </div>
                 <div className="rounded-xl bg-emerald-100 p-2.5">
                   <Hexagon className="h-5 w-5 text-emerald-700" />
@@ -108,7 +109,7 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
             </section>
 
             <section className="rounded-xl border border-emerald-200 bg-white p-3 shadow-sm">
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-emerald-700">Revenue</p>
+              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-emerald-700">{t('revenue', selectedLanguage)}</p>
               <div className="mt-2 grid grid-cols-2 gap-1.5 rounded-xl bg-emerald-50 p-1.5">
                 <button
                   onClick={() => setRevenueTab('rupees')}
@@ -118,7 +119,7 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
                 >
                   <span className="inline-flex items-center gap-1">
                     <BadgeIndianRupee className="h-3.5 w-3.5" />
-                    Rupees
+                    {t('rupees', selectedLanguage)}
                   </span>
                 </button>
                 <button
@@ -129,7 +130,7 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
                 >
                   <span className="inline-flex items-center gap-1">
                     <Leaf className="h-3.5 w-3.5" />
-                    Honey Share
+                    {t('honeyShare', selectedLanguage)}
                   </span>
                 </button>
               </div>
@@ -151,15 +152,15 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
             >
               <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-[0.72rem] font-semibold uppercase tracking-wide text-amber-700">Pending Bids</p>
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-wide text-amber-700">{t('pendingBids', selectedLanguage)}</p>
                   <p className="mt-1 text-[1.1rem] font-extrabold leading-none text-stone-900">{stats.pendingBids}</p>
-                  <p className="mt-0.5 text-[0.75rem] text-stone-600">Tap to review pending listings</p>
+                  <p className="mt-0.5 text-[0.75rem] text-stone-600">{t('tapToReview', selectedLanguage)}</p>
                 </div>
                 <div className="rounded-xl bg-amber-100 p-2.5">
                   <AlertCircle className="h-5 w-5 text-amber-700" />
                 </div>
                 <div className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-amber-700">
-                  Open
+                  {t('open', selectedLanguage)}
                   <ArrowRight className="h-3.5 w-3.5" />
                 </div>
               </div>
