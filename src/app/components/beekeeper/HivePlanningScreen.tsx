@@ -6,7 +6,7 @@ import { apiariesService, type Apiary } from '../../services/apiaries';
 import { hivesService, type Hive } from '../../services/hives';
 import { planningService, type PlanningAnalysis, type District, type GBIFForageSpecies } from '../../services/planning';
 import { ecologicalZonesService } from '../../services/ecologicalZones';
-import { MapPin, Hexagon as HiveIcon, CloudRain, Sun, Cloud, Wind, Droplets, Thermometer, Search, Leaf, ChevronDown, ChevronUp, Navigation } from 'lucide-react';
+import { MapPin, Hexagon as HiveIcon, CloudRain, Sun, Cloud, Wind, Droplets, Thermometer, Search, Leaf, ChevronDown, ChevronUp, Navigation, X } from 'lucide-react';
 import { ForecastDays14 } from './ForecastDays14';
 import { MapViewer } from '../shared/MapViewer';
 import { PROVINCES, getDistrictsByProvince, getDsDivisionsByDistrict, getDistrictCenter } from '../../constants/sriLankaLocations';
@@ -152,6 +152,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
   const [analysis, setAnalysis] = useState<PlanningAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [showNearbyHivesOverlay, setShowNearbyHivesOverlay] = useState(false);
   const [prefillHandled, setPrefillHandled] = useState(false);
 
   const availableDistricts = getDistrictsByProvince(selectedProvince);
@@ -222,8 +223,20 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
       const result = await planningService.analyze(lat, lng, districtLabel, {
         startDate,
         endDate,
-        apiaries: apiaries.map(a => ({ id: a.id, gps_latitude: a.gps_latitude, gps_longitude: a.gps_longitude, hive_count: a.hive_count })),
-        hives: hives.map(h => ({ id: h.id, apiary_id: h.apiary_id, gps_latitude: h.gps_latitude, gps_longitude: h.gps_longitude })),
+        apiaries: apiaries.map(a => ({
+          id: a.id,
+          name: a.name,
+          gps_latitude: a.gps_latitude,
+          gps_longitude: a.gps_longitude,
+          district: a.district
+        })),
+        hives: hives.map(h => ({
+          id: h.id,
+          name: h.name,
+          apiary_id: h.apiary_id,
+          gps_latitude: h.gps_latitude,
+          gps_longitude: h.gps_longitude
+        })),
       });
       setAnalysis(result);
     } catch (e) {
@@ -391,7 +404,15 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                           'bg-red-200 text-red-800'
                         }`}>{analysis.saturation.level}</span>
                       </div>
-                      <p className="text-[0.7rem] opacity-75">{analysis.saturation.message}</p>
+                      <p className="text-[0.7rem] opacity-75 mb-2">{analysis.saturation.message}</p>
+                      {(analysis.saturation.nearbyApiaries.length > 0 || analysis.saturation.nearbyStandaloneHives.length > 0) && (
+                        <button
+                          onClick={() => setShowNearbyHivesOverlay(true)}
+                          className="text-xs text-blue-600 hover:text-blue-800 font-medium underline"
+                        >
+                          See Info ({analysis.saturation.nearbyApiaries.length} apiaries, {analysis.saturation.nearbyStandaloneHives.length} standalone hives)
+                        </button>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -495,6 +516,149 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
               </>
           </>
         )}
+
+        {/* Nearby Hives Overlay */}
+        {showNearbyHivesOverlay && analysis && (
+          <NearbyHivesOverlay
+            nearbyApiaries={analysis.saturation.nearbyApiaries}
+            nearbyStandaloneHives={analysis.saturation.nearbyStandaloneHives}
+            radiusKm={analysis.saturation.radiusKm}
+            selectedLanguage={selectedLanguage}
+            onClose={() => setShowNearbyHivesOverlay(false)}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---- Nearby Hives Overlay Component ----
+function NearbyHivesOverlay({
+  nearbyApiaries,
+  nearbyStandaloneHives,
+  radiusKm,
+  selectedLanguage,
+  onClose
+}: {
+  nearbyApiaries: Array<{
+    id: number;
+    name: string;
+    district: string;
+    distance: number;
+    hiveCount: number;
+    hives: Array<{ id: number; name: string; distance: number; }>;
+  }>;
+  nearbyStandaloneHives: Array<{
+    id: number;
+    name: string;
+    distance: number;
+    apiary?: string;
+  }>;
+  radiusKm: number;
+  selectedLanguage: Language;
+  onClose: () => void;
+}) {
+  const totalHives = nearbyApiaries.reduce((sum, apiary) => sum + apiary.hiveCount, 0) + nearbyStandaloneHives.length;
+
+  return (
+    <div className="absolute inset-0 z-50 bg-black/40 flex items-end justify-center" onClick={onClose}>
+      <div
+        className="bg-white w-full max-w-[22rem] rounded-t-2xl p-4 pb-6 max-h-[80vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h3 className="font-bold text-[0.95rem] text-stone-800">Nearby Hives & Apiaries</h3>
+            <p className="text-[0.7rem] text-stone-500">
+              Within {radiusKm}km • {totalHives} total hives
+            </p>
+          </div>
+          <button onClick={onClose} className="p-1 rounded-full bg-stone-100 hover:bg-stone-200">
+            <X className="w-4 h-4 text-stone-600" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="space-y-4">
+
+          {/* Nearby Apiaries */}
+          {nearbyApiaries.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2">
+                <HiveIcon className="w-4 h-4 text-amber-500" />
+                Apiaries ({nearbyApiaries.length})
+              </h3>
+              <div className="space-y-3">
+                {nearbyApiaries.map((apiary) => (
+                  <div key={apiary.id} className="bg-stone-50 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-stone-800">{apiary.name}</h4>
+                      <div className="text-right">
+                        <p className="text-xs text-stone-500">{apiary.district}</p>
+                        <p className="text-xs font-medium text-amber-600">
+                          {apiary.distance === 0 ? 'Same District' : `${apiary.distance.toFixed(1)}km away`}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Always show hive count, including 0 hives */}
+                    <div>
+                      <p className="text-xs text-stone-600 mb-1">
+                        {apiary.hiveCount === 0 ? '0 hives' : `${apiary.hiveCount} hives:`}
+                      </p>
+                      {apiary.hives.length > 0 && (
+                        <div className="grid grid-cols-2 gap-1">
+                          {apiary.hives.map((hive) => (
+                            <div key={hive.id} className="text-xs text-stone-700 bg-white px-2 py-1 rounded">
+                              {hive.name}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Standalone Hives */}
+          {nearbyStandaloneHives.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2">
+                <HiveIcon className="w-4 h-4 text-blue-500" />
+                Standalone Hives ({nearbyStandaloneHives.length})
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {nearbyStandaloneHives.map((hive) => (
+                  <div key={hive.id} className="bg-blue-50 rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-stone-800">{hive.name}</h4>
+                      <p className="text-xs font-medium text-blue-600">
+                        {hive.distance.toFixed(1)}km away
+                      </p>
+                    </div>
+                    {hive.apiary && (
+                      <p className="text-xs text-stone-600 mt-1">{hive.apiary}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* No nearby hives */}
+          {nearbyApiaries.length === 0 && nearbyStandaloneHives.length === 0 && (
+            <div className="text-center py-8">
+              <HiveIcon className="w-8 h-8 text-stone-300 mx-auto mb-2" />
+              <p className="text-stone-500">No hives found within {radiusKm}km</p>
+              <p className="text-xs text-stone-400 mt-2">
+                Distance based on GPS coordinates where available
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

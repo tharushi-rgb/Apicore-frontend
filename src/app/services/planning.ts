@@ -66,9 +66,33 @@ export interface ForagePlant {
   confirmed?: boolean;
 }
 
+export interface NearbyApiaryInfo {
+  id: number;
+  name: string;
+  district: string;
+  distance: number;
+  hiveCount: number;
+  hives: NearbyHiveInfo[];
+}
+
+export interface NearbyHiveInfo {
+  id: number;
+  name: string;
+  distance: number;
+  apiary?: string; // For standalone hives
+}
+
 export interface PlanningAnalysis {
   location: { lat: number; lng: number; district: string };
-  saturation: { count: number; totalInSystem: number; level: string; message: string; radiusKm: number };
+  saturation: {
+    count: number;
+    totalInSystem: number;
+    level: string;
+    message: string;
+    radiusKm: number;
+    nearbyApiaries: NearbyApiaryInfo[];
+    nearbyStandaloneHives: NearbyHiveInfo[];
+  };
   suitability: { score: number; label: string; color: string };
   weather: { current: CurrentWeather | null; days: WeatherDay[]; hourly: WeatherHourly[]; source: string };
   forage: {
@@ -317,6 +341,7 @@ export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: numb
 
 export interface SatApiaryInfo {
   id: number;
+  name: string;
   gps_latitude?: number | null;
   gps_longitude?: number | null;
   district?: string;
@@ -324,6 +349,7 @@ export interface SatApiaryInfo {
 
 export interface SatHiveInfo {
   id: number;
+  name: string;
   apiary_id?: number | null;
   gps_latitude?: number | null;
   gps_longitude?: number | null;
@@ -497,15 +523,15 @@ export const planningService = {
     let allHives: SatHiveInfo[] = [];
 
     try {
-      // Get all apiaries from the database (removed non-existent hive_count column)
+      // Get all apiaries from the database with names
       const { data: apiariesData, error: apiariesError } = await supabase
         .from('apiaries')
-        .select('id, gps_latitude, gps_longitude, district');
+        .select('id, name, gps_latitude, gps_longitude, district');
 
-      // Get all hives from the database
+      // Get all hives from the database with names
       const { data: hivesData, error: hivesError } = await supabase
         .from('hives')
-        .select('id, apiary_id, gps_latitude, gps_longitude');
+        .select('id, name, apiary_id, gps_latitude, gps_longitude');
 
       if (apiariesError) {
         console.warn('Failed to fetch apiaries:', apiariesError);
@@ -516,6 +542,7 @@ export const planningService = {
 
       allApiaries = (apiariesData ?? []).map(a => ({
         id: a.id,
+        name: a.name,
         gps_latitude: a.gps_latitude,
         gps_longitude: a.gps_longitude,
         district: a.district
@@ -523,6 +550,7 @@ export const planningService = {
 
       allHives = (hivesData ?? []).map(h => ({
         id: h.id,
+        name: h.name,
         apiary_id: h.apiary_id,
         gps_latitude: h.gps_latitude,
         gps_longitude: h.gps_longitude
@@ -533,7 +561,9 @@ export const planningService = {
 
     let nearbyHiveCount = 0;
     const nearbyApiaryIds = new Set<number>();
-    const RADIUS_KM = 50; // Increased to 50km for better coverage
+    const nearbyApiaries: NearbyApiaryInfo[] = [];
+    const nearbyStandaloneHives: NearbyHiveInfo[] = [];
+    const RADIUS_KM = 30; // 30km radius for nearby hive detection
 
     console.log(`Calculating saturation for location: ${lat}, ${lng}`);
     console.log(`Total apiaries in database: ${allApiaries.length}`);
@@ -542,20 +572,22 @@ export const planningService = {
     // Count hives from apiaries within radius or same district
     for (const a of allApiaries) {
       let isNearby = false;
+      let distance = 0;
 
       if (a.gps_latitude != null && a.gps_longitude != null) {
         // GPS-based proximity check
-        const dist = haversineKm(lat, lng, a.gps_latitude, a.gps_longitude);
-        if (dist <= RADIUS_KM) {
+        distance = haversineKm(lat, lng, a.gps_latitude, a.gps_longitude);
+        if (distance <= RADIUS_KM) {
           isNearby = true;
-          console.log(`Apiary ${a.id} is ${dist.toFixed(1)}km away (GPS-based)`);
+          console.log(`Apiary ${a.name} (${a.id}) is ${distance.toFixed(1)}km away (GPS-based)`);
         }
       } else if (a.district && district) {
         // District-based proximity check (same district)
         if (a.district.toLowerCase().includes(district.toLowerCase()) ||
             district.toLowerCase().includes(a.district.toLowerCase())) {
           isNearby = true;
-          console.log(`Apiary ${a.id} is in same district: ${a.district}`);
+          distance = 0; // Same district, exact distance unknown
+          console.log(`Apiary ${a.name} (${a.id}) is in same district: ${a.district}`);
         }
       }
 
@@ -564,7 +596,21 @@ export const planningService = {
         // Count hives belonging to this apiary
         const apiaryHives = allHives.filter(h => h.apiary_id === a.id);
         nearbyHiveCount += apiaryHives.length;
-        console.log(`Apiary ${a.id} has ${apiaryHives.length} hives`);
+        console.log(`Apiary ${a.name} (${a.id}) has ${apiaryHives.length} hives`);
+
+        // Collect detailed apiary info for overlay
+        nearbyApiaries.push({
+          id: a.id,
+          name: a.name,
+          district: a.district || 'Unknown',
+          distance: distance,
+          hiveCount: apiaryHives.length,
+          hives: apiaryHives.map(h => ({
+            id: h.id,
+            name: h.name,
+            distance: distance, // Same as apiary distance
+          }))
+        });
       }
     }
 
@@ -576,10 +622,18 @@ export const planningService = {
       }
 
       if (h.gps_latitude != null && h.gps_longitude != null) {
-        const dist = haversineKm(lat, lng, h.gps_latitude, h.gps_longitude);
-        if (dist <= RADIUS_KM) {
+        const distance = haversineKm(lat, lng, h.gps_latitude, h.gps_longitude);
+        if (distance <= RADIUS_KM) {
           nearbyHiveCount++;
-          console.log(`Standalone hive ${h.id} is ${dist.toFixed(1)}km away`);
+          console.log(`Standalone hive ${h.name} (${h.id}) is ${distance.toFixed(1)}km away`);
+
+          // Collect detailed standalone hive info for overlay
+          nearbyStandaloneHives.push({
+            id: h.id,
+            name: h.name,
+            distance: distance,
+            apiary: h.apiary_id ? `Apiary ${h.apiary_id}` : 'Standalone'
+          });
         }
       }
     }
@@ -598,7 +652,15 @@ export const planningService = {
 
     return {
       location: { lat, lng, district: district ?? 'Unknown' },
-      saturation: { count: satCount, totalInSystem, level: satLevel, message: satMessage, radiusKm: RADIUS_KM },
+      saturation: {
+        count: satCount,
+        totalInSystem,
+        level: satLevel,
+        message: satMessage,
+        radiusKm: RADIUS_KM,
+        nearbyApiaries,
+        nearbyStandaloneHives
+      },
       suitability: { score: boostedScore, label: boostedLabel, color: boostedColor },
       weather: { current, days, hourly, source: 'Open-Meteo' },
       forage: { current: currentForage, upcoming: upcomingForage, month: currentMonth, gbifNearby, gbifScore },
