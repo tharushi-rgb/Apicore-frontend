@@ -50,7 +50,6 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
   const [listingReviews, setListingReviews] = useState<{ rating: number; comment: string; beekeeperName: string; createdAt: string }[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [confirmMoveOut, setConfirmMoveOut] = useState<ListingProposal | null>(null);
 
   const [myLocation, setMyLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationDenied, setLocationDenied] = useState(false);
@@ -294,21 +293,6 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
     }
   };
 
-  const onRequestMoveOut = async (proposal: ListingProposal) => {
-    if (!proposal.contractId) return;
-    setSaving(true);
-    try {
-      await beekeeperListingsService.requestMoveOut(proposal.ownerUserId, proposal.contractId);
-      await loadData();
-      setSuccess('Move-out request sent to landowner. Awaiting approval.');
-      setError('');
-      setConfirmMoveOut(null);
-    } catch (moveOutError: any) {
-      setError(moveOutError?.message || 'Failed to request move-out');
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const runSuitability = (listing: ListingSummary) => {
     navigate('/planning', {
@@ -463,14 +447,6 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                   {proposal.status === 'accepted' && (
                     <div className="flex flex-wrap gap-2">
                       <button onClick={() => navigate('/apiaries/new', { state: { prefillApiary: proposal } })} className="rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1.5 text-[0.68rem] font-semibold text-emerald-700">Go to My Apiary</button>
-
-                      {proposal.contractStatus === 'active' && proposal.contractId && (
-                        <button onClick={() => setConfirmMoveOut(proposal)} className="rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[0.68rem] font-semibold text-amber-700">Request Move-Out</button>
-                      )}
-
-                      {proposal.contractStatus === 'moving_out_requested' && (
-                        <button disabled className="rounded-lg border border-stone-300 bg-stone-100 px-2.5 py-1.5 text-[0.68rem] font-semibold text-stone-500">Move-Out Requested - Awaiting Landowner Approval</button>
-                      )}
                     </div>
                   )}
                 </div>
@@ -481,33 +457,6 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
           </section>
         )}
       </div>
-
-      {/* Move-Out Confirmation Modal */}
-      {confirmMoveOut && (
-        <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center px-4" onClick={() => setConfirmMoveOut(null)}>
-          <div className="bg-white rounded-xl p-4 shadow-2xl max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-base font-bold text-stone-900">Request Move-Out?</h3>
-            <p className="mt-2 text-sm text-stone-600">This will send a move-out request to the landowner for this active contract.</p>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setConfirmMoveOut(null)}
-                className="rounded-lg border border-stone-300 bg-white py-2 text-sm font-semibold text-stone-700"
-                disabled={saving}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => onRequestMoveOut(confirmMoveOut)}
-                className="rounded-lg bg-amber-500 py-2 text-sm font-semibold text-white inline-flex items-center justify-center gap-2"
-                disabled={saving}
-              >
-                {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showFilters && (
         <div className="absolute inset-0 bg-black/50 z-50 px-3 py-4" onClick={() => setShowFilters(false)}>

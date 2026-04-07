@@ -408,7 +408,6 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
 
       <div className="flex-1 min-h-0 overflow-y-auto">
         <form onSubmit={handleSubmit} className="px-4 py-6 pb-24 space-y-4">
-          {error && <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm">{error}</div>}
 
           <div>
             <label className={labelClass}>Apiary Name *</label>
@@ -644,6 +643,8 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
             <label className={labelClass}>Notes</label>
             <textarea value={form.notes} onChange={(event) => setField('notes', event.target.value)} rows={4} className={inputClass} />
           </div>
+
+          {error && <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm">{error}</div>}
 
           <button type="submit" disabled={saving} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-60">
             {saving ? <><Loader2 className="w-5 h-5 animate-spin" /> Saving...</> : <><Save className="w-5 h-5" /> {isEdit ? 'Update Apiary' : 'Create Apiary'}</>}
