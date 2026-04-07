@@ -40,10 +40,12 @@ export const dashboardService = {
       { data: apiaryRows },
       { data: hiveRows },
       { data: alertRows },
+      { data: harvestRows },
     ] = await Promise.all([
       supabase.from('apiaries').select('*').eq('user_id', userId),
       supabase.from('hives').select('id, name, hive_type, status, queen_age, queen_age_risk, last_inspection_date, apiary_id, apiaries(name)').eq('user_id', userId),
       supabase.from('alerts').select('*').eq('user_id', userId).eq('is_read', 0).order('created_at', { ascending: false }).limit(10),
+      supabase.from('harvests').select('id, quantity').eq('user_id', userId),
     ]);
 
     const apiaries: Apiary[] = (apiaryRows ?? []).map((a: any) => ({
@@ -71,6 +73,10 @@ export const dashboardService = {
     const activeApiaries = (apiaryRows ?? []).filter((a: any) => a.status === 'active').length;
     const activeHives = (hiveRows ?? []).filter((h: any) => h.status === 'active').length;
 
+    // Calculate harvest stats
+    const totalHarvests = (harvestRows ?? []).length;
+    const totalHoneyKg = (harvestRows ?? []).reduce((sum: number, h: any) => sum + (h.quantity || 0), 0);
+
     const alerts = (alertRows ?? []).map((a: any) => ({
       id: a.id, type: a.alert_type ?? 'info', message: a.message, is_read: a.is_read ?? 0, created_at: a.created_at,
     }));
@@ -82,8 +88,8 @@ export const dashboardService = {
         activeApiaries,
         totalHives: (hiveRows ?? []).length,
         activeHives,
-        totalHarvests: 0,
-        totalHoneyKg: 0,
+        totalHarvests,
+        totalHoneyKg,
       },
       alerts,
       apiaries,

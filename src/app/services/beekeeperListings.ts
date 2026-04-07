@@ -107,15 +107,11 @@ function paymentLabel(financialTerms: FinancialTerms, cashRentLkr?: number, hone
 
 export const beekeeperListingsService = {
   async getPublishedListings(): Promise<ListingSummary[]> {
-    // Now that foreign keys are properly set up, use JOIN queries
+    // Fetch listings with a simpler query to avoid potential JOIN issues
     const { data, error } = await supabase
       .from('landowner_listings')
-      .select(`
-        *,
-        landowner_plots(*),
-        users(id, name, phone, created_at)
-      `)
-      .eq('status', 'active')
+      .select('*')
+      .in('status', ['published', 'accepted', 'occupied'])
       .order('created_at', { ascending: false });
 
     if (error) throw new Error(error.message);
@@ -123,8 +119,15 @@ export const beekeeperListingsService = {
     const output: ListingSummary[] = [];
 
     for (const row of (data || [])) {
-      const plot = row.landowner_plots;
-      const owner = row.users;
+      // Fetch related data separately to avoid JOIN issues
+      const [plotResult, ownerResult] = await Promise.all([
+        supabase.from('landowner_plots').select('*').eq('id', row.plot_id).single(),
+        supabase.from('users').select('id, name, phone, created_at').eq('id', row.user_id).single()
+      ]);
+
+      const plot = plotResult.data;
+      const owner = ownerResult.data;
+
       if (!plot) continue;
 
       // Get accepted hive count for this listing
@@ -220,21 +223,8 @@ export const beekeeperListingsService = {
       .single();
 
     if (listingError || !listing) throw new Error('Listing not found');
-    if (listing.status !== 'active') throw new Error('Listing is not accepting proposals');
+    if (listing.status !== 'published') throw new Error('Listing is not accepting proposals');
 
-    // Check remaining capacity
-    const { data: acceptedBids } = await supabase
-      .from('landowner_bids')
-      .select('hives_proposed')
-      .eq('listing_id', payload.listingId)
-      .eq('status', 'accepted');
-
-    const acceptedHiveCount = (acceptedBids || []).reduce((sum: number, b: any) => sum + (b.hives_proposed || 0), 0);
-    const remainingCapacity = Math.max(0, 10 - acceptedHiveCount);
-
-    if (payload.hiveCount > remainingCapacity) {
-      throw new Error(`Hive count exceeds remaining capacity (${remainingCapacity})`);
-    }
 
     // Check for existing pending proposal
     const { data: existingPending } = await supabase
@@ -286,13 +276,10 @@ export const beekeeperListingsService = {
   async getMyProposals(): Promise<ListingProposal[]> {
     const user = getCurrentUser();
 
-    // Get all bids by this user
+    // Get all bids by this user with simpler query
     const { data: bids, error: bidsError } = await supabase
       .from('landowner_bids')
-      .select(`
-        *,
-        landowner_listings(*, landowner_plots(*), users(name, phone))
-      `)
+      .select('*')
       .eq('beekeeper_user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -301,11 +288,22 @@ export const beekeeperListingsService = {
     const proposals: ListingProposal[] = [];
 
     for (const bid of (bids || [])) {
-      const listing = bid.landowner_listings;
+      // Fetch related data separately to avoid JOIN issues
+      const [listingResult] = await Promise.all([
+        supabase.from('landowner_listings').select('*').eq('id', bid.listing_id).single()
+      ]);
+
+      const listing = listingResult.data;
       if (!listing) continue;
 
-      const plot = listing.landowner_plots;
-      const owner = listing.users;
+      // Fetch plot and user data separately
+      const [plotResult, ownerResult] = await Promise.all([
+        supabase.from('landowner_plots').select('*').eq('id', listing.plot_id).single(),
+        supabase.from('users').select('name, phone').eq('id', listing.user_id).single()
+      ]);
+
+      const plot = plotResult.data;
+      const owner = ownerResult.data;
 
       // Get accepted hive count
       const { data: acceptedBids } = await supabase

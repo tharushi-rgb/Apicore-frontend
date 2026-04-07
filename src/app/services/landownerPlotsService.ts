@@ -47,10 +47,17 @@ export const landownerPlotsService = {
       .order('created_at', { ascending: false });
 
     if (error) throw new Error(error.message);
-    return (data || []).map(plot => ({
-      ...plot,
-      forage_entries: plot.forage_entries || []
-    }));
+    return (data || []).map(plot => {
+      const imagesKey = `plot_images_${plot.id}`;
+      const storedImages = localStorage.getItem(imagesKey);
+      const images = storedImages ? JSON.parse(storedImages) : (plot.images || []);
+
+      return {
+        ...plot,
+        forage_entries: plot.forage_entries || [],
+        images
+      };
+    });
   },
 
   /**
@@ -70,9 +77,14 @@ export const landownerPlotsService = {
     if (error) throw new Error(error.message);
     if (!data) throw new Error('Plot not found');
 
+    const imagesKey = `plot_images_${plotId}`;
+    const storedImages = localStorage.getItem(imagesKey);
+    const images = storedImages ? JSON.parse(storedImages) : (data.images || []);
+
     return {
       ...data,
-      forage_entries: data.forage_entries || []
+      forage_entries: data.forage_entries || [],
+      images
     };
   },
 
@@ -84,6 +96,7 @@ export const landownerPlotsService = {
     if (!user) throw new Error('Not logged in');
 
     const now = new Date().toISOString();
+    const images = payload.images || [];
 
     const { data, error } = await supabase
       .from('landowner_plots')
@@ -99,10 +112,53 @@ export const landownerPlotsService = {
       .select()
       .single();
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      // Even if database save fails for images, we can still save to localStorage
+      if (error.message.includes('images') || error.message.includes('column') || error.message.includes('schema')) {
+        console.warn('Database does not support images column, using localStorage fallback');
+        // Re-try without images
+        const { data: dataWithoutImages, error: retryError } = await supabase
+          .from('landowner_plots')
+          .insert([
+            {
+              user_id: user.id,
+              ...payload,
+              images: undefined,
+              status: 'active',
+              created_at: now,
+              updated_at: now
+            }
+          ])
+          .select()
+          .single();
+
+        if (retryError) throw new Error(retryError.message);
+
+        // Save images to localStorage
+        const imagesKey = `plot_images_${dataWithoutImages.id}`;
+        if (images.length > 0) {
+          localStorage.setItem(imagesKey, JSON.stringify(images));
+        }
+
+        return {
+          ...dataWithoutImages,
+          forage_entries: dataWithoutImages.forage_entries || [],
+          images
+        };
+      }
+      throw new Error(error.message);
+    }
+
+    // Save images to localStorage as backup
+    const imagesKey = `plot_images_${data.id}`;
+    if (images.length > 0) {
+      localStorage.setItem(imagesKey, JSON.stringify(images));
+    }
+
     return {
       ...data,
-      forage_entries: data.forage_entries || []
+      forage_entries: data.forage_entries || [],
+      images: data.images || images
     };
   },
 
@@ -114,6 +170,7 @@ export const landownerPlotsService = {
     if (!user) throw new Error('Not logged in');
 
     const now = new Date().toISOString();
+    const images = payload.images;
 
     const { data, error } = await supabase
       .from('landowner_plots')
@@ -126,10 +183,50 @@ export const landownerPlotsService = {
       .select()
       .single();
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      // Handle case where database doesn't support images column
+      if (error.message.includes('images') || error.message.includes('column') || error.message.includes('schema')) {
+        console.warn('Database does not support images column, using localStorage fallback');
+        // Re-try without images
+        const { data: dataWithoutImages, error: retryError } = await supabase
+          .from('landowner_plots')
+          .update({
+            ...payload,
+            images: undefined,
+            updated_at: now
+          })
+          .eq('id', plotId)
+          .eq('user_id', user.id)
+          .select()
+          .single();
+
+        if (retryError) throw new Error(retryError.message);
+
+        // Save images to localStorage
+        const imagesKey = `plot_images_${plotId}`;
+        if (images && images.length >= 0) {
+          localStorage.setItem(imagesKey, JSON.stringify(images));
+        }
+
+        return {
+          ...dataWithoutImages,
+          forage_entries: dataWithoutImages.forage_entries || [],
+          images: images || []
+        };
+      }
+      throw new Error(error.message);
+    }
+
+    // Save images to localStorage as backup
+    if (images && images.length >= 0) {
+      const imagesKey = `plot_images_${plotId}`;
+      localStorage.setItem(imagesKey, JSON.stringify(images));
+    }
+
     return {
       ...data,
-      forage_entries: data.forage_entries || []
+      forage_entries: data.forage_entries || [],
+      images: data.images || images || []
     };
   },
 
@@ -159,6 +256,10 @@ export const landownerPlotsService = {
       .eq('user_id', user.id);
 
     if (error) throw new Error(error.message);
+
+    // Clean up localStorage for images
+    const imagesKey = `plot_images_${plotId}`;
+    localStorage.removeItem(imagesKey);
   },
 
   /**

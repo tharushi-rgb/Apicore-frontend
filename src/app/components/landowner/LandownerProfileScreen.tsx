@@ -743,6 +743,33 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                 </p>
               )}
 
+              {/* Plot Images Gallery - only shown in view mode */}
+              {isPlotViewMode && plotEditor.plotId && (() => {
+                const currentPlot = plots.find(p => p.id === plotEditor.plotId);
+                if (currentPlot && currentPlot.images && currentPlot.images.length > 0) {
+                  return (
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-2">Plot Images</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {currentPlot.images.map((imageUrl, index) => (
+                          <div key={index} className="aspect-square rounded-lg overflow-hidden border border-stone-200 bg-stone-100">
+                            <img
+                              src={imageUrl}
+                              alt={`${currentPlot.name} - Image ${index + 1}`}
+                              className="h-full w-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">{t('plotNameRequired', selectedLanguage)}</label>
                 <input
@@ -884,6 +911,15 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
           </div>
         </div>
       )}
+
+      {/* Hidden file input for avatar upload */}
+      <input
+        type="file"
+        ref={avatarInputRef}
+        accept="image/*"
+        onChange={handleAvatarChange}
+        className="hidden"
+      />
     </div>
   );
 }

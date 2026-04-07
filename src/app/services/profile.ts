@@ -25,9 +25,9 @@ export const profileService = {
     const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
     if (error) throw new Error(error.message);
     const avatarKey = `profile_avatar_${userId}`;
-    const avatarUrl = (data as Profile).avatar_url || localStorage.getItem(avatarKey) || undefined;
-    if ((data as Profile).avatar_url) {
-      localStorage.setItem(avatarKey, (data as Profile).avatar_url as string);
+    const avatarUrl = localStorage.getItem(avatarKey) || (data as Profile).avatar_url || undefined;
+    if (avatarUrl) {
+      localStorage.setItem(avatarKey, avatarUrl);
     }
     return { user: { ...(data as Profile), avatar_url: avatarUrl }, stats: {} };
   },

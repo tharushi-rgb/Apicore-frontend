@@ -336,15 +336,15 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
           onLogout={onLogout}
           onViewAllNotifications={() => onNavigate('notifications')}
         />
-        <PageTitleBar title="Find Land" subtitle="Browse, filter, and submit proposals" />
+        <PageTitleBar title={t('findLand', selectedLanguage)} subtitle={t('browsePlots', selectedLanguage)} />
       </div>
 
       <div className="px-4 py-3 grid grid-cols-2 gap-2">
         <button onClick={() => setTab('find')} className={`rounded-xl py-2 text-[0.8rem] font-semibold ${tab === 'find' ? 'bg-amber-500 text-white' : 'bg-white text-stone-700 border border-stone-200'}`}>
-          Find Land
+          {t('findLand', selectedLanguage)}
         </button>
         <button onClick={() => setTab('proposals')} className={`rounded-xl py-2 text-[0.8rem] font-semibold ${tab === 'proposals' ? 'bg-amber-500 text-white' : 'bg-white text-stone-700 border border-stone-200'}`}>
-          My Proposals
+          {t('myProposals', selectedLanguage)}
         </button>
       </div>
 
@@ -357,30 +357,30 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded-2xl bg-emerald-50 border border-emerald-100 px-3 py-2.5 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
                 <div className="flex items-center justify-between text-[0.74rem] text-emerald-800 font-semibold">
-                  <span>Active Contracts</span>
+                  <span>{t('activeContracts', selectedLanguage)}</span>
                   <BadgeCheck className="w-4 h-4" />
                 </div>
                 <p className="text-[1rem] font-bold text-emerald-900 leading-tight">{contractStats.activeCount}</p>
-                <p className="text-[0.72rem] text-emerald-700">{contractStats.activeHives} hives placed</p>
+                <p className="text-[0.72rem] text-emerald-700">{contractStats.activeHives} {t('hivesPlacedCount', selectedLanguage)}</p>
               </div>
               <div className="rounded-2xl bg-amber-50 border border-amber-100 px-3 py-2.5 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
                 <div className="flex items-center justify-between text-[0.74rem] text-amber-800 font-semibold">
-                  <span>Pending Bids</span>
+                  <span>{t('pendingBidsCount', selectedLanguage)}</span>
                   <Hourglass className="w-4 h-4" />
                 </div>
                 <p className="text-[1rem] font-bold text-amber-900 leading-tight">{contractStats.pendingCount}</p>
-                <p className="text-[0.72rem] text-amber-700">{contractStats.pendingHives} hives requested</p>
+                <p className="text-[0.72rem] text-amber-700">{contractStats.pendingHives} {t('hivesRequestedCount', selectedLanguage)}</p>
               </div>
             </div>
 
             <div className="flex gap-2">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-                <input value={search} onChange={(event) => setSearch(event.target.value)} className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm focus:border-amber-500 focus:outline-none" placeholder="Search by listing, plot, forage, or location" />
+                <input value={search} onChange={(event) => setSearch(event.target.value)} className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm focus:border-amber-500 focus:outline-none" placeholder={t('searchListingPlotLocation', selectedLanguage)} />
               </div>
               <button onClick={() => setShowFilters(true)} className="relative bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm inline-flex items-center gap-1">
                 <Filter className="w-4 h-4" />
-                Filter
+                {t('filter', selectedLanguage)}
                 {activeFilterCount > 0 && <span className="absolute -top-1.5 -right-1.5 min-w-5 h-5 rounded-full bg-amber-500 text-white text-[0.65rem] font-bold inline-flex items-center justify-center px-1">{activeFilterCount}</span>}
               </button>
             </div>
@@ -388,7 +388,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
             {loading ? (
               <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-amber-500" /></div>
             ) : filteredListings.length === 0 ? (
-              <p className="text-center text-stone-500 py-8 text-sm">No published listings match your search or filters.</p>
+              <p className="text-center text-stone-500 py-8 text-sm">{t('noPublishedListingsMatch', selectedLanguage)}</p>
             ) : (
               <div className="space-y-3">
                 {filteredListings.map((listing) => (
@@ -396,7 +396,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                     {listing.image ? (
                       <img src={listing.image} alt={listing.plotName} className="w-full h-28 object-cover" />
                     ) : (
-                      <div className="w-full h-28 bg-gradient-to-r from-stone-100 to-emerald-100 flex items-center justify-center text-[0.72rem] text-stone-500">No plot image</div>
+                      <div className="w-full h-28 bg-gradient-to-r from-stone-100 to-emerald-100 flex items-center justify-center text-[0.72rem] text-stone-500">{t('noPlotImage', selectedLanguage)}</div>
                     )}
 
                     <div className="p-3 space-y-2">
@@ -417,12 +417,12 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                         {listing.hasWaterOnSite && <AmenityIcon title="On-site water" icon={<Droplets className="w-3.5 h-3.5" />} />}
                         <AmenityIcon title={listing.vehicleAccess} icon={<Truck className="w-3.5 h-3.5" />} />
                         {listing.nightAccess && <AmenityIcon title="Night access" icon={<Moon className="w-3.5 h-3.5" />} />}
-                        {listing.ownerVerified && <span className="ml-auto inline-flex items-center gap-1 text-[0.65rem] font-medium text-emerald-700"><ShieldCheck className="w-3.5 h-3.5" /> Verified</span>}
+                        {listing.ownerVerified && <span className="ml-auto inline-flex items-center gap-1 text-[0.65rem] font-medium text-emerald-700"><ShieldCheck className="w-3.5 h-3.5" /> {t('verified', selectedLanguage)}</span>}
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 pt-1">
-                        <button onClick={() => openListing(listing)} className="rounded-xl border border-stone-300 py-2 text-[0.74rem] font-semibold text-stone-700">View</button>
-                        <button onClick={() => runSuitability(listing)} className="rounded-xl bg-emerald-600 py-2 text-[0.74rem] font-semibold text-white">Check Suitability</button>
+                        <button onClick={() => openListing(listing)} className="rounded-xl border border-stone-300 py-2 text-[0.74rem] font-semibold text-stone-700">{t('view', selectedLanguage)}</button>
+                        <button onClick={() => runSuitability(listing)} className="rounded-xl bg-emerald-600 py-2 text-[0.74rem] font-semibold text-white">{t('checkSuitability', selectedLanguage)}</button>
                       </div>
                     </div>
                   </div>
