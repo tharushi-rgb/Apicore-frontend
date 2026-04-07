@@ -553,20 +553,20 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
           <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-4 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-blue-900">Account Summary</p>
-                <p className="mt-1 text-sm text-blue-900">Member since {memberSince}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-blue-900">{t('accountSummary', selectedLanguage)}</p>
+                <p className="mt-1 text-sm text-blue-900">{memberSince}</p>
                 <div className="mt-2 space-y-1">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                    <span className="text-xs text-blue-800">Account Status: Active & Verified</span>
+                    <span className="text-xs text-blue-800">{t('accountStatus', selectedLanguage)}: {t('active', selectedLanguage)} & {t('verified', selectedLanguage)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                    <span className="text-xs text-blue-800">Role: Landowner</span>
+                    <span className="text-xs text-blue-800">{t('role', selectedLanguage)}: {t('landowner', selectedLanguage)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-amber-500"></div>
-                    <span className="text-xs text-blue-800">Profile Completion: 85%</span>
+                    <span className="text-xs text-blue-800">{t('profileCompletion', selectedLanguage)}: 85%</span>
                   </div>
                 </div>
               </div>

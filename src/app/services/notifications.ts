@@ -15,39 +15,67 @@ function getUserId(): number {
 
 export const notificationsService = {
   async getAll(unreadOnly = false) {
-    const userId = getUserId();
-    let query = supabase
-      .from('notifications')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_dismissed', 0)
-      .order('created_at', { ascending: false });
-    if (unreadOnly) query = query.eq('is_read', 0);
-    const { data, error } = await query;
-    if (error) throw new Error(error.message);
-    return data as Notification[];
+    try {
+      const userId = getUserId();
+      let query = supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_dismissed', 0)
+        .order('created_at', { ascending: false });
+      if (unreadOnly) query = query.eq('is_read', 0);
+      const { data, error } = await query;
+      if (error) {
+        // Check if it's a connection error vs table structure error
+        if (error.message.includes('relation') || error.message.includes('does not exist')) {
+          console.warn('Notifications table not available yet. This is expected during initial setup.');
+          return [];
+        }
+        throw new Error(error.message);
+      }
+      return data as Notification[];
+    } catch (error) {
+      // Gracefully handle network errors
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network connection unavailable');
+      }
+      throw error;
+    }
   },
 
   async markAsRead(id: number) {
-    const userId = getUserId();
-    const { error } = await supabase.from('notifications').update({ is_read: 1 }).eq('id', id).eq('user_id', userId);
-    if (error) throw new Error(error.message);
+    try {
+      const userId = getUserId();
+      const { error } = await supabase.from('notifications').update({ is_read: 1 }).eq('id', id).eq('user_id', userId);
+      if (error) throw new Error(error.message);
+    } catch (error) {
+      // Silently fail for marking as read - not critical
+      console.warn('Failed to mark notification as read:', error);
+    }
   },
 
   async markAllRead() {
-    const userId = getUserId();
-    const { error } = await supabase
-      .from('notifications')
-      .update({ is_read: 1 })
-      .eq('user_id', userId)
-      .eq('is_read', 0);
-    if (error) throw new Error(error.message);
+    try {
+      const userId = getUserId();
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: 1 })
+        .eq('user_id', userId)
+        .eq('is_read', 0);
+      if (error) throw new Error(error.message);
+    } catch (error) {
+      console.warn('Failed to mark all notifications as read:', error);
+    }
   },
 
   async dismiss(id: number) {
-    const userId = getUserId();
-    const { error } = await supabase.from('notifications').update({ is_dismissed: 1 }).eq('id', id).eq('user_id', userId);
-    if (error) throw new Error(error.message);
+    try {
+      const userId = getUserId();
+      const { error } = await supabase.from('notifications').update({ is_dismissed: 1 }).eq('id', id).eq('user_id', userId);
+      if (error) throw new Error(error.message);
+    } catch (error) {
+      console.warn('Failed to dismiss notification:', error);
+    }
   },
 
   async clearOld() {

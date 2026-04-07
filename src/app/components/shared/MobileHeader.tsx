@@ -38,6 +38,7 @@ export function MobileHeader({
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [connectionError, setConnectionError] = useState(false);
 
   const isSidebarOpen = internalSidebarOpen;
   const toggleSidebar = () => setInternalSidebarOpen(v => !v);
@@ -47,16 +48,26 @@ export function MobileHeader({
       const all = await notificationsService.getAll();
       setNotifications(all);
       setUnreadCount(all.filter(n => !n.is_read).length);
+      setConnectionError(false); // Reset error state on successful fetch
     } catch (error) {
-      console.error('Failed to load notifications:', error);
+      setConnectionError(true);
+      // Only log once per minute to reduce console noise
+      const now = Date.now();
+      const lastLogTime = parseInt(localStorage.getItem('lastNotificationError') || '0');
+      if (now - lastLogTime > 60000) { // 60 seconds
+        console.warn('Notifications temporarily unavailable:', error instanceof Error ? error.message : 'Network error');
+        localStorage.setItem('lastNotificationError', now.toString());
+      }
     }
   };
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000);
+    // Use longer intervals when there are connection issues to reduce error frequency
+    const intervalDuration = connectionError ? 120000 : 30000; // 2 minutes vs 30 seconds
+    const interval = setInterval(fetchNotifications, intervalDuration);
     return () => clearInterval(interval);
-  }, []);
+  }, [connectionError]); // Re-create interval when connection error state changes
 
   const handleOpenNotifications = async () => {
     const opening = !showNotifications;
