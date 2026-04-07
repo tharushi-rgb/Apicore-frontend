@@ -89,7 +89,7 @@ export const notificationsService = {
 
   async createActionNotification(action: {
     entity: string;
-    event: 'created' | 'updated' | 'deleted' | 'completed' | 'moved';
+    event: 'created' | 'updated' | 'deleted' | 'completed' | 'moved' | 'rejected' | 'accepted';
     details?: string;
     severity?: 'low' | 'medium' | 'high';
   }) {

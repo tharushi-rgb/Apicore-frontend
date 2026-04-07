@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   BadgeCheck,
   Hexagon as HiveIcon,
+  Filter,
 } from 'lucide-react';
 import { MobileHeader } from '../shared/MobileHeader';
 import { PageTitleBar } from '../shared/PageTitleBar';
@@ -211,63 +212,66 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
               </div>
 
               <div className="bg-white rounded-xl border border-stone-200 p-2.5 sm:p-3 shadow-sm w-full max-w-full overflow-hidden">
-                <h3 className="text-[0.8rem] font-bold text-stone-800 mb-2">Filters &amp; Search</h3>
+                <h3 className="text-[0.8rem] font-bold text-stone-800 mb-2 flex items-center gap-1.5">
+                  <Filter className="w-4 h-4 text-stone-600" />
+                  {t('filtersAndSearch', selectedLanguage)}
+                </h3>
                 <div className="flex flex-wrap items-start gap-2 w-full max-w-full">
                   <div className="flex flex-col min-w-0 w-auto max-w-full">
-                    <p className="text-[0.7rem] font-bold text-stone-800 mb-0.5">Status</p>
+                    <p className="text-[0.7rem] font-bold text-stone-800 mb-0.5">{t('status', selectedLanguage)}</p>
                     <select
                       value={filters.status}
                       onChange={(event) => setFilters((previous) => ({ ...previous, status: event.target.value as typeof filters.status }))}
                       className="w-auto max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
                     >
-                      <option value="all">Any</option>
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                      <option value="empty">Empty</option>
-                      <option value="expired">Expired</option>
+                      <option value="all">{t('any', selectedLanguage)}</option>
+                      <option value="active">{t('active', selectedLanguage)}</option>
+                      <option value="inactive">{t('inactive', selectedLanguage)}</option>
+                      <option value="empty">{t('empty', selectedLanguage)}</option>
+                      <option value="expired">{t('expired', selectedLanguage)}</option>
                     </select>
                   </div>
 
                   <div className="flex flex-col min-w-0 w-auto max-w-full">
-                    <p className="text-[0.7rem] font-bold text-stone-800 mb-1">Established Between</p>
+                    <p className="text-[0.7rem] font-bold text-stone-800 mb-1">{t('establishedBetween', selectedLanguage)}</p>
                     <div className="flex flex-col gap-1">
                       <input
                         type="date"
                         value={filters.dateFrom}
                         onChange={(event) => setFilters((previous) => ({ ...previous, dateFrom: event.target.value }))}
                         className="w-[9.5rem] max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
-                        placeholder="From"
+                        placeholder={t('from', selectedLanguage)}
                       />
                       <input
                         type="date"
                         value={filters.dateTo}
                         onChange={(event) => setFilters((previous) => ({ ...previous, dateTo: event.target.value }))}
                         className="w-[9.5rem] max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
-                        placeholder="To"
+                        placeholder={t('to', selectedLanguage)}
                       />
                     </div>
                   </div>
 
                   <div className="flex flex-col min-w-0 w-full max-w-full">
-                    <p className="text-[0.7rem] font-bold text-stone-800 mb-1">Health Filters</p>
+                    <p className="text-[0.7rem] font-bold text-stone-800 mb-1">{t('healthFilters', selectedLanguage)}</p>
                     <div className="flex flex-wrap gap-1 items-center">
                       <button
                         onClick={() => toggleHealthFilter('queenlessOnly')}
                         className={`px-2 py-1 rounded-full text-[0.7rem] font-semibold transition-all ${filters.queenlessOnly ? 'bg-red-100 text-red-900 border border-red-400 shadow-sm' : 'bg-stone-100 text-stone-700 border border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
-                        Queenless Hives
+                        {t('queenlessHives', selectedLanguage)}
                       </button>
                       <button
                         onClick={() => toggleHealthFilter('pestOnly')}
                         className={`px-2 py-1 rounded-full text-[0.7rem] font-semibold transition-all ${filters.pestOnly ? 'bg-amber-100 text-amber-900 border border-amber-400 shadow-sm' : 'bg-stone-100 text-stone-700 border border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
-                        Pest Alerts
+                        {t('pestAlerts', selectedLanguage)}
                       </button>
                       <button
                         onClick={() => toggleHealthFilter('healthyOnly')}
                         className={`px-2 py-1 rounded-full text-[0.7rem] font-semibold transition-all ${filters.healthyOnly ? 'bg-emerald-100 text-emerald-900 border border-emerald-400 shadow-sm' : 'bg-stone-100 text-stone-700 border border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
                       >
-                        Healthy Only
+                        {t('healthyOnly', selectedLanguage)}
                       </button>
                     </div>
                   </div>
@@ -277,7 +281,7 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                   onClick={() => setFilters(initialFilters)}
                   className="mt-2 w-full rounded-lg border border-stone-300 bg-white py-1.5 text-[0.75rem] font-semibold text-stone-700 hover:bg-stone-50"
                 >
-                  Reset Filters
+                  {t('resetFilters', selectedLanguage)}
                 </button>
               </div>
 
@@ -371,7 +375,7 @@ function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon, h
           )}
           <span className="flex items-center gap-0.5 ml-auto text-amber-700 font-medium">
             <HiveIcon className="w-3 h-3" />
-            {(apiary.hive_count || 0) > 0 ? `${apiary.hive_count} hives` : t('noHivesAdded', lang)}
+            {(apiary.hive_count || 0) > 0 ? `${apiary.hive_count} ${t('hives', lang)}` : t('noHivesAdded', lang)}
           </span>
         </div>
 
@@ -384,7 +388,7 @@ function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon, h
           {(apiary.forage_primary || apiary.blooming_window) && (
             <>
               <span className="text-stone-300">|</span>
-              <span className="text-emerald-700 truncate">{apiary.forage_primary || 'Mixed'}</span>
+              <span className="text-emerald-700 truncate">{apiary.forage_primary || t('mixed', lang)}</span>
               {apiary.blooming_window && (
                 <span className="text-stone-400 hidden sm:inline truncate"> · {apiary.blooming_window}</span>
               )}
@@ -394,12 +398,12 @@ function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon, h
 
         {(hasQueenless || hasPestAlert) ? (
           <div className="flex flex-wrap gap-1">
-            {hasQueenless && <span className="inline-flex items-center gap-0.5 rounded-full bg-red-50 text-red-700 text-[0.65rem] font-semibold px-1.5 py-0.5"><AlertTriangle className="w-3 h-3" />Queenless hive</span>}
-            {hasPestAlert && <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-50 text-amber-700 text-[0.65rem] font-semibold px-1.5 py-0.5"><AlertCircle className="w-3 h-3" />Pest alert</span>}
+            {hasQueenless && <span className="inline-flex items-center gap-0.5 rounded-full bg-red-50 text-red-700 text-[0.65rem] font-semibold px-1.5 py-0.5"><AlertTriangle className="w-3 h-3" />{t('queenlessHive', lang)}</span>}
+            {hasPestAlert && <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-50 text-amber-700 text-[0.65rem] font-semibold px-1.5 py-0.5"><AlertCircle className="w-3 h-3" />{t('pestAlert', lang)}</span>}
           </div>
         ) : (
           <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[0.65rem] font-semibold px-1.5 py-0.5">
-            <BadgeCheck className="w-3 h-3" />Healthy
+            <BadgeCheck className="w-3 h-3" />{t('healthy', lang)}
           </span>
         )}
 

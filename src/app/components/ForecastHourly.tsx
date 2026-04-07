@@ -81,7 +81,7 @@ export function ForecastHourly({ hourly, lang = 'en' }: Props) {
               >
                 <p className="text-[0.6rem] font-medium text-stone-500">{hour.time}</p>
                 <p className="text-base leading-none my-0.5">{weatherEmoji(hour.wcode)}</p>
-                <p className="text-[0.7rem] font-bold text-stone-800">{hour.temp}°</p>
+                <p className="text-[0.7rem] font-bold text-stone-800">{hour.temp.toFixed(1)}°</p>
                 {hour.precip > 0 && (
                   <p className="text-[0.55rem] text-blue-500">💧{hour.precip}</p>
                 )}
@@ -121,7 +121,7 @@ export function ForecastHourly({ hourly, lang = 'en' }: Props) {
             <div className="flex items-center gap-3 mb-4 p-3 bg-emerald-50 rounded-xl border border-emerald-200">
               <span className="text-3xl">{weatherEmoji(selectedHour.wcode)}</span>
               <div>
-                <p className="text-[1.1rem] font-bold text-stone-800">{selectedHour.temp}°C</p>
+                <p className="text-[1.1rem] font-bold text-stone-800">{selectedHour.temp.toFixed(1)}°C</p>
                 <p className="text-[0.7rem] text-stone-600">{selectedHour.tempRisk.label}</p>
               </div>
             </div>
@@ -130,7 +130,7 @@ export function ForecastHourly({ hourly, lang = 'en' }: Props) {
             <div className="space-y-2.5">
               <HourMetricRow
                 label={t('temperature', lang)}
-                value={`${selectedHour.temp}°C`}
+                value={`${selectedHour.temp.toFixed(1)}°C`}
                 explanation={tempExplanation(selectedHour.temp, lang)}
                 color={selectedHour.tempRisk.color}
                 statusLabel={selectedHour.tempRisk.label}

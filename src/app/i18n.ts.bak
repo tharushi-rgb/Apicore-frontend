@@ -67,6 +67,7 @@ const translations = {
   logHive: { en: 'Log Hive', si: 'ගස් කොටු මී වෙත', ta: 'मरप्पोरుळ् तेन्कूडु' },
   stinglessHive: { en: 'Stingless Hive', si: 'කටටුවක් නැති මී වෙත', ta: 'कुत्तात तेन्कूडु' },
   actionCannotBeUndone: { en: 'This action cannot be undone.', si: 'මෙම ක්‍රියාව නැවතත් අල්ලන්න බැහැ.', ta: 'इन्त नडवडिक्कैयै माच्च इयलातु.' },
+  selectProvince: { en: 'Select Province', si: 'පළාත තෝරන්න', ta: 'माकाणत्तै तेर्न्तेडुक्कवुम्' },
   selectDsDivision: { en: 'Select DS Division', si: 'ප්‍රා.ලේ. අංශය තෝරන්න', ta: 'DS पिरिवै तेर्न्תেडुक्कवुम्' },
   enterName: { en: 'Enter name', si: 'නම ඇතුළු කරන්න', ta: 'पेयरै उळ्ळिडवुम्' },
   enterEmail: { en: 'Enter email', si: 'ඊ-තැපෑල ඇතුළු කරන්න', ta: 'मिन्नञ्जलै उळ्ळिडवुम्' },

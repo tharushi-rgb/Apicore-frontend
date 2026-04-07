@@ -136,10 +136,10 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
         <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center px-4" onClick={() => setConfirmDelete(null)}>
           <div className="bg-white rounded-xl p-4 shadow-2xl max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-base font-bold text-stone-900">{t('deleteConfirm', selectedLanguage)}</h3>
-            <p className="mt-2 text-sm text-stone-600">This action cannot be undone.</p>
+            <p className="mt-2 text-sm text-stone-600">{t('actionCannotBeUndone', selectedLanguage)}</p>
             <div className="mt-4 grid grid-cols-2 gap-2">
-              <button onClick={() => setConfirmDelete(null)} className="rounded-lg border border-stone-300 bg-white py-2 text-sm font-semibold text-stone-700">Cancel</button>
-              <button onClick={handleDeleteHive} className="rounded-lg bg-red-600 py-2 text-sm font-semibold text-white">Delete</button>
+              <button onClick={() => setConfirmDelete(null)} className="rounded-lg border border-stone-300 bg-white py-2 text-sm font-semibold text-stone-700">{t('cancel', selectedLanguage)}</button>
+              <button onClick={handleDeleteHive} className="rounded-lg bg-red-600 py-2 text-sm font-semibold text-white">{t('delete', selectedLanguage)}</button>
             </div>
           </div>
         </div>
@@ -156,7 +156,7 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
             
             {/* Status Filters */}
             <div className="mb-4">
-              <h3 className="text-xs font-semibold text-stone-600 uppercase mb-2">Status</h3>
+              <h3 className="text-xs font-semibold text-stone-600 uppercase mb-2">{t('status', selectedLanguage)}</h3>
               <div className="space-y-1">
                 {filterOptions.map((filter, index) => (
                   <button
@@ -172,13 +172,13 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
 
             {/* Apiary Filter */}
             <div>
-              <h3 className="text-xs font-semibold text-stone-600 uppercase mb-2">Apiary Location</h3>
+              <h3 className="text-xs font-semibold text-stone-600 uppercase mb-2">{t('apiaryLocation', selectedLanguage)}</h3>
               <div className="space-y-1">
                 <button
                   className={`w-full text-left px-3 py-2 rounded-lg transition-colors text-sm ${selectedApiaryFilter === null ? 'bg-amber-100 text-amber-800 font-medium' : 'bg-stone-100 hover:bg-stone-200 text-stone-700'}`}
                   onClick={() => setSelectedApiaryFilter(null)}
                 >
-                  All Apiaries
+                  {t('allApiaries', selectedLanguage)}
                 </button>
                 {apiaries.map((apiary) => (
                   <button
@@ -219,7 +219,7 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
                 }}
                 className="w-full text-left px-3 py-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-sm flex items-center gap-2"
               >
-                <ArrowRightLeft className="w-3.5 h-3.5" /> Move Hive
+                <ArrowRightLeft className="w-3.5 h-3.5" /> {t('moveHive', selectedLanguage)}
               </button>
               <button onClick={() => { setConfirmDelete(activeHiveId); setShowHiveActions(false); }} className="w-full text-left px-3 py-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-sm">
                 {t('deleteHive', selectedLanguage)}
@@ -299,7 +299,7 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
                   high: { label: t('critical', selectedLanguage), color: 'bg-red-100 text-red-700' },
                 };
 
-                const hiveTypeLabels: Record<string, string> = { box: 'Standard Box Hive', pot: 'Pot Hive', log: 'Log Hive', stingless: 'Stingless Hive' };
+                const hiveTypeLabels: Record<string, string> = { box: t('standardBoxHive', selectedLanguage), pot: t('potHive', selectedLanguage), log: t('logHive', selectedLanguage), stingless: t('stinglessHive', selectedLanguage) };
                 const colonyStrengthLabels: Record<string, string> = { weak: t('weak', selectedLanguage), normal: t('normal', selectedLanguage), strong: t('strong', selectedLanguage) };
 
                 return (
@@ -353,7 +353,7 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
                           <p className={`text-xs mb-0.5 ${isOverdue ? 'text-red-700' : 'text-emerald-700'}`}>{t('lastInspection', selectedLanguage)}</p>
                           <div className="flex items-center gap-1">
                             <p className={`font-bold text-sm ${isOverdue ? 'text-red-900' : 'text-emerald-900'}`}>
-                              {hive.last_inspection_date ? `${daysAgo} days ago` : 'N/A'}
+                              {hive.last_inspection_date ? `${daysAgo} ${t('daysAgo', selectedLanguage)}` : t('noData', selectedLanguage)}
                             </p>
                             {isOverdue && <AlertTriangle className="w-3 h-3 text-red-600" />}
                           </div>
@@ -365,9 +365,9 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
                         <div className="p-2 bg-red-100 rounded-lg flex items-start gap-2">
                           <Bug className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
                           <div className="flex-1">
-                            <p className="text-xs font-bold text-red-800 mb-0.5">Pest detected</p>
+                            <p className="text-xs font-bold text-red-800 mb-0.5">{t('pestDetected', selectedLanguage)}</p>
                             {hive.pest_reported_date && (
-                              <p className="text-xs text-red-700">Reported on: {hive.pest_reported_date}</p>
+                              <p className="text-xs text-red-700">{t('reportedOn', selectedLanguage)} {hive.pest_reported_date}</p>
                             )}
                           </div>
                         </div>
@@ -415,6 +415,7 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
       {showMoveForm && activeHiveId && (
         <MoveHiveFormModal
           hiveId={activeHiveId}
+          selectedLanguage={selectedLanguage}
           onClose={() => setShowMoveForm(false)}
           onSaved={() => {
             setShowMoveForm(false);
@@ -438,7 +439,7 @@ export function HivesScreen({ selectedLanguage, onLanguageChange, onNavigate, on
 }
 
 // ---- Move Hive Form Modal ----
-function MoveHiveFormModal({ hiveId, onClose, onSaved }: { hiveId: number; onClose: () => void; onSaved: () => void }) {
+function MoveHiveFormModal({ hiveId, selectedLanguage, onClose, onSaved }: { hiveId: number; selectedLanguage: Language; onClose: () => void; onSaved: () => void }) {
   const [saving, setSaving] = useState(false);
   const [apiaries, setApiaries] = useState<Apiary[]>([]);
   const [targetApiaryId, setTargetApiaryId] = useState('');
@@ -467,7 +468,7 @@ function MoveHiveFormModal({ hiveId, onClose, onSaved }: { hiveId: number; onClo
     <div className="absolute inset-0 bg-black/50 z-50 flex items-end justify-center">
       <div className="bg-white w-full max-w-md rounded-t-2xl p-3 max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="font-bold text-sm text-stone-800">Move Hive</h3>
+          <h3 className="font-bold text-sm text-stone-800">{t('moveHive', selectedLanguage)}</h3>
           <button onClick={onClose} className="p-1 hover:bg-stone-100 rounded">
             <X className="w-4 h-4" />
           </button>
@@ -487,14 +488,14 @@ function MoveHiveFormModal({ hiveId, onClose, onSaved }: { hiveId: number; onClo
             onChange={(event) => setTargetApiaryId(event.target.value)}
             className="w-full border rounded-lg px-2.5 py-1.5 text-xs"
           >
-            <option value="">Select target apiary</option>
+            <option value="">{t('selectTargetApiary', selectedLanguage)}</option>
             {apiaries.map((apiary) => (
               <option key={apiary.id} value={apiary.id}>{apiary.name}</option>
             ))}
           </select>
           <button type="submit" disabled={saving || !targetApiaryId} className="w-full bg-amber-500 text-white py-2.5 rounded-xl font-medium disabled:opacity-60 inline-flex items-center justify-center gap-2">
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-            {saving ? 'Moving...' : 'Move Hive'}
+            {saving ? t('moving', selectedLanguage) : t('moveHive', selectedLanguage)}
           </button>
         </form>
       </div>

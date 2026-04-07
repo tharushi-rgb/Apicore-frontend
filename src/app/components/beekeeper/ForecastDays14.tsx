@@ -140,10 +140,10 @@ export function ForecastDays14({ days, hourly, lang = 'en' }: Props) {
               <span className="text-3xl">{weatherEmoji(selectedDay.icon)}</span>
               <div>
                 <p className="text-[1.1rem] font-bold text-stone-800">
-                  {selectedDay.maxTemp}°C / {selectedDay.minTemp}°C
+                  {selectedDay.maxTemp.toFixed(1)}°C / {selectedDay.minTemp.toFixed(1)}°C
                 </p>
                 <p className="text-[0.7rem] text-stone-600">
-                  {t('maxTemp', lang)}: {selectedDay.maxTemp}°C · {t('minTemp', lang)}: {selectedDay.minTemp}°C
+                  {t('maxTemp', lang)}: {selectedDay.maxTemp.toFixed(1)}°C · {t('minTemp', lang)}: {selectedDay.minTemp.toFixed(1)}°C
                 </p>
               </div>
             </div>
@@ -160,7 +160,7 @@ export function ForecastDays14({ days, hourly, lang = 'en' }: Props) {
 
               <MetricRow
                 label={t('heatStress', lang)}
-                value={`${selectedDay.maxTemp}°C ${lang === 'si' ? 'උපරිම' : 'peak'}`}
+                value={`${selectedDay.maxTemp.toFixed(1)}°C ${lang === 'si' ? 'උපරිම' : 'peak'}`}
                 explanation={heatStressExplanation(selectedDay.maxTemp, lang)}
                 color={selectedDay.maxTemp > 38 ? 'red' : selectedDay.maxTemp > 33 ? 'amber' : 'green'}
                 statusLabel={selectedDay.maxTemp > 38 ? (lang === 'si' ? 'ඉහළ' : 'High') : selectedDay.maxTemp > 33 ? (lang === 'si' ? 'මධ්‍යම' : 'Moderate') : (lang === 'si' ? 'අඩු' : 'Low')}
@@ -228,7 +228,7 @@ export function ForecastDays14({ days, hourly, lang = 'en' }: Props) {
                           <p className="text-[0.65rem] text-stone-500">{hour.humidity}% humidity · {hour.wind} km/h wind</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-[0.75rem] font-bold text-stone-800">{hour.temp}°C</p>
+                          <p className="text-[0.75rem] font-bold text-stone-800">{hour.temp.toFixed(1)}°C</p>
                           <p className="text-[0.65rem] text-blue-600">{hour.precip} mm</p>
                         </div>
                       </div>

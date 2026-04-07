@@ -423,7 +423,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                           <div className="flex items-center gap-2">
                             <WeatherIcon code={analysis.weather.current.wcode} className="w-8 h-8" />
                             <div>
-                              <p className="text-[1.35rem] font-bold leading-none text-stone-800">{analysis.weather.current.temp}°C</p>
+                              <p className="text-[1.35rem] font-bold leading-none text-stone-800">{analysis.weather.current.temp.toFixed(1)}°C</p>
                               <p className={`text-[0.7rem] px-1.5 py-0.5 rounded inline-block border ${riskBg(analysis.weather.current.tempRisk.color)}`}>{analysis.weather.current.tempRisk.label}</p>
                             </div>
                           </div>

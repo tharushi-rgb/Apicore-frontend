@@ -416,12 +416,12 @@ export const apiariesService = {
   async checkAndNotifyContractExpiry() {
     try {
       const userId = getUserId();
-      // Get all apiaries with rental contracts
+      // Get all apiaries with rental contracts (those with contract_end dates)
       const { data: apiaries, error } = await supabase
         .from('apiaries')
-        .select('id, name, contract_end, land_ownership')
+        .select('id, name, contract_end, apiary_type')
         .eq('user_id', userId)
-        .eq('land_ownership', 'not_owned');
+        .not('contract_end', 'is', null);
       
       if (error || !apiaries) return;
 

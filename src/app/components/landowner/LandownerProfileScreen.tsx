@@ -53,6 +53,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
   const [saveMessage, setSaveMessage] = useState('');
   const [plotsVersion, setPlotsVersion] = useState(0);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [plots, setPlots] = useState<LandPlot[]>([]);
 
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -108,13 +109,17 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
     setPlotsVersion((value) => value + 1);
   }, [loading]);
 
-  const plots = useMemo(() => {
-    try {
-      return landownerMarketplaceService.getPlots();
-    } catch (error) {
-      console.error('Failed to get plots:', error);
-      return [];
-    }
+  useEffect(() => {
+    const loadPlots = async () => {
+      try {
+        const loadedPlots = await landownerMarketplaceService.getPlots();
+        setPlots(loadedPlots);
+      } catch (error) {
+        console.error('Failed to get plots:', error);
+        setPlots([]);
+      }
+    };
+    loadPlots();
   }, [plotsVersion]);
 
   const districts = useMemo(() => getDistrictsByProvince(editProvince), [editProvince]);
@@ -410,7 +415,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                     onClick={handleOpenEdit}
                     className="rounded-full border border-emerald-300 bg-white px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors"
                   >
-                    Edit
+                    {t('edit', selectedLanguage)}
                   </button>
                 ) : (
                   <div className="flex items-center gap-1.5">
@@ -418,14 +423,14 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                       onClick={handleCancelEdit}
                       className="rounded-full border border-stone-300 bg-white px-2.5 py-1 text-xs font-semibold text-stone-700 hover:bg-stone-100 transition-colors"
                     >
-                      Cancel
+                      {t('cancel', selectedLanguage)}
                     </button>
                     <button
                       onClick={saveProfile}
                       disabled={isSaving}
                       className="rounded-full bg-emerald-700 px-2.5 py-1 text-xs font-semibold text-white hover:bg-emerald-800 transition-colors disabled:opacity-60"
                     >
-                      {isSaving ? 'Saving...' : 'Save Changes'}
+                      {isSaving ? t('saving', selectedLanguage) : t('saveChanges', selectedLanguage)}
                     </button>
                   </div>
                 )}
@@ -455,9 +460,9 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                 </div>
 
                 <div className="min-w-0 flex-1 pt-0.5">
-                  <h1 className="text-base font-bold leading-5 text-stone-900 break-words">{profile?.name || 'Landowner'}</h1>
+                  <h1 className="text-base font-bold leading-5 text-stone-900 break-words">{profile?.name || t('landowner', selectedLanguage)}</h1>
                   <div className="mt-1 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
-                    Landowner
+                    {t('landowner', selectedLanguage)}
                   </div>
                   <p className="mt-1 text-sm text-stone-600">{profile?.district || 'District not set'} · {memberSince}</p>
                 </div>
@@ -466,28 +471,28 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
               <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
                 <div className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
                   <ShieldCheck className="h-3 w-3" />
-                  Verified
+                  {t('verified', selectedLanguage)}
                 </div>
               </div>
 
               <div className="mt-4 rounded-xl border border-stone-200 bg-stone-50/80 p-3">
                 {!isEditingProfile ? (
                   <div className="space-y-2">
-                    <ProfileInfoTile label="Name" value={profile?.name || '-'} />
-                    <ProfileInfoTile label="Email" value={profile?.email || '-'} />
-                    <ProfileInfoTile label="Phone" value={profile?.phone || '-'} />
-                    <ProfileInfoTile label="Province" value={(profile as any)?.province || '-'} />
-                    <ProfileInfoTile label="District" value={profile?.district || '-'} />
-                    <ProfileInfoTile label="DS Division" value={(profile as any)?.ds_division || '-'} />
-                    <ProfileInfoTile label="B. Registration" value={profile?.business_reg_no || '-'} />
+                    <ProfileInfoTile label={t('name', selectedLanguage)} value={profile?.name || '-'} />
+                    <ProfileInfoTile label={t('email', selectedLanguage)} value={profile?.email || '-'} />
+                    <ProfileInfoTile label={t('phone', selectedLanguage)} value={profile?.phone || '-'} />
+                    <ProfileInfoTile label={t('province', selectedLanguage)} value={(profile as any)?.province || '-'} />
+                    <ProfileInfoTile label={t('district', selectedLanguage)} value={profile?.district || '-'} />
+                    <ProfileInfoTile label={t('dsDivision', selectedLanguage)} value={(profile as any)?.ds_division || '-'} />
+                    <ProfileInfoTile label={t('bRegistration', selectedLanguage)} value={profile?.business_reg_no || '-'} />
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <ProfileEditInputTile label="Name" value={editName} onChange={setEditName} placeholder="Enter name" />
-                    <ProfileEditInputTile label="Email" value={editEmail} onChange={setEditEmail} placeholder="Enter email" type="email" />
-                    <ProfileEditInputTile label="Phone" value={editPhone} onChange={setEditPhone} placeholder="Enter phone" type="tel" />
+                    <ProfileEditInputTile label={t('name', selectedLanguage)} value={editName} onChange={setEditName} placeholder={t('enterName', selectedLanguage)} />
+                    <ProfileEditInputTile label={t('email', selectedLanguage)} value={editEmail} onChange={setEditEmail} placeholder={t('enterEmail', selectedLanguage)} type="email" />
+                    <ProfileEditInputTile label={t('phone', selectedLanguage)} value={editPhone} onChange={setEditPhone} placeholder={t('enterPhone', selectedLanguage)} type="tel" />
                     <ProfileEditSelectTile
-                      label="Province"
+                      label={t('province', selectedLanguage)}
                       value={editProvince}
                       onChange={(value) => {
                         setEditProvince(value);
@@ -495,28 +500,28 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                         setEditDsDivision('');
                       }}
                       options={PROVINCES as unknown as string[]}
-                      placeholder="Select province"
+                      placeholder={t('selectProvince', selectedLanguage)}
                     />
                     <ProfileEditSelectTile
-                      label="District"
+                      label={t('district', selectedLanguage)}
                       value={editDistrict}
                       onChange={(value) => {
                         setEditDistrict(value);
                         setEditDsDivision('');
                       }}
                       options={districts}
-                      placeholder="Select district"
+                      placeholder={t('selectDistrict', selectedLanguage)}
                       disabled={!editProvince}
                     />
                     <ProfileEditSelectTile
-                      label="DS Division"
+                      label={t('dsDivision', selectedLanguage)}
                       value={editDsDivision}
                       onChange={setEditDsDivision}
                       options={dsDivisions}
-                      placeholder="Select DS division"
+                      placeholder={t('selectDsDivision', selectedLanguage)}
                       disabled={!editDistrict}
                     />
-                    <ProfileEditInputTile label="B. Registration" value={editBusinessRegNo} onChange={setEditBusinessRegNo} placeholder="Enter business registration" />
+                    <ProfileEditInputTile label={t('bRegistration', selectedLanguage)} value={editBusinessRegNo} onChange={setEditBusinessRegNo} placeholder="Enter business registration" />
                   </div>
                 )}
               </div>
@@ -534,28 +539,87 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
           {/* Trust Score Card */}
           <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-900">Trust Score</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-900">{t('trustScore', selectedLanguage)}</p>
               <p className="text-lg font-bold text-emerald-900">{trustScore} / 100</p>
             </div>
             <div className="mt-2 h-1.5 rounded-full bg-emerald-100">
               <div className="h-1.5 rounded-full bg-emerald-500" style={{ width: `${trustScore}%` }} />
             </div>
             <p className="mt-2 text-sm text-emerald-900">3 KYC verified · 100% fulfilment rate</p>
+            <p className="mt-1 text-xs text-emerald-700">Your trust score reflects your reliability as a landowner. It's based on verified identity, successful contract completions, and positive reviews from beekeepers.</p>
+          </div>
+
+          {/* Account Summary Card */}
+          <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-blue-900">Account Summary</p>
+                <p className="mt-1 text-sm text-blue-900">Member since {memberSince}</p>
+                <div className="mt-2 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                    <span className="text-xs text-blue-800">Account Status: Active & Verified</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                    <span className="text-xs text-blue-800">Role: Landowner</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-amber-500"></div>
+                    <span className="text-xs text-blue-800">Profile Completion: 85%</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <ShieldCheck className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+            <div className="mt-3 rounded-lg bg-blue-100/50 p-2">
+              <p className="text-xs text-blue-800">
+                Your verified landowner profile allows you to list land for beekeeping activities,
+                receive proposals from beekeepers, and earn income through land partnerships.
+              </p>
+            </div>
+          </div>
+
+          {/* Activity Overview Card */}
+          <div className="rounded-xl border border-purple-200 bg-purple-50/70 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-purple-900">Recent Activity</p>
+            <div className="mt-2 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-purple-800">Active Listings</span>
+                <span className="font-semibold text-purple-900">0</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-purple-800">Contract Proposals</span>
+                <span className="font-semibold text-purple-900">0</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-purple-800">Completed Contracts</span>
+                <span className="font-semibold text-purple-900">0</span>
+              </div>
+            </div>
+            <div className="mt-3 rounded-lg bg-purple-100/50 p-2">
+              <p className="text-xs text-purple-800">
+                Start by adding land plots below, then create your first listing to connect with beekeepers in your area.
+              </p>
+            </div>
           </div>
 
           {/* Land Plots Card */}
           <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-stone-600">My Land Plots</p>
-                <p className="mt-1 text-sm text-stone-600">{plots.length} plots linked</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-stone-600">{t('landPlots', selectedLanguage)}</p>
+                <p className="mt-1 text-sm text-stone-600">{plots.length} {t('plotsLinked', selectedLanguage)}</p>
+                <p className="mt-1 text-xs text-stone-500">Manage your land plots to create listings and partnerships with local beekeepers</p>
               </div>
               <button
                 onClick={() => navigate('/land-plots/new')}
                 className="inline-flex items-center gap-1 rounded-full bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-800 transition-colors"
               >
                 <Plus className="h-3 w-3" />
-                Add
+                {t('add', selectedLanguage)}
               </button>
             </div>
 
@@ -565,7 +629,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                 <input
                   value={plotSearch}
                   onChange={(event) => setPlotSearch(event.target.value)}
-                  placeholder="Search plots by name, district, or forage"
+                  placeholder={t('searchPlots', selectedLanguage)}
                   className="w-full rounded-lg border border-stone-200 bg-white py-2 pl-9 pr-3 text-[0.78rem] text-stone-700 focus:border-emerald-600 focus:outline-none"
                 />
               </div>
@@ -581,8 +645,8 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
               )}
               {plots.length === 0 && (
                 <div className="rounded-lg border border-dashed border-stone-300 bg-stone-50 px-2 py-2 text-center">
-                  <p className="text-sm font-semibold text-stone-700">No plots added</p>
-                  <p className="text-xs text-stone-500 mt-0.5">Add your first plot to attach to listings.</p>
+                  <p className="text-sm font-semibold text-stone-700">{t('noPlotsAdded', selectedLanguage)}</p>
+                  <p className="text-xs text-stone-500 mt-0.5">{t('addFirstPlot', selectedLanguage)}</p>
                 </div>
               )}
 
@@ -663,7 +727,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
           <div className="w-full max-w-sm rounded-xl bg-white shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 flex items-center justify-between border-b border-stone-200 bg-white px-4 py-3">
               <h2 className="text-base font-bold text-stone-900">
-                {plotEditor.mode === 'create' ? 'Add New Plot' : plotEditor.mode === 'edit' ? 'Edit Plot' : 'View Plot'}
+                {plotEditor.mode === 'create' ? t('addNewPlot', selectedLanguage) : plotEditor.mode === 'edit' ? t('editPlot', selectedLanguage) : t('viewPlot', selectedLanguage)}
               </h2>
               <button onClick={closePlotEditor} className="rounded-lg p-1 hover:bg-stone-100">
                 <X className="h-4 w-4 text-stone-500" />
@@ -680,7 +744,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
               )}
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">Plot Name *</label>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">{t('plotNameRequired', selectedLanguage)}</label>
                 <input
                   type="text"
                   value={plotEditor.name}
@@ -741,7 +805,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">Total Acreage *</label>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">{t('totalAcreageRequired', selectedLanguage)}</label>
                 <input
                   type="number"
                   step="0.1"
@@ -754,30 +818,30 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">Water Availability</label>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">{t('waterAvailability', selectedLanguage)}</label>
                 <select
                   value={plotEditor.waterAvailability}
                   onChange={(e) => setPlotEditor((prev) => ({ ...prev, waterAvailability: e.target.value }))}
                   disabled={isPlotViewMode}
                   className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 >
-                  <option>On-site</option>
-                  <option>Within 500m</option>
-                  <option>Requires Manual Water</option>
+                  <option>{t('onSite', selectedLanguage)}</option>
+                  <option>{t('within500m', selectedLanguage)}</option>
+                  <option>{t('requiresManualWater', selectedLanguage)}</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">Vehicle Access</label>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">{t('vehicleAccess', selectedLanguage)}</label>
                 <select
                   value={plotEditor.vehicleAccess}
                   onChange={(e) => setPlotEditor((prev) => ({ ...prev, vehicleAccess: e.target.value }))}
                   disabled={isPlotViewMode}
                   className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 >
-                  <option>Lorry</option>
-                  <option>Tuk-tuk</option>
-                  <option>Footpath</option>
+                  <option>{t('lorry', selectedLanguage)}</option>
+                  <option>{t('tukTuk', selectedLanguage)}</option>
+                  <option>{t('footpath', selectedLanguage)}</option>
                 </select>
               </div>
 
@@ -789,13 +853,13 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                     className="flex-1 rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50 flex items-center justify-center gap-1"
                   >
                     <Save className="h-4 w-4" />
-                    {isSavingPlot ? 'Saving...' : 'Save Plot'}
+                    {isSavingPlot ? t('saving', selectedLanguage) : t('savePlot', selectedLanguage)}
                   </button>
                   <button
                     onClick={closePlotEditor}
                     className="flex-1 rounded-lg border border-stone-300 px-4 py-2.5 text-sm font-semibold text-stone-700 hover:bg-stone-100"
                   >
-                    Cancel
+                    {t('cancel', selectedLanguage)}
                   </button>
                 </div>
               ) : (
@@ -803,7 +867,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                   onClick={closePlotEditor}
                   className="w-full rounded-lg border border-stone-300 px-4 py-2.5 text-sm font-semibold text-stone-700 hover:bg-stone-100"
                 >
-                  Close
+                  {t('close', selectedLanguage)}
                 </button>
               )}
 
@@ -813,7 +877,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                   className="w-full rounded-lg border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 flex items-center justify-center gap-1"
                 >
                   <Trash2 className="h-4 w-4" />
-                  Delete Plot
+                  {t('deletePlot', selectedLanguage)}
                 </button>
               )}
             </div>

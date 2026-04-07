@@ -760,8 +760,8 @@ export const landownerMarketplaceService = {
     return (data || []).map((row: any) => ({
       listing: listingWithDerivedStatus(mapDbToListing(row)),
       plot: row.landowner_plots ? mapDbToPlot(row.landowner_plots) : null,
-      ownerUserId: row.user_id,
-      ownerName: row.users?.name || `Landowner ${row.user_id}`,
-    })).filter((item: any) => item.plot !== null);
+      ownerUserId: row.user_id as number,
+      ownerName: (row.users?.name || `Landowner ${row.user_id}`) as string,
+    })).filter((item): item is { listing: Listing; plot: LandPlot; ownerUserId: number; ownerName: string } => item.plot !== null);
   },
 };

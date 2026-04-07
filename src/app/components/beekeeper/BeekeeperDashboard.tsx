@@ -70,7 +70,6 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
   const [harvestRows, setHarvestRows] = useState<any[]>([]);
   const [inspectionRows, setInspectionRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [queenRiskView, setQueenRiskView] = useState<'low' | 'medium' | 'high'>('high');
   const [forageTab, setForageTab] = useState<'current' | 'upcoming'>('current');
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d'>('30d');
 
@@ -98,65 +97,100 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
 
   const user = authService.getLocalUser();
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const currentMonth = new Date().getMonth() + 1;
-        const nextMonth = (currentMonth % 12) + 1;
-        const userId = user?.id;
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const currentMonth = new Date().getMonth() + 1;
+      const nextMonth = (currentMonth % 12) + 1;
+      const userId = user?.id;
 
-        const [dashData, forage, upcoming, expenseData, harvestData, inspectionData] = await Promise.all([
-          dashboardService.get(),
-          planningService.getForageByMonth(currentMonth),
-          planningService.getForageByMonth(nextMonth),
-          expensesService.getAll().catch(() => []),
-          supabase.from('harvests').select('quantity, harvest_date').eq('user_id', userId).then((r) => r.data ?? [], () => []),
-          supabase.from('inspections').select('pest_detected, inspection_date').eq('user_id', userId).then((r) => r.data ?? [], () => []),
-        ]);
-        setData(dashData);
-        setForageData(forage || []);
-        setUpcomingForage(upcoming || []);
-        setExpenses(expenseData || []);
-        setHarvestRows(harvestData || []);
-        setInspectionRows(inspectionData || []);
+      const [dashData, forage, upcoming, expenseData, harvestData, inspectionData] = await Promise.all([
+        dashboardService.get(),
+        planningService.getForageByMonth(currentMonth),
+        planningService.getForageByMonth(nextMonth),
+        expensesService.getAll().catch(() => []),
+        supabase.from('harvests').select('quantity, harvest_date').eq('user_id', userId).then((r) => r.data ?? [], () => []),
+        supabase.from('inspections').select('pest_detected, inspection_date').eq('user_id', userId).then((r) => r.data ?? [], () => []),
+      ]);
+      setData(dashData);
+      setForageData(forage || []);
+      setUpcomingForage(upcoming || []);
+      setExpenses(expenseData || []);
+      setHarvestRows(harvestData || []);
+      setInspectionRows(inspectionData || []);
 
-        if (userId) {
-          await loadRankings(userId);
-          // Check for contract expiry and create notifications
-          await apiariesService.checkAndNotifyContractExpiry();
-        }
-      } catch (err) {
-        console.error('Dashboard load error:', err);
-      } finally {
-        setLoading(false);
+      if (userId) {
+        await loadRankings(userId);
+        // Check for contract expiry and create notifications
+        await apiariesService.checkAndNotifyContractExpiry();
       }
-    };
+    } catch (err) {
+      console.error('Dashboard load error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadData();
   }, []);
 
+  // Refresh data when window gains focus (user comes back to dashboard)
+  useEffect(() => {
+    const handleFocus = () => {
+      const userId = user?.id;
+      if (userId) {
+        console.log('Dashboard focused - refreshing rankings data');
+        loadRankings(userId);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user?.id]);
+
+  // Also refresh when component receives focus (for mobile navigation)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user?.id) {
+        console.log('Dashboard visible - refreshing rankings data');
+        loadRankings(user.id);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [user?.id]);
+
   const loadRankings = async (userId: number) => {
     try {
+      console.log('Loading rankings for user:', userId);
       const [
         { data: harvests, error: harvestError },
         { data: allExpenses, error: expenseError },
         { data: inspections, error: inspectionError },
         { data: apiaryRows, error: apiaryError },
+        { data: hiveRows, error: hiveError },
       ] = await Promise.all([
         supabase
           .from('harvests')
-          .select('hive_id, apiary_id, quantity, hives(id, name, apiary_id, apiaries(id, name, district, area, forage_primary)), apiaries(id, name, district, area, forage_primary)')
+          .select('hive_id, apiary_id, quantity, harvest_date')
           .eq('user_id', userId),
         supabase
           .from('expenses')
-          .select('hive_id, apiary_id, amount, hives(id, name, apiary_id, apiaries(id, name)), apiaries(id, name)')
+          .select('hive_id, apiary_id, amount')
           .eq('user_id', userId),
         supabase
           .from('inspections')
-          .select('hive_id, apiary_id, pest_detected, hives(id, name, apiary_id, apiaries(id, name)), apiaries(id, name)')
+          .select('hive_id, apiary_id, pest_detected')
           .eq('user_id', userId),
         supabase
           .from('apiaries')
-          .select('id, district, area, forage_primary')
+          .select('id, name, district, area, forage_primary')
+          .eq('user_id', userId),
+        supabase
+          .from('hives')
+          .select('id, name, apiary_id')
           .eq('user_id', userId),
       ]);
 
@@ -164,29 +198,56 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
       if (expenseError) console.warn('Expense error:', expenseError);
       if (inspectionError) console.warn('Inspection error:', inspectionError);
       if (apiaryError) console.warn('Apiary error:', apiaryError);
+      if (hiveError) console.warn('Hive error:', hiveError);
+
+      console.log('Raw harvest data:', harvests);
+      console.log('Raw hive data:', hiveRows);
+      console.log('Raw apiary data:', apiaryRows);
+      console.log('Total harvest records found:', harvests?.length || 0);
+
+      // Create lookup maps
+      const hiveLookup = new Map<number, { name: string; apiary_id?: number }>();
+      (hiveRows || []).forEach((hive: any) => {
+        hiveLookup.set(hive.id, { name: hive.name, apiary_id: hive.apiary_id });
+      });
+
+      const apiaryLookup = new Map<number, { name: string; district?: string; area?: string; forage_primary?: string }>();
+      (apiaryRows || []).forEach((apiary: any) => {
+        apiaryLookup.set(apiary.id, {
+          name: apiary.name,
+          district: apiary.district,
+          area: apiary.area,
+          forage_primary: apiary.forage_primary,
+        });
+      });
 
       // ── Hive rankings ──────────────────────────────────────────────
       // Harvest: highest total qty per hive
       const hiveHarvMap: Record<number, { name: string; apiary: string; qty: number }> = {};
       (harvests ?? []).forEach((h: any) => {
         if (!h.hive_id) return;
-        const hiveName = h.hives?.name || `Hive ${h.hive_id}`;
-        const apiaryName = h.hives?.apiaries?.name || h.apiaries?.name || '—';
+        const hiveInfo = hiveLookup.get(h.hive_id);
+        const hiveName = hiveInfo?.name || `Hive ${h.hive_id}`;
+        const apiaryInfo = hiveInfo?.apiary_id ? apiaryLookup.get(hiveInfo.apiary_id) : null;
+        const apiaryName = apiaryInfo?.name || '—';
         if (!hiveHarvMap[h.hive_id]) hiveHarvMap[h.hive_id] = { name: hiveName, apiary: apiaryName, qty: 0 };
-        hiveHarvMap[h.hive_id].qty += h.quantity || 0;
+        hiveHarvMap[h.hive_id].qty += (h.quantity || 0);
+        console.log(`Adding ${h.quantity}kg to hive ${h.hive_id} (${hiveName}). Total now: ${hiveHarvMap[h.hive_id].qty}kg`);
       });
       const hiveHarvRank = Object.entries(hiveHarvMap)
         .map(([id, v]) => ({ id: +id, name: v.name, secondary: v.apiary, value: v.qty, label: `${v.qty.toFixed(1)} kg` }))
         .sort((a, b) => b.value - a.value);
       setHiveHarvestRank(hiveHarvRank);
-      console.log('Hive harvest rank set:', hiveHarvRank.length, 'entries');
+      console.log('Hive harvest rank set:', hiveHarvRank.length, 'entries', hiveHarvRank);
 
       // Expenses: lowest total per hive
       const hiveExpMap: Record<number, { name: string; apiary: string; amt: number }> = {};
       (allExpenses ?? []).forEach((e: any) => {
         if (!e.hive_id) return;
-        const hiveName = e.hives?.name || `Hive ${e.hive_id}`;
-        const apiaryName = e.hives?.apiaries?.name || e.apiaries?.name || '—';
+        const hiveInfo = hiveLookup.get(e.hive_id);
+        const hiveName = hiveInfo?.name || `Hive ${e.hive_id}`;
+        const apiaryInfo = hiveInfo?.apiary_id ? apiaryLookup.get(hiveInfo.apiary_id) : null;
+        const apiaryName = apiaryInfo?.name || '—';
         if (!hiveExpMap[e.hive_id]) hiveExpMap[e.hive_id] = { name: hiveName, apiary: apiaryName, amt: 0 };
         hiveExpMap[e.hive_id].amt += e.amount || 0;
       });
@@ -200,8 +261,10 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
       const hivePestMap: Record<number, { name: string; apiary: string; count: number }> = {};
       (inspections ?? []).forEach((i: any) => {
         if (!i.hive_id) return;
-        const hiveName = i.hives?.name || `Hive ${i.hive_id}`;
-        const apiaryName = i.hives?.apiaries?.name || i.apiaries?.name || '—';
+        const hiveInfo = hiveLookup.get(i.hive_id);
+        const hiveName = hiveInfo?.name || `Hive ${i.hive_id}`;
+        const apiaryInfo = hiveInfo?.apiary_id ? apiaryLookup.get(hiveInfo.apiary_id) : null;
+        const apiaryName = apiaryInfo?.name || '—';
         if (!hivePestMap[i.hive_id]) hivePestMap[i.hive_id] = { name: hiveName, apiary: apiaryName, count: 0 };
         if (i.pest_detected) hivePestMap[i.hive_id].count += 1;
       });
@@ -214,23 +277,35 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
       // ── Apiary rankings ────────────────────────────────────────────
       const apiaryHarvMap: Record<number, { name: string; qty: number }> = {};
       (harvests ?? []).forEach((h: any) => {
-        const aid = h.apiary_id || h.hives?.apiary_id;
+        // Get apiary_id from harvest directly, or from hive's apiary_id
+        let aid = h.apiary_id;
+        if (!aid && h.hive_id) {
+          const hiveInfo = hiveLookup.get(h.hive_id);
+          aid = hiveInfo?.apiary_id;
+        }
         if (!aid) return;
-        const aname = h.apiaries?.name || h.hives?.apiaries?.name || `Apiary ${aid}`;
+        const apiaryInfo = apiaryLookup.get(aid);
+        const aname = apiaryInfo?.name || `Apiary ${aid}`;
         if (!apiaryHarvMap[aid]) apiaryHarvMap[aid] = { name: aname, qty: 0 };
-        apiaryHarvMap[aid].qty += h.quantity || 0;
+        apiaryHarvMap[aid].qty += (h.quantity || 0);
+        console.log(`Adding ${h.quantity}kg to apiary ${aid} (${aname}). Total now: ${apiaryHarvMap[aid].qty}kg`);
       });
       const apiaryHarvRank = Object.entries(apiaryHarvMap)
         .map(([id, v]) => ({ id: +id, name: v.name, secondary: '', value: v.qty, label: `${v.qty.toFixed(1)} kg` }))
         .sort((a, b) => b.value - a.value);
       setApiaryHarvestRank(apiaryHarvRank);
-      console.log('Apiary harvest rank set:', apiaryHarvRank.length, 'entries');
+      console.log('Apiary harvest rank set:', apiaryHarvRank.length, 'entries', apiaryHarvRank);
 
       const apiaryExpMap: Record<number, { name: string; amt: number }> = {};
       (allExpenses ?? []).forEach((e: any) => {
-        const aid = e.apiary_id || e.hives?.apiary_id;
+        let aid = e.apiary_id;
+        if (!aid && e.hive_id) {
+          const hiveInfo = hiveLookup.get(e.hive_id);
+          aid = hiveInfo?.apiary_id;
+        }
         if (!aid) return;
-        const aname = e.apiaries?.name || e.hives?.apiaries?.name || `Apiary ${aid}`;
+        const apiaryInfo = apiaryLookup.get(aid);
+        const aname = apiaryInfo?.name || `Apiary ${aid}`;
         if (!apiaryExpMap[aid]) apiaryExpMap[aid] = { name: aname, amt: 0 };
         apiaryExpMap[aid].amt += e.amount || 0;
       });
@@ -242,9 +317,14 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
 
       const apiaryPestMap: Record<number, { name: string; count: number }> = {};
       (inspections ?? []).forEach((i: any) => {
-        const aid = i.apiary_id || i.hives?.apiary_id;
+        let aid = i.apiary_id;
+        if (!aid && i.hive_id) {
+          const hiveInfo = hiveLookup.get(i.hive_id);
+          aid = hiveInfo?.apiary_id;
+        }
         if (!aid) return;
-        const aname = i.apiaries?.name || i.hives?.apiaries?.name || `Apiary ${aid}`;
+        const apiaryInfo = apiaryLookup.get(aid);
+        const aname = apiaryInfo?.name || `Apiary ${aid}`;
         if (!apiaryPestMap[aid]) apiaryPestMap[aid] = { name: aname, count: 0 };
         if (i.pest_detected) apiaryPestMap[aid].count += 1;
       });
@@ -256,9 +336,15 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
 
       const forageAreaMap: Record<string, ForageAreaEntry> = {};
       (harvests ?? []).forEach((h: any) => {
-        const apiaryInfo = h.apiaries || h.hives?.apiaries || {};
-        const district = (apiaryInfo.district || 'Unknown').trim();
-        const area = (apiaryInfo.area || district || 'Unknown').trim();
+        let aid = h.apiary_id;
+        if (!aid && h.hive_id) {
+          const hiveInfo = hiveLookup.get(h.hive_id);
+          aid = hiveInfo?.apiary_id;
+        }
+        if (!aid) return;
+        const apiaryInfo = apiaryLookup.get(aid);
+        const district = (apiaryInfo?.district || 'Unknown').trim();
+        const area = (apiaryInfo?.area || district || 'Unknown').trim();
         const key = `${district}|${area}`;
         if (!forageAreaMap[key]) {
           forageAreaMap[key] = {
@@ -273,7 +359,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         }
         forageAreaMap[key].totalYield += h.quantity || 0;
         forageAreaMap[key].records += 1;
-        const recordedForage = apiaryInfo.forage_primary;
+        const recordedForage = apiaryInfo?.forage_primary;
         if (recordedForage && !forageAreaMap[key].forageRecords.includes(recordedForage)) {
           forageAreaMap[key].forageRecords.push(recordedForage);
         }
@@ -305,6 +391,8 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         .map((entry, index) => ({ ...entry, id: index + 1 }));
       setForageAreaRank(forageAreaRankData);
       console.log('Forage area rank set:', forageAreaRankData.length, 'entries');
+
+      console.log('Rankings refresh completed at:', new Date().toLocaleTimeString());
     } catch (err) {
       console.error('Rankings load error:', err);
     }
@@ -335,18 +423,6 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
     return Object.values(fallbackMap).sort((a, b) => b.records - a.records).map((entry, index) => ({ ...entry, id: index + 1 }));
   })();
   const isForageAreaFallback = forageAreaRank.length === 0 && forageAreaDisplay.length > 0;
-
-  const queenAgeData = {
-    low: hives.filter((h: any) => h.queen_age_risk === 'low').map((h: any) => ({
-      hiveId: h.name, apiaryName: h.apiary_name || '-', queenAge: h.queen_age || 0, riskLevel: 'low' as const,
-    })),
-    medium: hives.filter((h: any) => h.queen_age_risk === 'medium').map((h: any) => ({
-      hiveId: h.name, apiaryName: h.apiary_name || '-', queenAge: h.queen_age || 0, riskLevel: 'medium' as const,
-    })),
-    high: hives.filter((h: any) => h.queen_age_risk === 'high').map((h: any) => ({
-      hiveId: h.name, apiaryName: h.apiary_name || '-', queenAge: h.queen_age || 0, riskLevel: 'high' as const,
-    })),
-  };
 
   const rangeDays = dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
   const rangeStart = Date.now() - (rangeDays * 24 * 60 * 60 * 1000);
@@ -473,43 +549,6 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
                   <InfoBox title={t('expenses', selectedLanguage)} value={`Rs.${rangeExpenses.toFixed(0)}`} tone="rose" icon={Wallet} />
                   <InfoBox title={t('notInspected', selectedLanguage)} value={String(rangeNotInspected)} tone="rose" icon={ClipboardList} />
                   <InfoBox title={t('totalYield', selectedLanguage)} value={`${rangeYield.toFixed(1)} kg`} tone="emerald" icon={Wheat} />
-                </div>
-              </div>
-
-              {/* ── Queen Age Risk ───────────────────────────────────────── */}
-              <div className="bg-white rounded-xl p-3 shadow-sm">
-                <h2 className="text-[0.875rem] font-bold text-stone-800 mb-3">{t('queenAgeRisk', selectedLanguage)}</h2>
-                <div className="flex gap-1.5 mb-3">
-                  {(['low', 'medium', 'high'] as const).map(r => (
-                    <button key={r} onClick={() => setQueenRiskView(r)}
-                      className={`flex-1 py-1.5 px-2 rounded-lg text-[0.75rem] font-medium transition-colors ${
-                        queenRiskView === r
-                          ? r === 'low' ? 'bg-emerald-500 text-white' : r === 'medium' ? 'bg-amber-500 text-white' : 'bg-red-500 text-white'
-                          : r === 'low' ? 'bg-emerald-50 text-emerald-700' : r === 'medium' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'
-                      }`}>
-                      {r === 'low' ? t('lowRisk', selectedLanguage) : r === 'medium' ? t('mediumRisk', selectedLanguage) : t('highRisk', selectedLanguage)}
-                    </button>
-                  ))}
-                </div>
-                <div className={`p-3 rounded-lg mb-3 border ${queenRiskView === 'low' ? 'bg-emerald-50 border-emerald-200' : queenRiskView === 'medium' ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'}`}>
-                  {queenRiskView === 'low' && <><p className="text-emerald-900 font-medium mb-0.5 text-[0.8rem]">{t('queenLowDesc', selectedLanguage)}</p><p className="text-emerald-700 text-[0.75rem]">{t('queenLowAction', selectedLanguage)}</p></>}
-                  {queenRiskView === 'medium' && <><p className="text-amber-900 font-medium mb-0.5 text-[0.8rem]">{t('queenMedDesc', selectedLanguage)}</p><p className="text-amber-700 text-[0.75rem]">{t('queenMedAction', selectedLanguage)}</p></>}
-                  {queenRiskView === 'high' && <><p className="text-red-900 font-medium mb-0.5 text-[0.8rem]">{t('queenHighDesc', selectedLanguage)}</p><p className="text-red-700 text-[0.75rem]">{t('queenHighAction', selectedLanguage)}</p></>}
-                </div>
-                <div className="space-y-2">
-                  {queenAgeData[queenRiskView].length === 0 ? (
-                    <p className="text-sm text-stone-500 text-center py-4">{t('noHivesInCategory', selectedLanguage)}</p>
-                  ) : queenAgeData[queenRiskView].map((hive) => (
-                    <div key={hive.hiveId} className="flex items-center justify-between p-2.5 bg-stone-50 rounded-lg">
-                      <div><p className="font-medium text-stone-800 text-[0.8rem]">{hive.hiveId}</p><p className="text-[0.7rem] text-stone-600">{hive.apiaryName}</p></div>
-                      <div className="text-right">
-                        <p className="font-medium text-stone-800 text-[0.8rem]">{hive.queenAge} years</p>
-                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${hive.riskLevel === 'low' ? 'bg-emerald-100 text-emerald-700' : hive.riskLevel === 'medium' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
-                          {hive.riskLevel.toUpperCase()}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </div>
 
