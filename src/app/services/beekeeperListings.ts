@@ -119,63 +119,92 @@ export const beekeeperListingsService = {
     const output: ListingSummary[] = [];
 
     for (const row of (data || [])) {
-      // Fetch related data separately to avoid JOIN issues
-      const [plotResult, ownerResult] = await Promise.all([
-        supabase.from('landowner_plots').select('*').eq('id', row.plot_id).single(),
-        supabase.from('users').select('id, name, phone, created_at').eq('id', row.user_id).single()
-      ]);
+      try {
+        // Fetch related data separately to avoid JOIN issues
+        const [plotResult, ownerResult] = await Promise.all([
+          supabase.from('landowner_plots').select('*').eq('id', row.plot_id).single(),
+          supabase.from('users').select('id, name, phone, created_at').eq('id', row.user_id).single()
+        ]);
 
-      const plot = plotResult.data;
-      const owner = ownerResult.data;
+        const plot = plotResult.data;
+        const owner = ownerResult.data;
 
-      if (!plot) continue;
+        if (!plot) {
+          console.warn(`Skipping listing ${row.id}: plot ${row.plot_id} not found`);
+          continue;
+        }
 
-      // Get accepted hive count for this listing
-      const { data: acceptedBids } = await supabase
-        .from('landowner_bids')
-        .select('hives_proposed')
-        .eq('listing_id', row.id)
-        .eq('status', 'accepted');
+        if (!owner) {
+          console.warn(`Skipping listing ${row.id}: owner ${row.user_id} not found`);
+          continue;
+        }
 
-      const acceptedHiveCount = (acceptedBids || []).reduce((sum: number, b: any) => sum + (b.hives_proposed || 0), 0);
+        // Get accepted hive count for this listing - with error handling
+        let acceptedHiveCount = 0;
+        try {
+          const { data: acceptedBids } = await supabase
+            .from('landowner_bids')
+            .select('hives_proposed')
+            .eq('listing_id', row.id)
+            .eq('status', 'accepted');
+          acceptedHiveCount = (acceptedBids || []).reduce((sum: number, b: any) => sum + (b.hives_proposed || 0), 0);
+        } catch (bidError) {
+          console.warn(`Error fetching bids for listing ${row.id}:`, bidError);
+        }
 
-      // Get review count for owner
-      const { count: reviewCount } = await supabase
-        .from('listing_reviews')
-        .select('id', { count: 'exact', head: true })
-        .eq('owner_user_id', row.user_id);
+        // Get review count for owner - with error handling
+        let reviewCount = 0;
+        try {
+          const { count } = await supabase
+            .from('listing_reviews')
+            .select('id', { count: 'exact', head: true })
+            .eq('owner_user_id', row.user_id);
+          reviewCount = count || 0;
+        } catch (reviewError) {
+          console.warn(`Error fetching reviews for owner ${row.user_id}:`, reviewError);
+        }
 
-      // Calculate owner's years active
-      const ownerCreatedAt = owner?.created_at ? new Date(owner.created_at) : new Date();
-      const yearsActive = Math.max(1, Math.floor((Date.now() - ownerCreatedAt.getTime()) / (365.25 * 24 * 60 * 60 * 1000)));
+        // Calculate owner's years active
+        const ownerCreatedAt = owner?.created_at ? new Date(owner.created_at) : new Date();
+        const yearsActive = Math.max(1, Math.floor((Date.now() - ownerCreatedAt.getTime()) / (365.25 * 24 * 60 * 60 * 1000)));
 
-      output.push({
-        id: `${row.user_id}:${row.id}`,
-        ownerUserId: row.user_id,
-        listingId: row.id,
-        plotId: plot.id,
-        listingCode: row.listing_code || makeListingCode(row.id),
-        plotName: plot.name,
-        district: plot.district || '',
-        dsDivision: plot.ds_division || '',
-        coordinates: { lat: plot.gps_latitude || 0, lng: plot.gps_longitude || 0 },
-        forageNames: (plot.forage_entries || []).map((e: any) => e.name).filter(Boolean),
-        shadeProfile: plot.shade_profile || 'Full Sun',
-        hasWaterOnSite: plot.water_availability === 'On-site',
-        vehicleAccess: plot.vehicle_access || 'Lorry',
-        nightAccess: plot.night_access || false,
-        paymentLabel: paymentLabel(row.financial_terms, row.cash_rent_lkr, row.honey_share_kg),
-        financialTerms: row.financial_terms,
-        ownerName: owner?.name || `Landowner ${row.user_id}`,
-        ownerRating: 4.5, // Default rating - could be calculated from reviews
-        ownerReviewCount: reviewCount || 0,
-        ownerVerified: true, // Could be based on verification status
-        ownerContact: owner?.phone || '',
-        ownerYearsActive: yearsActive,
-        image: (plot.images || [])[0],
-        maxHiveCapacity: 10, // Default capacity
-        acceptedHiveCount,
-      });
+        // Load plot images from localStorage if needed
+        const imagesKey = `plot_images_${plot.id}`;
+        const storedImages = localStorage.getItem(imagesKey);
+        const plotImages = storedImages ? JSON.parse(storedImages) : (plot.images || []);
+
+        output.push({
+          id: `${row.user_id}:${row.id}`,
+          ownerUserId: row.user_id,
+          listingId: row.id,
+          plotId: plot.id,
+          listingCode: row.listing_code || makeListingCode(row.id),
+          plotName: plot.name,
+          district: plot.district || '',
+          dsDivision: plot.ds_division || '',
+          coordinates: { lat: plot.gps_latitude || 0, lng: plot.gps_longitude || 0 },
+          forageNames: (plot.forage_entries || []).map((e: any) => e.name).filter(Boolean),
+          shadeProfile: plot.shade_profile || 'Full Sun',
+          hasWaterOnSite: plot.water_availability === 'On-site',
+          vehicleAccess: plot.vehicle_access || 'Lorry',
+          nightAccess: plot.night_access || false,
+          paymentLabel: paymentLabel(row.financial_terms, row.cash_rent_lkr, row.honey_share_kg),
+          financialTerms: row.financial_terms,
+          ownerName: owner?.name || `Landowner ${row.user_id}`,
+          ownerRating: 4.5, // Default rating - could be calculated from reviews
+          ownerReviewCount: reviewCount,
+          ownerVerified: true, // Could be based on verification status
+          ownerContact: owner?.phone || '',
+          ownerYearsActive: yearsActive,
+          image: plotImages[0],
+          maxHiveCapacity: 10, // Default capacity
+          acceptedHiveCount,
+        });
+      } catch (processError) {
+        console.warn(`Error processing listing ${row.id}:`, processError);
+        // Continue processing other listings
+        continue;
+      }
     }
 
     return output.sort((a, b) => a.listingCode.localeCompare(b.listingCode));
@@ -288,52 +317,69 @@ export const beekeeperListingsService = {
     const proposals: ListingProposal[] = [];
 
     for (const bid of (bids || [])) {
-      // Fetch related data separately to avoid JOIN issues
-      const [listingResult] = await Promise.all([
-        supabase.from('landowner_listings').select('*').eq('id', bid.listing_id).single()
-      ]);
+      try {
+        // Fetch related data separately to avoid JOIN issues
+        const [listingResult] = await Promise.all([
+          supabase.from('landowner_listings').select('*').eq('id', bid.listing_id).single()
+        ]);
 
-      const listing = listingResult.data;
-      if (!listing) continue;
+        const listing = listingResult.data;
+        if (!listing) {
+          console.warn(`Skipping bid ${bid.id}: listing ${bid.listing_id} not found`);
+          continue;
+        }
 
-      // Fetch plot and user data separately
-      const [plotResult, ownerResult] = await Promise.all([
-        supabase.from('landowner_plots').select('*').eq('id', listing.plot_id).single(),
-        supabase.from('users').select('name, phone').eq('id', listing.user_id).single()
-      ]);
+        // Fetch plot and user data separately
+        const [plotResult, ownerResult] = await Promise.all([
+          supabase.from('landowner_plots').select('*').eq('id', listing.plot_id).single(),
+          supabase.from('users').select('name, phone').eq('id', listing.user_id).single()
+        ]);
 
-      const plot = plotResult.data;
-      const owner = ownerResult.data;
+        const plot = plotResult.data;
+        const owner = ownerResult.data;
 
-      // Get accepted hive count
-      const { data: acceptedBids } = await supabase
-        .from('landowner_bids')
-        .select('hives_proposed')
-        .eq('listing_id', listing.id)
-        .eq('status', 'accepted');
+        if (!plot) {
+          console.warn(`Skipping bid ${bid.id}: plot ${listing.plot_id} not found`);
+          continue;
+        }
 
-      const acceptedHiveCount = (acceptedBids || []).reduce((sum: number, b: any) => sum + (b.hives_proposed || 0), 0);
+        // Get accepted hive count - with error handling
+        let acceptedHiveCount = 0;
+        try {
+          const { data: acceptedBids } = await supabase
+            .from('landowner_bids')
+            .select('hives_proposed')
+            .eq('listing_id', listing.id)
+            .eq('status', 'accepted');
+          acceptedHiveCount = (acceptedBids || []).reduce((sum: number, b: any) => sum + (b.hives_proposed || 0), 0);
+        } catch (bidCountError) {
+          console.warn(`Error fetching accepted bids for listing ${listing.id}:`, bidCountError);
+        }
 
-      // Get contract if bid is accepted
-      let contract: any = null;
-      if (bid.status === 'accepted') {
-        const { data: contracts } = await supabase
-          .from('landowner_contracts')
-          .select('*')
-          .eq('listing_id', listing.id)
-          .eq('bid_id', bid.id)
-          .single();
-        contract = contracts;
-      }
+        // Get contract if bid is accepted - with error handling
+        let contract: any = null;
+        if (bid.status === 'accepted') {
+          try {
+            const { data: contracts } = await supabase
+              .from('landowner_contracts')
+              .select('*')
+              .eq('listing_id', listing.id)
+              .eq('bid_id', bid.id)
+              .single();
+            contract = contracts;
+          } catch (contractError) {
+            console.warn(`Error fetching contract for bid ${bid.id}:`, contractError);
+          }
+        }
 
-      proposals.push({
-        ownerUserId: listing.user_id,
-        listingId: listing.id,
-        bidId: bid.id,
-        listingCode: listing.listing_code || makeListingCode(listing.id),
-        plotName: plot?.name || 'Plot',
-        province: plot?.province || '-',
-        hiveCount: bid.hives_proposed,
+        proposals.push({
+          ownerUserId: listing.user_id,
+          listingId: listing.id,
+          bidId: bid.id,
+          listingCode: listing.listing_code || makeListingCode(listing.id),
+          plotName: plot?.name || 'Plot',
+          province: plot?.province || '-',
+          hiveCount: bid.hives_proposed,
         moveInDate: bid.placement_start_date,
         moveOutDate: bid.placement_end_date,
         submittedAt: bid.submitted_at || bid.created_at,
@@ -355,6 +401,11 @@ export const beekeeperListingsService = {
         gpsLongitude: plot?.gps_longitude ?? 0,
         forageEntries: plot?.forage_entries || [],
       });
+      } catch (processError) {
+        console.warn(`Error processing bid ${bid.id}:`, processError);
+        // Continue processing other bids
+        continue;
+      }
     }
 
     return proposals.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());

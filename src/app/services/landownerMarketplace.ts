@@ -405,7 +405,7 @@ export const landownerMarketplaceService = {
         plot_id: payload.plotId,
         financial_terms: payload.financialTerms,
         cash_rent_lkr: payload.cashRentLkr,
-        honey_share_kg: payload.honeyShareKg,
+        // honey_share_kg: payload.honeyShareKg, // Column doesn't exist in schema
         spraying_clause_agreed: payload.sprayingClauseAgreed,
         status: payload.status,
         availability_end_date: payload.availabilityEndDate,
@@ -464,7 +464,7 @@ export const landownerMarketplaceService = {
         plot_id: payload.plotId,
         financial_terms: payload.financialTerms,
         cash_rent_lkr: payload.cashRentLkr,
-        honey_share_kg: payload.honeyShareKg,
+        // honey_share_kg: payload.honeyShareKg, // Column doesn't exist in schema
         spraying_clause_agreed: payload.sprayingClauseAgreed,
         status: payload.status,
         availability_end_date: payload.availabilityEndDate,
@@ -594,31 +594,45 @@ export const landownerMarketplaceService = {
     const isCapacityFull = newTotalAccepted >= maxCapacity;
 
     // Update the bid status
-    await supabase
+    const { error: updateError } = await supabase
       .from('landowner_bids')
-      .update({ status: 'accepted' })
+      .update({ status: 'accepted', updated_at: new Date().toISOString() })
       .eq('id', bidId);
+
+    if (updateError) {
+      console.error('Failed to update bid status:', updateError);
+      throw new Error('Failed to accept bid: ' + updateError.message);
+    }
 
     // If capacity is full, reject other pending bids
     if (isCapacityFull) {
-      await supabase
+      const { error: rejectError } = await supabase
         .from('landowner_bids')
-        .update({ status: 'rejected' })
+        .update({ status: 'rejected', updated_at: new Date().toISOString() })
         .eq('listing_id', listingId)
         .eq('status', 'pending')
         .neq('id', bidId);
+
+      if (rejectError) {
+        console.error('Failed to reject other bids:', rejectError);
+      }
     }
 
     // Update listing status
     const nextStatus: ListingStatus = isCapacityFull ? 'occupied' : 'accepted';
-    await supabase
+    const { error: listingUpdateError } = await supabase
       .from('landowner_listings')
       .update({ status: nextStatus, updated_at: new Date().toISOString() })
       .eq('id', listingId);
 
+    if (listingUpdateError) {
+      console.error('Failed to update listing status:', listingUpdateError);
+      throw new Error('Failed to update listing status: ' + listingUpdateError.message);
+    }
+
     // Create contract
     const plotName = listing.landowner_plots?.name || 'Plot';
-    await supabase
+    const { error: contractError } = await supabase
       .from('landowner_contracts')
       .insert({
         user_id: userId,
@@ -636,6 +650,11 @@ export const landownerMarketplaceService = {
         honey_share_kgs: listing.honey_share_kg,
         created_at: new Date().toISOString(),
       });
+
+    if (contractError) {
+      console.error('Failed to create contract:', contractError);
+      throw new Error('Failed to create contract: ' + contractError.message);
+    }
 
     notificationsService.createActionNotification({
       entity: 'Bid',

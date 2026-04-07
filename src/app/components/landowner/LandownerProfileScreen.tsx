@@ -149,7 +149,11 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
     try {
       const imageUrl = await fileToDataUrl(file);
       const updated = await profileService.update({ avatar_url: imageUrl });
-      setProfile(updated);
+
+      // Force reload the complete profile to ensure image shows
+      const refreshedProfile = await profileService.get();
+      setProfile(refreshedProfile.user);
+
       setSaveMessage('Profile photo updated successfully');
     } catch (error) {
       console.error('Failed to update profile photo:', error);
@@ -536,30 +540,6 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
               {saveMessage}
             </p>
           )}
-
-          {/* Activity Overview Card */}
-          <div className="rounded-xl border border-purple-200 bg-purple-50/70 p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-purple-900">Recent Activity</p>
-            <div className="mt-2 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-purple-800">Active Listings</span>
-                <span className="font-semibold text-purple-900">0</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-purple-800">Contract Proposals</span>
-                <span className="font-semibold text-purple-900">0</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-purple-800">Completed Contracts</span>
-                <span className="font-semibold text-purple-900">0</span>
-              </div>
-            </div>
-            <div className="mt-3 rounded-lg bg-purple-100/50 p-2">
-              <p className="text-xs text-purple-800">
-                Start by adding land plots below, then create your first listing to connect with beekeepers in your area.
-              </p>
-            </div>
-          </div>
 
           {/* Land Plots Card */}
           <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">

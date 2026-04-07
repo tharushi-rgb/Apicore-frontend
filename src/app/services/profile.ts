@@ -96,6 +96,7 @@ export const profileService = {
     // Return the merged data including non-db fields
     return {
       ...data,
+      avatar_url: avatarUrl ?? (data as any)?.avatar_url ?? (current as any)?.avatar_url,
       province: p.province ?? (current as any)?.province,
       ds_division: p.ds_division ?? (current as any)?.ds_division,
     } as Profile;
