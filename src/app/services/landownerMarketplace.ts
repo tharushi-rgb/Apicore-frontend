@@ -145,7 +145,7 @@ function mapDbToListing(row: any): Listing {
     plotId: row.plot_id,
     financialTerms: row.financial_terms || 'cash_rent',
     cashRentLkr: row.cash_rent_lkr,
-    honeyShareKg: row.honey_share_kg,
+    honeyShareKg: row.honey_share_kgs,
     sprayingClauseAgreed: row.spraying_clause_agreed || false,
     status: row.status || 'draft',
     availabilityEndDate: row.availability_end_date,

@@ -161,7 +161,7 @@ export const beekeeperListingsService = {
         hasWaterOnSite: plot.water_availability === 'On-site',
         vehicleAccess: plot.vehicle_access || 'Lorry',
         nightAccess: plot.night_access || false,
-        paymentLabel: paymentLabel(row.financial_terms, row.cash_rent_lkr, row.honey_share_kg),
+        paymentLabel: paymentLabel(row.financial_terms, row.cash_rent_lkr, row.honey_share_kgs),
         financialTerms: row.financial_terms,
         ownerName: owner?.name || `Landowner ${row.user_id}`,
         ownerRating: 4.5, // Default rating - could be calculated from reviews
@@ -349,7 +349,7 @@ export const beekeeperListingsService = {
         ownerContact: owner?.phone || '',
         financialTerms: listing.financial_terms,
         cashRentLkr: listing.cash_rent_lkr,
-        honeyShareKg: listing.honey_share_kg,
+        honeyShareKg: listing.honey_share_kgs,
         waterAvailability: plot?.water_availability || 'On-site',
         vehicleAccess: plot?.vehicle_access || 'Lorry',
         nightAccess: plot?.night_access ?? false,
