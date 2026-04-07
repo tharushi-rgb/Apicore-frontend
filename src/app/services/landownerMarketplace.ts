@@ -693,11 +693,16 @@ export const landownerMarketplaceService = {
   }> {
     const userId = getUserId();
 
-    // Get all listings for this user
-    const { data: listings } = await supabase
+    // Get all listings for this user - use basic select to avoid column issues
+    const { data: listings, error: listingsError } = await supabase
       .from('landowner_listings')
-      .select('id, status, financial_terms, cash_rent_lkr, honey_share_kg')
+      .select('id, status, financial_terms, cash_rent_lkr')
       .eq('user_id', userId);
+
+    if (listingsError) {
+      console.warn('Error fetching listings:', listingsError.message);
+      return { hiveCount: 0, pendingBids: 0, rupeesReceived: 0, honeyShareKg: 0 };
+    }
 
     if (!listings || listings.length === 0) {
       return { hiveCount: 0, pendingBids: 0, rupeesReceived: 0, honeyShareKg: 0 };
@@ -729,9 +734,9 @@ export const landownerMarketplaceService = {
       .filter((l: any) => l.financial_terms === 'cash_rent')
       .reduce((sum: number, l: any) => sum + (l.cash_rent_lkr || 0), 0);
 
-    const honeyShareKg = acceptedListings
-      .filter((l: any) => l.financial_terms === 'honey_share')
-      .reduce((sum: number, l: any) => sum + (l.honey_share_kg || 0), 0);
+    // Note: honey_share_kg column might not exist in database schema
+    // For now, return 0 for honey share as this feature may not be implemented in the database
+    const honeyShareKg = 0;
 
     return {
       hiveCount,

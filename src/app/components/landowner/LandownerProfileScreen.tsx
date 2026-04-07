@@ -410,29 +410,13 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
               </div>
               
               <div className="relative flex items-center justify-end">
-                {!isEditingProfile ? (
+                {!isEditingProfile && (
                   <button
                     onClick={handleOpenEdit}
                     className="rounded-full border border-emerald-300 bg-white px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors"
                   >
                     {t('edit', selectedLanguage)}
                   </button>
-                ) : (
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={handleCancelEdit}
-                      className="rounded-full border border-stone-300 bg-white px-2.5 py-1 text-xs font-semibold text-stone-700 hover:bg-stone-100 transition-colors"
-                    >
-                      {t('cancel', selectedLanguage)}
-                    </button>
-                    <button
-                      onClick={saveProfile}
-                      disabled={isSaving}
-                      className="rounded-full bg-emerald-700 px-2.5 py-1 text-xs font-semibold text-white hover:bg-emerald-800 transition-colors disabled:opacity-60"
-                    >
-                      {isSaving ? t('saving', selectedLanguage) : t('saveChanges', selectedLanguage)}
-                    </button>
-                  </div>
                 )}
               </div>
 
@@ -522,6 +506,23 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                       disabled={!editDistrict}
                     />
                     <ProfileEditInputTile label={t('bRegistration', selectedLanguage)} value={editBusinessRegNo} onChange={setEditBusinessRegNo} placeholder="Enter business registration" />
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-1.5 pt-3">
+                      <button
+                        onClick={handleCancelEdit}
+                        className="flex-1 rounded-full border border-stone-300 bg-white px-2.5 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-100 transition-colors"
+                      >
+                        {t('cancel', selectedLanguage)}
+                      </button>
+                      <button
+                        onClick={saveProfile}
+                        disabled={isSaving}
+                        className="flex-1 rounded-full bg-emerald-700 px-2.5 py-2 text-xs font-semibold text-white hover:bg-emerald-800 transition-colors disabled:opacity-60"
+                      >
+                        {isSaving ? t('saving', selectedLanguage) : t('saveChanges', selectedLanguage)}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -535,52 +536,6 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
               {saveMessage}
             </p>
           )}
-
-          {/* Trust Score Card */}
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-900">{t('trustScore', selectedLanguage)}</p>
-              <p className="text-lg font-bold text-emerald-900">{trustScore} / 100</p>
-            </div>
-            <div className="mt-2 h-1.5 rounded-full bg-emerald-100">
-              <div className="h-1.5 rounded-full bg-emerald-500" style={{ width: `${trustScore}%` }} />
-            </div>
-            <p className="mt-2 text-sm text-emerald-900">3 KYC verified · 100% fulfilment rate</p>
-            <p className="mt-1 text-xs text-emerald-700">Your trust score reflects your reliability as a landowner. It's based on verified identity, successful contract completions, and positive reviews from beekeepers.</p>
-          </div>
-
-          {/* Account Summary Card */}
-          <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-4 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-blue-900">{t('accountSummary', selectedLanguage)}</p>
-                <p className="mt-1 text-sm text-blue-900">{memberSince}</p>
-                <div className="mt-2 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                    <span className="text-xs text-blue-800">{t('accountStatus', selectedLanguage)}: {t('active', selectedLanguage)} & {t('verified', selectedLanguage)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                    <span className="text-xs text-blue-800">{t('role', selectedLanguage)}: {t('landowner', selectedLanguage)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-amber-500"></div>
-                    <span className="text-xs text-blue-800">{t('profileCompletion', selectedLanguage)}: 85%</span>
-                  </div>
-                </div>
-              </div>
-              <div className="text-right">
-                <ShieldCheck className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-            <div className="mt-3 rounded-lg bg-blue-100/50 p-2">
-              <p className="text-xs text-blue-800">
-                Your verified landowner profile allows you to list land for beekeeping activities,
-                receive proposals from beekeepers, and earn income through land partnerships.
-              </p>
-            </div>
-          </div>
 
           {/* Activity Overview Card */}
           <div className="rounded-xl border border-purple-200 bg-purple-50/70 p-4 shadow-sm">

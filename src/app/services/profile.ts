@@ -50,6 +50,7 @@ export const profileService = {
     // Remove fields that don't exist in the database schema
     delete (nextPayload as any).province;
     delete (nextPayload as any).ds_division;
+    delete (nextPayload as any).avatar_url; // Handle avatar separately
 
     const { data, error } = await supabase
       .from('users')

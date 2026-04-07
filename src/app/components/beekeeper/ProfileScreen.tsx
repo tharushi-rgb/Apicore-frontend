@@ -212,29 +212,13 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
               </div>
 
               <div className="relative flex items-center justify-end">
-                {!isEditingProfile ? (
+                {!isEditingProfile && (
                   <button
                     onClick={handleOpenEdit}
                     className="rounded-full border border-emerald-300 bg-white px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors"
                   >
                     {t('edit', selectedLanguage)}
                   </button>
-                ) : (
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={handleCancelEdit}
-                      className="rounded-full border border-stone-300 bg-white px-2.5 py-1 text-xs font-semibold text-stone-700 hover:bg-stone-100 transition-colors"
-                    >
-                      {t('cancel', selectedLanguage)}
-                    </button>
-                    <button
-                      onClick={saveProfile}
-                      disabled={isSaving}
-                      className="rounded-full bg-emerald-700 px-2.5 py-1 text-xs font-semibold text-white hover:bg-emerald-800 transition-colors disabled:opacity-60"
-                    >
-                      {isSaving ? t('saving', selectedLanguage) : t('saveChanges', selectedLanguage)}
-                    </button>
-                  </div>
                 )}
               </div>
 
@@ -322,6 +306,23 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                       placeholder={t('selectDsDivision', selectedLanguage)}
                       disabled={!editDistrict}
                     />
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-1.5 pt-3">
+                      <button
+                        onClick={handleCancelEdit}
+                        className="flex-1 rounded-full border border-stone-300 bg-white px-2.5 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-100 transition-colors"
+                      >
+                        {t('cancel', selectedLanguage)}
+                      </button>
+                      <button
+                        onClick={saveProfile}
+                        disabled={isSaving}
+                        className="flex-1 rounded-full bg-emerald-700 px-2.5 py-2 text-xs font-semibold text-white hover:bg-emerald-800 transition-colors disabled:opacity-60"
+                      >
+                        {isSaving ? t('saving', selectedLanguage) : t('saveChanges', selectedLanguage)}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

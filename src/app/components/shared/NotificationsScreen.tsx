@@ -16,7 +16,6 @@ interface Props {
 export function NotificationsScreen({ selectedLanguage, onLanguageChange, onNavigate, isHelper, onLogout }: Props) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const user = authService.getLocalUser();
   const isLandowner = user?.role === 'landowner';
   const pageGradient = isLandowner
@@ -37,7 +36,6 @@ export function NotificationsScreen({ selectedLanguage, onLanguageChange, onNavi
   };
   useEffect(() => { fetchNotifications(); }, []);
 
-  const filtered = filter === 'unread' ? notifications.filter(n => !n.is_read) : notifications;
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   const handleMarkRead = async (id: number) => { await notificationsService.markAsRead(id); fetchNotifications(); };
@@ -65,17 +63,12 @@ export function NotificationsScreen({ selectedLanguage, onLanguageChange, onNavi
           )}
         </div>
 
-        <div className="flex bg-white rounded-xl p-1 shadow-sm">
-          <button onClick={() => setFilter('all')} className={`flex-1 py-1.5 rounded-lg text-[0.75rem] font-medium ${filter==='all' ? `${accentBg} text-white` : 'text-stone-600'}`}>{t('all', selectedLanguage)} ({notifications.length})</button>
-          <button onClick={() => setFilter('unread')} className={`flex-1 py-1.5 rounded-lg text-[0.75rem] font-medium ${filter==='unread' ? `${accentBg} text-white` : 'text-stone-600'}`}>{t('unread', selectedLanguage)} ({unreadCount})</button>
-        </div>
-
         {loading ? <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full" /></div> :
-          filtered.length === 0 ? (
+          notifications.length === 0 ? (
             <div className="text-center py-12"><Bell className="w-12 h-12 text-stone-300 mx-auto mb-3" /><p className="text-stone-500">{t('noNotifications', selectedLanguage)}</p></div>
           ) : (
             <div className="space-y-2">
-              {filtered.map(n => (
+              {notifications.map(n => (
                 <div key={n.id} className={`bg-white rounded-xl p-3 shadow-sm ${!n.is_read ? `border-l-4 ${accentBorder}` : ''}`}>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
