@@ -47,6 +47,10 @@ export const profileService = {
 
     delete (nextPayload as any).email;
 
+    // Remove fields that don't exist in the database schema
+    delete (nextPayload as any).province;
+    delete (nextPayload as any).ds_division;
+
     const { data, error } = await supabase
       .from('users')
       .update({ ...nextPayload, updated_at: new Date().toISOString() })
@@ -70,6 +74,9 @@ export const profileService = {
         ...data,
         email: (typeof p.email === 'string' && p.email.trim()) ? p.email.trim() : (data as any).email ?? current.email,
         avatar_url: (data as any).avatar_url ?? avatarUrl ?? (current as any).avatar_url,
+        // Keep non-db fields in local storage for display purposes
+        province: p.province ?? (current as any).province,
+        ds_division: p.ds_division ?? (current as any).ds_division,
       };
       localStorage.setItem('user', JSON.stringify(merged));
     }
@@ -85,7 +92,12 @@ export const profileService = {
       severity: 'low',
     });
 
-    return data as Profile;
+    // Return the merged data including non-db fields
+    return {
+      ...data,
+      province: p.province ?? (current as any)?.province,
+      ds_division: p.ds_division ?? (current as any)?.ds_division,
+    } as Profile;
   },
 
   async changePassword(_currentPassword: string, newPassword: string) {
