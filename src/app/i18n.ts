@@ -550,6 +550,43 @@ const translations = {
   // ── Landowner Pages Missing Translations ─────────────────────────────
   unknownPlot: { en: 'Unknown Plot', si: 'නොදන්නා ඉඩම', ta: 'தெரியாத நிலम்' },
   errorTitle: { en: 'Error', si: 'දෝෂයක්', ta: 'பிழை' },
+
+  // ── Landowner Registration Step Labels ──────────────────────────────
+  personalDetailsStep: { en: 'Personal Details', si: 'පුද්ගලික විස්තර', ta: 'தனிப்பட்ட விவரங்கள்' },
+  profileStep: { en: 'Profile', si: 'පැතිකඩ', ta: 'সুযවিवరம্' },
+  locationPasswordStep: { en: 'Location & Password', si: 'ස්ථානය සහ මුරපදය', ta: 'ইডম্ মর্ড্রুম্ কডভুচ্চোল্' },
+  summaryStep: { en: 'Summary', si: 'සාරාංශය', ta: 'শুরুক্কম্' },
+  businessReg: { en: 'Business Reg', si: 'ව්‍යාපාර ලියාප', ta: 'বণিক পতিবু' },
+  role: { en: 'Role', si: 'භූමිකාව', ta: 'পাত্থিরম্' },
+  optionalText: { en: '(optional)', si: '(විකල්ප)', ta: '(বিরুপ্পম্)' },
+
+  // ── Landowner Plots Screen Messages ─────────────────────────────────
+  plotManager: { en: 'Plot Manager', si: 'ඉඩම් කළමනාකරු', ta: 'নিল মেলাळর্' },
+  noPlotsMatchFilters: { en: 'No plots match your filters', si: 'ඔබේ පෙරහන්වලට ගැළපෙන ඉඩම් නොමැත', ta: 'উঙ্গळ্ বডিকট্টিকळুক্কু পোরুন্তুম্ নিলঙ্গळ্ ইল্লৈ' },
+  createFirstPlotMessage: { en: 'Create your first plot to start listing for beekeepers', si: 'මී මැසි පාලකයින් සඳහා ලැයිස්තුගත කිරීම ආරම්භ කිරීමට ඔබේ පළමු ඉඩම සාදන්න', ta: 'তেনী বळর্প্পাळর্কळুক্কাক পট্টিযळ্ সেয্য উঙ্গळ্ মুদळ্ নিলত্তৈ উরুবাক্কুঙ্গळ্' },
+  tryAdjustingFilters: { en: 'Try adjusting your search or status filter.', si: 'ඔබේ සෙවීම හෝ තත්ත්ව පෙරනය වෙනස් කිරීමට උත්සාහ කරන්න.', ta: 'উঙ্গळ্ তেডল্ অল্লদু নিলৈ বডিকট্টিযৈ সরিসেয্য মুযর্সিক্কবুম্।' },
+
+  // ── Land Plot Registration Form Fields ───────────────────────────────
+  landPlotName: { en: 'Land/Plot Name', si: 'ඉඩම/බිම් නම', ta: 'নিলম্/পকুতি পেযর্' },
+  landPlotNameRequired: { en: 'Land/Plot Name *', si: 'ඉඩම/බිම් නම *', ta: 'নিলম্/পকুতি পেযর্ *' },
+  registerNewLandPlot: { en: 'Register New Land Plot', si: 'නව ඉඩම් බිම ලියාපදිංচි කරන්න', ta: 'পুদিয নিল পকুতিযৈ পতিবু সেয্যবুম্' },
+  gpsCoordinatesRequired: { en: 'GPS Coordinates are required. Drop a pin on the map area.', si: 'GPS ඛණ්ඩාංක අවශ්‍යයි. සිතියම් ප්‍රදේශයේ පින් එකක් දමන්න.', ta: 'GPS আকুল্ আবশ্যক হৈং। মানচিত্র প্রদেশযিল্ ওরু পিন্ পোডুঙ্গল্।' },
+
+  // ── Add Plot Form Additional Fields ─────────────────────────────────
+  editPlotTitle: { en: 'Edit Plot', si: 'ඉඩම සංස්කරණය', ta: 'নিলম্ তিরুত্তু' },
+  addNewPlotTitle: { en: 'Add New Plot', si: 'අලුත් ඉඩමක් එකතු කරන්න', ta: 'পুতিয নিলম্ চের্ক্ক' },
+  plotNamePlaceholder: { en: 'e.g., North Coconut Grove', si: 'උදා: උතුරු පොල් වත්ත', ta: 'উদা: উত্তর নারিকেল বাগান' },
+  acreageExample: { en: 'e.g., 8.5', si: 'උදා: 8.5', ta: 'উদা: 8.5' },
+  primaryForageSourcesLabel: { en: 'Primary Forage Sources', si: 'මූලික ආහාර ප්‍රභව', ta: 'মুখ্য খাদ্য উৎস' },
+  forageNameLabel: { en: 'Forage name (e.g., Coconut Palm)', si: 'ආහාර නම (උදා: පොල් ගස)', ta: 'খাদ্য নাম (উদা: নারিকেল গাছ)' },
+  startMonth: { en: 'Start Month', si: 'ආරම්භක මාසය', ta: 'আরম্ভের মাস' },
+  endMonth: { en: 'End Month', si: 'අවසන් මාসය', ta: 'শেষ মাস' },
+  addForageSource: { en: 'Add Forage', si: 'ආහාර එකতු කරන්න', ta: 'খাদ্য যোগ করুন' },
+  shadeProfileLabel: { en: 'Shade Profile', si: 'සෙවන පැතිකඩ', ta: 'ছায়ার প্রোফাইল' },
+  fullShade: { en: 'Full Shade', si: 'සම්පූර්ණ සෙවන', ta: 'সম্পূর্ণ ছায়া' },
+  partialShade: { en: 'Partial Shade', si: 'අර්ධ සෙවන', ta: 'আংশিক ছায়া' },
+  fullSun: { en: 'Full Sun', si: 'සම්පූර්ණ අව්ව', ta: 'সম্পূর্ণ রোদ' },
+  nightAccessQuestion: { en: 'Can beekeeper access the land at night?', si: 'මී මැසි පාලකයාට රාත්‍රියේ ඉඩමට ප්‍රවේශ විය හැකිද?', ta: 'মৌচাষি কি রাতে জমিতে প্রবেশ করতে পারে?' },
   yourPlots: { en: 'Your Plots', si: 'ඔබේ ඉඩම්', ta: 'உங்கள் நிலங்கள்' },
   registeredPlots: { en: 'registered plots', si: 'ලියාපදිංචි ඉඩම්', ta: 'பதிவு செய்யப்பட்ட நிලங்கள்' },
   activeContracts: { en: 'active contracts', si: 'ක්‍රියාකාරී ගිවිසුම්', ta: 'செயலில் உள்ள ஒப்பந்தங்கள்' },
@@ -586,33 +623,23 @@ const translations = {
 
   // ── Add Plot and Form Translations ──────────────────────────────────
   gpsCoordinates: { en: 'GPS Coordinates', si: 'GPS ඛණ්ඩාංක', ta: 'GPS निर्देशांक' },
-  acreageExample: { en: 'e.g., 8.5', si: 'උදා: 8.5', ta: 'उदा: 8.5' },
   primaryForageSources: { en: 'Primary Forage Sources', si: 'මූලික ආහාර ප්‍රභව', ta: 'प्राथमिक चारा स्रोत' },
   forageNamePlaceholder: { en: 'Forage name (e.g., Coconut Palm)', si: 'ආහාර නම (උදා: පොල් ගස)', ta: 'चारे का नाम (उदा: नारियल पाम)' },
-  startMonth: { en: 'Start Month', si: 'ආරම්භක මාසය', ta: 'प्रारंभिक महीना' },
-  endMonth: { en: 'End Month', si: 'අවසන් මාසය', ta: 'अंतिम महीना' },
-  addForage: { en: 'Add Forage', si: 'ආහාර එකතු කරන්න', ta: 'चारा जोड़ें' },
+  addForage: { en: 'Add Forage', si: 'ආහාර එකතু කරන්න', ta: 'चारा जोड़ें' },
   shadeProfile: { en: 'Shade Profile', si: 'සෙවන පැතිකඩ', ta: 'छाया प्रोफ़ाइल' },
-  fullShade: { en: 'Full Shade', si: 'සම්පූර්ණ සෙවන', ta: 'पूर्ण छाया' },
-  partialShade: { en: 'Partial Shade', si: 'අර්ධ සෙවන', ta: 'आंशिक छाया' },
-  fullSun: { en: 'Full Sun', si: 'සම්පූර්ණ අව්ව', ta: 'पूर्ण सूर्य' },
   nightAccess: { en: 'Can beekeeper access the land at night?', si: 'මී මැසි පාලකයාට රාත්‍රියේ ඉඩමට ප්‍රවේශ විය හැකිද?', ta: 'क्या मधुमक्खी पालक रात में भूमि तक पहुंच सकता है?' },
   images: { en: 'Images', si: 'පින්තූර', ta: 'चित्र' },
   clickToUpload: { en: 'Click to upload images', si: 'පින්තූර උඩුගත කිරීමට ක්ලික් කරන්න', ta: 'चित्र अपलोड करने के लिए क्लिक करें' },
   maxSizeEach: { en: 'Max 5MB each', si: 'ප්‍රභේදයක් 5MB', ta: 'प्रत्येक अधिकतम 5MB' },
   savingPlot: { en: 'Saving...', si: 'සුරකිමින්...', ta: 'सहेजा जा रहा है...' },
-  editPlotTitle: { en: 'Edit Plot', si: 'ඉඩම සංස්කරණය', ta: 'भूखंड संपादित करें' },
 
   // ── Registration Form Translations ─────────────────────────────────
-  profileStep: { en: 'Profile', si: 'පැතිකඩ', ta: 'प्रोफ़ाइल' },
   locationPassword: { en: 'Location & Password', si: 'ස්ථානය සහ මුරපදය', ta: 'स्थान और पासवर्ड' },
   failedToFetch: { en: 'Failed to fetch', si: 'ගෙන ඒමට අසමත්', ta: 'प्राप्त करने में असमर्थ' },
   cannotConnect: { en: 'Cannot connect to server. Please check your internet connection.', si: 'සේවාදායකයා සමඟ සම්බන්ධ විය නොහැක. ඔබේ අන්තර්ජාල සම්බන්ධතාවය පරීක්ෂා කරන්න.', ta: 'सर्वर से कनेक्ট नहीं हो पा रहा। कृपया अपना इंटरनेट कनेक्शन जांचें।' },
   phoneExample: { en: '94 77 456 7890', si: '94 77 456 7890', ta: '94 77 456 7890' },
   nicExample: { en: '200012345678', si: '200012345678', ta: '200012345678' },
   emailExample: { en: 'your@email.com', si: 'ඔබේ@ඊමේල්.com', ta: 'आपका@ईमेल.com' },
-  role: { en: 'Role', si: 'භූමිකාව', ta: 'भूमिका' },
-  businessReg: { en: 'Business Reg', si: 'ව්‍යාපාර ලියාප', ta: 'व्यापार पंजी' },
 
   // ── Additional UI Translations ─────────────────────────────────────
   accountStatus: { en: 'Account Status', si: 'ගිණුම් තත්ත්වය', ta: 'खाता स्थिति' },

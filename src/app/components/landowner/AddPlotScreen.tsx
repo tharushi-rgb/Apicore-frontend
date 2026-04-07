@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Save, X, Plus, Trash2, Loader2 } from 'lucide-react';
 import { AdministrativeLocationFields } from '../shared/AdministrativeLocationFields';
+import { LocationSelectorField } from '../shared/LocationSelectorField';
 import { landownerPlotsService, type LandPlot, type ForageEntry, type WaterAvailability, type ShadeProfile, type VehicleAccess } from '../../services/landownerPlotsService';
 import { getDistrictsByProvince, getDsDivisionsByDistrict } from '../../constants/sriLankaLocations';
 import { t } from '../../i18n';
@@ -203,7 +204,7 @@ export function AddPlotScreen({
           <ArrowLeft className="w-4 h-4 text-stone-700" />
         </button>
         <h1 className="text-base font-bold text-stone-800 flex-1">
-          {existingPlot ? 'Edit Plot' : 'Add New Plot'}
+          {existingPlot ? t('editPlotTitle', selectedLanguage) : t('addNewPlotTitle', selectedLanguage)}
         </h1>
       </div>
 
@@ -218,7 +219,7 @@ export function AddPlotScreen({
         {/* Plot Name */}
         <div className="bg-white rounded-lg p-3 shadow-sm">
           <label className="text-xs font-semibold text-stone-700 uppercase tracking-widest block mb-2">
-            Plot Name
+            {t('plotName', selectedLanguage)}
           </label>
           <input
             type="text"
@@ -241,28 +242,17 @@ export function AddPlotScreen({
         />
 
         {/* GPS Coordinates */}
-        <div className="bg-white rounded-lg p-3 shadow-sm space-y-2">
-          <label className="text-xs font-semibold text-stone-700 uppercase tracking-widest block">
-            GPS Coordinates
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            <input
-              type="number"
-              step="0.0001"
-              placeholder="Latitude"
-              value={form.gps_latitude}
-              onChange={e => handleInputChange('gps_latitude', e.target.value)}
-              className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-            />
-            <input
-              type="number"
-              step="0.0001"
-              placeholder="Longitude"
-              value={form.gps_longitude}
-              onChange={e => handleInputChange('gps_longitude', e.target.value)}
-              className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-            />
-          </div>
+        <div className="bg-white rounded-lg p-3 shadow-sm">
+          <LocationSelectorField
+            label={t('gpsCoordinates', selectedLanguage)}
+            district={form.district}
+            latitude={form.gps_latitude}
+            longitude={form.gps_longitude}
+            onChange={(latitude, longitude) => {
+              handleInputChange('gps_latitude', latitude);
+              handleInputChange('gps_longitude', longitude);
+            }}
+          />
         </div>
 
         {/* Total Acreage */}
@@ -480,7 +470,7 @@ export function AddPlotScreen({
             </>
           ) : (
             <>
-              <Save className="w-4 h-4" /> Save Plot
+              <Save className="w-4 h-4" /> {t('savePlot', selectedLanguage)}
             </>
           )}
         </button>

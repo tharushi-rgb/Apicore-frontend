@@ -453,7 +453,7 @@ export function LandownerListingsScreen({
                       </p>
                     </div>
 
-                    <div className="flex flex-col items-end gap-tight">
+                    <div className="flex flex-col items-end gap-1.5">
                       <ActionBtn label={t('view', selectedLanguage)} onClick={() => openView(listing)} icon={<Eye className="h-3.5 w-3.5" />} />
                       <ActionBtn label={t('edit', selectedLanguage)} onClick={() => openEdit(listing)} icon={<Pencil className="h-3.5 w-3.5" />} />
                       {listingBids.length > 0 && (
@@ -724,8 +724,8 @@ function ActionBtn({
   return (
     <button
       onClick={onClick}
-      className={`btn-compact inline-flex items-center justify-center gap-1 rounded-full border min-h-9 px-4 ${
-        danger ? 'border-red-300 bg-red-50 text-red-700' : 'border-emerald-300 bg-emerald-50 text-emerald-700'
+      className={`inline-flex items-center justify-center gap-1 rounded-md border text-xs font-medium py-1.5 px-2.5 min-h-[28px] transition-colors ${
+        danger ? 'border-red-300 bg-red-50 text-red-700 hover:bg-red-100' : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
       }`}
     >
       {icon}

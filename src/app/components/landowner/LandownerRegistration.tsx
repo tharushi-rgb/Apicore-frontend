@@ -55,7 +55,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
   const districts = getDistrictsByProvince(selectedProvince);
   const dsDivisions = getDsDivisionsByDistrict(selectedDistrict);
 
-  const stepLabels = ['Personal Details', 'Profile', 'Location & Password', 'Summary'];
+  const stepLabels = [t('personalDetailsStep', selectedLanguage), t('profileStep', selectedLanguage), t('locationPasswordStep', selectedLanguage), t('summaryStep', selectedLanguage)];
 
   const handleNext = async () => {
     if (currentStep === 1) {
@@ -226,7 +226,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
                   {errors.ageGroup && <p className={ec}>{errors.ageGroup.message}</p>}
                 </div>
                 <div>
-                  <label className={lc}>{t('businessRegNo', selectedLanguage)} <span className="text-stone-400 text-[0.7rem]">(optional)</span></label>
+                  <label className={lc}>{t('businessRegNo', selectedLanguage)} <span className="text-stone-400 text-[0.7rem]">{t('optionalText', selectedLanguage)}</span></label>
                   <input {...register('businessRegNo')}
                     className={ic} placeholder={t('brPlaceholder', selectedLanguage)} />
                 </div>
@@ -324,16 +324,16 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
                     <span className="text-stone-800 font-medium capitalize">{watch('preferredLanguage') || '—'}</span>
                     <span className="text-stone-500">Age Group</span>
                     <span className="text-stone-800 font-medium">{watch('ageGroup') || '—'}</span>
-                    <span className="text-stone-500">Business Reg</span>
+                    <span className="text-stone-500">{t('businessReg', selectedLanguage)}</span>
                     <span className="text-stone-800 font-medium">{watch('businessRegNo') || '—'}</span>
-                    <span className="text-stone-500">Province</span>
+                    <span className="text-stone-500">{t('province', selectedLanguage)}</span>
                     <span className="text-stone-800 font-medium">{watch('province') || '—'}</span>
-                    <span className="text-stone-500">District</span>
+                    <span className="text-stone-500">{t('district', selectedLanguage)}</span>
                     <span className="text-stone-800 font-medium">{watch('district') || '—'}</span>
-                    <span className="text-stone-500">DS Division</span>
+                    <span className="text-stone-500">{t('dsDivision', selectedLanguage)}</span>
                     <span className="text-stone-800 font-medium truncate">{watch('dsDivision') || '—'}</span>
-                    <span className="text-stone-500">Role</span>
-                    <span className="text-stone-800 font-medium">Landowner</span>
+                    <span className="text-stone-500">{t('role', selectedLanguage)}</span>
+                    <span className="text-stone-800 font-medium">{t('landowner', selectedLanguage)}</span>
                   </div>
                 </div>
                 {error && (

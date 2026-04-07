@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, MapPin, AlertTriangle, Loader2, ChevronRight, Eye, Zap, Search } from 'lucide-react';
 import { MobileHeader } from '../shared/MobileHeader';
+import { t } from '../../i18n';
 import { landownerPlotsService, type LandPlot } from '../../services/landownerPlotsService';
 import { landownerMarketplaceService, type Contract } from '../../services/landownerMarketplace';
 
@@ -117,7 +118,7 @@ export function LandownerPlotsScreen({
         role="landowner"
         theme="green"
         userName="Landowner"
-        roleLabel="Plot Manager"
+        roleLabel={t('plotManager', selectedLanguage)}
       />
 
       <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-4 pb-24">
@@ -172,16 +173,16 @@ export function LandownerPlotsScreen({
             <div className="bg-white rounded-xl p-8 text-center shadow-sm border border-stone-100">
               <MapPin className="w-12 h-12 text-stone-300 mx-auto mb-3" />
               <p className="text-stone-600 font-medium mb-2">
-                {totalPlots === 0 ? 'No plots registered yet' : 'No plots match your filters'}
+                {totalPlots === 0 ? t('noPlotsYet', selectedLanguage) : t('noPlotsMatchFilters', selectedLanguage)}
               </p>
               <p className="text-xs text-stone-500 mb-4">
-                {totalPlots === 0 ? 'Create your first plot to start listing for beekeepers' : 'Try adjusting your search or status filter.'}
+                {totalPlots === 0 ? t('createFirstPlotMessage', selectedLanguage) : t('tryAdjustingFilters', selectedLanguage)}
               </p>
               <button
                 onClick={onAddPlot}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium text-sm mx-auto transition-colors"
               >
-                Create First Plot
+                {t('createFirstPlotBtn', selectedLanguage)}
               </button>
             </div>
           ) : (

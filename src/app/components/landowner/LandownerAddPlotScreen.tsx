@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { ArrowLeft, CalendarRange, ImagePlus, Plus, Save, Trash2 } from 'lucide-react';
 import { MobileHeader } from '../shared/MobileHeader';
+import { LocationSelectorField } from '../shared/LocationSelectorField';
 import { authService } from '../../services/auth';
+import { t } from '../../i18n';
 import { PROVINCES, getDistrictsByProvince, getDsDivisionsByDistrict } from '../../constants/sriLankaLocations';
 import { landownerMarketplaceService } from '../../services/landownerMarketplace';
 
@@ -116,7 +118,7 @@ export function LandownerAddPlotScreen({
     }
 
     if (!gpsLatitude.trim() || !gpsLongitude.trim()) {
-      setError('GPS Coordinates are required. Drop a pin on the map area.');
+      setError(t('gpsCoordinatesRequired', selectedLanguage));
       return;
     }
 
@@ -208,13 +210,13 @@ export function LandownerAddPlotScreen({
 
         <form onSubmit={onSubmit} className="space-y-1.5">
           <div className="rounded-lg border border-stone-200 bg-white p-2.5 shadow-sm">
-            <h1 className="text-[0.95rem] font-bold text-stone-900">Register New Land Plot</h1>
+            <h1 className="text-[0.95rem] font-bold text-stone-900">{t('registerNewLandPlot', selectedLanguage)}</h1>
             <p className="mt-0.5 text-[0.75rem] text-stone-600">Provinces: 9 · Districts: 25 · DS Divisions: 331</p>
           </div>
 
           <div className="rounded-lg border border-stone-200 bg-white p-2.5 shadow-sm space-y-1.5">
             <div>
-              <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">Land/Plot Name *</label>
+              <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">{t('landPlotNameRequired', selectedLanguage)}</label>
               <input
                 value={plotName}
                 onChange={(event) => setPlotName(event.target.value)}
@@ -269,37 +271,23 @@ export function LandownerAddPlotScreen({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-1.5">
-              <div>
-                <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">GPS Latitude *</label>
-                <input
-                  value={gpsLatitude}
-                  onChange={(event) => setGpsLatitude(event.target.value)}
-                  placeholder="6.9271"
-                  className="w-full rounded-lg border border-stone-300 px-2.5 py-2.5 text-[0.88rem] focus:border-emerald-600 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">GPS Longitude *</label>
-                <input
-                  value={gpsLongitude}
-                  onChange={(event) => setGpsLongitude(event.target.value)}
-                  placeholder="79.8612"
-                  className="w-full rounded-lg border border-stone-300 px-2.5 py-2.5 text-[0.88rem] focus:border-emerald-600 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <p className="text-[0.72rem] text-stone-500">
-              Enter GPS latitude and longitude above.
-            </p>
+            <LocationSelectorField
+              label={t('gpsCoordinates', selectedLanguage)}
+              district={district}
+              latitude={gpsLatitude}
+              longitude={gpsLongitude}
+              onChange={(latitude, longitude) => {
+                setGpsLatitude(latitude);
+                setGpsLongitude(longitude);
+              }}
+            />
 
             <div>
-              <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">Total Acreage *</label>
+              <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">{t('totalAcreageRequired', selectedLanguage)}</label>
               <input
                 value={totalAcreage}
                 onChange={(event) => setTotalAcreage(event.target.value)}
-                placeholder="e.g. 12.5"
+                placeholder={t('acreageExample', selectedLanguage)}
                 className="w-full rounded-lg border border-stone-300 px-2.5 py-2.5 text-[0.88rem] focus:border-emerald-600 focus:outline-none"
               />
             </div>
@@ -307,16 +295,17 @@ export function LandownerAddPlotScreen({
 
           <div className="rounded-lg border border-stone-200 bg-white p-2.5 shadow-sm space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">Primary Forage Sources *</p>
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">{t('primaryForageSourcesLabel', selectedLanguage)} *</p>
               <button type="button" onClick={addForage} className="inline-flex items-center gap-1 rounded-full border border-emerald-700 px-2.5 py-1 text-[0.7rem] font-semibold text-emerald-800">
                 <Plus className="h-3 w-3" />
-                Add
+                {t('add', selectedLanguage)}
               </button>
             </div>
 
             {forageEntries.map((entry, index) => (
-              <div key={`forage-${index}`} className="rounded-lg border border-stone-200 bg-stone-50 p-2">
-                <div className="grid grid-cols-[1fr_1fr_auto] gap-1.5">
+              <div key={`forage-${index}`} className="rounded-lg border border-stone-200 bg-stone-50 p-2 space-y-1.5">
+                {/* Row 1: Forage name and Delete button */}
+                <div className="grid grid-cols-[1fr_auto] gap-1.5">
                   <input
                     value={entry.forage}
                     onChange={(event) => updateForage(index, 'forage', event.target.value)}
@@ -324,6 +313,18 @@ export function LandownerAddPlotScreen({
                     className="rounded-md border border-stone-300 px-2 py-2 text-[0.8rem] focus:border-emerald-600 focus:outline-none"
                   />
 
+                  <button
+                    type="button"
+                    onClick={() => removeForage(index)}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-red-200 text-red-600 hover:bg-red-50"
+                    aria-label="Remove forage"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                {/* Row 2: Start month and End month */}
+                <div className="grid grid-cols-2 gap-1.5">
                   <div className="relative">
                     <CalendarRange className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-stone-400" />
                     <select
@@ -338,17 +339,6 @@ export function LandownerAddPlotScreen({
                     </select>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => removeForage(index)}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-red-200 text-red-600 hover:bg-red-50"
-                    aria-label="Remove forage"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-
-                <div className="mt-1.5 grid grid-cols-1 gap-1.5">
                   <select
                     value={entry.bloomEndMonth}
                     onChange={(event) => updateForage(index, 'bloomEndMonth', event.target.value)}
@@ -436,7 +426,7 @@ export function LandownerAddPlotScreen({
 
           <button type="submit" className="mb-2 inline-flex w-full items-center justify-center gap-1 rounded-lg bg-emerald-700 px-2 py-2 text-body font-bold text-white hover:bg-emerald-800">
             <Save className="h-3.5 w-3.5" />
-            Save Plot
+            {t('savePlot', selectedLanguage)}
           </button>
         </form>
       </div>
