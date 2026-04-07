@@ -8,6 +8,7 @@ import { transfersService, type ColonyTransfer } from '../../services/transfers'
 import { notificationsService } from '../../services/notifications';
 import { harvestsService, type Harvest } from '../../services/harvests';
 import { expensesService, type Expense } from '../../services/finance';
+import { t } from '../../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -43,7 +44,7 @@ function normalizeColonyStrength(value?: string): 'weak' | 'normal' | 'strong' {
 }
 
 // ---- Inspection Form: Modern Hive (Box Hive) Inspection Details (Table 1) ----
-function InspectionForm({ hiveId, initial, onClose, onSaved }: { hiveId: number; initial?: Inspection; onClose: () => void; onSaved: () => void }) {
+function InspectionForm({ hiveId, initial, onClose, onSaved, selectedLanguage }: { hiveId: number; initial?: Inspection; onClose: () => void; onSaved: () => void; selectedLanguage: Language }) {
   const [saving, setSaving] = useState(false);
   const [f, setF] = useState({
     inspection_date: initial?.inspection_date || new Date().toISOString().split('T')[0],
@@ -231,7 +232,7 @@ function InspectionForm({ hiveId, initial, onClose, onSaved }: { hiveId: number;
               value={f.active_frame_count}
               onChange={e => setF(p => ({ ...p, active_frame_count: e.target.value }))}
               required
-              placeholder="Enter number of active frames"
+              placeholder={t('enterNumberActiveFrames', selectedLanguage)}
               className="w-full border border-stone-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -292,7 +293,7 @@ function InspectionForm({ hiveId, initial, onClose, onSaved }: { hiveId: number;
   );
 }
 
-function FeedingForm({ hiveId, initial, onClose, onSaved }: { hiveId: number; initial?: Feeding; onClose: () => void; onSaved: () => void }) {
+function FeedingForm({ hiveId, initial, onClose, onSaved, selectedLanguage }: { hiveId: number; initial?: Feeding; onClose: () => void; onSaved: () => void; selectedLanguage: Language }) {
   const [saving, setSaving] = useState(false);
   const [f, setF] = useState({
     feeding_date: initial?.feeding_date || new Date().toISOString().split('T')[0],
@@ -321,17 +322,17 @@ function FeedingForm({ hiveId, initial, onClose, onSaved }: { hiveId: number; in
         <input type="date" value={f.feeding_date} onChange={e=>setF(p=>({...p,feeding_date:e.target.value}))} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
         <select value={f.feed_type} onChange={e=>setF(p=>({...p,feed_type:e.target.value}))} className="w-full border rounded-lg px-2.5 py-1.5 text-xs"><option value="sugar_syrup">Sugar Syrup</option><option value="pollen_patty">Pollen Patty</option><option value="fondant">Fondant</option><option value="honey">Honey</option><option value="other">Other</option></select>
         <div className="grid grid-cols-2 gap-1.5">
-          <input value={f.quantity} onChange={e=>setF(p=>({...p,quantity:e.target.value}))} placeholder="Qty" type="number" className="border rounded-lg px-2.5 py-1.5 text-xs" />
+          <input value={f.quantity} onChange={e=>setF(p=>({...p,quantity:e.target.value}))} placeholder={t('qty', selectedLanguage)} type="number" className="border rounded-lg px-2.5 py-1.5 text-xs" />
           <select value={f.unit} onChange={e=>setF(p=>({...p,unit:e.target.value}))} className="border rounded-lg px-2.5 py-1.5 text-xs"><option value="ml">ml</option><option value="l">L</option><option value="g">g</option><option value="kg">kg</option></select>
         </div>
-        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder="Notes" rows={1} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
-        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-1.5 rounded-lg font-medium disabled:opacity-60 text-xs">{saving ? 'Saving...' : 'Save'}</button>
+        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder={t('notes', selectedLanguage)} rows={1} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
+        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-1.5 rounded-lg font-medium disabled:opacity-60 text-xs">{saving ? t('saving', selectedLanguage) : t('save', selectedLanguage)}</button>
       </form>
     </div></div>
   );
 }
 
-function ComponentForm({ hiveId, initial, onClose, onSaved }: { hiveId: number; initial?: HiveComponent; onClose: () => void; onSaved: () => void }) {
+function ComponentForm({ hiveId, initial, onClose, onSaved, selectedLanguage }: { hiveId: number; initial?: HiveComponent; onClose: () => void; onSaved: () => void; selectedLanguage: Language }) {
   const [saving, setSaving] = useState(false);
   const [f, setF] = useState({
     component_type: initial?.component_type || 'frame',
@@ -359,17 +360,17 @@ function ComponentForm({ hiveId, initial, onClose, onSaved }: { hiveId: number; 
         <select value={f.component_type} onChange={e=>setF(p=>({...p,component_type:e.target.value}))} className="w-full border rounded-lg px-2.5 py-1.5 text-xs">
           <option value="frame">Frame</option><option value="super">Super</option><option value="feeder">Feeder</option><option value="queen_excluder">Queen Excluder</option><option value="entrance_reducer">Entrance Reducer</option><option value="bottom_board">Bottom Board</option><option value="inner_cover">Inner Cover</option><option value="outer_cover">Outer Cover</option><option value="other">Other</option>
         </select>
-        <input value={f.quantity} onChange={e=>setF(p=>({...p,quantity:e.target.value}))} placeholder="Quantity" type="number" className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
+        <input value={f.quantity} onChange={e=>setF(p=>({...p,quantity:e.target.value}))} placeholder={t('qty', selectedLanguage)} type="number" className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
         <input type="date" value={f.installed_date} onChange={e=>setF(p=>({...p,installed_date:e.target.value}))} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
         <select value={f.condition} onChange={e=>setF(p=>({...p,condition:e.target.value}))} className="w-full border rounded-lg px-2.5 py-1.5 text-xs"><option value="new">New</option><option value="good">Good</option><option value="fair">Fair</option><option value="poor">Poor</option><option value="replaced">Replaced</option></select>
-        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder="Notes" rows={1} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
-        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-1.5 rounded-lg font-medium disabled:opacity-60 text-xs">{saving ? 'Saving...' : 'Save'}</button>
+        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder={t('notes', selectedLanguage)} rows={1} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
+        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-1.5 rounded-lg font-medium disabled:opacity-60 text-xs">{saving ? t('saving', selectedLanguage) : t('save', selectedLanguage)}</button>
       </form>
     </div></div>
   );
 }
 
-function QueenForm({ hiveId, initial, onClose, onSaved }: { hiveId: number; initial?: Queen; onClose: () => void; onSaved: () => void }) {
+function QueenForm({ hiveId, initial, onClose, onSaved, selectedLanguage }: { hiveId: number; initial?: Queen; onClose: () => void; onSaved: () => void; selectedLanguage: Language }) {
   const [saving, setSaving] = useState(false);
   const [f, setF] = useState({
     marking_color: initial?.marking_color || '',
@@ -404,14 +405,14 @@ function QueenForm({ hiveId, initial, onClose, onSaved }: { hiveId: number; init
         <select value={f.source} onChange={e=>setF(p=>({...p,source:e.target.value}))} className="w-full border rounded-lg px-2.5 py-1.5 text-xs"><option value="">Source</option><option value="purchased">Purchased</option><option value="swarm">Swarm</option><option value="reared">Reared</option><option value="split">Split</option><option value="unknown">Unknown</option></select>
         <input type="date" value={f.introduction_date} onChange={e=>setF(p=>({...p,introduction_date:e.target.value}))} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
         <select value={f.status} onChange={e=>setF(p=>({...p,status:e.target.value}))} className="w-full border rounded-lg px-2.5 py-1.5 text-xs"><option value="active">Active</option><option value="superseded">Superseded</option><option value="dead">Dead</option><option value="missing">Missing</option><option value="removed">Removed</option></select>
-        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder="Notes" rows={1} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
-        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-1.5 rounded-lg font-medium disabled:opacity-60 text-xs">{saving ? 'Saving...' : 'Save'}</button>
+        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder={t('notes', selectedLanguage)} rows={1} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
+        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-1.5 rounded-lg font-medium disabled:opacity-60 text-xs">{saving ? t('saving', selectedLanguage) : t('save', selectedLanguage)}</button>
       </form>
     </div></div>
   );
 }
 
-function TreatmentForm({ hiveId, initial, onClose, onSaved }: { hiveId: number; initial?: Treatment; onClose: () => void; onSaved: () => void }) {
+function TreatmentForm({ hiveId, initial, onClose, onSaved, selectedLanguage }: { hiveId: number; initial?: Treatment; onClose: () => void; onSaved: () => void; selectedLanguage: Language }) {
   const [saving, setSaving] = useState(false);
   const [f, setF] = useState({
     treatment_type: initial?.treatment_type || '',
@@ -442,20 +443,20 @@ function TreatmentForm({ hiveId, initial, onClose, onSaved }: { hiveId: number; 
         <select value={f.treatment_type} onChange={e=>setF(p=>({...p,treatment_type:e.target.value}))} className="w-full border rounded-lg px-2.5 py-1.5 text-xs">
           <option value="">Treatment Type *</option><option value="varroa">Varroa</option><option value="nosema">Nosema</option><option value="foulbrood">Foulbrood</option><option value="wax_moth">Wax Moth</option><option value="small_hive_beetle">Small Hive Beetle</option><option value="other">Other</option>
         </select>
-        <input value={f.product_name} onChange={e=>setF(p=>({...p,product_name:e.target.value}))} placeholder="Product Name" className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
-        <input value={f.dosage} onChange={e=>setF(p=>({...p,dosage:e.target.value}))} placeholder="Dosage" className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
+        <input value={f.product_name} onChange={e=>setF(p=>({...p,product_name:e.target.value}))} placeholder={t('productName', selectedLanguage)} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
+        <input value={f.dosage} onChange={e=>setF(p=>({...p,dosage:e.target.value}))} placeholder={t('dosage', selectedLanguage)} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
         <div className="grid grid-cols-2 gap-1.5">
           <div><label className="text-xs text-stone-500">Treatment Date</label><input type="date" value={f.treatment_date} onChange={e=>setF(p=>({...p,treatment_date:e.target.value}))} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" /></div>
           <div><label className="text-xs text-stone-500">End Date</label><input type="date" value={f.end_date} onChange={e=>setF(p=>({...p,end_date:e.target.value}))} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" /></div>
         </div>
-        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder="Notes" rows={1} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
-        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-1.5 rounded-lg font-medium disabled:opacity-60 text-xs">{saving ? 'Saving...' : 'Save'}</button>
+        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder={t('notes', selectedLanguage)} rows={1} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
+        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-1.5 rounded-lg font-medium disabled:opacity-60 text-xs">{saving ? t('saving', selectedLanguage) : t('save', selectedLanguage)}</button>
       </form>
     </div></div>
   );
 }
 
-function TransferForm({ hiveId, onClose, onSaved }: { hiveId: number; onClose: () => void; onSaved: () => void }) {
+function TransferForm({ hiveId, onClose, onSaved, selectedLanguage }: { hiveId: number; onClose: () => void; onSaved: () => void; selectedLanguage: Language }) {
   const [saving, setSaving] = useState(false);
   const [hives, setHives] = useState<Hive[]>([]);
   const [f, setF] = useState({ target_hive_id: '', transfer_date: new Date().toISOString().split('T')[0], transfer_type: 'pot_to_box', queen_moved: true, brood_frames_moved: '0', notes: '' });
@@ -481,15 +482,15 @@ function TransferForm({ hiveId, onClose, onSaved }: { hiveId: number; onClose: (
           <option value="pot_to_box">Pot to Box</option><option value="split">Split</option><option value="merge">Merge</option>
         </select>
         <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={f.queen_moved} onChange={e=>setF(p=>({...p,queen_moved:e.target.checked}))} className="accent-amber-500" /> Queen Moved</label>
-        <input value={f.brood_frames_moved} onChange={e=>setF(p=>({...p,brood_frames_moved:e.target.value}))} placeholder="Brood Frames" type="number" className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
-        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder="Notes" rows={1} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
-        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-1.5 rounded-lg font-medium disabled:opacity-60 text-xs">{saving ? 'Saving...' : 'Transfer'}</button>
+        <input value={f.brood_frames_moved} onChange={e=>setF(p=>({...p,brood_frames_moved:e.target.value}))} placeholder={t('broodFrames', selectedLanguage)} type="number" className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
+        <textarea value={f.notes} onChange={e=>setF(p=>({...p,notes:e.target.value}))} placeholder={t('notes', selectedLanguage)} rows={1} className="w-full border rounded-lg px-2.5 py-1.5 text-xs" />
+        <button type="submit" disabled={saving} className="w-full bg-amber-500 text-white py-1.5 rounded-lg font-medium disabled:opacity-60 text-xs">{saving ? t('saving', selectedLanguage) : t('transfer', selectedLanguage)}</button>
       </form>
     </div></div>
   );
 }
 
-function MoveHiveForm({ hiveId, onClose, onSaved }: { hiveId: number; onClose: () => void; onSaved: () => void }) {
+function MoveHiveForm({ hiveId, onClose, onSaved, selectedLanguage }: { hiveId: number; onClose: () => void; onSaved: () => void; selectedLanguage: Language }) {
   const [saving, setSaving] = useState(false);
   const [apiaries, setApiaries] = useState<Apiary[]>([]);
   const [targetApiaryId, setTargetApiaryId] = useState('');
@@ -538,7 +539,7 @@ function MoveHiveForm({ hiveId, onClose, onSaved }: { hiveId: number; onClose: (
 }
 
 // ---- Main Screen ----
-export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
+export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, onNavigate, onBack, onEditHive, hiveId }: Props) {
   const [hive, setHive] = useState<Hive | null>(null);
   const [loading, setLoading] = useState(true);
   const [lockInfo, setLockInfo] = useState<{ locked: boolean; lockedByName?: string; isOwner?: boolean } | null>(null);
@@ -1046,7 +1047,7 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
               <input
                 value={quickInspection.treatment_used}
                 onChange={(event) => setQuickInspection((current) => ({ ...current, treatment_used: event.target.value }))}
-                placeholder="Enter treatment used"
+                placeholder={t('enterTreatmentUsed', selectedLanguage)}
                 className="w-full border border-stone-300 rounded-lg px-2.5 py-1.5 text-xs"
               />
             </div>
@@ -1076,7 +1077,7 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
               min="1"
               value={quickInspection.active_frame_count}
               onChange={(event) => setQuickInspection((current) => ({ ...current, active_frame_count: event.target.value }))}
-              placeholder="Number of frames covered by bees"
+              placeholder={t('framesNumberCoveredByBees', selectedLanguage)}
               className="w-full border border-stone-300 rounded-lg px-2.5 py-1.5 text-xs"
             />
             <p className="mt-0.5 text-xs text-stone-500">Use to validate effective bee space management.</p>
@@ -1122,13 +1123,13 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
           <textarea
             value={quickInspection.general_remarks}
             onChange={(event) => setQuickInspection((current) => ({ ...current, general_remarks: event.target.value }))}
-            placeholder="General Remarks"
+            placeholder={t('generalRemarks', selectedLanguage)}
             rows={2}
             className="w-full border border-stone-300 rounded-lg px-2.5 py-1.5 text-xs"
           />
 
           <button onClick={saveQuickInspection} disabled={savingQuickInspection} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg font-medium disabled:opacity-60 text-sm">
-            {savingQuickInspection ? 'Saving...' : 'Save Inspection'}
+            {savingQuickInspection ? t('saving', selectedLanguage) : t('save', selectedLanguage) + ' Inspection'}
           </button>
         </div>
 
@@ -1212,7 +1213,7 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
             <input
               value={quickExpense.description}
               onChange={(event) => setQuickExpense((current) => ({ ...current, description: event.target.value }))}
-              placeholder="Short note"
+              placeholder={t('shortNote', selectedLanguage)}
               className="w-full border border-stone-300 rounded-lg px-2.5 py-1.5 text-xs"
             />
           </div>
@@ -1381,10 +1382,10 @@ export function ViewHiveScreen({ onBack, onEditHive, hiveId }: Props) {
           </button>
         </div>
 
-        {showMoveForm && <MoveHiveForm hiveId={hiveId} onClose={() => setShowMoveForm(false)} onSaved={() => { setShowMoveForm(false); fetchHive(); }} />}
-        {showInspForm && <InspectionForm hiveId={hiveId} initial={showInspForm === true ? undefined : showInspForm} onClose={() => setShowInspForm(false)} onSaved={() => { setShowInspForm(false); fetchInspections(); }} />}
-        {showTreatForm && <TreatmentForm hiveId={hiveId} initial={showTreatForm === true ? undefined : showTreatForm} onClose={() => setShowTreatForm(false)} onSaved={() => { setShowTreatForm(false); fetchTreatments(); fetchExpenses(); }} />}
-        {showQueenForm && <QueenForm hiveId={hiveId} initial={showQueenForm === true ? undefined : showQueenForm} onClose={() => setShowQueenForm(false)} onSaved={() => { setShowQueenForm(false); fetchQueens(); }} />}
+        {showMoveForm && <MoveHiveForm hiveId={hiveId} onClose={() => setShowMoveForm(false)} onSaved={() => { setShowMoveForm(false); fetchHive(); }} selectedLanguage={selectedLanguage} />}
+        {showInspForm && <InspectionForm hiveId={hiveId} initial={showInspForm === true ? undefined : showInspForm} onClose={() => setShowInspForm(false)} onSaved={() => { setShowInspForm(false); fetchInspections(); }} selectedLanguage={selectedLanguage} />}
+        {showTreatForm && <TreatmentForm hiveId={hiveId} initial={showTreatForm === true ? undefined : showTreatForm} onClose={() => setShowTreatForm(false)} onSaved={() => { setShowTreatForm(false); fetchTreatments(); fetchExpenses(); }} selectedLanguage={selectedLanguage} />}
+        {showQueenForm && <QueenForm hiveId={hiveId} initial={showQueenForm === true ? undefined : showQueenForm} onClose={() => setShowQueenForm(false)} onSaved={() => { setShowQueenForm(false); fetchQueens(); }} selectedLanguage={selectedLanguage} />}
       </div>
     </div>
   );

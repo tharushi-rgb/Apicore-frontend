@@ -182,7 +182,7 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="h-[100dvh] bg-stone-50 flex flex-col overflow-hidden">
       <div className="bg-white shadow-sm sticky top-0 z-30">
         <MobileHeader userName={profile?.name || user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
           activeTab={activeTab} onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
@@ -190,7 +190,8 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
       {showPasswordForm && <PasswordModal onClose={() => setShowPasswordForm(false)} />}
 
-      <div className="max-w-2xl mx-auto">
+      <div className="flex-1 overflow-y-auto pb-24">
+        <div className="max-w-2xl mx-auto">
         <section className="px-4 pt-4">
           <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
             <div className="space-y-4">
@@ -432,6 +433,7 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
             <p className="text-[0.7rem] text-stone-400 mt-1">{t('beekeepingMgmtSystem', selectedLanguage)}</p>
           </div>
         </div>
+      </div>
       </div>
 
       <input

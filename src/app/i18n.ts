@@ -657,6 +657,41 @@ const translations = {
   csvRecordsNearLocation: { en: 'CSV records near location', si: 'ස්ථානයට ආසන්න CSV වාර්තා', ta: 'இடத்திற்கு அருகிலான CSV பதிவுகள்' },
   observedMonths: { en: 'Observed months', si: 'නිරීක්ෂණ කරන ලද මාස', ta: 'கவனிக்கப்பட்ட மாதங்கள்' },
 
+  // ── Missing Form Field Placeholders ──────────────────────────────────
+  enterNumberActiveFrames: { en: 'Enter number of active frames', si: 'ක්‍රියාකාරී රාමු සංඛ්‍යාව ඇතුළත් කරන්න', ta: 'सक्रिय फ्रेम की संख्या दर्ज करें' },
+  qty: { en: 'Qty', si: 'ප්‍රමාණය', ta: 'मात्रा' },
+  productName: { en: 'Product Name', si: 'නිෂ්පාදන නම', ta: 'उत्पाद नाम' },
+  dosage: { en: 'Dosage', si: 'මාත්‍රාව', ta: 'खुराक' },
+  broodFrames: { en: 'Brood Frames', si: 'පැටවුන් රාමු', ta: 'बच्चे के फ्रेम' },
+  enterTreatmentUsed: { en: 'Enter treatment used', si: 'භාවිතා කළ ප්‍රතිකාරය ඇතුළත් කරන්න', ta: 'इस्तेमाल किया गया इलाज दर्ज करें' },
+  framesNumberCoveredByBees: { en: 'Number of frames covered by bees', si: 'මී මැස්සන් ආවරණය කළ රාමු සංඛ්‍යාව', ta: 'मधुमक्खियों से ढके फ्रेम की संख्या' },
+  generalRemarks: { en: 'General Remarks', si: 'සාමාන්‍ය ප්‍රකාශන', ta: 'सामान्य टिप्पणी' },
+  shortNote: { en: 'Short note', si: 'කෙටි සටහන', ta: 'छोटी टिप्पणी' },
+  forageType: { en: 'Forage type', si: 'ආහාර වර්ගය', ta: 'चारे का प्रकार' },
+  bloomingPeriod: { en: 'Blooming period', si: 'මල් පිපෙන කාලය', ta: 'फूल का समय' },
+  searchLocation: { en: 'Search location', si: 'ස්ථානය සොයන්න', ta: 'स्थान खोजें' },
+  optionalMessage: { en: 'Optional message', si: 'විකල්ප පණිවිඩය', ta: 'वैकल्पिक संदेश' },
+  latitudePlaceholder: { en: 'Latitude', si: 'අක්ෂාංශ', ta: 'अक्षांश' },
+  longitudePlaceholder: { en: 'Longitude', si: 'දේශාංශ', ta: 'देशांतर' },
+
+  // ── Button Labels and Actions ─────────────────────────────────────────
+  transfer: { en: 'Transfer', si: 'මාරු කරන්න', ta: 'स्थानांतरण' },
+  ok: { en: 'OK', si: 'හරි', ta: 'ठीक है' },
+
+  // ── Form Labels and Static Text ───────────────────────────────────────
+  invitationToken: { en: 'Invitation Token', si: 'ආරාධනා ටෝකනය', ta: 'निमंत्रण टोकन' },
+  accountSummaryTitle: { en: 'Account Summary', si: 'ගිණුම් සාරාංශය', ta: 'खाता सारांश' },
+  accountStatusActive: { en: 'Account Status: Active & Verified', si: 'ගිණුම් තත්ත්වය: ක්‍රියාකාරී සහ සත්‍යාපිත', ta: 'खाते की स्थिति: सक्रिय और सत्यापित' },
+  roleBeekeeper: { en: 'Role: Beekeeper', si: 'භූමිකාව: මී මැසි පාලකයා', ta: 'भूमिका: मधुमक्खी पालक' },
+  profileCompletionPercent: { en: 'Profile Completion: 85%', si: 'පැතිකඩ සම්පූර්ණකරණය: 85%', ta: 'प्रोफाइल पूर्णता: 85%' },
+
+  // ── Status and Error Messages ─────────────────────────────────────────
+  noForageNamesRecorded: { en: 'No forage names recorded yet', si: 'තවම ආහාර නම් සටහන් කර නැත', ta: 'अभी तक कोई चारा नाम दर्ज नहीं किया गया' },
+  noForageNamesInArea: { en: 'No forage names recorded by beekeepers for this area yet', si: 'මෙම ප්‍රදේශය සඳහා මී මැසි පාලකයින් විසින් තවම ආහාර නම් සටහන් කර නැත', ta: 'इस क्षेत्र के लिए मधुमक्खी पालकों द्वारा अभी तक कोई चारा नाम दर्ज नहीं किया गया' },
+  pleaseEnterInvitationToken: { en: 'Please enter your invitation token', si: 'කරුණාකර ඔබේ ආරාධනා ටෝකනය ඇතුළත් කරන්න', ta: 'कृपया अपना निमंत्रण टोकन दर्ज करें' },
+  invalidExpiredToken: { en: 'Invalid or expired token', si: 'වලංගු නොවන හෝ කල් ඉකුත් වූ ටෝකනය', ta: 'अमान्य या समाप्त टोकन' },
+  pleaseFillMandatoryFields: { en: 'Please fill all mandatory fields', si: 'කරුණාකර සියලුම අනිවාර්ය ක්ෂේත්‍ර පිරවන්න', ta: 'कृपया सभी अनिवार्य फ़ील्ड भरें' },
+
   // ── Nearby location warning ──────────────────────────────────────────
   nearbyApiaryWarning: {
     en: 'An apiary already exists within 500 m of this location.',
@@ -802,7 +837,6 @@ const translations = {
   moveInDate: { en: 'Move-In *', si: 'ඇතුල් වන දිනය *', ta: 'உள்நுழைவு *' },
   moveOutDate: { en: 'Move-Out *', si: 'පිටවන දිනය *', ta: 'வெளியேृற்றம் *' },
   noteToLandowner: { en: 'Note to Landowner', si: 'ඉඩම් අයිතිකරුට සටහන', ta: 'நிலவுரிமையாளருக்கு குறிப்பு' },
-  optionalMessage: { en: 'Optional message', si: 'විකල්ප පසිවිඩය', ta: 'விருப்ப செய்தி' },
 
   // ── Error/Success Messages (Beekeeper) ───────────────────────────────
   failedToLoadListings: { en: 'Failed to load listings', si: 'ලැයිස්තු පූරණය අසාර්ථක විය', ta: 'பட்டியல்கள் ஏற்ற தோல்வி' },
