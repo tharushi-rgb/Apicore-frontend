@@ -195,25 +195,45 @@ async function fetchWeather(lat: number, lng: number, startDate?: string, endDat
   const maxEnd = new Date(today.getTime() + 16 * 86400000).toISOString().split('T')[0];
   const end = rawEnd > maxEnd ? maxEnd : rawEnd;
 
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
+  // Try multiple weather API endpoints to avoid CORS issues
+  const urls = [
+    // Direct API call
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
     `&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,` +
     `precipitation_hours,sunrise,sunset` +
     `&hourly=temperature_2m,precipitation,relativehumidity_2m,windspeed_10m,weathercode` +
     `&current_weather=true` +
     `&start_date=${start}&end_date=${end}` +
-    `&timezone=Asia%2FColombo`;
+    `&timezone=Asia%2FColombo`,
 
-  try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      console.warn(`Weather API returned ${res.status}: ${res.statusText}`);
-      return generateFallbackWeatherData(start, end);
+    // CORS proxy fallback (if available)
+    `https://cors-anywhere.herokuapp.com/https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
+    `&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,` +
+    `precipitation_hours,sunrise,sunset` +
+    `&hourly=temperature_2m,precipitation,relativehumidity_2m,windspeed_10m,weathercode` +
+    `&current_weather=true` +
+    `&start_date=${start}&end_date=${end}` +
+    `&timezone=Asia%2FColombo`
+  ];
+
+  for (let i = 0; i < urls.length; i++) {
+    try {
+      console.log(`Trying weather API endpoint ${i + 1}/${urls.length}...`);
+      const res = await fetch(urls[i]);
+      if (!res.ok) {
+        console.warn(`Weather API ${i + 1} returned ${res.status}: ${res.statusText}`);
+        continue;
+      }
+      const data = await res.json();
+      console.log('Weather API success!');
+      return data;
+    } catch (error) {
+      console.warn(`Weather API ${i + 1} failed:`, error);
     }
-    return res.json();
-  } catch (error) {
-    console.warn('Weather API failed (CORS/Network issue):', error);
-    return generateFallbackWeatherData(start, end);
   }
+
+  console.warn('All weather APIs failed, using fallback data');
+  return generateFallbackWeatherData(start, end);
 }
 
 // Generate realistic fallback weather data for Sri Lanka
@@ -299,7 +319,7 @@ export interface SatApiaryInfo {
   id: number;
   gps_latitude?: number | null;
   gps_longitude?: number | null;
-  hive_count?: number;
+  district?: string;
 }
 
 export interface SatHiveInfo {
@@ -470,29 +490,35 @@ export const planningService = {
     else if (boostedScore >= 35) { boostedLabel = 'Fair'; boostedColor = 'orange'; }
     else { boostedLabel = 'Poor'; boostedColor = 'red'; }
 
-    // Real saturation: count ALL hives from ALL users in the same district within 5km radius
-    const RADIUS_KM = 5;
+    // Real saturation: count ALL hives from ALL users in the same district within 50km radius
 
     // Query all apiaries and hives from database (all users) in the district
     let allApiaries: SatApiaryInfo[] = [];
     let allHives: SatHiveInfo[] = [];
 
     try {
-      // Get all apiaries from the database in the selected district
-      const { data: apiariesData } = await supabase
+      // Get all apiaries from the database (removed non-existent hive_count column)
+      const { data: apiariesData, error: apiariesError } = await supabase
         .from('apiaries')
-        .select('id, gps_latitude, gps_longitude, hive_count, district');
+        .select('id, gps_latitude, gps_longitude, district');
 
       // Get all hives from the database
-      const { data: hivesData } = await supabase
+      const { data: hivesData, error: hivesError } = await supabase
         .from('hives')
         .select('id, apiary_id, gps_latitude, gps_longitude');
+
+      if (apiariesError) {
+        console.warn('Failed to fetch apiaries:', apiariesError);
+      }
+      if (hivesError) {
+        console.warn('Failed to fetch hives:', hivesError);
+      }
 
       allApiaries = (apiariesData ?? []).map(a => ({
         id: a.id,
         gps_latitude: a.gps_latitude,
         gps_longitude: a.gps_longitude,
-        hive_count: a.hive_count
+        district: a.district
       }));
 
       allHives = (hivesData ?? []).map(h => ({
@@ -507,28 +533,58 @@ export const planningService = {
 
     let nearbyHiveCount = 0;
     const nearbyApiaryIds = new Set<number>();
+    const RADIUS_KM = 50; // Increased to 50km for better coverage
 
-    // Count hives from apiaries within radius
+    console.log(`Calculating saturation for location: ${lat}, ${lng}`);
+    console.log(`Total apiaries in database: ${allApiaries.length}`);
+    console.log(`Total hives in database: ${allHives.length}`);
+
+    // Count hives from apiaries within radius or same district
     for (const a of allApiaries) {
+      let isNearby = false;
+
       if (a.gps_latitude != null && a.gps_longitude != null) {
+        // GPS-based proximity check
         const dist = haversineKm(lat, lng, a.gps_latitude, a.gps_longitude);
         if (dist <= RADIUS_KM) {
-          nearbyApiaryIds.add(a.id);
-          nearbyHiveCount += a.hive_count ?? 0;
+          isNearby = true;
+          console.log(`Apiary ${a.id} is ${dist.toFixed(1)}km away (GPS-based)`);
         }
+      } else if (a.district && district) {
+        // District-based proximity check (same district)
+        if (a.district.toLowerCase().includes(district.toLowerCase()) ||
+            district.toLowerCase().includes(a.district.toLowerCase())) {
+          isNearby = true;
+          console.log(`Apiary ${a.id} is in same district: ${a.district}`);
+        }
+      }
+
+      if (isNearby) {
+        nearbyApiaryIds.add(a.id);
+        // Count hives belonging to this apiary
+        const apiaryHives = allHives.filter(h => h.apiary_id === a.id);
+        nearbyHiveCount += apiaryHives.length;
+        console.log(`Apiary ${a.id} has ${apiaryHives.length} hives`);
       }
     }
 
     // Count standalone hives (not linked to any apiary or linked to non-nearby apiary) within radius
     for (const h of allHives) {
+      // Skip if hive is already counted via its apiary
+      if (h.apiary_id && nearbyApiaryIds.has(h.apiary_id)) {
+        continue;
+      }
+
       if (h.gps_latitude != null && h.gps_longitude != null) {
-        // Only count if the hive is standalone or its apiary is not already counted
-        if (!h.apiary_id || !nearbyApiaryIds.has(h.apiary_id)) {
-          const dist = haversineKm(lat, lng, h.gps_latitude, h.gps_longitude);
-          if (dist <= RADIUS_KM) nearbyHiveCount++;
+        const dist = haversineKm(lat, lng, h.gps_latitude, h.gps_longitude);
+        if (dist <= RADIUS_KM) {
+          nearbyHiveCount++;
+          console.log(`Standalone hive ${h.id} is ${dist.toFixed(1)}km away`);
         }
       }
     }
+
+    console.log(`Total nearby hives found: ${nearbyHiveCount}`);
 
     const totalInSystem = allHives.length;
     const satCount = nearbyHiveCount;

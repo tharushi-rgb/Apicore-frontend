@@ -151,6 +151,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
   });
   const [analysis, setAnalysis] = useState<PlanningAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [prefillHandled, setPrefillHandled] = useState(false);
 
   const availableDistricts = getDistrictsByProvince(selectedProvince);
@@ -215,6 +216,8 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
     if (isNaN(lat) || isNaN(lng)) return;
 
     setAnalyzing(true);
+    setAnalysisError(null);
+    setAnalysis(null);
     try {
       const result = await planningService.analyze(lat, lng, districtLabel, {
         startDate,
@@ -225,6 +228,8 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
       setAnalysis(result);
     } catch (e) {
       console.error('Analysis failed:', e);
+      const errorMessage = e instanceof Error ? e.message : 'Unknown error occurred during analysis';
+      setAnalysisError(`Analysis failed: ${errorMessage}`);
     }
     setAnalyzing(false);
   };
@@ -355,6 +360,14 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                     className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50">
                     {analyzing ? <><div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> Analyzing...</> : <><Search className="w-4 h-4" /> Analyze Location</>}
                   </button>
+
+                  {/* Error Display */}
+                  {analysisError && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+                      <p className="text-sm text-red-700">{analysisError}</p>
+                      <p className="text-xs text-red-500 mt-1">Check console for more details or try different coordinates.</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Analysis Results */}
