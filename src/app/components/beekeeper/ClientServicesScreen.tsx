@@ -393,12 +393,6 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
               <div className="space-y-3">
                 {filteredListings.map((listing) => (
                   <div key={listing.id} className="rounded-2xl bg-white border border-stone-200 shadow-sm overflow-hidden">
-                    {listing.image ? (
-                      <img src={listing.image} alt={listing.plotName} className="w-full h-28 object-cover" />
-                    ) : (
-                      <div className="w-full h-28 bg-gradient-to-r from-stone-100 to-emerald-100 flex items-center justify-center text-[0.72rem] text-stone-500">{t('noPlotImage', selectedLanguage)}</div>
-                    )}
-
                     <div className="p-3 space-y-2">
                       <div className="flex items-start justify-between gap-2">
                         <div>
@@ -417,7 +411,20 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                         {listing.hasWaterOnSite && <AmenityIcon title="On-site water" icon={<Droplets className="w-3.5 h-3.5" />} />}
                         <AmenityIcon title={listing.vehicleAccess} icon={<Truck className="w-3.5 h-3.5" />} />
                         {listing.nightAccess && <AmenityIcon title="Night access" icon={<Moon className="w-3.5 h-3.5" />} />}
-                        {listing.ownerVerified && <span className="ml-auto inline-flex items-center gap-1 text-[0.65rem] font-medium text-emerald-700"><ShieldCheck className="w-3.5 h-3.5" /> {t('verified', selectedLanguage)}</span>}
+                        {listing.userProposalStatus !== 'none' ? (
+                          <span className={`ml-auto inline-flex items-center gap-1 text-[0.65rem] font-medium ${
+                            listing.userProposalStatus === 'accepted' ? 'text-emerald-700' :
+                            listing.userProposalStatus === 'pending' ? 'text-amber-700' :
+                            'text-red-700'
+                          }`}>
+                            <ShieldCheck className="w-3.5 h-3.5" />
+                            Proposal {listing.userProposalStatus}
+                          </span>
+                        ) : listing.ownerVerified && (
+                          <span className="ml-auto inline-flex items-center gap-1 text-[0.65rem] font-medium text-emerald-700">
+                            <ShieldCheck className="w-3.5 h-3.5" /> {t('verified', selectedLanguage)}
+                          </span>
+                        )}
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 pt-1">
@@ -583,11 +590,6 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
             </div>
 
             <div className="p-3 space-y-3">
-              {selectedListing.image ? (
-                <img src={selectedListing.image} alt={selectedListing.plotName} className="w-full h-36 rounded-xl object-cover" />
-              ) : (
-                <div className="w-full h-36 rounded-xl bg-gradient-to-r from-stone-100 to-emerald-100 flex items-center justify-center text-[0.74rem] text-stone-500">No images uploaded for this plot</div>
-              )}
 
               <section className="rounded-xl border border-stone-200 p-3">
                 <p className="text-[0.68rem] text-stone-500">Plot</p>

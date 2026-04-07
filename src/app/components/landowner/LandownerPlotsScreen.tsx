@@ -192,28 +192,17 @@ export function LandownerPlotsScreen({
                   key={plot.id}
                   className="bg-white rounded-xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-md transition-shadow flex flex-col"
                 >
-                  {/* Image Section */}
-                  <div className="relative h-40 bg-gradient-to-br from-amber-200 to-emerald-200 overflow-hidden">
-                    {plot.images && plot.images.length > 0 ? (
-                      <img src={plot.images[0]} alt={plot.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-stone-400">
-                        <MapPin className="w-12 h-12" />
-                      </div>
-                    )}
-
-                    {/* Status Badge */}
+                  {/* Content Section */}
+                  <div className="p-3 flex-1 flex flex-col gap-3">
+                    {/* Active Status Badge */}
                     {activeContracts > 0 && (
-                      <div className="absolute top-2 right-2">
+                      <div className="flex justify-end">
                         <span className="bg-green-500 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
                           <Zap className="w-3 h-3" /> Active
                         </span>
                       </div>
                     )}
-                  </div>
 
-                  {/* Content Section */}
-                  <div className="p-3 flex-1 flex flex-col gap-3">
                     {/* Title and Location */}
                     <div>
                       <h3 className="font-bold text-sm text-stone-900 mb-0.5">{plot.name}</h3>
