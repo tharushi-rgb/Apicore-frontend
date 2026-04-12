@@ -99,8 +99,8 @@ export function ForecastDays14({ days, hourly, lang = 'en' }: Props) {
                 <p className="text-[0.6rem] font-medium text-stone-500">{day.dayName}</p>
                 <p className="text-[0.85rem] font-bold text-stone-800">{day.dayNum}</p>
                 <p className="text-base leading-none my-0.5">{weatherEmoji(day.icon)}</p>
-                <p className="text-[0.65rem] font-bold text-stone-700">{day.maxTemp}°</p>
-                <p className="text-[0.55rem] text-stone-400">{day.minTemp}°</p>
+                <p className="text-[0.65rem] font-bold text-stone-700">{day.maxTemp.toFixed(1)}°</p>
+                <p className="text-[0.55rem] text-stone-400">{day.minTemp.toFixed(1)}°</p>
                 <div className="flex justify-center mt-0.5">
                   <span className={`w-1.5 h-1.5 rounded-full ${riskDot(day.tempRisk.color)}`} />
                 </div>

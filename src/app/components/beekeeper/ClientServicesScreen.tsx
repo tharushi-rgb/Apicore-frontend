@@ -467,7 +467,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
             </div>
 
             <div className="mt-3 space-y-3">
-              <div>
+              {/* <div>
                 <p className="text-[0.68rem] font-semibold uppercase tracking-wide text-stone-500 mb-1">Distance</p>
                 <div className="grid grid-cols-4 gap-2">
                   {[0, 5, 10, 50].map((km) => (
@@ -477,7 +477,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                   ))}
                 </div>
                 {locationDenied && <p className="text-[0.66rem] text-red-600 mt-1">Location permission is required for distance filter.</p>}
-              </div>
+              </div> */}
 
               <div>
                 <p className="text-[0.68rem] font-semibold uppercase tracking-wide text-stone-500 mb-1">District / DS Division</p>

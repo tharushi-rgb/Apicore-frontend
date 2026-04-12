@@ -196,7 +196,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
     try {
       const updated = await profileService.update({
         name: editName.trim(),
-        email: editEmail.trim(),
+        // email: editEmail.trim(),
         phone: editPhone.trim(),
         district: editDistrict.trim(),
         province: editProvince.trim(),
@@ -477,7 +477,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                 ) : (
                   <div className="space-y-2">
                     <ProfileEditInputTile label={t('name', selectedLanguage)} value={editName} onChange={setEditName} placeholder={t('enterName', selectedLanguage)} />
-                    <ProfileEditInputTile label={t('email', selectedLanguage)} value={editEmail} onChange={setEditEmail} placeholder={t('enterEmail', selectedLanguage)} type="email" />
+                    {/* <ProfileEditInputTile label={t('email', selectedLanguage)} value={editEmail} onChange={setEditEmail} placeholder={t('enterEmail', selectedLanguage)} type="email" /> */}
                     <ProfileEditInputTile label={t('phone', selectedLanguage)} value={editPhone} onChange={setEditPhone} placeholder={t('enterPhone', selectedLanguage)} type="tel" />
                     <ProfileEditSelectTile
                       label={t('province', selectedLanguage)}

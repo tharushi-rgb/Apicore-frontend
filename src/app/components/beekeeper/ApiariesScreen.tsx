@@ -47,6 +47,7 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
     dateTo: '',
   };
   const [filters, setFilters] = useState(initialFilters);
+  const [showFilters, setShowFilters] = useState(false);
   const user = authService.getLocalUser();
   const activeTab: NavTab = 'apiaries';
 
@@ -200,91 +201,30 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
           ) : (
             <div className="space-y-4">
               {/* Search Bar */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-stone-400" />
-                <input
-                  type="text"
-                  placeholder={t('searchApiaries', selectedLanguage)}
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white text-[0.875rem]"
-                />
-              </div>
-
-              <div className="bg-white rounded-xl border border-stone-200 p-2.5 sm:p-3 shadow-sm w-full max-w-full overflow-hidden">
-                <h3 className="text-[0.8rem] font-bold text-stone-800 mb-2 flex items-center gap-1.5">
-                  <Filter className="w-4 h-4 text-stone-600" />
-                  {t('filtersAndSearch', selectedLanguage)}
-                </h3>
-                <div className="flex flex-wrap items-start gap-2 w-full max-w-full">
-                  <div className="flex flex-col min-w-0 w-auto max-w-full">
-                    <p className="text-[0.7rem] font-bold text-stone-800 mb-0.5">{t('status', selectedLanguage)}</p>
-                    <select
-                      value={filters.status}
-                      onChange={(event) => setFilters((previous) => ({ ...previous, status: event.target.value as typeof filters.status }))}
-                      className="w-auto max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
-                    >
-                      <option value="all">{t('any', selectedLanguage)}</option>
-                      <option value="active">{t('active', selectedLanguage)}</option>
-                      <option value="inactive">{t('inactive', selectedLanguage)}</option>
-                      <option value="empty">{t('empty', selectedLanguage)}</option>
-                      <option value="expired">{t('expired', selectedLanguage)}</option>
-                    </select>
-                  </div>
-
-                  <div className="flex flex-col min-w-0 w-auto max-w-full">
-                    <p className="text-[0.7rem] font-bold text-stone-800 mb-1">{t('establishedBetween', selectedLanguage)}</p>
-                    <div className="flex flex-col gap-1">
-                      <input
-                        type="date"
-                        value={filters.dateFrom}
-                        onChange={(event) => setFilters((previous) => ({ ...previous, dateFrom: event.target.value }))}
-                        className="w-[9.5rem] max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
-                        placeholder={t('from', selectedLanguage)}
-                      />
-                      <input
-                        type="date"
-                        value={filters.dateTo}
-                        onChange={(event) => setFilters((previous) => ({ ...previous, dateTo: event.target.value }))}
-                        className="w-[9.5rem] max-w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.7rem] font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white hover:border-stone-400 transition-colors"
-                        placeholder={t('to', selectedLanguage)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col min-w-0 w-full max-w-full">
-                    <p className="text-[0.7rem] font-bold text-stone-800 mb-1">{t('healthFilters', selectedLanguage)}</p>
-                    <div className="flex flex-wrap gap-1 items-center">
-                      <button
-                        onClick={() => toggleHealthFilter('queenlessOnly')}
-                        className={`px-2 py-1 rounded-full text-[0.7rem] font-semibold transition-all ${filters.queenlessOnly ? 'bg-red-100 text-red-900 border border-red-400 shadow-sm' : 'bg-stone-100 text-stone-700 border border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
-                      >
-                        {t('queenlessHives', selectedLanguage)}
-                      </button>
-                      <button
-                        onClick={() => toggleHealthFilter('pestOnly')}
-                        className={`px-2 py-1 rounded-full text-[0.7rem] font-semibold transition-all ${filters.pestOnly ? 'bg-amber-100 text-amber-900 border border-amber-400 shadow-sm' : 'bg-stone-100 text-stone-700 border border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
-                      >
-                        {t('pestAlerts', selectedLanguage)}
-                      </button>
-                      <button
-                        onClick={() => toggleHealthFilter('healthyOnly')}
-                        className={`px-2 py-1 rounded-full text-[0.7rem] font-semibold transition-all ${filters.healthyOnly ? 'bg-emerald-100 text-emerald-900 border border-emerald-400 shadow-sm' : 'bg-stone-100 text-stone-700 border border-stone-300 hover:bg-stone-150 hover:border-stone-400'}`}
-                      >
-                        {t('healthyOnly', selectedLanguage)}
-                      </button>
-                    </div>
-                  </div>
+              <div className="flex gap-2">
+                {/* Search */}
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-stone-400" />
+                  <input
+                    type="text"
+                    placeholder={t('searchApiaries', selectedLanguage)}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-[0.875rem]"
+                  />
                 </div>
+
+                {/* Filter Button */}
                 <button
-                  type="button"
-                  onClick={() => setFilters(initialFilters)}
-                  className="mt-2 w-full rounded-lg border border-stone-300 bg-white py-1.5 text-[0.75rem] font-semibold text-stone-700 hover:bg-stone-50"
+                  onClick={() => setShowFilters(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 rounded-lg shadow-sm"
                 >
-                  {t('resetFilters', selectedLanguage)}
+                  <Filter className="w-4 h-4" />
+                  Filter
                 </button>
               </div>
 
+            
               {filtered.length === 0 ? (
                 <div className="bg-white rounded-2xl p-12 text-center">
                   <MapPin className="w-12 h-12 text-stone-300 mx-auto mb-4" />
@@ -319,6 +259,17 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
         >
           <Plus className="w-6 h-6" />
         </button>
+      )}
+      {showFilters && (
+        <FilterModal
+          filters={filters}
+          setFilters={setFilters}
+          onClose={() => setShowFilters(false)}
+          onApply={() => setShowFilters(false)}
+          selectedLanguage={selectedLanguage}
+          toggleHealthFilter={toggleHealthFilter}
+          initialFilters={initialFilters}
+        />
       )}
     </div>
   );
@@ -428,6 +379,171 @@ function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon, h
           <button onClick={onAddHive}
             className="flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 py-1 rounded-full text-[0.7rem] font-medium transition-colors flex items-center justify-center gap-0.5 min-h-8">
             <HiveIcon className="w-3 h-3" />{t('addHive', lang)}
+          </button>
+        </div>
+      </div>
+      
+    </div>
+  );
+}
+
+function FilterModal({
+  filters,
+  setFilters,
+  onClose,
+  onApply,
+  selectedLanguage,
+  toggleHealthFilter,
+  initialFilters,
+}: any) {
+  return (
+    <div
+      className="absolute inset-0 bg-black/50 z-50 px-3 py-6 flex items-start justify-center"
+      onClick={onClose}
+    >
+      
+      {/* Modal */}
+      <div
+        className="w-full max-w-sm bg-white rounded-2xl max-h-full overflow-y-auto p-3"
+        onClick={(e) => e.stopPropagation()}
+      >
+
+        {/* Header */}
+        <div className="flex justify-end">
+          <button onClick={onClose} className="text-xl">✕</button>
+        </div>
+
+        {/* FILTER CONTENT */}
+        <div className="bg-white rounded-xl border border-stone-200 p-3 mb-2 shadow-sm w-full">
+
+          {/* Title */}
+          <h3 className="text-[0.8rem] font-bold text-stone-800 mb-2 flex items-center gap-1.5">
+            <Filter className="w-4 h-4 text-stone-600" />
+            {t('filtersAndSearch', selectedLanguage)}
+          </h3>
+
+          <div className="flex flex-col gap-3">
+
+            {/* Status */}
+            <div>
+              <p className="text-[0.7rem] font-bold text-stone-800 mb-1">
+                {t('status', selectedLanguage)}
+              </p>
+              <select
+                value={filters.status}
+                onChange={(e) =>
+                  setFilters((prev: any) => ({
+                    ...prev,
+                    status: e.target.value,
+                  }))
+                }
+                className="w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.75rem] focus:outline-none focus:ring-2 focus:ring-amber-500"
+              >
+                <option value="all">{t('any', selectedLanguage)}</option>
+                <option value="active">{t('active', selectedLanguage)}</option>
+                <option value="inactive">{t('inactive', selectedLanguage)}</option>
+                <option value="empty">{t('empty', selectedLanguage)}</option>
+                <option value="expired">{t('expired', selectedLanguage)}</option>
+              </select>
+            </div>
+
+            {/* Date */}
+            <div>
+              <p className="text-[0.7rem] font-bold text-stone-800 mb-1">
+                {t('establishedBetween', selectedLanguage)}
+              </p>
+              <div className="flex flex-col gap-2">
+                <input
+                  type="date"
+                  value={filters.dateFrom}
+                  onChange={(e) =>
+                    setFilters((prev: any) => ({
+                      ...prev,
+                      dateFrom: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.75rem] focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+                <input
+                  type="date"
+                  value={filters.dateTo}
+                  onChange={(e) =>
+                    setFilters((prev: any) => ({
+                      ...prev,
+                      dateTo: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-lg border border-stone-300 px-2 py-1 text-[0.75rem] focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+            </div>
+
+            {/* Health Filters */}
+            <div>
+              <p className="text-[0.7rem] font-bold text-stone-800 mb-1">
+                {t('healthFilters', selectedLanguage)}
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => toggleHealthFilter('queenlessOnly')}
+                  className={`px-3 py-1 rounded-full text-[0.7rem] font-semibold ${
+                    filters.queenlessOnly
+                      ? 'bg-red-100 text-red-900 border border-red-400'
+                      : 'bg-stone-100 text-stone-700 border border-stone-300'
+                  }`}
+                >
+                  {t('queenlessHives', selectedLanguage)}
+                </button>
+
+                <button
+                  onClick={() => toggleHealthFilter('pestOnly')}
+                  className={`px-3 py-1 rounded-full text-[0.7rem] font-semibold ${
+                    filters.pestOnly
+                      ? 'bg-amber-100 text-amber-900 border border-amber-400'
+                      : 'bg-stone-100 text-stone-700 border border-stone-300'
+                  }`}
+                >
+                  {t('pestAlerts', selectedLanguage)}
+                </button>
+
+                <button
+                  onClick={() => toggleHealthFilter('healthyOnly')}
+                  className={`px-3 py-1 rounded-full text-[0.7rem] font-semibold ${
+                    filters.healthyOnly
+                      ? 'bg-emerald-100 text-emerald-900 border border-emerald-400'
+                      : 'bg-stone-100 text-stone-700 border border-stone-300'
+                  }`}
+                >
+                  {t('healthyOnly', selectedLanguage)}
+                </button>
+              </div>
+            </div>
+
+            {/* Reset */}
+            <button
+              onClick={() => setFilters(initialFilters)}
+              className="w-full rounded-lg border border-stone-300 py-2 text-[0.75rem] font-semibold text-stone-700 hover:bg-stone-50"
+            >
+              {t('resetFilters', selectedLanguage)}
+            </button>
+          </div>
+        </div>
+
+        {/* Bottom Buttons */}
+        <div className="flex gap-2">
+          <button
+            onClick={onClose}
+            className="flex-1 border rounded-xl py-2 text-sm"
+          >
+            Close
+          </button>
+
+          <button
+            onClick={onApply}
+            className="flex-1 bg-amber-500 text-white rounded-xl py-2 text-sm"
+          >
+            Apply
           </button>
         </div>
       </div>

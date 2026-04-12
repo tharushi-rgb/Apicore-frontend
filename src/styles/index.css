@@ -34,10 +34,11 @@ html, body {
   margin: 0;
   padding: 0;
   min-height: 100dvh;
-  background-color: #1c1917; /* stone-900 surround */
+  background-color: #1c1917;
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  font-family: 'Noto Sans Tamil', sans-serif;
 }
 
 #root {

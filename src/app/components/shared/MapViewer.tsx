@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapPin } from 'lucide-react';
@@ -37,6 +37,7 @@ export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, distri
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const marker = useRef<L.Marker | null>(null);
+  const [detectedDistrict, setDetectedDistrict] = useState('');
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -103,7 +104,7 @@ export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, distri
             .bindPopup(`<div class="text-sm"><strong>${district || 'Location'}</strong><br/>${lat.toFixed(4)}, ${lng.toFixed(4)}</div>`)
             .addTo(map.current);
         }
-        map.current.panTo([lat, lng]);
+         map.current.setView([lat, lng], 10);
       }
     }
 
@@ -112,12 +113,42 @@ export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, distri
     };
   }, [lat, lng, district, editable, onLocationSelect]);
 
+
+  useEffect(() => {
+    if (!latProp || !lngProp) return;
+
+    const fetchDistrict = async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latProp}&lon=${lngProp}`
+        );
+        const data = await res.json();
+
+        const districtName =
+          data.address?.county ||
+          data.address?.state_district ||
+          data.address?.state ||
+          '';
+
+        setDetectedDistrict(districtName.replace(' District', ''));
+      } catch (err) {
+        console.error('Failed to fetch district:', err);
+      }
+    };
+
+    fetchDistrict();
+  }, [latProp, lngProp]);
+
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm" style={{ isolation: 'isolate', position: 'relative', zIndex: 0 }}>
       <div className="p-3 bg-gradient-to-r from-emerald-50 to-blue-50 border-b border-stone-200 flex items-center gap-2">
         <MapPin className="w-4 h-4 text-emerald-600" />
         <div>
-          <h3 className="font-bold text-sm text-stone-800">{district || 'Sri Lanka Map'}</h3>
+          <h3 className="font-bold text-sm text-stone-800">
+            {latProp && lngProp
+              ? (detectedDistrict || 'Loading...')
+              : (district || 'Sri Lanka Map')}
+          </h3>
           <p className="text-xs text-stone-500">
             {editable
               ? (hasLocation ? 'Click on map to update location' : 'Select a district or click the map')

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, Flag, Plus, Edit2, Trash2, ArrowRightLeft, ClipboardList, Droplets, Wrench, Crown, Pill, X, MapPin, AlertTriangle, Lock } from 'lucide-react';
 import { hivesService, type Hive } from '../../services/hives';
 import { apiariesService, type Apiary } from '../../services/apiaries';
@@ -116,7 +117,8 @@ function InspectionForm({ hiveId, initial, onClose, onSaved, selectedLanguage }:
 
   return (
     <div className="absolute inset-0 bg-black/50 z-50 flex items-end justify-center">
-      <div className="bg-white w-full max-w-md rounded-t-2xl p-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white w-full max-w-md rounded-t-2xl overflow-hidden">
+        <div className="p-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-sm text-stone-800">Modern Hive Inspection</h3>
           <button onClick={onClose} className="p-1"><X className="w-4 h-4" /></button>
@@ -288,6 +290,7 @@ function InspectionForm({ hiveId, initial, onClose, onSaved, selectedLanguage }:
             {saving ? 'Saving...' : initial ? 'Update Inspection' : 'Record Inspection'}
           </button>
         </form>
+        </div>
       </div>
     </div>
   );
@@ -541,6 +544,7 @@ function MoveHiveForm({ hiveId, onClose, onSaved, selectedLanguage }: { hiveId: 
 // ---- Main Screen ----
 export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, onNavigate, onBack, onEditHive, hiveId }: Props) {
   const [hive, setHive] = useState<Hive | null>(null);
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [lockInfo, setLockInfo] = useState<{ locked: boolean; lockedByName?: string; isOwner?: boolean } | null>(null);
 
@@ -583,12 +587,15 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
     unit: 'kg',
     notes: '',
   });
+  const [editingHarvestId, setEditingHarvestId] = useState<number | null>(null);
+
   const [quickQueen, setQuickQueen] = useState({
     introduction_date: new Date().toISOString().split('T')[0],
     queen_type: 'local_wild',
     breed_color: '',
     status: 'active' as 'active' | 'inactive',
   });
+  const [editingQueenId, setEditingQueenId] = useState<number | null>(null);
 
   const [showInspForm, setShowInspForm] = useState<Inspection | true | false>(false);
   const [showFeedForm, setShowFeedForm] = useState<Feeding | true | false>(false);
@@ -597,6 +604,7 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
   const [showTreatForm, setShowTreatForm] = useState<Treatment | true | false>(false);
   const [showTransferForm, setShowTransferForm] = useState(false);
   const [showMoveForm, setShowMoveForm] = useState(false);
+  const [editingExpenseId, setEditingExpenseId] = useState<number | null>(null);
 
   const fetchHive = async () => { try { const h = await hivesService.getById(hiveId); setHive(h); } catch (err) { console.error('Failed to fetch hive:', err); } };
   const fetchInspections = async () => { try { setInspections(await inspectionsService.getByHive(hiveId)); } catch (err) { console.error('Failed to fetch inspections:', err); } };
@@ -655,8 +663,8 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
     }
   };
 
-  const toggleStar = async () => { if (!hive) return; await hivesService.toggleStar(hive.id); fetchHive(); };
-  const toggleFlag = async () => { if (!hive) return; await hivesService.toggleFlag(hive.id); fetchHive(); };
+  // const toggleStar = async () => { if (!hive) return; await hivesService.toggleStar(hive.id); fetchHive(); };
+  // const toggleFlag = async () => { if (!hive) return; await hivesService.toggleFlag(hive.id); fetchHive(); };
   const handleDeleteHive = async () => {
     if (!hive) return;
     if (!confirm(`Delete hive "${hive.name}"? All inspections, feedings, treatments and other records will also be deleted. This cannot be undone.`)) return;
@@ -742,6 +750,15 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
 
     setSavingQuickExpense(true);
     try {
+      if (editingExpenseId) {
+      await expensesService.update(editingExpenseId, {
+        hive_id: hive.id,
+        expense_date: quickExpense.expense_date,
+        expense_type: quickExpense.expense_type,
+        amount,
+        description: quickExpense.description || undefined,
+      });
+    } else {
       await expensesService.create({
         hive_id: hive.id,
         expense_date: quickExpense.expense_date,
@@ -749,7 +766,9 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
         amount,
         description: quickExpense.description || undefined,
       });
+    }
       await fetchExpenses();
+      setEditingExpenseId(null);
       setQuickExpense((current) => ({
         ...current,
         amount: '',
@@ -764,6 +783,17 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
     }
   };
 
+  const clearExpenseForm = () => {
+    setQuickExpense({
+      expense_date: new Date().toISOString().split('T')[0],
+      expense_type: 'fuel_transport',
+      amount: '',
+      description: '',
+    });
+
+    setEditingExpenseId(null); // exit edit mode
+  };
+
   const saveQuickHarvest = async () => {
     if (!hive) return;
     const quantity = Number(quickHarvest.quantity);
@@ -771,15 +801,27 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
 
     setSavingQuickHarvest(true);
     try {
-      await harvestsService.create({
-        hive_id: hive.id,
-        harvest_date: quickHarvest.harvest_date,
-        harvest_type: quickHarvest.harvest_type,
-        quantity,
-        unit: quickHarvest.unit,
-        notes: quickHarvest.notes || undefined,
-      });
+      if (editingHarvestId) {
+        await harvestsService.update(editingHarvestId, {
+          hive_id: hive.id,
+          harvest_date: quickHarvest.harvest_date,
+          harvest_type: quickHarvest.harvest_type,
+          quantity,
+          unit: quickHarvest.unit,
+          notes: quickHarvest.notes || undefined,
+        });
+      } else {
+        await harvestsService.create({
+          hive_id: hive.id,
+          harvest_date: quickHarvest.harvest_date,
+          harvest_type: quickHarvest.harvest_type,
+          quantity,
+          unit: quickHarvest.unit,
+          notes: quickHarvest.notes || undefined,
+        });
+      }
       await fetchHarvests();
+      setEditingHarvestId(null);
       setQuickHarvest((current) => ({
         ...current,
         quantity: '',
@@ -794,26 +836,51 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
     setSavingQuickHarvest(false);
   };
 
+  const clearHarvestForm = () => {
+    setQuickHarvest({
+      harvest_date: new Date().toISOString().split('T')[0],
+      harvest_type: 'Honey',
+      quantity: '',
+      unit: 'kg',
+      notes: '',
+    });
+
+    setEditingHarvestId(null); // exit edit mode
+  };
+
   const saveQuickQueen = async () => {
     if (!hive || !quickQueen.introduction_date || !quickQueen.queen_type) return;
 
     setSavingQuickQueen(true);
     try {
       const queenStatus = quickQueen.status === 'active' ? 'active' : 'missing';
-      await queensService.create({
-        hive_id: hive.id,
-        introduction_date: quickQueen.introduction_date,
-        source: quickQueen.queen_type,
-        species: quickQueen.breed_color || undefined,
-        status: queenStatus,
-        notes: quickQueen.status === 'inactive' ? 'Hive marked queenless. Add replacement queen.' : undefined,
-      });
+      
+      if (editingQueenId) {
+        await queensService.update(editingQueenId, {
+          hive_id: hive.id,
+          introduction_date: quickQueen.introduction_date,
+          source: quickQueen.queen_type,
+          species: quickQueen.breed_color || undefined,
+          status: queenStatus,
+          notes: quickQueen.status === 'inactive' ? 'Hive marked queenless. Add replacement queen.' : undefined,
+        });
+      } else {
+        await queensService.create({
+          hive_id: hive.id,
+          introduction_date: quickQueen.introduction_date,
+          source: quickQueen.queen_type,
+          species: quickQueen.breed_color || undefined,
+          status: queenStatus,
+          notes: quickQueen.status === 'inactive' ? 'Hive marked queenless. Add replacement queen.' : undefined,
+        });
+      }
 
       await hivesService.update(hive.id, {
         queen_present: quickQueen.status === 'active' ? 1 : 0,
       } as any);
 
       await fetchQueens();
+      setEditingQueenId(null);
       await fetchHive();
 
       if (quickQueen.status === 'inactive') {
@@ -833,6 +900,17 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
       setSavingQuickQueen(false);
     }
     setSavingQuickQueen(false);
+  };
+
+  const clearQueenForm = () => {
+    setQuickQueen({
+      introduction_date: new Date().toISOString().split('T')[0],
+      queen_type: 'local_wild',
+      breed_color: '',
+      status: 'active',
+    });
+
+    setEditingQueenId(null);
   };
 
   const deleteExpense = async (id: number) => { 
@@ -870,11 +948,17 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
   if (!hive) return <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100"><p>Hive not found</p></div>;
 
   const cleanHiveNotes = (hive.notes || '').replace(/\[HIVE_METADATA\][\s\S]*$/, '').trim();
-
+  
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 flex flex-col overflow-hidden">
       <div className="bg-white shadow-sm px-3 py-2 flex items-center gap-2">
-        <button onClick={onBack} className="p-1.5 hover:bg-stone-100 rounded-lg"><ArrowLeft className="w-4 h-4 text-stone-700" /></button>
+        <button onClick={() => {
+          if (hive?.apiary_id) {
+            window.location.href = `/apiaries/${hive.apiary_id}`;
+          } else {
+            onBack();
+          }
+        }} className="p-1.5 hover:bg-stone-100 rounded-lg"><ArrowLeft className="w-4 h-4 text-stone-700" /></button>
         <div className="flex-1">
           <div className="flex items-center gap-1.5">
             <h1 className="text-base font-bold text-stone-800">{hive.name}</h1>
@@ -883,8 +967,8 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
           <p className="text-xs text-stone-500">{hive.apiary_name || '-'}</p>
         </div>
         <div className="flex gap-1">
-          <button onClick={toggleStar} className="p-1.5 hover:bg-stone-100 rounded-lg"><Star className={`w-4 h-4 ${hive.is_starred ? 'text-amber-500 fill-amber-500' : 'text-stone-400'}`} /></button>
-          <button onClick={toggleFlag} className="p-1.5 hover:bg-stone-100 rounded-lg"><Flag className={`w-4 h-4 ${hive.is_flagged ? 'text-red-500 fill-red-500' : 'text-stone-400'}`} /></button>
+          {/* <button onClick={toggleStar} className="p-1.5 hover:bg-stone-100 rounded-lg"><Star className={`w-4 h-4 ${hive.is_starred ? 'text-amber-500 fill-amber-500' : 'text-stone-400'}`} /></button>
+          <button onClick={toggleFlag} className="p-1.5 hover:bg-stone-100 rounded-lg"><Flag className={`w-4 h-4 ${hive.is_flagged ? 'text-red-500 fill-red-500' : 'text-stone-400'}`} /></button> */}
           {onEditHive && (
             <button onClick={handleEditHive} className={`p-1.5 hover:bg-stone-100 rounded-lg relative ${lockInfo?.locked && !lockInfo?.isOwner ? 'opacity-50' : ''}`}
               title={lockInfo?.locked && !lockInfo?.isOwner ? `Being edited by ${lockInfo.lockedByName || 'another user'}` : 'Edit hive'}>
@@ -930,7 +1014,7 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
               : 'bg-white border-stone-200'
           }`}>
             <p className="text-lg font-bold text-red-600">{inspections.filter(i => i.pest_disease_presence?.includes('pest_detected') || i.pest_disease_presence?.includes('under_treatment')).length}</p>
-            <p className="text-xs text-stone-500">🐛 Pest</p>
+            <p className="text-xs text-stone-500">Pest</p>
           </button>
           <button type="button" onClick={() => document.getElementById('expense-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="bg-white rounded-lg p-2 shadow-sm text-center border border-stone-200 hover:border-red-300">
             <p className="text-lg font-bold text-red-600">{expenses.length}</p>
@@ -1145,17 +1229,45 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
                 inspection.pest_disease_presence?.includes('under_treatment') ? 'text-amber-700' :
                 hasPestDetection ? 'text-red-700' :
                 'text-emerald-700';
-              const pestLabel = inspection.pest_disease_presence?.join(' • ') || 'Clear';
+              const pestLabel = Array.isArray(inspection.pest_disease_presence)
+                ? inspection.pest_disease_presence.join(' • ')
+                : String(inspection.pest_disease_presence || 'Clear')
+                    .replace(/^\["/, '')
+                    .replace(/"\]$/, '')
+                    .replace(/","/g, ' • ')
+                    .replace(/_/g, ' ');
               
               return (
                 <div key={inspection.id} className={`rounded-lg p-2.5 shadow-sm border ${pestBgColor}`}>
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex justify-between items-start mb-1.5">
                     <div>
-                      <p className="text-xs font-semibold text-stone-800">{new Date(inspection.inspection_date).toLocaleDateString()}</p>
-                      {inspection.pest_name && <p className="text-[0.7rem] text-stone-600 font-medium">Pest: {inspection.pest_name}</p>}
+                      <p className="text-xs font-semibold text-stone-800">
+                        {new Date(inspection.inspection_date).toLocaleDateString()}
+                      </p>
+
+                      {inspection.pest_name && (
+                        <p className="text-[0.7rem] text-stone-600 font-medium">
+                          Pest: {inspection.pest_name}
+                        </p>
+                      )}
                     </div>
-                    <button onClick={() => setShowInspForm(inspection)} className="p-1 text-amber-600 hover:bg-white/50 rounded" title="Edit"><Edit2 className="w-3.5 h-3.5" /></button>
-                    <button onClick={() => deleteInspection(inspection.id)} className="p-1 hover:bg-red-50 rounded"><Trash2 className="w-3 h-3 text-red-400" /></button>
+
+                    <div className="flex items-center gap-0.5">
+                      <button
+                        onClick={() => setShowInspForm(inspection)}
+                        className="p-1 text-amber-600 hover:bg-white/50 rounded"
+                        title="Edit"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        onClick={() => deleteInspection(inspection.id)}
+                        className="p-1 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="w-3 h-3 text-red-400" />
+                      </button>
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-1 text-[0.65rem]">
                     <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-blue-700">👑 {inspection.queen_presence?.replace('_', ' ') || 'n/a'}</span>
@@ -1217,17 +1329,64 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
               className="w-full border border-stone-300 rounded-lg px-2.5 py-1.5 text-xs"
             />
           </div>
-          <button onClick={saveQuickExpense} disabled={savingQuickExpense} className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-medium disabled:opacity-60 text-sm">
-            {savingQuickExpense ? 'Saving...' : 'Save Expense'}
+          <div className="flex gap-2">
+          {/* Clear Button */}
+          <button
+            onClick={clearExpenseForm}
+            type="button"
+            className="w-1/3 bg-gray-200 hover:bg-gray-300 text-stone-700 py-2 rounded-lg font-medium text-sm"
+          >
+            Clear
           </button>
+
+          {/* Save Button */}
+          <button
+            onClick={saveQuickExpense}
+            disabled={savingQuickExpense}
+            className="w-2/3 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-medium disabled:opacity-60 text-sm"
+          >
+            {savingQuickExpense 
+              ? 'Saving...' 
+              : editingExpenseId 
+                ? 'Update Expense' 
+                : 'Save Expense'}
+          </button>
+        </div>
 
           {expenses.length > 0 && (
             <div className="space-y-1.5 pt-1">
               {expenses.slice(0, 5).map((expense) => (
                 <div key={expense.id} className="rounded-lg bg-stone-50 p-2 border border-stone-200">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-semibold text-stone-800">{new Date(expense.expense_date).toLocaleDateString()}</p>
-                    <button onClick={() => deleteExpense(expense.id)} className="p-1 hover:bg-red-50 rounded"><Trash2 className="w-3 h-3 text-red-400" /></button>
+                    <p className="text-xs font-semibold text-stone-800">
+                      {new Date(expense.expense_date).toLocaleDateString()}
+                    </p>
+
+                    <div className="flex items-center gap-1">
+                      {/* ✏️ Edit Button */}
+                      <button
+                        onClick={() => {
+                            setEditingExpenseId(expense.id);
+                            setQuickExpense({
+                              expense_date: expense.expense_date,
+                              expense_type: expense.expense_type,
+                              amount: expense.amount.toString(),
+                              description: expense.description || '',
+                            });
+                          }}
+                        className="p-1 hover:bg-blue-50 rounded"
+                      >
+                        <Edit2 className="w-3 h-3 text-blue-500" />
+                      </button>
+
+                      {/* 🗑 Delete Button */}
+                      <button
+                        onClick={() => deleteExpense(expense.id)}
+                        className="p-1 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="w-3 h-3 text-red-400" />
+                      </button>
+                    </div>
                   </div>
                   <p className="text-xs text-stone-700 capitalize">{expense.expense_type.replace(/_/g, ' ')}</p>
                   <p className="text-sm font-bold text-red-700">LKR {Number(expense.amount).toLocaleString()}</p>
@@ -1283,18 +1442,66 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
               className="w-full border border-stone-300 rounded-lg px-2.5 py-1.5 text-xs"
             />
           </div>
-          <button onClick={saveQuickHarvest} disabled={savingQuickHarvest} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-lg font-medium disabled:opacity-60 text-sm">
-            {savingQuickHarvest ? 'Saving...' : 'Save Harvest'}
-          </button>
+          <div className="flex gap-2">
+            {/* Clear Button */}
+            <button
+              onClick={clearHarvestForm}
+              type="button"
+              className="w-1/3 bg-gray-200 hover:bg-gray-300 text-stone-700 py-2 rounded-lg font-medium text-sm"
+            >
+              Clear
+            </button>
+
+            {/* Save Button */}
+            <button
+              onClick={saveQuickHarvest}
+              disabled={savingQuickHarvest}
+              className="w-2/3 bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-lg font-medium disabled:opacity-60 text-sm"
+            >
+              {savingQuickHarvest 
+                ? 'Saving...' 
+                : editingHarvestId 
+                  ? 'Update Harvest' 
+                  : 'Save Harvest'}
+            </button>
+          </div>
 
           {harvests.length > 0 && (
             <div className="space-y-1.5 pt-1">
               {harvests.slice(0, 5).map((harvest) => (
                 <div key={harvest.id} className="rounded-lg bg-stone-50 p-2 border border-stone-200">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-semibold text-stone-800">{new Date(harvest.harvest_date).toLocaleDateString()}</p>
-                    <button onClick={() => deleteHarvest(harvest.id)} className="p-1 hover:bg-red-50 rounded"><Trash2 className="w-3 h-3 text-red-400" /></button>
+                  <p className="text-xs font-semibold text-stone-800">
+                    {new Date(harvest.harvest_date).toLocaleDateString()}
+                  </p>
+
+                  <div className="flex items-center gap-1">
+                    {/* ✏️ Edit Button */}
+                    <button
+                      onClick={() => {
+                        setEditingHarvestId(harvest.id);
+                        setQuickHarvest({
+                          harvest_date: harvest.harvest_date,
+                          harvest_type: harvest.harvest_type,
+                          quantity: harvest.quantity.toString(),
+                          unit: harvest.unit,
+                          notes: harvest.notes || '',
+                        });
+                      }}
+                      className="p-1 hover:bg-blue-50 rounded"
+                    >
+                      <Edit2 className="w-3 h-3 text-blue-500" />
+                    </button>
+
+                    {/* 🗑 Delete Button */}
+                    <button
+                      onClick={() => deleteHarvest(harvest.id)}
+                      className="p-1 hover:bg-red-50 rounded"
+                    >
+                      <Trash2 className="w-3 h-3 text-red-400" />
+                    </button>
                   </div>
+                </div>
                   <p className="text-xs text-stone-700">{harvest.harvest_type}</p>
                   <p className="text-sm font-bold text-emerald-700">{harvest.quantity} {harvest.unit}</p>
                   {harvest.notes && <p className="text-xs text-stone-500">{harvest.notes}</p>}
@@ -1352,17 +1559,64 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
               <p className="mt-1 text-xs text-amber-700">This will mark the hive queenless. Add a new active queen when available.</p>
             )}
           </div>
-          <button onClick={saveQuickQueen} disabled={savingQuickQueen} className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-medium disabled:opacity-60 text-sm">
-            {savingQuickQueen ? 'Saving...' : 'Save Queen'}
-          </button>
+          <div className="flex gap-2">
+            {/* Clear Button */}
+            <button
+              onClick={clearQueenForm}
+              type="button"
+              className="w-1/3 bg-gray-200 hover:bg-gray-300 text-stone-700 py-2 rounded-lg font-medium text-sm"
+            >
+              Clear
+            </button>
+
+            {/* Save Button */}
+            <button
+              onClick={saveQuickQueen}
+              disabled={savingQuickQueen}
+              className="w-2/3 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-medium disabled:opacity-60 text-sm"
+            >
+              {savingQuickQueen 
+                ? 'Saving...' 
+                : editingQueenId 
+                  ? 'Update Queen' 
+                  : 'Save Queen'}
+            </button>
+          </div>
 
           {queens.length > 0 && (
             <div className="space-y-1.5 pt-1">
               {queens.slice(0, 5).map((queen) => (
                 <div key={queen.id} className="rounded-lg bg-stone-50 p-2 border border-stone-200">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-semibold text-stone-800">{queen.introduction_date ? new Date(queen.introduction_date).toLocaleDateString() : 'No date'}</p>
-                    <button onClick={() => deleteQueen(queen.id)} className="p-1 hover:bg-red-50 rounded"><Trash2 className="w-3 h-3 text-red-400" /></button>
+                    <p className="text-xs font-semibold text-stone-800">
+                      {queen.introduction_date ? new Date(queen.introduction_date).toLocaleDateString() : 'No date'}
+                    </p>
+
+                    <div className="flex items-center gap-1">
+                      {/* ✏️ Edit Button */}
+                      <button
+                        onClick={() => {
+                          setEditingQueenId(queen.id);
+                          setQuickQueen({
+                            introduction_date: queen.introduction_date || new Date().toISOString().split('T')[0],
+                            queen_type: queen.source || 'local_wild',
+                            breed_color: queen.species || '',
+                            status: queen.status === 'active' ? 'active' : 'inactive',
+                          });
+                        }}
+                        className="p-1 hover:bg-blue-50 rounded"
+                      >
+                        <Edit2 className="w-3 h-3 text-blue-500" />
+                      </button>
+
+                      {/* 🗑 Delete Button */}
+                      <button
+                        onClick={() => deleteQueen(queen.id)}
+                        className="p-1 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="w-3 h-3 text-red-400" />
+                      </button>
+                    </div>
                   </div>
                   <p className="text-xs text-stone-700">Type: {queen.source || '-'}</p>
                   <p className="text-xs text-stone-700">Breed/Color: {queen.species || '-'}</p>
@@ -1387,6 +1641,8 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
         {showTreatForm && <TreatmentForm hiveId={hiveId} initial={showTreatForm === true ? undefined : showTreatForm} onClose={() => setShowTreatForm(false)} onSaved={() => { setShowTreatForm(false); fetchTreatments(); fetchExpenses(); }} selectedLanguage={selectedLanguage} />}
         {showQueenForm && <QueenForm hiveId={hiveId} initial={showQueenForm === true ? undefined : showQueenForm} onClose={() => setShowQueenForm(false)} onSaved={() => { setShowQueenForm(false); fetchQueens(); }} selectedLanguage={selectedLanguage} />}
       </div>
+      
     </div>
+    
   );
 }

@@ -346,7 +346,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                       <MapViewer
                         lat={customLat ? parseFloat(customLat) : undefined}
                         lng={customLng ? parseFloat(customLng) : undefined}
-                        district={selectedDistrict || user?.district}
+                        district={searchMode === 'gps' ? '' : (selectedDistrict || user?.district)}
                         editable={true}
                         onLocationSelect={(lat, lng) => {
                           setCustomLat(String(lat));
@@ -405,14 +405,14 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                         }`}>{analysis.saturation.level}</span>
                       </div>
                       <p className="text-[0.7rem] opacity-75 mb-2">{analysis.saturation.message}</p>
-                      {(analysis.saturation.nearbyApiaries.length > 0 || analysis.saturation.nearbyStandaloneHives.length > 0) && (
-                        <button
-                          onClick={() => setShowNearbyHivesOverlay(true)}
-                          className="text-xs text-blue-600 hover:text-blue-800 font-medium underline"
-                        >
-                          See Info ({analysis.saturation.nearbyApiaries.length} apiaries, {analysis.saturation.nearbyStandaloneHives.length} standalone hives)
-                        </button>
-                      )}
+                      {/* {(analysis.saturation.nearbyApiaries.length > 0 || analysis.saturation.nearbyStandaloneHives.length > 0) && (
+                        // <button
+                        //   onClick={() => setShowNearbyHivesOverlay(true)}
+                        //   className="text-xs text-blue-600 hover:text-blue-800 font-medium underline"
+                        // >
+                        //   See Info ({analysis.saturation.nearbyApiaries.length} apiaries, {analysis.saturation.nearbyStandaloneHives.length} standalone hives)
+                        // </button>
+                      )} */}
                     </div>
 
                     <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -462,8 +462,8 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                             </div>
                           </div>
                           <div className="text-right space-y-1">
-                            <p className="flex items-center gap-1 justify-end text-[0.8rem]"><Droplets className="w-3 h-3 text-blue-400" /> {analysis.weather.current.humidity}%</p>
-                            <p className="flex items-center gap-1 justify-end text-[0.8rem]"><Wind className="w-3 h-3 text-stone-400" /> {analysis.weather.current.wind} km/h</p>
+                            <p className="flex items-center gap-1 justify-end text-[0.8rem]"><Droplets className="w-3 h-3 text-blue-400" /> {analysis.weather.current.humidity.toFixed(1)}%</p>
+                            <p className="flex items-center gap-1 justify-end text-[0.8rem]"><Wind className="w-3 h-3 text-stone-400" /> {analysis.weather.current.wind.toFixed(1)} km/h</p>
                             <p className={`text-[0.7rem] px-1.5 py-0.5 rounded inline-block border ${riskBg(analysis.weather.current.humidityStatus.color)}`}>{analysis.weather.current.humidityStatus.label}</p>
                           </div>
                         </div>

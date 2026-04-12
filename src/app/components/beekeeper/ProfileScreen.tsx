@@ -151,7 +151,6 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
     try {
       const updated = await profileService.update({
         name: editName.trim(),
-        email: editEmail.trim(),
         phone: editPhone.trim(),
         district: editDistrict.trim(),
         province: editProvince.trim(),
@@ -211,48 +210,77 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                 </button>
               </div>
 
-              <div className="relative flex items-center justify-end">
+              {/* <div className="relative flex items-center justify-end">
                 {!isEditingProfile && (
                   <button
                     onClick={handleOpenEdit}
                     className="rounded-full border border-emerald-300 bg-white px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors"
                   >
-                    {t('edit', selectedLanguage)}
+                    {t('editt', selectedLanguage)}
                   </button>
                 )}
-              </div>
+              </div> */}
 
-              <div className="flex items-start gap-3 min-w-0">
-                <div className="relative shrink-0">
-                  <div className="h-14 w-14 overflow-hidden rounded-xl border border-stone-200 bg-stone-100 shadow-sm">
-                    {profile?.avatar_url ? (
-                      <img src={profile.avatar_url} alt={profile?.name || 'Profile'} className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-stone-200 to-stone-100">
-                        <User className="h-6 w-6 text-stone-500" />
-                      </div>
-                    )}
-                  </div>
-                  <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full border-2 border-white bg-emerald-500" />
-                  <button
-                    type="button"
-                    onClick={() => avatarInputRef.current?.click()}
-                    disabled={isUploadingAvatar}
-                    className="absolute -bottom-1 -left-1 h-6 w-6 rounded-full border border-white bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 disabled:opacity-60"
-                    title="Change profile photo"
-                  >
-                    <Camera className="mx-auto h-3 w-3" />
-                  </button>
+              <div className="relative rounded-2xl bg-white p-4 shadow-sm border border-stone-200 flex items-center gap-4">
+
+              {/* Avatar */}
+              <div className="relative">
+                <div className="h-16 w-16 rounded-full bg-amber-400 flex items-center justify-center overflow-hidden">
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} className="h-full w-full object-cover" />
+                  ) : (
+                    <User className="w-7 h-7 text-white" />
+                  )}
                 </div>
 
-                <div className="min-w-0 flex-1 pt-0.5">
-                  <h1 className="text-base font-bold leading-5 text-stone-900 break-words">{profile?.name || t('beekeeper', selectedLanguage)}</h1>
-                  <div className="mt-1 inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
-                    {t('beekeeper', selectedLanguage)}
+                {/* Camera icon */}
+                <button
+                  onClick={() => avatarInputRef.current?.click()}
+                  className="absolute bottom-0 right-0 bg-emerald-600 p-1.5 rounded-full border-2 border-white"
+                >
+                  <Camera className="w-3 h-3 text-white" />
+                </button>
+              </div>
+
+              {/* Info */}
+              <div className="flex-1">
+                <h2 className="font-bold text-stone-900 text-base">
+                  {profile?.name || 'User'}
+                </h2>
+
+                <p className="text-amber-600 text-sm font-medium">
+                  Beekeeper
+                </p>
+
+                <div className="mt-1 space-y-1 text-sm text-stone-600">
+
+                  <div className="flex items-center gap-2">
+                    <MapPinned className="w-4 h-4" />
+                    {profile?.district || 'Not set'}
                   </div>
-                  <p className="mt-1 text-sm text-stone-600">{profile?.district || 'District not set'} · {memberSince}</p>
+
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4" />
+                    {profile?.phone || '-'}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    {profile?.email || '-'}
+                  </div>
+
                 </div>
               </div>
+
+              {/* Edit Button */}
+              <button
+                onClick={handleOpenEdit}
+                className="absolute top-3 right-3 bg-orange-100 hover:bg-orange-200 p-2 rounded-lg"
+              >
+                <Edit className="w-4 h-4 text-orange-600" />
+              </button>
+
+            </div>
 
               <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
                 <div className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
@@ -274,7 +302,14 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                 ) : (
                   <div className="space-y-2">
                     <ProfileEditInputTile label={t('name', selectedLanguage)} value={editName} onChange={setEditName} placeholder={t('enterName', selectedLanguage)} />
-                    <ProfileEditInputTile label={t('email', selectedLanguage)} value={editEmail} onChange={setEditEmail} placeholder={t('enterEmail', selectedLanguage)} type="email" />
+                    {/* <ProfileEditInputTile
+                      label={t('email', selectedLanguage)}
+                      value={editEmail}
+                      onChange={setEditEmail}
+                      placeholder={t('enterEmail', selectedLanguage)}
+                      type="email"
+                      disabled={true}
+                    /> */}
                     <ProfileEditInputTile label={t('phone', selectedLanguage)} value={editPhone} onChange={setEditPhone} placeholder={t('enterPhone', selectedLanguage)} type="tel" />
                     <ProfileEditSelectTile
                       label={t('province', selectedLanguage)}
@@ -330,7 +365,7 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
           </div>
         </section>
 
-        <div className="space-y-4 px-4 pb-6">
+        <div className="space-y-4 px-4 pb-6 mt-4">
           {saveMessage && (
             <p className={`rounded-lg px-3 py-2 text-sm font-semibold ${saveMessage.includes('Failed') ? 'border border-red-200 bg-red-50 text-red-700' : 'border border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
               {saveMessage}
@@ -428,12 +463,20 @@ function ProfileInfoTile({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ProfileEditInputTile({ label, value, onChange, placeholder, type = 'text' }: {
+function ProfileEditInputTile({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = 'text',
+  disabled = false
+}: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
   type?: string;
+  disabled?: boolean;
 }) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (type === 'tel') {
@@ -451,6 +494,7 @@ function ProfileEditInputTile({ label, value, onChange, placeholder, type = 'tex
           type={type}
           value={value}
           onChange={handleChange}
+          disabled={disabled}
           placeholder={placeholder}
           maxLength={type === 'tel' ? 15 : undefined}
           className="min-w-0 flex-1 bg-transparent text-right text-sm font-semibold text-stone-900 placeholder:text-stone-400 focus:outline-none"
