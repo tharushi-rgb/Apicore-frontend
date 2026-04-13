@@ -1332,7 +1332,7 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
                             honey_pollen_stores: (inspection.honey_pollen_stores as HoneyPollenStores) || 'sufficient',
                             pest_statuses: Array.isArray(inspection.pest_disease_presence)
                               ? inspection.pest_disease_presence as PestStatus[]
-                              : [inspection.pest_disease_presence as PestStatus || 'clear'],
+                              : [(inspection.pest_disease_presence ?? 'clear') as PestStatus],
                             pest_name: inspection.pest_name || '',
                             treatment_used: inspection.treatment_used || '',
                             active_frame_count: inspection.active_frame_count?.toString() || '',
