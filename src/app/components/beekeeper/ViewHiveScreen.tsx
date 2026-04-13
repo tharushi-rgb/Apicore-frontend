@@ -1139,27 +1139,54 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
                 { key: 'pest_detected', label: 'Pest Detected' },
                 { key: 'under_treatment', label: 'Under Treatment' },
               ] as { key: PestStatus; label: string }[]).map((option) => (
-                <label key={option.key} className="flex items-center gap-1.5 rounded-lg border border-stone-300 px-2.5 py-1.5 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={quickInspection.pest_statuses.includes(option.key)}
-                    onChange={(event) => {
-                      setQuickInspection((current) => {
-                        if (event.target.checked) {
-                          if (option.key === 'clear') {
-                            return { ...current, pest_statuses: ['clear'], pest_name: '', treatment_used: '' };
+                <label
+                    key={option.key}
+                    className="flex items-center gap-1.5 rounded-lg border border-stone-300 px-2.5 py-1.5 text-xs"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={quickInspection.pest_statuses.includes(option.key)}
+                      onChange={(event) => {
+                        setQuickInspection((current) => {
+                          // USER CHECKING A BOX
+                          if (event.target.checked) {
+                            // If CLEAR selected → remove everything else
+                            if (option.key === 'clear') {
+                              return {
+                                ...current,
+                                pest_statuses: ['clear'],
+                                pest_name: '',
+                                treatment_used: '',
+                              };
+                            }
+
+                            // If Pest/Under Treatment selected → remove clear first
+                            const updatedStatuses = current.pest_statuses.filter(
+                              (status) => status !== 'clear'
+                            );
+
+                            return {
+                              ...current,
+                              pest_statuses: [...updatedStatuses, option.key],
+                            };
                           }
-                          const withoutClear = current.pest_statuses.filter((status) => status !== 'clear');
-                          return { ...current, pest_statuses: Array.from(new Set([...withoutClear, option.key])) };
-                        }
-                        const next = current.pest_statuses.filter((status) => status !== option.key);
-                        return { ...current, pest_statuses: next.length > 0 ? next : ['clear'] };
-                      });
-                    }}
-                    className="accent-amber-600"
-                  />
-                  {option.label}
-                </label>
+
+                          // USER UNCHECKING A BOX
+                          const updatedStatuses = current.pest_statuses.filter(
+                            (status) => status !== option.key
+                          );
+
+                          return {
+                            ...current,
+                            pest_statuses:
+                              updatedStatuses.length > 0 ? updatedStatuses : ['clear'],
+                          };
+                        });
+                      }}
+                      className="accent-amber-600"
+                    />
+                    {option.label}
+                  </label>
               ))}
             </div>
           </div>

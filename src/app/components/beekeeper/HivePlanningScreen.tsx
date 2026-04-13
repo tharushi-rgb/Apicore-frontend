@@ -9,7 +9,13 @@ import { ecologicalZonesService } from '../../services/ecologicalZones';
 import { MapPin, Hexagon as HiveIcon, CloudRain, Sun, Cloud, Wind, Droplets, Thermometer, Search, Leaf, ChevronDown, ChevronUp, Navigation, X } from 'lucide-react';
 import { ForecastDays14 } from './ForecastDays14';
 import { MapViewer } from '../shared/MapViewer';
-import { PROVINCES, getDistrictsByProvince, getDsDivisionsByDistrict, getDistrictCenter } from '../../constants/sriLankaLocations';
+import {
+  PROVINCES,
+  getDistrictsByProvince,
+  getDsDivisionsByDistrict,
+  getDistrictCenter,
+  getDsDivisionCenter
+} from '../../constants/sriLankaLocations';
 import { t } from '../../i18n';
 
 type Language = 'en' | 'si' | 'ta';
@@ -157,6 +163,11 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
   const availableDistricts = getDistrictsByProvince(selectedProvince);
   const availableDsDivisions = getDsDivisionsByDistrict(selectedDistrict);
+  const usingDistrictFallback =
+    searchMode === 'admin' &&
+    selectedDistrict &&
+    selectedDsDivision &&
+    !getDsDivisionCenter(selectedDistrict, selectedDsDivision);
 
   useEffect(() => {
     const nextEndDate = new Date(`${startDate}T00:00:00`);
@@ -195,7 +206,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
     let lat = parseFloat(customLat);
     let lng = parseFloat(customLng);
     const districtLabel = searchMode === 'admin'
-      ? [selectedDsDivision, selectedDistrict].filter(Boolean).join(', ') || selectedDistrict
+      ? selectedDistrict
       : (selectedDistrict || 'GPS search');
 
     if (startDate && endDate && startDate > endDate) {
@@ -204,12 +215,23 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
     if (searchMode === 'admin') {
       if (!selectedProvince || !selectedDistrict || !selectedDsDivision) return;
-      const d = getDistrictCenter(selectedDistrict);
+
+      const dsCenter = getDsDivisionCenter(selectedDistrict, selectedDsDivision);
+
+      let d;
+
+      if (dsCenter) {
+        d = dsCenter;
+      } else {
+        d = getDistrictCenter(selectedDistrict);
+      }
+
       lat = d.lat;
       lng = d.lng;
+
       setCustomLat(String(d.lat));
       setCustomLng(String(d.lng));
-    } else if (selectedDistrict && (!customLat || !customLng)) {
+    }else if (selectedDistrict && (!customLat || !customLng)) {
       const d = districts.find(dd => dd.name === selectedDistrict);
       if (d) { lat = d.lat; lng = d.lng; }
     }
@@ -375,6 +397,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                     className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50">
                     {analyzing ? <><div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> Analyzing...</> : <><Search className="w-4 h-4" /> Analyze Location</>}
                   </button>
+                  
 
                   {/* Error Display */}
                   {analysisError && (

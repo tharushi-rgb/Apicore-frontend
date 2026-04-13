@@ -387,7 +387,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                         </div>
                         <div className="text-right">
                           <p className="text-[0.8rem] font-bold text-emerald-700">{listing.paymentLabel}</p>
-                          <p className="text-[0.68rem] text-stone-600 inline-flex items-center gap-1 justify-end"><Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" /> {listing.ownerRating}</p>
+                          {/* <p className="text-[0.68rem] text-stone-600 inline-flex items-center gap-1 justify-end"><Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" /> {listing.ownerRating}</p> */}
                         </div>
                       </div>
 

@@ -89,3 +89,28 @@ export function getDsDivisionsByDistrict(district?: string) {
 export function getDistrictCenter(district?: string) {
   return district && DISTRICT_CENTERS[district] ? DISTRICT_CENTERS[district] : { lat: 7.8731, lng: 80.7718 };
 }
+
+export const DS_DIVISION_CENTERS: Record<string, Record<string, { lat: number; lng: number }>> = {
+  Kandy: {
+    Akurana: { lat: 7.3700, lng: 80.6200 },
+  },
+  Matara: {
+    Akuressa: { lat: 6.1000, lng: 80.4800 },
+  },
+  Ampara: {
+    Akkayarapattu: { lat: 7.2167, lng: 81.8500 },
+  }
+};
+
+export function getDsDivisionCenter(district?: string, dsDivision?: string) {
+  if (
+    district &&
+    dsDivision &&
+    DS_DIVISION_CENTERS[district] &&
+    DS_DIVISION_CENTERS[district][dsDivision]
+  ) {
+    return DS_DIVISION_CENTERS[district][dsDivision];
+  }
+
+  return null;
+}

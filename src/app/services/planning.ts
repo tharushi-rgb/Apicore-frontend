@@ -563,11 +563,11 @@ export const planningService = {
     const nearbyApiaryIds = new Set<number>();
     const nearbyApiaries: NearbyApiaryInfo[] = [];
     const nearbyStandaloneHives: NearbyHiveInfo[] = [];
-    const RADIUS_KM = 30; // 30km radius for nearby hive detection
+    const RADIUS_KM = 30; // 2km radius for nearby hive detection
 
-    console.log(`Calculating saturation for location: ${lat}, ${lng}`);
-    console.log(`Total apiaries in database: ${allApiaries.length}`);
-    console.log(`Total hives in database: ${allHives.length}`);
+    // console.log(`Calculating saturation for location: ${lat}, ${lng}`);
+    // console.log(`Total apiaries in database: ${allApiaries.length}`);
+    // console.log(`Total hives in database: ${allHives.length}`);
 
     // Count hives from apiaries within radius or same district
     for (const a of allApiaries) {
@@ -583,8 +583,7 @@ export const planningService = {
         }
       } else if (a.district && district) {
         // District-based proximity check (same district)
-        if (a.district.toLowerCase().includes(district.toLowerCase()) ||
-            district.toLowerCase().includes(a.district.toLowerCase())) {
+        if (a.district.toLowerCase() === district.toLowerCase()){
           isNearby = true;
           distance = 0; // Same district, exact distance unknown
           console.log(`Apiary ${a.name} (${a.id}) is in same district: ${a.district}`);
