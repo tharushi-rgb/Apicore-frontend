@@ -43,7 +43,7 @@ export const dashboardService = {
       { data: harvestRows },
     ] = await Promise.all([
       supabase.from('apiaries').select('*').eq('user_id', userId),
-      supabase.from('hives').select('id, name, hive_type, status, queen_age, queen_age_risk, last_inspection_date, apiary_id, apiaries(name)').eq('user_id', userId),
+      supabase.from('hives').select('id, name, hive_type, status, queen_present, queen_age, queen_age_risk, last_inspection_date, apiary_id, apiaries(name)').eq('user_id', userId),
       supabase.from('alerts').select('*').eq('user_id', userId).eq('is_read', 0).order('created_at', { ascending: false }).limit(10),
       supabase.from('harvests').select('id, quantity').eq('user_id', userId),
     ]);
@@ -65,6 +65,7 @@ export const dashboardService = {
       status: h.status,
       apiary_name: h.apiaries?.name,
       apiary_id: h.apiary_id,
+      queen_present: h.queen_present,
       queen_age: h.queen_age,
       queen_age_risk: h.queen_age_risk,
       last_inspection_date: h.last_inspection_date,

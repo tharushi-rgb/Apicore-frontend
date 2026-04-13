@@ -541,6 +541,7 @@ function MoveHiveForm({ hiveId, onClose, onSaved, selectedLanguage }: { hiveId: 
   );
 }
 
+
 // ---- Main Screen ----
 export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, onNavigate, onBack, onEditHive, hiveId }: Props) {
   const [hive, setHive] = useState<Hive | null>(null);
@@ -630,6 +631,8 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
     }
   };
 
+  const [editingInspectionId, setEditingInspectionId] = useState<number | null>(null);
+
   useEffect(() => {
     Promise.all([fetchHive(), fetchInspections(), fetchFeedings(), fetchComponents(), fetchQueens(), fetchTreatments(), fetchTransfers(), fetchExpenses(), fetchHarvests()])
       .finally(() => setLoading(false));
@@ -693,24 +696,53 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
     try {
       const pestDetectedNow = quickInspection.pest_statuses.includes('pest_detected') || quickInspection.pest_statuses.includes('under_treatment');
 
-      await inspectionsService.create({
-        hive_id: hive.id,
-        inspection_date: quickInspection.inspection_date,
-        colony_strength: quickInspection.colony_strength,
-        queen_present: quickInspection.queen_presence === 'not_seen' ? 0 : 1,
-        pest_detected: pestDetectedNow ? 1 : 0,
-        notes: quickInspection.general_remarks,
-        queen_presence: quickInspection.queen_presence,
-        honey_pollen_stores: quickInspection.honey_pollen_stores,
-        pest_disease_presence: quickInspection.pest_statuses,
-        pest_name: quickInspection.pest_name || undefined,
-        pest_treatment_status: quickInspection.pest_statuses.includes('under_treatment') ? 'under_treatment' : (quickInspection.pest_statuses.includes('pest_detected') ? 'pest_detected' : 'clear'),
-        treatment_used: quickInspection.treatment_used || undefined,
-        active_frame_count: Number(quickInspection.active_frame_count),
-        queen_cell_presence: quickInspection.queen_cell_presence || undefined,
-        bottom_board_cleaned: quickInspection.bottom_board_cleaned || undefined,
-        general_remarks: quickInspection.general_remarks || undefined,
-      });
+      if (editingInspectionId) {
+        await inspectionsService.update(editingInspectionId, {
+          hive_id: hive.id,
+          inspection_date: quickInspection.inspection_date,
+          colony_strength: quickInspection.colony_strength,
+          queen_present: quickInspection.queen_presence === 'not_seen' ? 0 : 1,
+          pest_detected: pestDetectedNow ? 1 : 0,
+          notes: quickInspection.general_remarks,
+          queen_presence: quickInspection.queen_presence,
+          honey_pollen_stores: quickInspection.honey_pollen_stores,
+          pest_disease_presence: quickInspection.pest_statuses,
+          pest_name: quickInspection.pest_name || undefined,
+          pest_treatment_status: quickInspection.pest_statuses.includes('under_treatment')
+            ? 'under_treatment'
+            : quickInspection.pest_statuses.includes('pest_detected')
+            ? 'pest_detected'
+            : 'clear',
+          treatment_used: quickInspection.treatment_used || undefined,
+          active_frame_count: Number(quickInspection.active_frame_count),
+          queen_cell_presence: quickInspection.queen_cell_presence || undefined,
+          bottom_board_cleaned: quickInspection.bottom_board_cleaned || undefined,
+          general_remarks: quickInspection.general_remarks || undefined,
+        });
+      } else {
+        await inspectionsService.create({
+          hive_id: hive.id,
+          inspection_date: quickInspection.inspection_date,
+          colony_strength: quickInspection.colony_strength,
+          queen_present: quickInspection.queen_presence === 'not_seen' ? 0 : 1,
+          pest_detected: pestDetectedNow ? 1 : 0,
+          notes: quickInspection.general_remarks,
+          queen_presence: quickInspection.queen_presence,
+          honey_pollen_stores: quickInspection.honey_pollen_stores,
+          pest_disease_presence: quickInspection.pest_statuses,
+          pest_name: quickInspection.pest_name || undefined,
+          pest_treatment_status: quickInspection.pest_statuses.includes('under_treatment')
+            ? 'under_treatment'
+            : quickInspection.pest_statuses.includes('pest_detected')
+            ? 'pest_detected'
+            : 'clear',
+          treatment_used: quickInspection.treatment_used || undefined,
+          active_frame_count: Number(quickInspection.active_frame_count),
+          queen_cell_presence: quickInspection.queen_cell_presence || undefined,
+          bottom_board_cleaned: quickInspection.bottom_board_cleaned || undefined,
+          general_remarks: quickInspection.general_remarks || undefined,
+        });
+      }
 
       // Keep pest detection meter sticky once detected at least once.
       if (pestDetectedNow || hive.pest_detected) {
@@ -941,6 +973,25 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
     { value: 'medicines_treatments', label: '💊 Medicines/Treatments' },
     { value: 'labor_salary', label: '💸 Labor/Salary' },
   ];
+
+  const clearInspectionForm = () => {
+    setQuickInspection({
+      inspection_date: new Date().toISOString().split('T')[0],
+      inspection_time: new Date().toTimeString().slice(0, 5),
+      colony_strength: 'normal',
+      queen_presence: 'seen',
+      honey_pollen_stores: 'sufficient',
+      pest_statuses: ['clear'],
+      pest_name: '',
+      treatment_used: '',
+      active_frame_count: '',
+      queen_cell_presence: '',
+      bottom_board_cleaned: '',
+      general_remarks: '',
+    });
+
+    setEditingInspectionId(null);
+  };
 
   const typeColors: Record<string, string> = { box: 'bg-amber-100 text-amber-700', pot: 'bg-emerald-100 text-emerald-700', log: 'bg-orange-100 text-orange-700', stingless: 'bg-blue-100 text-blue-700' };
 
@@ -1212,14 +1263,33 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
             className="w-full border border-stone-300 rounded-lg px-2.5 py-1.5 text-xs"
           />
 
-          <button onClick={saveQuickInspection} disabled={savingQuickInspection} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg font-medium disabled:opacity-60 text-sm">
-            {savingQuickInspection ? t('saving', selectedLanguage) : t('save', selectedLanguage) + ' Inspection'}
-          </button>
+          <div className="flex gap-2">
+            {editingInspectionId && (
+              <button
+                onClick={clearInspectionForm}
+                className="w-1/3 bg-stone-200 hover:bg-stone-300 text-stone-700 py-2 rounded-lg font-medium text-sm"
+              >
+                Clear
+              </button>
+            )}
+
+            <button
+              onClick={saveQuickInspection}
+              disabled={savingQuickInspection}
+              className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg font-medium disabled:opacity-60 text-sm"
+            >
+              {savingQuickInspection
+                ? t('saving', selectedLanguage)
+                : editingInspectionId
+                ? 'Update Inspection'
+                : t('save', selectedLanguage) + ' Inspection'}
+            </button>
+          </div>
         </div>
 
         {inspections.length > 0 && (
-          <div className="space-y-1.5">
-            {inspections.slice(0, 3).map((inspection) => {
+        <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1 scrollbar-hide">
+            {inspections.map((inspection) => {
               const hasPestDetection = inspection.pest_disease_presence?.includes('pest_detected') || inspection.pest_disease_presence?.includes('under_treatment');
               const pestBgColor = 
                 inspection.pest_disease_presence?.includes('under_treatment') ? 'bg-amber-50 border-amber-200' :
@@ -1232,11 +1302,10 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
               const pestLabel = Array.isArray(inspection.pest_disease_presence)
                 ? inspection.pest_disease_presence.join(' • ')
                 : String(inspection.pest_disease_presence || 'Clear')
-                    .replace(/^\["/, '')
-                    .replace(/"\]$/, '')
-                    .replace(/","/g, ' • ')
+                    .replace(/[\[\]"\\]/g, '')
+                    .replace(/,/g, ' • ')
                     .replace(/_/g, ' ');
-              
+                                          
               return (
                 <div key={inspection.id} className={`rounded-lg p-2.5 shadow-sm border ${pestBgColor}`}>
                   <div className="flex justify-between items-start mb-1.5">
@@ -1254,7 +1323,30 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
 
                     <div className="flex items-center gap-0.5">
                       <button
-                        onClick={() => setShowInspForm(inspection)}
+                        onClick={() => {
+                          setQuickInspection({
+                            inspection_date: inspection.inspection_date || new Date().toISOString().split('T')[0],
+                            inspection_time: new Date().toTimeString().slice(0, 5),
+                            colony_strength: (inspection.colony_strength as 'weak' | 'normal' | 'strong') || 'normal',
+                            queen_presence: (inspection.queen_presence as QueenPresence) || 'seen',
+                            honey_pollen_stores: (inspection.honey_pollen_stores as HoneyPollenStores) || 'sufficient',
+                            pest_statuses: Array.isArray(inspection.pest_disease_presence)
+                              ? inspection.pest_disease_presence as PestStatus[]
+                              : [inspection.pest_disease_presence as PestStatus || 'clear'],
+                            pest_name: inspection.pest_name || '',
+                            treatment_used: inspection.treatment_used || '',
+                            active_frame_count: inspection.active_frame_count?.toString() || '',
+                            queen_cell_presence: (inspection.queen_cell_presence as OptionalYesNo) || '',
+                            bottom_board_cleaned: (inspection.bottom_board_cleaned as OptionalYesNo) || '',
+                            general_remarks: inspection.general_remarks || '',
+                          });
+
+                          setEditingInspectionId(inspection.id);
+
+                          document
+                            .getElementById('inspection-section')
+                            ?.scrollIntoView({ behavior: 'smooth' });
+                        }}
                         className="p-1 text-amber-600 hover:bg-white/50 rounded"
                         title="Edit"
                       >
@@ -1270,12 +1362,27 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-1 text-[0.65rem]">
-                    <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-blue-700">👑 {inspection.queen_presence?.replace('_', ' ') || 'n/a'}</span>
-                    <span className="rounded-full bg-yellow-50 px-1.5 py-0.5 text-yellow-700">🍯 {inspection.honey_pollen_stores || 'n/a'} stores</span>
-                    <span className={`rounded-full px-1.5 py-0.5 ${pestTextColor}`}>🐛 {pestLabel.replace(/_/g, ' ')}</span>
-                    <span className="rounded-full bg-stone-50 px-1.5 py-0.5 text-stone-700">#️⃣ {inspection.active_frame_count || '0'} frames</span>
+                    <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-blue-700">
+                      {inspection.queen_presence?.replace('_', ' ') || 'n/a'}
+                    </span>
+
+                    <span className="rounded-full bg-yellow-50 px-1.5 py-0.5 text-yellow-700">
+                      {inspection.honey_pollen_stores || 'n/a'} stores
+                    </span>
+
+                    <span className={`rounded-full px-1.5 py-0.5 ${pestTextColor}`}>
+                      {pestLabel.replace(/_/g, ' ')}
+                    </span>
+
+                    <span className="rounded-full bg-stone-50 px-1.5 py-0.5 text-stone-700">
+                      {inspection.active_frame_count || '0'} frames
+                    </span>
                   </div>
-                  {inspection.general_remarks && <p className="text-[0.7rem] text-stone-600 mt-1 italic">"{inspection.general_remarks}"</p>}
+                    {inspection.general_remarks && (
+                      <p className="text-[0.7rem] text-stone-600 mt-1 italic">
+                        {inspection.general_remarks}
+                      </p>
+                    )}
                 </div>
               );
             })}
@@ -1354,8 +1461,8 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
         </div>
 
           {expenses.length > 0 && (
-            <div className="space-y-1.5 pt-1">
-              {expenses.slice(0, 5).map((expense) => (
+          <div className="space-y-2 max-h-80 overflow-y-auto pr-1 scrollbar-hide">
+              {expenses.map((expense) => (
                 <div key={expense.id} className="rounded-lg bg-stone-50 p-2 border border-stone-200">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-semibold text-stone-800">
@@ -1467,8 +1574,8 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
           </div>
 
           {harvests.length > 0 && (
-            <div className="space-y-1.5 pt-1">
-              {harvests.slice(0, 5).map((harvest) => (
+          <div className="space-y-2 max-h-80 overflow-y-auto pr-1 scrollbar-hide">
+              {harvests.map((harvest) => (
                 <div key={harvest.id} className="rounded-lg bg-stone-50 p-2 border border-stone-200">
                   <div className="flex items-center justify-between gap-2">
                   <p className="text-xs font-semibold text-stone-800">
@@ -1584,8 +1691,8 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
           </div>
 
           {queens.length > 0 && (
-            <div className="space-y-1.5 pt-1">
-              {queens.slice(0, 5).map((queen) => (
+          <div className="space-y-1.5 pt-1 max-h-80 overflow-y-auto pr-1 scrollbar-hide">
+              {queens.map((queen) => (
                 <div key={queen.id} className="rounded-lg bg-stone-50 p-2 border border-stone-200">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-semibold text-stone-800">
@@ -1637,7 +1744,8 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
         </div>
 
         {showMoveForm && <MoveHiveForm hiveId={hiveId} onClose={() => setShowMoveForm(false)} onSaved={() => { setShowMoveForm(false); fetchHive(); }} selectedLanguage={selectedLanguage} />}
-        {showInspForm && <InspectionForm hiveId={hiveId} initial={showInspForm === true ? undefined : showInspForm} onClose={() => setShowInspForm(false)} onSaved={() => { setShowInspForm(false); fetchInspections(); }} selectedLanguage={selectedLanguage} />}
+        {/* Inspection popup removed */}
+        {/* {showInspForm && <InspectionForm hiveId={hiveId} initial={showInspForm === true ? undefined : showInspForm} onClose={() => setShowInspForm(false)} onSaved={() => { setShowInspForm(false); fetchInspections(); }} selectedLanguage={selectedLanguage} />} */}
         {showTreatForm && <TreatmentForm hiveId={hiveId} initial={showTreatForm === true ? undefined : showTreatForm} onClose={() => setShowTreatForm(false)} onSaved={() => { setShowTreatForm(false); fetchTreatments(); fetchExpenses(); }} selectedLanguage={selectedLanguage} />}
         {showQueenForm && <QueenForm hiveId={hiveId} initial={showQueenForm === true ? undefined : showQueenForm} onClose={() => setShowQueenForm(false)} onSaved={() => { setShowQueenForm(false); fetchQueens(); }} selectedLanguage={selectedLanguage} />}
       </div>

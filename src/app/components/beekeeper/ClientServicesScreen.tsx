@@ -308,7 +308,8 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
   };
 
   return (
-    <div className="h-[100dvh] bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative overflow-hidden flex flex-col">
+    // <div className="h-[100dvh] bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative overflow-hidden flex flex-col">
+    <div className="h-full bg-white relative">
       <div className="bg-white shadow-sm sticky top-0 z-30">
         <MobileHeader
           userName={user?.name}
@@ -558,7 +559,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                 <p className="text-[0.72rem] text-stone-600 mt-0.5">Contact: {selectedListing.ownerContact}</p>
               </section>
 
-              <section className="rounded-xl border border-stone-200 p-3">
+              {/* <section className="rounded-xl border border-stone-200 p-3">
                 <p className="text-[0.68rem] text-stone-500 mb-1">Community Reviews</p>
                 {reviewsLoading ? (
                   <p className="text-[0.74rem] text-stone-600">Loading reviews...</p>
@@ -580,7 +581,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                     ))}
                   </div>
                 )}
-              </section>
+              </section> */}
 
               <section className="rounded-xl border border-stone-200 p-3 space-y-2">
                 <p className="text-[0.68rem] text-stone-500">Submit Proposal</p>
@@ -602,7 +603,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                       <label className="text-[0.7rem] text-stone-600">Hive Count *
                         <input type="number" value={proposalForm.hiveCount} onChange={(event) => setProposalForm((current) => ({ ...current, hiveCount: event.target.value }))} className="mt-1 w-full rounded-lg border border-stone-300 px-2.5 py-2 text-[0.75rem]" />
                       </label>
-                      <div className="rounded-lg bg-stone-50 border border-stone-200 px-2 py-2 text-[0.68rem] text-stone-600 self-end">Remaining capacity: {selectedListing.maxHiveCapacity - selectedListing.acceptedHiveCount}</div>
+                      {/* <div className="rounded-lg bg-stone-50 border border-stone-200 px-2 py-2 text-[0.68rem] text-stone-600 self-end">Remaining capacity: {selectedListing.maxHiveCapacity - selectedListing.acceptedHiveCount}</div> */}
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">

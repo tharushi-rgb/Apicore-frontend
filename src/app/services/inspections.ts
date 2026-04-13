@@ -38,21 +38,16 @@ function getUserId(): number {
 
 export const inspectionsService = {
   async getAll() {
-    const userId = getUserId();
     const { data, error } = await supabase
       .from('inspections')
-      .select('*, hives(name, apiaries(name))')
-      .eq('user_id', userId)
+      .select('*')
       .order('inspection_date', { ascending: false });
-    if (error) throw new Error(error.message);
-    return (data ?? []).map((i: any) => ({
-      ...i,
-      hive_name: i.hives?.name,
-      apiary_name: i.hives?.apiaries?.name,
-      hives: undefined,
-    })) as Inspection[];
-  },
 
+    if (error) throw new Error(error.message);
+
+    return data as Inspection[];
+  },
+  
   async getByHive(hiveId: number) {
     const { data, error } = await supabase
       .from('inspections')

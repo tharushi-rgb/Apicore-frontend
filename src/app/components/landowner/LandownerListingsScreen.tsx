@@ -251,6 +251,8 @@ export function LandownerListingsScreen({
       status: targetStatus,
     };
 
+    
+
     setSaving(true);
     try {
       if (editorMode === 'edit' && form.listingId) {
@@ -348,7 +350,9 @@ export function LandownerListingsScreen({
   }
 
   return (
-    <div className="h-[100dvh] bg-gradient-to-b from-emerald-50 via-green-50 to-white flex flex-col overflow-hidden">
+    // <div className="h-[100dvh] bg-gradient-to-b from-emerald-50 via-green-50 to-white flex flex-col overflow-hidden">
+    <div className="h-full bg-white relative">
+
       <div className="bg-white shadow-sm">
         <MobileHeader
           userName={user?.name}
@@ -762,7 +766,11 @@ function ContractsSection({
     <section className="rounded-2xl border border-stone-200 bg-white px-2 py-2 shadow-sm">
       <h2 className="px-1 text-[1rem] font-bold text-stone-900">{t('activeContracts', selectedLanguage)}</h2>
       <div className="mt-2 divide-y divide-stone-100">
-        {contracts.map((contract) => (
+        {contracts.map((contract) => {
+          console.log(contract);
+
+          return (
+          
           <div key={contract.id} className="px-1 py-3">
             <div className="flex items-center justify-between gap-2">
               <div>
@@ -802,7 +810,10 @@ function ContractsSection({
               </div>
             )}
           </div>
-        ))}
+          
+        );
+        
+        })}  
 
         {contracts.length === 0 && <div className="px-1 py-4 text-[0.74rem] text-stone-500">{t('noActiveContracts', selectedLanguage)}</div>}
       </div>

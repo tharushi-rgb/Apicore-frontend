@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Loader2, Plus, Save, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, Save, Trash2, X } from 'lucide-react';
 import { MobileHeader } from '../shared/MobileHeader';
 import { PageTitleBar } from '../shared/PageTitleBar';
 import { LocationSelectorField } from '../shared/LocationSelectorField';
@@ -400,10 +400,23 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
           onLogout={onLogout}
           onViewAllNotifications={() => onNavigate('notifications')}
         />
-        <PageTitleBar
-          title={isEdit ? 'Edit Apiary' : 'Create Apiary'}
-          subtitle="Apiary details, forage, and location"
-        />
+        <div className="flex items-center gap-3 px-4 py-3 border-t">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-stone-100"
+          >
+            <ArrowLeft className="w-5 h-5 text-stone-700" />
+          </button>
+
+          <div>
+            <h2 className="text-lg font-bold text-stone-800">
+              {isEdit ? 'Edit Apiary' : 'Create Apiary'}
+            </h2>
+            <p className="text-sm text-stone-500">
+              Apiary details, forage, and location
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">

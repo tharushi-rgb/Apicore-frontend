@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
-import { Camera, ChevronRight, MapPin, Plus, ShieldCheck, User, Edit, Eye, Trash2, X, Save } from 'lucide-react';
+import { Camera, ChevronRight, MapPin, Plus, ShieldCheck, User, Edit, Eye, Trash2, X, Save, Mail, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { MobileHeader } from '../shared/MobileHeader';
 import { authService } from '../../services/auth';
@@ -413,7 +413,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                 </button>
               </div>
               
-              <div className="relative flex items-center justify-end">
+              {/* <div className="relative flex items-center justify-end">
                 {!isEditingProfile && (
                   <button
                     onClick={handleOpenEdit}
@@ -422,39 +422,67 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                     {t('edit', selectedLanguage)}
                   </button>
                 )}
+              </div> */}
+
+              <div className="relative rounded-2xl bg-white p-4 shadow-sm border border-stone-200 flex items-center gap-4">
+
+            {/* Avatar */}
+            <div className="relative">
+              <div className="h-16 w-16 rounded-full bg-amber-400 flex items-center justify-center overflow-hidden">
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} className="h-full w-full object-cover" />
+                ) : (
+                  <User className="w-7 h-7 text-white" />
+                )}
               </div>
 
-              <div className="flex items-start gap-3 min-w-0">
-                <div className="relative shrink-0">
-                  <div className="h-14 w-14 overflow-hidden rounded-xl border border-stone-200 bg-stone-100 shadow-sm">
-                    {profile?.avatar_url ? (
-                      <img src={profile.avatar_url} alt={profile?.name || 'Profile'} className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-stone-200 to-stone-100">
-                        <User className="h-6 w-6 text-stone-500" />
-                      </div>
-                    )}
-                  </div>
-                  <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full border-2 border-white bg-emerald-500" />
-                  <button
-                    type="button"
-                    onClick={() => avatarInputRef.current?.click()}
-                    disabled={isUploadingAvatar}
-                    className="absolute -bottom-1 -left-1 h-6 w-6 rounded-full border border-white bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 disabled:opacity-60"
-                    title="Change profile photo"
-                  >
-                    <Camera className="mx-auto h-3 w-3" />
-                  </button>
+              <button
+                onClick={() => avatarInputRef.current?.click()}
+                className="absolute bottom-0 right-0 bg-emerald-600 p-1.5 rounded-full border-2 border-white"
+              >
+                <Camera className="w-3 h-3 text-white" />
+              </button>
+            </div>
+
+            {/* Info */}
+            <div className="flex-1">
+              <h2 className="font-bold text-stone-900 text-base">
+                {profile?.name || 'User'}
+              </h2>
+
+              <p className="text-amber-600 text-sm font-medium">
+                Landowner
+              </p>
+
+              <div className="mt-1 space-y-1 text-sm text-stone-600">
+
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  {profile?.district || 'Not set'}
                 </div>
 
-                <div className="min-w-0 flex-1 pt-0.5">
-                  <h1 className="text-base font-bold leading-5 text-stone-900 break-words">{profile?.name || t('landowner', selectedLanguage)}</h1>
-                  <div className="mt-1 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
-                    {t('landowner', selectedLanguage)}
-                  </div>
-                  <p className="mt-1 text-sm text-stone-600">{profile?.district || 'District not set'} · {memberSince}</p>
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  {profile?.phone || '-'}
                 </div>
+
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  {profile?.email || '-'}
+                </div>
+
               </div>
+            </div>
+
+            {/* Edit Button */}
+            <button
+              onClick={handleOpenEdit}
+              className="absolute top-3 right-3 bg-orange-100 hover:bg-orange-200 p-2 rounded-lg"
+            >
+              <Edit className="w-4 h-4 text-orange-600" />
+            </button>
+
+          </div>
 
               <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
                 <div className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">

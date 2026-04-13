@@ -149,3 +149,12 @@ html, body {
   border-radius: var(--app-radius-lg);
   padding: 0.85rem;
 }
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

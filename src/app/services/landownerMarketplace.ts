@@ -405,7 +405,7 @@ export const landownerMarketplaceService = {
         plot_id: payload.plotId,
         financial_terms: payload.financialTerms,
         cash_rent_lkr: payload.cashRentLkr,
-        // honey_share_kg: payload.honeyShareKg, // Column doesn't exist in schema
+        honey_share_kgs: payload.honeyShareKg, // Column doesn't exist in schema
         spraying_clause_agreed: payload.sprayingClauseAgreed,
         status: payload.status,
         availability_end_date: payload.availabilityEndDate,
@@ -464,7 +464,7 @@ export const landownerMarketplaceService = {
         plot_id: payload.plotId,
         financial_terms: payload.financialTerms,
         cash_rent_lkr: payload.cashRentLkr,
-        // honey_share_kg: payload.honeyShareKg, // Column doesn't exist in schema
+        honey_share_kgs: payload.honeyShareKg, // Column doesn't exist in schema
         spraying_clause_agreed: payload.sprayingClauseAgreed,
         status: payload.status,
         availability_end_date: payload.availabilityEndDate,

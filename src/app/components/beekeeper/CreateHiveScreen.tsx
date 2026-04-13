@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { AlertTriangle, Loader2, Plus, Save, Trash2, X } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { AlertTriangle, ArrowLeft, Loader2, Plus, Save, Trash2, X } from 'lucide-react';
 import { MobileHeader } from '../shared/MobileHeader';
 import { PageTitleBar } from '../shared/PageTitleBar';
 import { LocationSelectorField } from '../shared/LocationSelectorField';
@@ -205,6 +205,7 @@ function buildHiveFormState(initialHive?: Hive, contextApiary?: Apiary, user?: {
 export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigate, onClose, contextApiary, initialHive, onLogout }: Props) {
   const isEdit = !!initialHive;
   const location = useLocation();
+  const navigate = useNavigate();
   const prefillApiaryId = (location.state as { apiaryId?: number } | null)?.apiaryId;
   const user = authService.getLocalUser();
 
@@ -547,11 +548,31 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
           onLogout={onLogout}
           onViewAllNotifications={() => onNavigate('notifications')}
         />
-        <PageTitleBar
-          title={isEdit ? 'Edit Hive' : 'Create Hive'}
-          subtitle="Basic details, hive configuration, and colony setup"
-          size="sm"
-        />
+        <div className="flex items-center gap-2 px-3 py-2">
+          <button
+            onClick={() => {
+              const apiaryId =
+                contextApiary?.id ||
+                Number(form.apiary_selection) ||
+                prefillApiaryId;
+
+              if (apiaryId) {
+                navigate(`/apiaries/${apiaryId}`);
+              } else {
+                onClose();
+              }
+            }}
+            className="p-2 rounded-lg hover:bg-stone-100"
+          >
+            <ArrowLeft className="w-5 h-5 text-stone-700" />
+          </button>
+
+          <PageTitleBar
+            title={isEdit ? 'Edit Hive' : 'Create Hive'}
+            subtitle="Basic details, hive configuration, and colony setup"
+            size="sm"
+          />
+        </div>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto relative">

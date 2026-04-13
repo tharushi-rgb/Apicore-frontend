@@ -428,7 +428,9 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
   const rangeStart = Date.now() - (rangeDays * 24 * 60 * 60 * 1000);
 
   const activeHiveCount = hives.filter((h: any) => h.status === 'active').length;
-  const queenlessHiveCount = hives.filter((h: any) => h.status === 'queenless').length;
+  const queenlessHiveCount = hives.filter(
+    (h: any) => h.queen_present === false
+    ).length;
   const pestAlertCount = inspectionRows
     .filter((inspection: any) => inspection.pest_detected)
     .length;
@@ -498,7 +500,8 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
   };
 
   return (
-    <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
+    // <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
+    <div className="h-full bg-white relative">
       <div className="h-full overflow-y-auto pb-24">
         {/* Navbar */}
         <MobileHeader

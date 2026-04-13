@@ -66,7 +66,8 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
   const revenueNote = revenueTab === 'rupees' ? t('totalCashRent', selectedLanguage) : t('totalHoneyYield', selectedLanguage);
 
   return (
-    <div className="h-[100dvh] bg-gradient-to-b from-emerald-50 via-green-50 to-white flex flex-col overflow-hidden">
+    // <div className="h-[100dvh] bg-gradient-to-b from-emerald-50 via-green-50 to-white flex flex-col overflow-hidden">
+    <div className="h-full bg-white relative">
       <div className="bg-white shadow-sm">
         <MobileHeader
           userName={displayName}

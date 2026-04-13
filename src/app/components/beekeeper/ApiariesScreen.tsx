@@ -18,6 +18,7 @@ import {
 import { MobileHeader } from '../shared/MobileHeader';
 import { PageTitleBar } from '../shared/PageTitleBar';
 import { apiariesService, type Apiary } from '../../services/apiaries';
+import { planningService } from '../../services/planning';
 import { hivesService, type Hive } from '../../services/hives';
 import { inspectionsService, type Inspection } from '../../services/inspections';
 import { authService } from '../../services/auth';
@@ -50,6 +51,7 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
   const [showFilters, setShowFilters] = useState(false);
   const user = authService.getLocalUser();
   const activeTab: NavTab = 'apiaries';
+  const [weatherData, setWeatherData] = useState<Record<number, any>>({});
 
   useEffect(() => {
     let mounted = true;
@@ -70,6 +72,34 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      const weatherMap: Record<number, any> = {};
+
+      for (const apiary of apiaries) {
+        if (!apiary.gps_latitude || !apiary.gps_longitude) continue;
+
+        try {
+          const result = await planningService.analyze(
+            Number(apiary.gps_latitude),
+            Number(apiary.gps_longitude),
+            apiary.district || apiary.name
+          );
+
+          weatherMap[apiary.id] = result.weather.current;
+        } catch (err) {
+          console.error("Weather fetch failed for apiary", apiary.id);
+        }
+      }
+
+      setWeatherData(weatherMap);
+    };
+
+    if (apiaries.length > 0) {
+      fetchWeather();
+    }
+  }, [apiaries]);
 
   const totalApiaries = apiaries.length;
   const apiariesWithHives = apiaries.filter(a => (a.hive_count || 0) > 0).length;
@@ -92,16 +122,42 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
 
   const pestAlertApiaryIds = useMemo(() => {
     const latest: Record<number, Inspection> = {};
+
     inspections.forEach((inspection) => {
-      const apiaryId = inspection.apiary_id || hiveById[inspection.hive_id]?.apiary_id;
+      const apiaryId =
+        inspection.apiary_id ||
+        hiveById[Number(inspection.hive_id)]?.apiary_id;
+
       if (!apiaryId) return;
+
       const current = latest[apiaryId];
-      if (!current || new Date(inspection.inspection_date) > new Date(current.inspection_date)) {
+
+      if (
+        !current ||
+        new Date(inspection.inspection_date) >
+          new Date(current.inspection_date)
+      ) {
         latest[apiaryId] = inspection;
       }
     });
-    return new Set<number>(Object.entries(latest).filter(([, insp]) => insp.pest_detected).map(([apiaryId]) => Number(apiaryId)));
-  }, [hiveById, inspections]);
+
+  return new Set<number>(
+    Object.entries(latest)
+      .filter(([, insp]) => {
+        const pestValues = Array.isArray(insp.pest_disease_presence)
+          ? insp.pest_disease_presence
+          : String(insp.pest_disease_presence || '')
+              .replace(/[\[\]"]/g, '')
+              .split(',');
+
+        return (
+          pestValues.includes('pest_detected') ||
+          pestValues.includes('under_treatment')
+        );
+      })
+      .map(([apiaryId]) => Number(apiaryId))
+  );
+}, [hiveById, inspections]);
 
   const filtered = apiaries.filter((apiary) => {
     if (search && !apiary.name.toLowerCase().includes(search.toLowerCase()) && !apiary.district?.toLowerCase().includes(search.toLowerCase()) && !apiary.area?.toLowerCase().includes(search.toLowerCase())) return false;
@@ -162,7 +218,8 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
   }
 
   return (
-    <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
+    // <div className="h-full bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative">
+    <div className="h-full bg-white relative">
       <div className="h-full overflow-y-auto pb-24">
         {/* Header */}
         <div className="bg-white shadow-sm sticky top-0 z-30">
@@ -243,6 +300,7 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
                     hasQueenless={queenlessApiaryIds.has(apiary.id)}
                     hasPestAlert={pestAlertApiaryIds.has(apiary.id)}
                     getWeatherIcon={getWeatherIcon}
+                    weatherData={weatherData}
                   />
                 ))
               )}
@@ -292,9 +350,10 @@ function SummaryCard({ title, value, color, alert }: { title: string; value: str
   );
 }
 
-function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon, hasQueenless, hasPestAlert }: {
+function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon, hasQueenless, hasPestAlert,  weatherData }: {
   apiary: Apiary; lang: Language; onView: () => void; onEdit: () => void; onAddHive: () => void;
   getWeatherIcon: (condition: string) => React.ReactNode; hasQueenless: boolean; hasPestAlert: boolean;
+  weatherData: Record<number, any>;
 }) {
   const statusConfig: Record<string, { label: string; textColor: string; bgColor: string }> = {
     active: { label: t('active', lang), textColor: 'text-emerald-700', bgColor: 'bg-emerald-50' },
@@ -304,8 +363,8 @@ function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon, h
   const config = statusConfig[apiary.status] || statusConfig.active;
 
   return (
-    <div className={`bg-white rounded-xl shadow-sm overflow-hidden ${apiary.status === 'expired' ? 'border-l-4 border-red-400' : ''}`}>
-      <div className="p-2.5 space-y-1.5">
+    // <div className={`bg-white rounded-xl shadow-sm overflow-hidden ${apiary.status === 'expired' ? 'border-l-4 border-red-400' : ''}`}>
+    <div className={`bg-white rounded-xl shadow-md border border-stone-100 overflow-hidden hover:shadow-lg transition-all duration-200 ${apiary.status === 'expired' ? 'border-l-4 border-red-400' : ''}`}>      <div className="p-2.5 space-y-1.5">
         {/* Row 1: Name + Status */}
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-[0.875rem] font-bold text-stone-800 flex-1 truncate">{apiary.name}</h3>
@@ -334,7 +393,11 @@ function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon, h
         <div className="flex items-center gap-1.5 bg-stone-50 rounded-lg px-2 py-1 text-[0.7rem]">
           <span className="flex items-center gap-1">
             {getWeatherIcon('sunny')}
-            <span className="font-medium text-stone-700">28°C · Sunny</span>
+            <span className="font-medium text-stone-700">
+              {weatherData[apiary.id]
+                ? `${weatherData[apiary.id].temp.toFixed(1)}°C`
+                : 'Loading...'}
+            </span>
           </span>
           {(apiary.forage_primary || apiary.blooming_window) && (
             <>
