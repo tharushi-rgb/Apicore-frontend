@@ -275,7 +275,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
   return (
     // <div className="h-full flex flex-col bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100">
-    <div className="h-full bg-white relative">
+    <div className="h-full bg-white relative flex flex-col">
 
       <div className="bg-white shadow-sm shrink-0 z-30">
         <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}

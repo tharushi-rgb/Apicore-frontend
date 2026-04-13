@@ -515,14 +515,30 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
           ...sharedData,
           name: trimmedNames[0],
         });
-      } else {
-        await Promise.all(trimmedNames.map((name) => hivesService.create({
-          ...sharedData,
-          name,
-        })));
-      }
 
-      onClose();
+        const apiaryId =
+          contextApiary?.id ||
+          Number(form.apiary_selection) ||
+          prefillApiaryId;
+
+        if (apiaryId) {
+          navigate(`/apiaries/${apiaryId}`);
+        } else {
+          onClose();
+        }
+
+      } else {
+        await Promise.all(
+          trimmedNames.map((name) =>
+            hivesService.create({
+              ...sharedData,
+              name,
+            })
+          )
+        );
+
+        onClose();
+      }
     } catch (submitError: any) {
       setError(submitError.message || 'Failed to save hive');
       setSaving(false);
