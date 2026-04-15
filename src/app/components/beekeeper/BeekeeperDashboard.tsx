@@ -106,8 +106,8 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
 
       const [dashData, forage, upcoming, expenseData, harvestData, inspectionData] = await Promise.all([
         dashboardService.get(),
-        planningService.getForageByMonth(currentMonth),
-        planningService.getForageByMonth(nextMonth),
+        planningService.getForageByMonth(currentMonth, { maxItems: 20 }),
+        planningService.getForageByMonth(nextMonth, { excludeMonth: currentMonth, maxItems: 20 }),
         expensesService.getAll().catch(() => []),
         supabase.from('harvests').select('quantity, harvest_date').eq('user_id', userId).then((r) => r.data ?? [], () => []),
         supabase.from('inspections').select('pest_detected, inspection_date').eq('user_id', userId).then((r) => r.data ?? [], () => []),

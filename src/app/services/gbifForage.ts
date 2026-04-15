@@ -71,16 +71,14 @@ export interface GBIFForageSpecies {
   sinhalaName?: string; // deprecated - use 'sinhala'
   gbifCount: number;
   observedMonths: number[];
+  observedMonthCounts: Record<string, number>;
   hotspots: [number, number, number][];
   popularityRank?: number;
 }
 
-// Get top 39 plants by record count (excluding "Plantae" kingdom entry)
-const TOP_40_THRESHOLD = 39;
 const CSV_RECORDS = (forageCsvData.records as CsvForageRecord[])
   .filter((record) => !!record.scientificName && Number.isFinite(record.recordCount) && record.scientificName !== 'Plantae')
-  .sort((a, b) => b.recordCount - a.recordCount)
-  .slice(0, TOP_40_THRESHOLD);
+  .sort((a, b) => b.recordCount - a.recordCount);
 
 export const GBIF_FORAGE_SPECIES: Record<string, GBIFForageSpecies> = Object.fromEntries(
   CSV_RECORDS.map((record, idx) => {
@@ -95,6 +93,7 @@ export const GBIF_FORAGE_SPECIES: Record<string, GBIFForageSpecies> = Object.fro
       sinhalaName: names.sinhala || record.sinhalaName || undefined,
       gbifCount: record.recordCount,
       observedMonths: Array.isArray(record.observedMonths) ? record.observedMonths : [],
+      observedMonthCounts: record.observedMonthCounts || {},
       hotspots: (record.hotspots || []).map((hotspot) => [hotspot.lat, hotspot.lng, hotspot.count]),
       popularityRank: idx + 1,
     };
@@ -102,22 +101,26 @@ export const GBIF_FORAGE_SPECIES: Record<string, GBIFForageSpecies> = Object.fro
   })
 );
 
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 export function getNearbyGBIFForage(
   lat: number,
   lng: number,
-  opts?: { currentMonthOnly?: boolean }
+  opts?: { currentMonthOnly?: boolean; radiusKm?: number; minNearbyCount?: number }
 ): Array<GBIFForageSpecies & { scientific: string; nearbyCount: number }> {
   const month = new Date().getMonth() + 1;
-
-  // 0.5-degree cell + neighbors
-  const cellLat = Math.round(lat * 2) / 2;
-  const cellLng = Math.round(lng * 2) / 2;
-  const nearbyCells = new Set<string>();
-  for (let dLat = -0.5; dLat <= 0.5; dLat += 0.5) {
-    for (let dLng = -0.5; dLng <= 0.5; dLng += 0.5) {
-      nearbyCells.add(`${(cellLat + dLat).toFixed(1)},${(cellLng + dLng).toFixed(1)}`);
-    }
-  }
+  const radiusKm = opts?.radiusKm ?? 18;
+  const minNearbyCount = opts?.minNearbyCount ?? 1;
 
   const results: Array<GBIFForageSpecies & { scientific: string; nearbyCount: number }> = [];
 
@@ -126,13 +129,13 @@ export function getNearbyGBIFForage(
 
     let nearbyCount = 0;
     for (const [hotspotLat, hotspotLng, hotspotCount] of species.hotspots) {
-      const key = `${hotspotLat.toFixed(1)},${hotspotLng.toFixed(1)}`;
-      if (nearbyCells.has(key)) {
+      const distance = haversineKm(lat, lng, hotspotLat, hotspotLng);
+      if (distance <= radiusKm) {
         nearbyCount += hotspotCount;
       }
     }
 
-    if (nearbyCount > 0) {
+    if (nearbyCount >= minNearbyCount) {
       results.push({ ...species, scientific, nearbyCount });
     }
   }
@@ -142,7 +145,7 @@ export function getNearbyGBIFForage(
     return right.gbifCount - left.gbifCount;
   });
 
-  return results;
+  return results.slice(0, 120);
 }
 
 export function getGBIFBiodiversityScore(lat: number, lng: number): number {

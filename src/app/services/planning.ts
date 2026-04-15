@@ -464,8 +464,19 @@ export const planningService = {
     // CSV-backed forage data only (no hardcoded forage descriptions)
     const currentMonth = new Date().getMonth() + 1;
     const nextMonth = (currentMonth % 12) + 1;
-    const gbifNearby = getNearbyGBIFForage(lat, lng);
-    const currentForage: ForagePlant[] = gbifNearby
+    const gbifNearby =
+      getNearbyGBIFForage(lat, lng, { radiusKm: 12 })
+      || [];
+    const nearbyForage = gbifNearby.length >= 6
+      ? gbifNearby
+      : getNearbyGBIFForage(lat, lng, { radiusKm: 20 });
+    const adaptiveNearbyForage = nearbyForage.length >= 6
+      ? nearbyForage
+      : getNearbyGBIFForage(lat, lng, { radiusKm: 30 });
+    const finalNearbyForage = adaptiveNearbyForage.length > 0
+      ? adaptiveNearbyForage
+      : getNearbyGBIFForage(lat, lng, { radiusKm: 45, minNearbyCount: 2 });
+    const currentForage: ForagePlant[] = finalNearbyForage
       .filter((entry) => entry.observedMonths.includes(currentMonth))
       .slice(0, 10)
       .map((entry) => {
@@ -484,7 +495,7 @@ export const planningService = {
           confirmed: true,
         };
       });
-    const upcomingForage: ForagePlant[] = gbifNearby
+    const upcomingForage: ForagePlant[] = finalNearbyForage
       .filter((entry) => entry.observedMonths.includes(nextMonth) && !entry.observedMonths.includes(currentMonth))
       .slice(0, 10)
       .map((entry) => {
@@ -662,7 +673,7 @@ export const planningService = {
       },
       suitability: { score: boostedScore, label: boostedLabel, color: boostedColor },
       weather: { current, days, hourly, source: 'Open-Meteo' },
-      forage: { current: currentForage, upcoming: upcomingForage, month: currentMonth, gbifNearby, gbifScore },
+      forage: { current: currentForage, upcoming: upcomingForage, month: currentMonth, gbifNearby: finalNearbyForage, gbifScore },
     };
   },
 
@@ -670,20 +681,57 @@ export const planningService = {
     return SRI_LANKA_DISTRICTS;
   },
 
-  async getForageByMonth(month: number): Promise<ForagePlant[]> {
-    // CSV-backed monthly forage snapshot
-    return Object.entries(GBIF_FORAGE_SPECIES)
-      .filter(([, species]) => species.observedMonths.includes(month))
-      .sort(([, left], [, right]) => right.gbifCount - left.gbifCount)
-      .slice(0, 20)
-      .map(([scientific, species]) => ({
+  async getForageByMonth(
+    month: number,
+    opts?: { excludeMonth?: number; maxItems?: number }
+  ): Promise<ForagePlant[]> {
+    const maxItems = opts?.maxItems ?? 20;
+
+    const ranked = Object.entries(GBIF_FORAGE_SPECIES)
+      .map(([scientific, species]) => {
+        const monthCount = Number(species.observedMonthCounts?.[String(month)] || 0);
+        const excludeCount = opts?.excludeMonth != null
+          ? Number(species.observedMonthCounts?.[String(opts.excludeMonth)] || 0)
+          : 0;
+        return {
+          scientific,
+          species,
+          monthCount,
+          excludeCount,
+          trendScore: monthCount - excludeCount,
+        };
+      })
+      .filter((entry) => entry.monthCount > 0)
+      .sort((left, right) => {
+        if (right.trendScore !== left.trendScore) return right.trendScore - left.trendScore;
+        if (right.monthCount !== left.monthCount) return right.monthCount - left.monthCount;
+        return right.species.gbifCount - left.species.gbifCount;
+      });
+
+    let filtered = ranked;
+
+    if (opts?.excludeMonth != null) {
+      const strictUpcoming = ranked.filter((entry) => entry.excludeCount === 0);
+      if (strictUpcoming.length >= maxItems) {
+        filtered = strictUpcoming;
+      } else {
+        const strongerUpcoming = ranked.filter((entry) => entry.trendScore > 0);
+        filtered = strongerUpcoming.length >= Math.ceil(maxItems * 0.7) ? strongerUpcoming : ranked;
+      }
+    }
+
+    return filtered
+      .slice(0, maxItems)
+      .map(({ scientific, species, monthCount, trendScore }) => ({
         name: species.common,
         scientific,
         resourceType: 'records',
         bloomStart: species.observedMonths.length ? Math.min(...species.observedMonths) : month,
         bloomEnd: species.observedMonths.length ? Math.max(...species.observedMonths) : month,
         availability: 'observed',
-        note: `CSV records in Sri Lanka: ${species.gbifCount}`,
+        note: opts?.excludeMonth != null
+          ? `Next-month observations: ${monthCount}${trendScore > 0 ? ` (+${trendScore} vs current month)` : ''}`
+          : `Current-month observations: ${monthCount}`,
         zone: 'all',
         gbifCount: species.gbifCount,
         confirmed: true,
