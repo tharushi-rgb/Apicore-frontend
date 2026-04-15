@@ -14,7 +14,7 @@ import {
   getDistrictsByProvince,
   getDsDivisionsByDistrict,
   getDistrictCenter,
-  getDsDivisionCenter
+  resolveDsDivisionCenter
 } from '../../constants/sriLankaLocations';
 import { t } from '../../i18n';
 
@@ -158,16 +158,13 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
   const [analysis, setAnalysis] = useState<PlanningAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [adminLocationHint, setAdminLocationHint] = useState<string | null>(null);
+  const [resolvingDsCenter, setResolvingDsCenter] = useState(false);
   const [showNearbyHivesOverlay, setShowNearbyHivesOverlay] = useState(false);
   const [prefillHandled, setPrefillHandled] = useState(false);
 
   const availableDistricts = getDistrictsByProvince(selectedProvince);
   const availableDsDivisions = getDsDivisionsByDistrict(selectedDistrict);
-  const usingDistrictFallback =
-    searchMode === 'admin' &&
-    selectedDistrict &&
-    selectedDsDivision &&
-    !getDsDivisionCenter(selectedDistrict, selectedDsDivision);
 
   useEffect(() => {
     const nextEndDate = new Date(`${startDate}T00:00:00`);
@@ -187,6 +184,41 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
       setSelectedDsDivision('');
     }
   }, [availableDsDivisions, selectedDistrict, selectedDsDivision]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const syncAdminCoordinates = async () => {
+      if (searchMode !== 'admin' || !selectedDistrict || !selectedDsDivision) {
+        setAdminLocationHint(null);
+        return;
+      }
+
+      setResolvingDsCenter(true);
+      setAdminLocationHint(null);
+
+      const dsCenter = await resolveDsDivisionCenter(selectedDistrict, selectedDsDivision);
+      if (cancelled) return;
+
+      if (dsCenter) {
+        setCustomLat(String(dsCenter.lat));
+        setCustomLng(String(dsCenter.lng));
+      } else {
+        const districtCenter = getDistrictCenter(selectedDistrict);
+        setCustomLat(String(districtCenter.lat));
+        setCustomLng(String(districtCenter.lng));
+        setAdminLocationHint('Exact DS coordinates unavailable right now. Using district center as fallback.');
+      }
+
+      setResolvingDsCenter(false);
+    };
+
+    syncAdminCoordinates();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchMode, selectedDistrict, selectedDsDivision]);
 
   useEffect(() => {
     if (searchMode === 'gps' && !customLat && !customLng) {
@@ -216,21 +248,20 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
     if (searchMode === 'admin') {
       if (!selectedProvince || !selectedDistrict || !selectedDsDivision) return;
 
-      const dsCenter = getDsDivisionCenter(selectedDistrict, selectedDsDivision);
+      const dsCenter = await resolveDsDivisionCenter(selectedDistrict, selectedDsDivision);
+      const selectedCenter = dsCenter ?? getDistrictCenter(selectedDistrict);
 
-      let d;
+      lat = selectedCenter.lat;
+      lng = selectedCenter.lng;
 
-      if (dsCenter) {
-        d = dsCenter;
+      setCustomLat(String(selectedCenter.lat));
+      setCustomLng(String(selectedCenter.lng));
+
+      if (!dsCenter) {
+        setAdminLocationHint('Exact DS coordinates unavailable right now. Using district center as fallback.');
       } else {
-        d = getDistrictCenter(selectedDistrict);
+        setAdminLocationHint(null);
       }
-
-      lat = d.lat;
-      lng = d.lng;
-
-      setCustomLat(String(d.lat));
-      setCustomLng(String(d.lng));
     }else if (selectedDistrict && (!customLat || !customLng)) {
       const d = districts.find(dd => dd.name === selectedDistrict);
       if (d) { lat = d.lat; lng = d.lng; }
@@ -393,9 +424,15 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                     </div>
                   </div>
 
-                  <button onClick={handleAnalyze} disabled={analyzing || (!customLat && !selectedDistrict)}
+                  {searchMode === 'admin' && adminLocationHint && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                      <p className="text-xs text-amber-700">{adminLocationHint}</p>
+                    </div>
+                  )}
+
+                  <button onClick={handleAnalyze} disabled={analyzing || resolvingDsCenter || (!customLat && !selectedDistrict)}
                     className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50">
-                    {analyzing ? <><div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> Analyzing...</> : <><Search className="w-4 h-4" /> Analyze Location</>}
+                    {analyzing ? <><div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> Analyzing...</> : resolvingDsCenter ? <><div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> Resolving DS location...</> : <><Search className="w-4 h-4" /> Analyze Location</>}
                   </button>
                   
 

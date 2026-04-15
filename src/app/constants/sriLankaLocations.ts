@@ -102,6 +102,50 @@ export const DS_DIVISION_CENTERS: Record<string, Record<string, { lat: number; l
   }
 };
 
+const DS_CENTER_CACHE_KEY = 'ds_division_center_cache_v1';
+let dsCenterCache: Record<string, { lat: number; lng: number }> | null = null;
+
+function getDsCenterCacheKey(district: string, dsDivision: string) {
+  return `${district.trim().toLowerCase()}::${dsDivision.trim().toLowerCase()}`;
+}
+
+function loadDsCenterCache() {
+  if (dsCenterCache) return dsCenterCache;
+  dsCenterCache = {};
+
+  if (typeof window === 'undefined') {
+    return dsCenterCache;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(DS_CENTER_CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        dsCenterCache = parsed;
+      }
+    }
+  } catch {
+    // Ignore cache parse errors and continue with an empty cache.
+  }
+
+  return dsCenterCache;
+}
+
+function getSafeDsCenterCache() {
+  return loadDsCenterCache() ?? {};
+}
+
+function saveDsCenterCache() {
+  if (typeof window === 'undefined' || !dsCenterCache) return;
+
+  try {
+    window.localStorage.setItem(DS_CENTER_CACHE_KEY, JSON.stringify(dsCenterCache));
+  } catch {
+    // Ignore localStorage write failures.
+  }
+}
+
 export function getDsDivisionCenter(district?: string, dsDivision?: string) {
   if (
     district &&
@@ -110,6 +154,82 @@ export function getDsDivisionCenter(district?: string, dsDivision?: string) {
     DS_DIVISION_CENTERS[district][dsDivision]
   ) {
     return DS_DIVISION_CENTERS[district][dsDivision];
+  }
+
+  if (district && dsDivision) {
+    const cache = getSafeDsCenterCache();
+    const cached = cache[getDsCenterCacheKey(district, dsDivision)];
+    if (cached) return cached;
+  }
+
+  return null;
+}
+
+export async function resolveDsDivisionCenter(district?: string, dsDivision?: string) {
+  if (!district || !dsDivision) return null;
+
+  const staticOrCached = getDsDivisionCenter(district, dsDivision);
+  if (staticOrCached) return staticOrCached;
+
+  const queries = [
+    `${dsDivision} Divisional Secretariat, ${district} District, Sri Lanka`,
+    `${dsDivision} DS Division, ${district} District, Sri Lanka`,
+    `${dsDivision}, ${district}, Sri Lanka`,
+  ];
+
+  const normalizedDistrict = district.trim().toLowerCase();
+  const normalizedDs = dsDivision.trim().toLowerCase();
+
+  for (const query of queries) {
+    const params = new URLSearchParams({
+      q: query,
+      format: 'jsonv2',
+      limit: '8',
+      countrycodes: 'lk',
+      addressdetails: '1',
+    });
+
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`);
+      if (!response.ok) continue;
+
+      const data = await response.json();
+      const candidates = Array.isArray(data) ? data : [];
+      if (!candidates.length) continue;
+
+      const best = candidates
+        .map((candidate: any) => {
+          const display = String(candidate?.display_name ?? '').toLowerCase();
+          const address = candidate?.address && typeof candidate.address === 'object' ? candidate.address : {};
+          const addressText = Object.values(address).map((value) => String(value).toLowerCase()).join(' ');
+          const combined = `${display} ${addressText}`;
+
+          let score = 0;
+          if (combined.includes(normalizedDs)) score += 3;
+          if (combined.includes(normalizedDistrict)) score += 2;
+          if (combined.includes('divisional secretariat') || combined.includes('ds division')) score += 2;
+          if (String(candidate?.type ?? '').toLowerCase().includes('administrative')) score += 1;
+          if (String(candidate?.class ?? '').toLowerCase().includes('boundary')) score += 1;
+
+          return { candidate, score };
+        })
+        .sort((a, b) => b.score - a.score)[0];
+
+      if (!best || best.score < 3) continue;
+
+      const lat = Number(best.candidate.lat);
+      const lng = Number(best.candidate.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+
+      const resolved = { lat, lng };
+      const cache = getSafeDsCenterCache();
+      cache[getDsCenterCacheKey(district, dsDivision)] = resolved;
+      dsCenterCache = cache;
+      saveDsCenterCache();
+      return resolved;
+    } catch {
+      // Try the next query variation.
+    }
   }
 
   return null;
