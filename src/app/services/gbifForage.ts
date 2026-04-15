@@ -1,5 +1,53 @@
 import forageCsvData from '../data/forage_records_from_csv.json';
 
+// Build plant names lookup from hardcoded data
+// This maps scientific names to English and Sinhala names
+function buildPlantNamesLookup(): Record<string, { english: string; sinhala: string }> {
+  // Direct mapping based on forage_plants_names.csv data
+  return {
+    "Oryza sativa L.": { english: "Rice", sinhala: "ගොයම්" },
+    "Dioscorea alata L.": { english: "Purple Yam", sinhala: "ඇතුල්" },
+    "Mimosa pudica L.": { english: "Sensitive Plant", sinhala: "නිදිකුම්බා" },
+    "Calotropis gigantea (L.) W.T.Aiton": { english: "Crown Flower", sinhala: "මුතු ගෙඩි" },
+    "Cocos nucifera L.": { english: "Coconut", sinhala: "පොල්" },
+    "Lantana camara L.": { english: "Spanish Flag", sinhala: "ගන්දපාන" },
+    "Nepenthes distillatoria L.": { english: "Pitcher Plant", sinhala: "බඳුන් වැල්" },
+    "Barringtonia asiatica (L.) Kurz": { english: "Fish Poison Tree", sinhala: "දිය මීදෙල්" },
+    "Artocarpus heterophyllus Lam.": { english: "Jackfruit", sinhala: "කොස්" },
+    "Pontederia crassipes Mart.": { english: "Water Hyacinth", sinhala: "ජල නිල් මානෙල්" },
+    "Arundina graminifolia (D.Don) Hochr.": { english: "Bamboo Orchid", sinhala: "බැම්බු ඕකිඩ්" },
+    "Gloriosa superba L.": { english: "Flame Lily", sinhala: "නියාඟලා" },
+    "Ipomoea pes-caprae (L.) R.Br.": { english: "Beach Morning Glory", sinhala: "මුහුදු මදන" },
+    "Melastoma malabathricum L.": { english: "Indian Rhododendron", sinhala: "බෝවිටියා" },
+    "Tridax procumbens L.": { english: "Coat Buttons", sinhala: "හීන්මැදුරු" },
+    "Sphagneticola trilobata (L.) Pruski": { english: "Singapore Daisy", sinhala: "සිංගප්පූරු ඩේසි" },
+    "Clitoria ternatea L.": { english: "Butterfly Pea", sinhala: "නිල් කතරොළු" },
+    "Miconia crenata (Vahl) Michelang.": { english: "Miconia", sinhala: "මිකෝනියා" },
+    "Nelumbo nucifera Gaertn.": { english: "Sacred Lotus", sinhala: "නෙළුම්" },
+    "Dioscorea esculenta (Lour.) Burkill": { english: "Lesser Yam", sinhala: "කුකුලාලා" },
+    "Oryza rufipogon Griff.": { english: "Wild Rice", sinhala: "වල් ගොයම්" },
+    "Cyanthillium cinereum (L.) H.Rob.": { english: "Little Ironweed", sinhala: "මොණරකුඩුම්බිය" },
+    "Asystasia intrusa (Forssk.) Blume": { english: "Asystasia", sinhala: "අසිස්ටේසියා" },
+    "Rhododendron arboreum subsp. zeylanicum (Booth) Tagg": { english: "Tree Rhododendron", sinhala: "රෝඩොඩෙන්ඩ්‍රන්" },
+    "Aristea ecklonii Baker": { english: "Blue Stars", sinhala: "නිල් තාරා මල්" },
+    "Solanum torvum Sw.": { english: "Turkey Berry", sinhala: "තිබ්බටු" },
+    "Tabernaemontana divaricata (L.) R.Br. ex Roem. & Schult.": { english: "Crape Jasmine", sinhala: "එරබදු සුදු" },
+    "Chromolaena odorata (L.) R.M.King & H.Rob.": { english: "Siam Weed", sinhala: "පොඩි පත්මකුස්ස" },
+    "Hellenia speciosa (J.Koenig) S.R.Dutta": { english: "Spiral Ginger", sinhala: "කට්ටියමුරුංගා" },
+    "Persicaria capitata (Buch.-Ham. ex D.Don) H.Gross": { english: "Pink Knotweed", sinhala: "රෝස නට්වීඩ්" },
+    "Terminalia catappa L.": { english: "Tropical Almond", sinhala: "කොට්ටම්බා" },
+    "Solanum melongena L.": { english: "Brinjal", sinhala: "වම්බටු" },
+    "Cassia fistula L.": { english: "Golden Shower Tree", sinhala: "ඇහැල" },
+    "Couroupita guianensis Aubl.": { english: "Cannonball Tree", sinhala: "සාල මල් ගස" },
+    "Mangifera indica L.": { english: "Mango", sinhala: "අඹ" },
+    "Cerbera odollam Gaertn.": { english: "Sea Mango", sinhala: "ගොන කඩොල්" },
+    "Scaevola taccada (Gaertn.) Roxb.": { english: "Beach Naupaka", sinhala: "මුහුදු නාවක්කාඩු" },
+    "Rhododendron arboreum Sm.": { english: "Tree Rhododendron", sinhala: "රෝඩොඩෙන්ඩ්‍රන්" }
+  };
+}
+
+const PLANT_NAMES_LOOKUP = buildPlantNamesLookup();
+
 // Multilingual name mapping (curated from plant-common-names.js)
 const PLANT_MULTILINGUAL_NAMES: Record<string, {
   english: string;
@@ -82,14 +130,15 @@ const CSV_RECORDS = (forageCsvData.records as CsvForageRecord[])
 
 export const GBIF_FORAGE_SPECIES: Record<string, GBIFForageSpecies> = Object.fromEntries(
   CSV_RECORDS.map((record, idx) => {
-    const names = PLANT_MULTILINGUAL_NAMES[record.scientificName] || { english: '', sinhala: '', tamil: '' };
+    // Try to find names from the CSV-based lookup first
+    const names = PLANT_NAMES_LOOKUP[record.scientificName] || { english: '', sinhala: '' };
     
     const normalized: GBIFForageSpecies = {
       scientificName: record.scientificName,
       common: names.english || record.scientificName,
       english: names.english || '',
       sinhala: names.sinhala || record.sinhalaName || '',
-      tamil: names.tamil || '',
+      tamil: '',
       sinhalaName: names.sinhala || record.sinhalaName || undefined,
       gbifCount: record.recordCount,
       observedMonths: Array.isArray(record.observedMonths) ? record.observedMonths : [],

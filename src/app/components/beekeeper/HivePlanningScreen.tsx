@@ -100,9 +100,12 @@ function GBIFForageCard({ plants, currentMonth }: { plants: GBIFNearbyEntry[]; c
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-sm font-medium text-stone-800 truncate">{p.common}</span>
-                    {isNow && <span className="text-xs px-1 py-0.5 rounded bg-emerald-200 text-emerald-800 flex-shrink-0">Now</span>}
                   </div>
-                  <p className="text-xs text-stone-400 italic truncate">{p.scientific}</p>
+                  <div className="flex items-center gap-2 mt-0.5 text-xs text-stone-500 flex-wrap">
+                    {p.english && <span>{p.english}</span>}
+                    {p.english && p.sinhala && <span className="text-stone-300">•</span>}
+                    {p.sinhala && <span className="text-amber-700 font-medium">{p.sinhala}</span>}
+                  </div>
                 </div>
                 <span className="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0 bg-blue-100 text-blue-700 border border-blue-200">
                   {p.nearbyCount} obs.
