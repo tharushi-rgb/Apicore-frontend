@@ -102,7 +102,7 @@ export function LandownerAddPlotScreen({
     setImages((current) => current.filter((_, imageIndex) => imageIndex !== index));
   };
 
-  const onSubmit = (event: React.FormEvent) => {
+  const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
     setSuccess('');
@@ -152,7 +152,7 @@ export function LandownerAddPlotScreen({
     }
 
     try {
-      landownerMarketplaceService.createPlot({
+      await landownerMarketplaceService.createPlot({
         name: plotName.trim(),
         province,
         district,

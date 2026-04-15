@@ -70,7 +70,7 @@ function GBIFForageCard({ plants, currentMonth }: { plants: GBIFNearbyEntry[]; c
             <Leaf className="w-4 h-4 text-blue-600" />
           </div>
           <div>
-            <h3 className="font-bold text-stone-800 text-sm">GBIF Verified Forage Plants</h3>
+            <h3 className="font-bold text-stone-800 text-sm">GBIF Forage Plants</h3>
             <p className="text-xs text-stone-500">CSV records near this location only</p>
           </div>
         </div>
@@ -568,7 +568,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                       </div>
                     )}
 
-                    {/* GBIF Verified Nearby Plants */}
+                    {/* GBIF Nearby Forage Plants */}
                     {analysis.forage.gbifNearby.length > 0 && (
                       <GBIFForageCard
                         plants={analysis.forage.gbifNearby}

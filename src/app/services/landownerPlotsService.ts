@@ -13,7 +13,7 @@ export interface ForageEntry {
 
 export interface LandPlot {
   id: number;
-  user_id: string;
+  user_id: number;
   name: string;
   province: string;
   district: string;
@@ -27,7 +27,7 @@ export interface LandPlot {
   vehicle_access: VehicleAccess;
   night_access: boolean;
   images: string[];
-  status: 'active' | 'inactive';
+  status: 'active' | 'inactive' | null;
   created_at: string;
   updated_at: string;
 }
@@ -294,7 +294,7 @@ export const landownerPlotsService = {
       .from('landowner_plots')
       .select('id')
       .eq('user_id', user.id)
-      .eq('status', 'active');
+      .or('status.is.null,status.eq.active');
 
     if (plotError) throw new Error(plotError.message);
 

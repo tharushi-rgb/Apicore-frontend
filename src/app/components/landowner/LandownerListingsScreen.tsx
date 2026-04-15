@@ -671,11 +671,29 @@ export function LandownerListingsScreen({
                   </div>
 
                   <div className="mt-2 text-[0.8rem] text-stone-700 space-y-0.5">
-                    <p>{bid.fullName}</p>
-                    <p>{bid.beekeepingNature} · {bid.trainingLevel}</p>
-                    <p>{bid.primaryBeeSpecies} · {bid.district}</p>
-                    <p>{t('previousListings', selectedLanguage)} {bid.previousListings}</p>
-                    <p>{t('proposed', selectedLanguage)} {bid.hivesProposed} {t('hives', selectedLanguage)} · {bid.placementStartDate} {t('to', selectedLanguage)} {bid.placementEndDate}</p>
+                    {bid.fullName && <p>{bid.fullName}</p>}
+
+                    {(bid.beekeepingNature || bid.trainingLevel) && (
+                      <p>
+                        {[bid.beekeepingNature, bid.trainingLevel].filter(Boolean).join(' · ')}
+                      </p>
+                    )}
+
+                    {(bid.primaryBeeSpecies || bid.district) && (
+                      <p>
+                        {[bid.primaryBeeSpecies, bid.district].filter(Boolean).join(' · ')}
+                      </p>
+                    )}
+
+                    {(bid.hivesProposed > 0 || bid.placementStartDate || bid.placementEndDate) && (
+                      <p>
+                        {t('proposed', selectedLanguage)} {bid.hivesProposed} {t('hives', selectedLanguage)}
+                        {(bid.placementStartDate || bid.placementEndDate) && (
+                          <> · {bid.placementStartDate} {t('to', selectedLanguage)} {bid.placementEndDate}</>
+                        )}
+                      </p>
+                    )}
+
                     <p>{t('submitted', selectedLanguage)} {new Date(bid.submittedAt).toLocaleDateString()}</p>
                     {bid.note && <p className="text-stone-600">{t('note', selectedLanguage)} {bid.note}</p>}
                   </div>

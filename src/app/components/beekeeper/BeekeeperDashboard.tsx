@@ -928,6 +928,11 @@ function ForagePlantCard({ plant, type, onOpenArea, selectedLanguage = 'en' }: {
   const nearbyRecords = typeof plant.note === 'string' && plant.note.includes('CSV records near location:')
     ? plant.note.replace('CSV records near location:', '').trim()
     : '';
+
+  const lookup = typeof plant?.scientific === 'string' ? GBIF_FORAGE_SPECIES[plant.scientific] : undefined;
+  const englishName = lookup?.english || '';
+  const sinhalaName = lookup?.sinhala || '';
+
   return (
     <div className={`p-3 rounded-lg border ${baseClass}`}>
       <div className="flex items-center justify-between mb-1">
@@ -938,6 +943,15 @@ function ForagePlantCard({ plant, type, onOpenArea, selectedLanguage = 'en' }: {
           </span>
         )}
       </div>
+
+      {(englishName || sinhalaName) && (
+        <div className="flex items-center gap-2 -mt-0.5 mb-1 text-xs text-stone-500 flex-wrap">
+          {englishName && <span>{englishName}</span>}
+          {englishName && sinhalaName && <span className="text-stone-300">•</span>}
+          {sinhalaName && <span className="text-amber-700 font-medium">{sinhalaName}</span>}
+        </div>
+      )}
+
       <p className="text-xs text-stone-600"><em>{plant.scientific}</em></p>
       <p className="text-[0.7rem] text-stone-600 mt-1">{t('observedMonths', selectedLanguage)}: {monthLabel}</p>
       {nearbyRecords && <p className="text-[0.7rem] text-stone-500">{csvRecordsLabel}: {nearbyRecords}</p>}
