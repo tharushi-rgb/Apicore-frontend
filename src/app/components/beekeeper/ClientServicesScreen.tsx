@@ -310,30 +310,31 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
   return (
     // <div className="h-[100dvh] bg-gradient-to-b from-amber-50 via-emerald-50 to-amber-100 relative overflow-hidden flex flex-col">
     <div className="h-full bg-white relative">
-      <div className="bg-white shadow-sm sticky top-0 z-30">
-        <MobileHeader
-          userName={user?.name}
-          roleLabel={user?.role}
-          selectedLanguage={selectedLanguage}
-          onLanguageChange={onLanguageChange}
-          activeTab="clients"
-          onNavigate={onNavigate}
-          onLogout={onLogout}
-          onViewAllNotifications={() => onNavigate('notifications')}
-        />
-        <PageTitleBar title={t('findLand', selectedLanguage)} subtitle={t('browsePlots', selectedLanguage)} />
-      </div>
+      <div className="h-full overflow-y-auto pb-24">
+        <div className="bg-white shadow-sm sticky top-0 z-30">
+          <MobileHeader
+            userName={user?.name}
+            roleLabel={user?.role}
+            selectedLanguage={selectedLanguage}
+            onLanguageChange={onLanguageChange}
+            activeTab="clients"
+            onNavigate={onNavigate}
+            onLogout={onLogout}
+            onViewAllNotifications={() => onNavigate('notifications')}
+          />
+          <PageTitleBar title={t('findLand', selectedLanguage)} subtitle={t('browsePlots', selectedLanguage)} />
 
-      <div className="px-4 py-3 grid grid-cols-2 gap-2">
-        <button onClick={() => setTab('find')} className={`rounded-xl py-2 text-[0.8rem] font-semibold ${tab === 'find' ? 'bg-amber-500 text-white' : 'bg-white text-stone-700 border border-stone-200'}`}>
-          {t('findLand', selectedLanguage)}
-        </button>
-        <button onClick={() => setTab('proposals')} className={`rounded-xl py-2 text-[0.8rem] font-semibold ${tab === 'proposals' ? 'bg-amber-500 text-white' : 'bg-white text-stone-700 border border-stone-200'}`}>
-          {t('myProposals', selectedLanguage)}
-        </button>
-      </div>
+          <div className="px-4 py-3 grid grid-cols-2 gap-2">
+            <button onClick={() => setTab('find')} className={`rounded-xl py-2 text-[0.8rem] font-semibold ${tab === 'find' ? 'bg-amber-500 text-white' : 'bg-white text-stone-700 border border-stone-200'}`}>
+              {t('findLand', selectedLanguage)}
+            </button>
+            <button onClick={() => setTab('proposals')} className={`rounded-xl py-2 text-[0.8rem] font-semibold ${tab === 'proposals' ? 'bg-amber-500 text-white' : 'bg-white text-stone-700 border border-stone-200'}`}>
+              {t('myProposals', selectedLanguage)}
+            </button>
+          </div>
+        </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-20 space-y-3">
+        <div className="px-4 pb-20 space-y-3">
         {error && <p className="rounded-xl bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-[0.72rem] font-medium">{error}</p>}
         {success && <p className="rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 px-3 py-2 text-[0.72rem] font-medium">{success}</p>}
 
@@ -457,6 +458,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
             </div>
           </section>
         )}
+      </div>
       </div>
 
       {showFilters && (

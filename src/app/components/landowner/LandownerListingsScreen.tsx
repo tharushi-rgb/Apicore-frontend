@@ -351,25 +351,25 @@ export function LandownerListingsScreen({
 
   return (
     
-    // <div className="h-[100dvh] bg-gradient-to-b from-emerald-50 via-green-50 to-white flex flex-col overflow-hidden">
     <div className="h-full bg-white relative">
+      <div className="h-full overflow-y-auto pb-24">
+        {/* Navbar */}
+        <div className="bg-white shadow-sm">
+          <MobileHeader
+            userName={user?.name}
+            roleLabel="Landowner"
+            selectedLanguage={selectedLanguage}
+            onLanguageChange={onLanguageChange}
+            activeTab="clients"
+            onNavigate={onNavigate}
+            onLogout={onLogout}
+            onViewAllNotifications={() => onNavigate('notifications')}
+            role="landowner"
+            theme="green"
+          />
+        </div>
 
-      <div className="bg-white shadow-sm">
-        <MobileHeader
-          userName={user?.name}
-          roleLabel="Landowner"
-          selectedLanguage={selectedLanguage}
-          onLanguageChange={onLanguageChange}
-          activeTab="clients"
-          onNavigate={onNavigate}
-          onLogout={onLogout}
-          onViewAllNotifications={() => onNavigate('notifications')}
-          role="landowner"
-          theme="green"
-        />
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-4 py-4 pb-24 space-y-4">
+        <div className="px-4 py-4 space-y-4">
         <section className="rounded-xl border border-emerald-200 bg-white px-4 py-3 shadow-sm">
           <div className="flex items-start justify-between gap-2">
             <div>
@@ -711,6 +711,7 @@ export function LandownerListingsScreen({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
