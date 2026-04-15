@@ -574,7 +574,7 @@ export const planningService = {
     const nearbyApiaryIds = new Set<number>();
     const nearbyApiaries: NearbyApiaryInfo[] = [];
     const nearbyStandaloneHives: NearbyHiveInfo[] = [];
-    const RADIUS_KM = 30; // 2km radius for nearby hive detection
+    const RADIUS_KM = 5; // 5km radius for nearby hive detection
 
     // console.log(`Calculating saturation for location: ${lat}, ${lng}`);
     // console.log(`Total apiaries in database: ${allApiaries.length}`);
