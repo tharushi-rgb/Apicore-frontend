@@ -115,7 +115,6 @@ function GBIFForageCard({ plants, currentMonth }: { plants: GBIFNearbyEntry[]; c
                 <span>Observed months: {MONTH_ABBR[firstMonth]}{firstMonth !== lastMonth ? `–${MONTH_ABBR[lastMonth]}` : ''}</span>
                 <span className="ml-auto text-blue-600 font-medium">Sri Lanka total: {p.gbifCount}</span>
               </div>
-              {p.sinhalaName && <p className="text-xs text-stone-500 mt-1 leading-relaxed">Sinhala: {p.sinhalaName}</p>}
             </div>
           );
         })}
