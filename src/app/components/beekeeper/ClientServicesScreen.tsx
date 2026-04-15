@@ -397,18 +397,18 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                         {listing.hasWaterOnSite && <AmenityIcon title="On-site water" icon={<Droplets className="w-3.5 h-3.5" />} />}
                         <AmenityIcon title={listing.vehicleAccess} icon={<Truck className="w-3.5 h-3.5" />} />
                         {listing.nightAccess && <AmenityIcon title="Night access" icon={<Moon className="w-3.5 h-3.5" />} />}
-                        {listing.userProposalStatus !== 'none' ? (
-                          <span className={`ml-auto inline-flex items-center gap-1 text-[0.65rem] font-medium ${
-                            listing.userProposalStatus === 'accepted' ? 'text-emerald-700' :
-                            listing.userProposalStatus === 'pending' ? 'text-amber-700' :
-                            'text-red-700'
-                          }`}>
+                        {listing.userProposalStatus !== 'none' && (
+                          <span
+                            className={`ml-auto inline-flex items-center gap-1 text-[0.65rem] font-medium ${
+                              listing.userProposalStatus === 'accepted'
+                                ? 'text-emerald-700'
+                                : listing.userProposalStatus === 'pending'
+                                  ? 'text-amber-700'
+                                  : 'text-red-700'
+                            }`}
+                          >
                             <ShieldCheck className="w-3.5 h-3.5" />
                             Proposal {listing.userProposalStatus}
-                          </span>
-                        ) : listing.ownerVerified && (
-                          <span className="ml-auto inline-flex items-center gap-1 text-[0.65rem] font-medium text-emerald-700">
-                            <ShieldCheck className="w-3.5 h-3.5" /> {t('verified', selectedLanguage)}
                           </span>
                         )}
                       </div>
@@ -554,9 +554,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                 <p className="text-[0.68rem] text-stone-500 mb-1">Landowner Profile</p>
                 <p className="text-[0.84rem] font-bold text-stone-800 inline-flex items-center gap-1">
                   {selectedListing.ownerName}
-                  {selectedListing.ownerVerified && <BadgeCheck className="w-4 h-4 text-emerald-600" />}
                 </p>
-                <p className="text-[0.72rem] text-stone-600 inline-flex items-center gap-1 mt-0.5"><Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" /> {selectedListing.ownerRating} - {selectedListing.ownerReviewCount} reviews</p>
                 <p className="text-[0.72rem] text-stone-600 mt-0.5">Active on APICore: {selectedListing.ownerYearsActive} years</p>
                 <p className="text-[0.72rem] text-stone-600 mt-0.5">Contact: {selectedListing.ownerContact}</p>
               </section>

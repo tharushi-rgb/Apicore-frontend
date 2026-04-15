@@ -30,9 +30,6 @@ export interface ListingSummary {
   paymentLabel: string;
   financialTerms: FinancialTerms;
   ownerName: string;
-  ownerRating: number;
-  ownerReviewCount: number;
-  ownerVerified: boolean;
   ownerContact: string;
   ownerYearsActive: number;
   image?: string;
@@ -136,12 +133,6 @@ export const beekeeperListingsService = {
 
       const acceptedHiveCount = (acceptedBids || []).reduce((sum: number, b: any) => sum + (b.hives_proposed || 0), 0);
 
-      // Get review count for owner
-      const { count: reviewCount } = await supabase
-        .from('listing_reviews')
-        .select('id', { count: 'exact', head: true })
-        .eq('owner_user_id', row.user_id);
-
       // Calculate owner's years active
       const ownerCreatedAt = owner?.created_at ? new Date(owner.created_at) : new Date();
       const yearsActive = Math.max(1, Math.floor((Date.now() - ownerCreatedAt.getTime()) / (365.25 * 24 * 60 * 60 * 1000)));
@@ -164,9 +155,6 @@ export const beekeeperListingsService = {
         paymentLabel: paymentLabel(row.financial_terms, row.cash_rent_lkr, row.honey_share_kgs),
         financialTerms: row.financial_terms,
         ownerName: owner?.name || `Landowner ${row.user_id}`,
-        ownerRating: 4.5, // Default rating - could be calculated from reviews
-        ownerReviewCount: reviewCount || 0,
-        ownerVerified: true, // Could be based on verification status
         ownerContact: owner?.phone || '',
         ownerYearsActive: yearsActive,
         image: (plot.images || [])[0],

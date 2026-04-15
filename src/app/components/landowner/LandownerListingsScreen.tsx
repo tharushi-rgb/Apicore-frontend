@@ -665,9 +665,7 @@ export function LandownerListingsScreen({
                     <div>
                       <p className="text-[0.9rem] font-bold text-stone-900 inline-flex items-center gap-1">
                         {bid.beekeeperName}
-                        {bid.verified && <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />}
                       </p>
-                      <p className="text-[0.78rem] text-stone-600">{t('rating', selectedLanguage)} {bid.rating.toFixed(1)} · {bid.reviews} {t('reviews', selectedLanguage)}</p>
                     </div>
                     <span className={`rounded-full px-2.5 py-1 text-[0.7rem] font-semibold ${bidStatusClass(bid.status)}`}>{bid.status}</span>
                   </div>

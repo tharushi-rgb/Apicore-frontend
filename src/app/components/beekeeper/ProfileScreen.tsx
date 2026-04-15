@@ -282,12 +282,6 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
             </div>
 
-              <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
-                <div className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
-                  <ShieldCheck className="h-3 w-3" />
-                  {t('verified', selectedLanguage)}
-                </div>
-              </div>
 
               <div className="mt-4 rounded-xl border border-stone-200 bg-stone-50/80 p-3">
                 {!isEditingProfile ? (

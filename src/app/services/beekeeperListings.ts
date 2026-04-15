@@ -30,9 +30,6 @@ export interface ListingSummary {
   paymentLabel: string;
   financialTerms: FinancialTerms;
   ownerName: string;
-  ownerRating: number;
-  ownerReviewCount: number;
-  ownerVerified: boolean;
   ownerContact: string;
   ownerYearsActive: number;
   image?: string;
@@ -161,18 +158,6 @@ export const beekeeperListingsService = {
           continue;
         }
 
-        // Get review count for owner - with error handling
-        let reviewCount = 0;
-        try {
-          const { count } = await supabase
-            .from('listing_reviews')
-            .select('id', { count: 'exact', head: true })
-            .eq('owner_user_id', row.user_id);
-          reviewCount = count || 0;
-        } catch (reviewError) {
-          console.warn(`Error fetching reviews for owner ${row.user_id}:`, reviewError);
-        }
-
         // Check if current user has already submitted a proposal for this listing
         let userProposalStatus: 'none' | 'pending' | 'accepted' | 'rejected' = 'none';
         try {
@@ -219,9 +204,6 @@ export const beekeeperListingsService = {
           paymentLabel: paymentLabel(row.financial_terms, row.cash_rent_lkr, row.honey_share_kgs),
           financialTerms: row.financial_terms,
           ownerName: owner?.name || `Landowner ${row.user_id}`,
-          ownerRating: 4.5, // Default rating - could be calculated from reviews
-          ownerReviewCount: reviewCount,
-          ownerVerified: true, // Could be based on verification status
           ownerContact: owner?.phone || '',
           ownerYearsActive: yearsActive,
           image: plotImages[0],
