@@ -544,12 +544,18 @@ export function LandownerListingsScreen({
                 </select>
               </label>
 
-              {selectedPlot && (
+{selectedPlot && (
                 <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5">
                   <p className="text-xs font-semibold text-emerald-900">{t('plotSummary', selectedLanguage)}</p>
                   <p className="mt-1 text-sm text-stone-700">{selectedPlot.name}</p>
                   <p className="text-xs text-stone-600 inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{selectedPlot.district} / {selectedPlot.dsDivision}</p>
                   <p className="text-xs text-stone-600 mt-0.5">{t('water', selectedLanguage)}: {selectedPlot.waterAvailability}</p>
+                  <p className="text-xs text-stone-600 mt-0.5">Acreage: {selectedPlot.totalAcreage?.toFixed(1) ?? 'N/A'} acres</p>
+                  <p className="text-xs text-stone-600 mt-0.5">{t('vehicleAccess', selectedLanguage)}: {selectedPlot.vehicleAccess ?? 'N/A'}</p>
+                  <p className="text-xs text-stone-600 mt-1">
+                    Forage: {(selectedPlot.forageEntries ?? [])[0]?.name ?? 'N/A'}
+                    {((selectedPlot.forageEntries ?? [])[1]) && `, ${selectedPlot.forageEntries[1].name}`}
+                  </p>
                 </div>
               )}
 

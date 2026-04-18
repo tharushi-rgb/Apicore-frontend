@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MobileHeader } from '../shared/MobileHeader';
 import { dashboardService, type DashboardData } from '../../services/dashboard';
 import { planningService } from '../../services/planning';
@@ -16,7 +17,14 @@ type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
 type RankTab = 'harvest' | 'expenses' | 'pest';
 
-interface RankEntry { id: number; name: string; secondary: string; value: number; label: string; }
+interface RankEntry { 
+  id: number; 
+  name: string; 
+  secondary: string; 
+  value: number; 
+  label: string; 
+  type: 'hive' | 'apiary';
+}
 interface ForageAreaEntry {
   id: number;
   district: string;
@@ -63,6 +71,7 @@ interface Props {
 }
 
 export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavigate, onLogout }: Props) {
+  const navigate = useNavigate();
   const [data, setData] = useState<DashboardData | null>(null);
   const [forageData, setForageData] = useState<any[]>([]);
   const [upcomingForage, setUpcomingForage] = useState<any[]>([]);
@@ -235,7 +244,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         console.log(`Adding ${h.quantity}kg to hive ${h.hive_id} (${hiveName}). Total now: ${hiveHarvMap[h.hive_id].qty}kg`);
       });
       const hiveHarvRank = Object.entries(hiveHarvMap)
-        .map(([id, v]) => ({ id: +id, name: v.name, secondary: v.apiary, value: v.qty, label: `${v.qty.toFixed(1)} kg` }))
+        .map(([id, v]) => ({ id: +id, name: v.name, secondary: v.apiary, value: v.qty, label: `${v.qty.toFixed(1)} kg`, type: 'hive' as const }))
         .sort((a, b) => b.value - a.value);
       setHiveHarvestRank(hiveHarvRank);
       console.log('Hive harvest rank set:', hiveHarvRank.length, 'entries', hiveHarvRank);
@@ -252,7 +261,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         hiveExpMap[e.hive_id].amt += e.amount || 0;
       });
       const hiveExpRank = Object.entries(hiveExpMap)
-        .map(([id, v]) => ({ id: +id, name: v.name, secondary: v.apiary, value: v.amt, label: `Rs.${v.amt.toFixed(0)}` }))
+        .map(([id, v]) => ({ id: +id, name: v.name, secondary: v.apiary, value: v.amt, label: `Rs.${v.amt.toFixed(0)}`, type: 'hive' as const }))
         .sort((a, b) => a.value - b.value);
       setHiveExpenseRank(hiveExpRank);
       console.log('Hive expense rank set:', hiveExpRank.length, 'entries');
@@ -269,7 +278,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         if (i.pest_detected) hivePestMap[i.hive_id].count += 1;
       });
       const hivePestRank = Object.entries(hivePestMap)
-        .map(([id, v]) => ({ id: +id, name: v.name, secondary: v.apiary, value: v.count, label: `${v.count} detected` }))
+        .map(([id, v]) => ({ id: +id, name: v.name, secondary: v.apiary, value: v.count, label: `${v.count} detected`, type: 'hive' as const }))
         .sort((a, b) => a.value - b.value);
       setHivePestRank(hivePestRank);
       console.log('Hive pest rank set:', hivePestRank.length, 'entries');
@@ -291,7 +300,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         console.log(`Adding ${h.quantity}kg to apiary ${aid} (${aname}). Total now: ${apiaryHarvMap[aid].qty}kg`);
       });
       const apiaryHarvRank = Object.entries(apiaryHarvMap)
-        .map(([id, v]) => ({ id: +id, name: v.name, secondary: '', value: v.qty, label: `${v.qty.toFixed(1)} kg` }))
+        .map(([id, v]) => ({ id: +id, name: v.name, secondary: '', value: v.qty, label: `${v.qty.toFixed(1)} kg`, type: 'apiary' as const }))
         .sort((a, b) => b.value - a.value);
       setApiaryHarvestRank(apiaryHarvRank);
       console.log('Apiary harvest rank set:', apiaryHarvRank.length, 'entries', apiaryHarvRank);
@@ -310,7 +319,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         apiaryExpMap[aid].amt += e.amount || 0;
       });
       const apiaryExpRank = Object.entries(apiaryExpMap)
-        .map(([id, v]) => ({ id: +id, name: v.name, secondary: '', value: v.amt, label: `Rs.${v.amt.toFixed(0)}` }))
+        .map(([id, v]) => ({ id: +id, name: v.name, secondary: '', value: v.amt, label: `Rs.${v.amt.toFixed(0)}`, type: 'apiary' as const }))
         .sort((a, b) => a.value - b.value);
       setApiaryExpenseRank(apiaryExpRank);
       console.log('Apiary expense rank set:', apiaryExpRank.length, 'entries');
@@ -329,7 +338,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         if (i.pest_detected) apiaryPestMap[aid].count += 1;
       });
       const apiaryPestRank = Object.entries(apiaryPestMap)
-        .map(([id, v]) => ({ id: +id, name: v.name, secondary: '', value: v.count, label: `${v.count} detected` }))
+        .map(([id, v]) => ({ id: +id, name: v.name, secondary: '', value: v.count, label: `${v.count} detected`, type: 'apiary' as const }))
         .sort((a, b) => a.value - b.value);
       setApiaryPestRank(apiaryPestRank);
       console.log('Apiary pest rank set:', apiaryPestRank.length, 'entries');
@@ -563,6 +572,11 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
                 data={hiveRankData}
                 tabColors={hiveTabColors}
                 onSeeMore={() => { setOverlayHiveTab(hiveRankTab); setShowHiveOverlay(true); }}
+                onEntryClick={(entry) => {
+                  if (entry.type === 'hive') {
+                    navigate(`/hives/${entry.id}`);
+                  }
+                }}
                 selectedLanguage={selectedLanguage}
               />
 
@@ -574,6 +588,11 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
                 data={apiaryRankData}
                 tabColors={hiveTabColors}
                 onSeeMore={() => { setOverlayApiaryTab(apiaryRankTab); setShowApiaryOverlay(true); }}
+                onEntryClick={(entry) => {
+                  if (entry.type === 'apiary') {
+                    navigate(`/apiaries/${entry.id}`);
+                  }
+                }}
                 selectedLanguage={selectedLanguage}
               />
 
@@ -680,6 +699,11 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
           data={hiveRankData}
           tabColors={hiveTabColors}
           onClose={() => setShowHiveOverlay(false)}
+          onEntryClick={(entry) => {
+            if (entry.type === 'hive') {
+              navigate(`/hives/${entry.id}`);
+            }
+          }}
           selectedLanguage={selectedLanguage}
         />
       )}
@@ -693,6 +717,11 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
           data={apiaryRankData}
           tabColors={hiveTabColors}
           onClose={() => setShowApiaryOverlay(false)}
+          onEntryClick={(entry) => {
+            if (entry.type === 'apiary') {
+              navigate(`/apiaries/${entry.id}`);
+            }
+          }}
           selectedLanguage={selectedLanguage}
         />
       )}
@@ -804,10 +833,23 @@ function RangeBtn({ active, onClick, label }: { active: boolean; onClick: () => 
 type TabColors = Record<RankTab, { bg: string; text: string; activeBg: string; activeText: string }>;
 
 function PerformanceCard({
-  title, tab, onTabChange, data, tabColors, onSeeMore, selectedLanguage = 'en',
+  title, 
+  tab, 
+  onTabChange, 
+  data, 
+  tabColors, 
+  onSeeMore, 
+  onEntryClick,
+  selectedLanguage = 'en',
 }: {
-  title: string; tab: RankTab; onTabChange: (t: RankTab) => void;
-  data: Record<RankTab, RankEntry[]>; tabColors: TabColors; onSeeMore: () => void; selectedLanguage?: Language;
+  title: string; 
+  tab: RankTab; 
+  onTabChange: (t: RankTab) => void;
+  data: Record<RankTab, RankEntry[]>; 
+  tabColors: TabColors; 
+  onSeeMore: () => void; 
+  onEntryClick?: (entry: RankEntry) => void;
+  selectedLanguage?: Language;
 }) {
   const entries = data[tab].slice(0, 5);
   const tabMeta: { key: RankTab; label: string }[] = [
@@ -845,7 +887,13 @@ function PerformanceCard({
         {entries.length === 0 ? (
           <p className="text-center text-stone-400 text-caption py-2">{t('noDataAvailableMessage', selectedLanguage)}</p>
         ) : entries.map((e, i) => (
-          <RankRow key={e.id} rank={i + 1} entry={e} tone={tab === 'harvest' ? 'amber' : tab === 'expenses' ? 'rose' : 'emerald'} />
+          <RankRow 
+            key={e.id} 
+            rank={i + 1} 
+            entry={e} 
+            tone={tab === 'harvest' ? 'amber' : tab === 'expenses' ? 'rose' : 'emerald'} 
+            onEntryClick={onEntryClick}
+          />
         ))}
         {data[tab].length > 5 && (
           <button onClick={onSeeMore} className={`w-full text-center font-semibold text-caption py-1 ${tabColors[tab].text} hover:opacity-80`}>
@@ -857,26 +905,55 @@ function PerformanceCard({
   );
 }
 
-function RankRow({ rank, entry, tone }: { rank: number; entry: RankEntry; tone: 'amber' | 'rose' | 'emerald' }) {
+function RankRow({ 
+  rank, 
+  entry, 
+  tone, 
+  onEntryClick 
+}: { 
+  rank: number; 
+  entry: RankEntry; 
+  tone: 'amber' | 'rose' | 'emerald';
+  onEntryClick?: (entry: RankEntry) => void;
+}) {
   const numBg = tone === 'amber' ? 'bg-amber-100 text-amber-700' : tone === 'rose' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700';
   const valColor = tone === 'amber' ? 'text-amber-700' : tone === 'rose' ? 'text-rose-700' : 'text-emerald-700';
   return (
-    <div className="flex items-center gap-1.5 py-0.5">
+    <button
+      type="button"
+      role="button"
+      tabIndex={0}
+      onClick={() => onEntryClick?.(entry)}
+      className="flex items-center gap-1.5 py-0.5 w-full cursor-pointer hover:bg-stone-50 active:scale-[0.98] transition-all group rounded-lg"
+    >
       <span className={`w-4.5 h-4.5 rounded-full text-caption font-bold flex items-center justify-center shrink-0 ${numBg}`}>{rank}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-stone-800 truncate">{entry.name}</p>
+        <p className="text-sm font-semibold text-stone-800 truncate group-hover:text-stone-900 transition-colors">{entry.name}</p>
         {entry.secondary && <p className="text-caption text-stone-500 truncate">{entry.secondary}</p>}
       </div>
       <span className={`text-caption font-bold shrink-0 ${valColor}`}>{entry.label}</span>
-    </div>
+    </button>
   );
 }
 
 function RankingOverlay({
-  title, tab, onTabChange, data, tabColors, onClose, selectedLanguage = 'en',
+  title, 
+  tab, 
+  onTabChange, 
+  data, 
+  tabColors, 
+  onClose, 
+  onEntryClick,
+  selectedLanguage = 'en',
 }: {
-  title: string; tab: RankTab; onTabChange: (t: RankTab) => void;
-  data: Record<RankTab, RankEntry[]>; tabColors: TabColors; onClose: () => void; selectedLanguage?: Language;
+  title: string; 
+  tab: RankTab; 
+  onTabChange: (t: RankTab) => void;
+  data: Record<RankTab, RankEntry[]>; 
+  tabColors: TabColors; 
+  onClose: () => void; 
+  onEntryClick?: (entry: RankEntry) => void;
+  selectedLanguage?: Language;
 }) {
   const entries = data[tab].slice(0, 5);
   const tabMeta: { key: RankTab; label: string }[] = [
@@ -909,7 +986,13 @@ function RankingOverlay({
         {entries.length === 0 ? (
           <p className="text-center text-stone-400 text-sm py-8">{t('noData', selectedLanguage)}</p>
         ) : entries.map((e, i) => (
-          <RankRow key={e.id} rank={i + 1} entry={e} tone={tab === 'harvest' ? 'amber' : tab === 'expenses' ? 'rose' : 'emerald'} />
+          <RankRow 
+            key={e.id} 
+            rank={i + 1} 
+            entry={e} 
+            tone={tab === 'harvest' ? 'amber' : tab === 'expenses' ? 'rose' : 'emerald'}
+            onEntryClick={onEntryClick}
+          />
         ))}
       </div>
     </div>

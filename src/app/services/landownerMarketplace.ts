@@ -97,6 +97,31 @@ function makeListingCode(id: number): string {
   return `LST-${String(id).padStart(4, '0')}`;
 }
 
+function safeTrim(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function normalizeForageEntries(input: unknown): ForageEntry[] {
+  let value: unknown = input;
+  if (typeof value === 'string') {
+    try {
+      value = JSON.parse(value);
+    } catch {
+      value = [];
+    }
+  }
+
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((entry: any) => ({
+      name: safeTrim(entry?.name ?? entry?.forage),
+      bloomStartMonth: safeTrim(entry?.bloomStartMonth ?? entry?.bloom_start_month),
+      bloomEndMonth: safeTrim(entry?.bloomEndMonth ?? entry?.bloom_end_month),
+    }))
+    .filter((entry) => entry.name || entry.bloomStartMonth || entry.bloomEndMonth);
+}
+
 // Map database row to LandPlot interface
 function mapDbToPlot(row: any): LandPlot {
   return {
@@ -108,7 +133,7 @@ function mapDbToPlot(row: any): LandPlot {
     gpsLatitude: row.gps_latitude || 0,
     gpsLongitude: row.gps_longitude || 0,
     totalAcreage: row.total_acreage || 0,
-    forageEntries: row.forage_entries || [],
+    forageEntries: normalizeForageEntries(row.forage_entries),
     waterAvailability: row.water_availability || 'On-site',
     shadeProfile: row.shade_profile || 'Full Sun',
     vehicleAccess: row.vehicle_access || 'Lorry',
@@ -128,7 +153,7 @@ function mapPlotToDb(plot: Omit<LandPlot, 'id' | 'createdAt'>): any {
     gps_latitude: plot.gpsLatitude,
     gps_longitude: plot.gpsLongitude,
     total_acreage: plot.totalAcreage,
-    forage_entries: plot.forageEntries,
+    forage_entries: normalizeForageEntries(plot.forageEntries),
     water_availability: plot.waterAvailability,
     shade_profile: plot.shadeProfile,
     vehicle_access: plot.vehicleAccess,

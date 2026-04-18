@@ -79,12 +79,18 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
     waterAvailability: 'On-site',
     shadeProfile: 'Partial Shade',
     vehicleAccess: 'Lorry',
-    nightAccess: null,
-    forageEntries: [{ forage: '', bloomStartMonth: '', bloomEndMonth: '' }],
+    nightAccess: false,
+    forageEntries: [],
   });
   const [plotEditorMessage, setPlotEditorMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSavingPlot, setIsSavingPlot] = useState(false);
   const [plotSearch, setPlotSearch] = useState('');
+  // Forage editor state for edit mode
+  const [newForageInput, setNewForageInput] = useState({
+    forage: '',
+    bloomStartMonth: '',
+    bloomEndMonth: '',
+  });
 
   useEffect(() => {
     profileService.get()
@@ -228,10 +234,11 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
       waterAvailability: 'On-site',
       shadeProfile: 'Partial Shade',
       vehicleAccess: 'Lorry',
-      nightAccess: null,
-      forageEntries: [{ forage: '', bloomStartMonth: '', bloomEndMonth: '' }],
+      nightAccess: false,
+      forageEntries: [],
     });
     setPlotEditorMessage(null);
+    setNewForageInput({ forage: '', bloomStartMonth: '', bloomEndMonth: '' });
   };
 
   const openPlotEdit = (plot: LandPlot) => {
@@ -243,20 +250,21 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
       province: plot.province,
       district: plot.district,
       dsDivision: plot.dsDivision,
-      gpsLatitude: String(plot.gpsLatitude || ''),
-      gpsLongitude: String(plot.gpsLongitude || ''),
+      gpsLatitude: String(plot.gpsLatitude ?? ''),
+      gpsLongitude: String(plot.gpsLongitude ?? ''),
       totalAcreage: String(plot.totalAcreage || ''),
       waterAvailability: plot.waterAvailability,
       shadeProfile: plot.shadeProfile,
       vehicleAccess: plot.vehicleAccess,
-      nightAccess: plot.nightAccess || null,
+      nightAccess: plot.nightAccess ?? false,
       forageEntries: (plot.forageEntries || []).map(entry => ({
-        forage: entry.name,
+        forage: (entry as any).name ?? (entry as any).forage ?? '',
         bloomStartMonth: entry.bloomStartMonth,
         bloomEndMonth: entry.bloomEndMonth,
       })),
     });
     setPlotEditorMessage(null);
+    setNewForageInput({ forage: '', bloomStartMonth: '', bloomEndMonth: '' });
   };
 
   const openPlotView = (plot: LandPlot) => {
@@ -268,20 +276,21 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
       province: plot.province,
       district: plot.district,
       dsDivision: plot.dsDivision,
-      gpsLatitude: String(plot.gpsLatitude || ''),
-      gpsLongitude: String(plot.gpsLongitude || ''),
+      gpsLatitude: String(plot.gpsLatitude ?? ''),
+      gpsLongitude: String(plot.gpsLongitude ?? ''),
       totalAcreage: String(plot.totalAcreage || ''),
       waterAvailability: plot.waterAvailability,
       shadeProfile: plot.shadeProfile,
       vehicleAccess: plot.vehicleAccess,
-      nightAccess: plot.nightAccess || null,
+      nightAccess: plot.nightAccess ?? false,
       forageEntries: (plot.forageEntries || []).map(entry => ({
-        forage: entry.name,
+        forage: (entry as any).name ?? (entry as any).forage ?? '',
         bloomStartMonth: entry.bloomStartMonth,
         bloomEndMonth: entry.bloomEndMonth,
       })),
     });
     setPlotEditorMessage(null);
+    setNewForageInput({ forage: '', bloomStartMonth: '', bloomEndMonth: '' });
   };
 
   const closePlotEditor = () => {
@@ -310,31 +319,58 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
     setPlotEditorMessage(null);
 
     try {
+      const forageEntries = plotEditor.forageEntries
+        .map((entry) => ({
+          name: entry.forage.trim(),
+          bloomStartMonth: entry.bloomStartMonth,
+          bloomEndMonth: entry.bloomEndMonth,
+        }))
+        .filter((entry) => Boolean(entry.name && entry.bloomStartMonth && entry.bloomEndMonth));
+
+      if (forageEntries.length === 0) {
+        setPlotEditorMessage({ type: 'error', text: 'Add at least one forage entry with bloom start and end month' });
+        return;
+      }
+
+      const gpsLatitudeRaw = plotEditor.gpsLatitude.trim();
+      const gpsLongitudeRaw = plotEditor.gpsLongitude.trim();
+      const gpsLatitude = gpsLatitudeRaw ? Number(gpsLatitudeRaw) : undefined;
+      const gpsLongitude = gpsLongitudeRaw ? Number(gpsLongitudeRaw) : undefined;
+      if (gpsLatitudeRaw && !Number.isFinite(gpsLatitude)) {
+        setPlotEditorMessage({ type: 'error', text: 'GPS latitude must be a valid number' });
+        return;
+      }
+      if (gpsLongitudeRaw && !Number.isFinite(gpsLongitude)) {
+        setPlotEditorMessage({ type: 'error', text: 'GPS longitude must be a valid number' });
+        return;
+      }
+
       const payload = {
         name: plotEditor.name.trim(),
         province: plotEditor.province,
         district: plotEditor.district,
         dsDivision: plotEditor.dsDivision,
-        gpsLatitude: plotEditor.gpsLatitude || undefined,
-        gpsLongitude: plotEditor.gpsLongitude || undefined,
+        gpsLatitude,
+        gpsLongitude,
         totalAcreage: Number(plotEditor.totalAcreage),
         waterAvailability: plotEditor.waterAvailability,
         shadeProfile: plotEditor.shadeProfile,
         vehicleAccess: plotEditor.vehicleAccess,
-        nightAccess: plotEditor.nightAccess,
-        forageEntries: plotEditor.forageEntries.filter((entry) => entry.forage && entry.bloomStartMonth && entry.bloomEndMonth),
+        nightAccess: plotEditor.nightAccess ?? false,
+        forageEntries,
       };
 
       if (plotEditor.mode === 'edit' && plotEditor.plotId) {
-        landownerMarketplaceService.updatePlot(plotEditor.plotId, payload as any);
+        await landownerMarketplaceService.updatePlot(plotEditor.plotId, payload as any);
         setPlotEditorMessage({ type: 'success', text: 'Plot updated successfully' });
       } else {
-        landownerMarketplaceService.createPlot(payload as any);
+        await landownerMarketplaceService.createPlot(payload as any);
         setPlotEditorMessage({ type: 'success', text: 'Plot created successfully' });
       }
 
+      await new Promise(resolve => setTimeout(resolve, 500)); // Wait for save
       setPlotsVersion((v) => v + 1);
-      setTimeout(() => closePlotEditor(), 1000);
+      closePlotEditor();
     } catch (error: any) {
       setPlotEditorMessage({ type: 'error', text: error?.message || 'Failed to save plot' });
     } finally {
@@ -346,7 +382,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
     if (!window.confirm('Delete this plot? This cannot be undone.')) return;
 
     try {
-      landownerMarketplaceService.deletePlot(plotId);
+      await landownerMarketplaceService.deletePlot(plotId);
       setPlotEditorMessage({ type: 'success', text: 'Plot deleted successfully' });
       setPlotsVersion((v) => v + 1);
       closePlotEditor();
@@ -800,6 +836,90 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                   <option>{t('tukTuk', selectedLanguage)}</option>
                   <option>{t('footpath', selectedLanguage)}</option>
                 </select>
+              </div>
+
+              {/* Forage Sources Section */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-2">Primary Forage Sources</label>
+                
+                {plotEditor.forageEntries.length === 0 ? (
+                  <p className="text-xs text-stone-500 italic">No forage sources added</p>
+                ) : (
+                  <div className="space-y-2 mb-3">
+                    {plotEditor.forageEntries.map((entry, index) => (
+                      entry.forage ? (
+                        <div key={index} className="flex items-center justify-between p-2 bg-emerald-50 rounded-lg border border-emerald-200">
+                          <div>
+                            <p className="text-sm font-semibold text-emerald-900">{entry.forage}</p>
+                            <p className="text-xs text-emerald-700">{entry.bloomStartMonth} - {entry.bloomEndMonth}</p>
+                          </div>
+                          {!isPlotViewMode && (
+                            <button
+                              onClick={() => setPlotEditor(prev => ({
+                                ...prev,
+                                forageEntries: prev.forageEntries.filter((_, i) => i !== index)
+                              }))}
+                              className="p-1.5 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      ) : null
+                    ))}
+                  </div>
+                )}
+
+                {!isPlotViewMode && (
+                  <>
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        value={newForageInput.forage}
+                        onChange={(e) => setNewForageInput(prev => ({ ...prev, forage: e.target.value }))}
+                        placeholder="Forage name (e.g., Coconut Palm)"
+                        className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <select
+                          value={newForageInput.bloomStartMonth}
+                          onChange={(e) => setNewForageInput(prev => ({ ...prev, bloomStartMonth: e.target.value }))}
+                          className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
+                        >
+                          <option value="">Start Month</option>
+                          {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(month => (
+                            <option key={month} value={month}>{month}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={newForageInput.bloomEndMonth}
+                          onChange={(e) => setNewForageInput(prev => ({ ...prev, bloomEndMonth: e.target.value }))}
+                          className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
+                        >
+                          <option value="">End Month</option>
+                          {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(month => (
+                            <option key={month} value={month}>{month}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (newForageInput.forage && newForageInput.bloomStartMonth && newForageInput.bloomEndMonth) {
+                          setPlotEditor(prev => ({
+                            ...prev,
+                            forageEntries: [...prev.forageEntries, newForageInput]
+                          }));
+                          setNewForageInput({ forage: '', bloomStartMonth: '', bloomEndMonth: '' });
+                        }
+                      }}
+                      className="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Forage
+                    </button>
+                  </>
+                )}
               </div>
 
               {!isPlotViewMode ? (

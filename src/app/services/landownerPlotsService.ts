@@ -11,6 +11,31 @@ export interface ForageEntry {
   bloomEndMonth: string;
 }
 
+function safeTrim(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function normalizeForageEntries(input: unknown): ForageEntry[] {
+  let value: unknown = input;
+  if (typeof value === 'string') {
+    try {
+      value = JSON.parse(value);
+    } catch {
+      value = [];
+    }
+  }
+
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((entry: any) => ({
+      name: safeTrim(entry?.name ?? entry?.forage),
+      bloomStartMonth: safeTrim(entry?.bloomStartMonth ?? entry?.bloom_start_month),
+      bloomEndMonth: safeTrim(entry?.bloomEndMonth ?? entry?.bloom_end_month),
+    }))
+    .filter((entry) => entry.name || entry.bloomStartMonth || entry.bloomEndMonth);
+}
+
 export interface LandPlot {
   id: number;
   user_id: number;
@@ -54,7 +79,7 @@ export const landownerPlotsService = {
 
       return {
         ...plot,
-        forage_entries: plot.forage_entries || [],
+        forage_entries: normalizeForageEntries(plot.forage_entries),
         images
       };
     });
@@ -83,7 +108,7 @@ export const landownerPlotsService = {
 
     return {
       ...data,
-      forage_entries: data.forage_entries || [],
+      forage_entries: normalizeForageEntries(data.forage_entries),
       images
     };
   },
@@ -142,7 +167,7 @@ export const landownerPlotsService = {
 
         return {
           ...dataWithoutImages,
-          forage_entries: dataWithoutImages.forage_entries || [],
+          forage_entries: normalizeForageEntries(dataWithoutImages.forage_entries),
           images
         };
       }
@@ -157,7 +182,7 @@ export const landownerPlotsService = {
 
     return {
       ...data,
-      forage_entries: data.forage_entries || [],
+      forage_entries: normalizeForageEntries(data.forage_entries),
       images: data.images || images
     };
   },
@@ -210,7 +235,7 @@ export const landownerPlotsService = {
 
         return {
           ...dataWithoutImages,
-          forage_entries: dataWithoutImages.forage_entries || [],
+          forage_entries: normalizeForageEntries(dataWithoutImages.forage_entries),
           images: images || []
         };
       }
@@ -225,7 +250,7 @@ export const landownerPlotsService = {
 
     return {
       ...data,
-      forage_entries: data.forage_entries || [],
+      forage_entries: normalizeForageEntries(data.forage_entries),
       images: data.images || images || []
     };
   },

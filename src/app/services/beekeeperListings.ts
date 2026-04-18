@@ -35,7 +35,8 @@ export interface ListingSummary {
   image?: string;
   maxHiveCapacity: number;
   acceptedHiveCount: number;
-  userProposalStatus: 'none' | 'pending' | 'accepted' | 'rejected';
+userProposalStatus: 'none' | 'pending' | 'accepted' | 'rejected';
+  totalAcreage?: number;
 }
 
 export interface ListingProposal {
@@ -210,6 +211,7 @@ export const beekeeperListingsService = {
           maxHiveCapacity: 10, // Default capacity
           acceptedHiveCount,
           userProposalStatus,
+          totalAcreage: plot.total_acreage || 0,
         });
       } catch (processError) {
         console.warn(`Error processing listing ${row.id}:`, processError);

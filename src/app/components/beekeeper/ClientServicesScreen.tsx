@@ -22,6 +22,7 @@ import {
   type ListingProposal,
   type ListingSummary,
 } from '../../services/beekeeperListings';
+import { resolveDsDivisionCenter, getDistrictCenter } from '../../constants/sriLankaLocations';
 import { t } from '../../i18n';
 
 type Language = 'en' | 'si' | 'ta';
@@ -294,17 +295,46 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
   };
 
 
-  const runSuitability = (listing: ListingSummary) => {
-    navigate('/planning', {
-      state: {
-        prefillCoordinates: {
-          lat: listing.coordinates.lat,
-          lng: listing.coordinates.lng,
-          district: listing.district,
-          dsDivision: listing.dsDivision,
+  const runSuitability = async (listing: ListingSummary) => {
+    try {
+      let lat = listing.coordinates.lat;
+      let lng = listing.coordinates.lng;
+      
+      // Resolve accurate DS center
+      const dsCenter = await resolveDsDivisionCenter(listing.district, listing.dsDivision);
+      if (dsCenter) {
+        lat = dsCenter.lat;
+        lng = dsCenter.lng;
+      } else {
+        // Fallback: district center
+        const districtCenter = getDistrictCenter(listing.district);
+        lat = districtCenter.lat;
+        lng = districtCenter.lng;
+      }
+      
+      navigate('/planning', {
+        state: {
+          prefillCoordinates: {
+            lat,
+            lng,
+            district: listing.district,
+            dsDivision: listing.dsDivision,
+          },
         },
-      },
-    });
+      });
+    } catch (error) {
+      console.warn('Coordinate resolution failed, using stored GPS:', error);
+      navigate('/planning', {
+        state: {
+          prefillCoordinates: {
+            lat: listing.coordinates.lat,
+            lng: listing.coordinates.lng,
+            district: listing.district,
+            dsDivision: listing.dsDivision,
+          },
+        },
+      });
+    }
   };
 
   return (
@@ -557,6 +587,28 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                 </p>
                 <p className="text-[0.72rem] text-stone-600 mt-0.5">Active on APICore: {selectedListing.ownerYearsActive} years</p>
                 <p className="text-[0.72rem] text-stone-600 mt-0.5">Contact: {selectedListing.ownerContact}</p>
+              </section>
+
+              <section className="rounded-xl border border-stone-200 p-3 space-y-1">
+                <p className="text-[0.68rem] text-stone-500 mb-1.5">Plot Details</p>
+                <div className="space-y-1 text-[0.72rem] text-stone-700">
+                  <div className="flex justify-between">
+                    <span>Forage Plants:</span>
+                    <span className="font-medium">{selectedListing.forageNames?.join(', ') || 'Not specified'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Water:</span>
+                    <span className="font-medium">{selectedListing.hasWaterOnSite ? 'On-site' : 'Nearby'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Vehicle Access:</span>
+                    <span className="font-medium">{selectedListing.vehicleAccess || 'Not specified'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Size:</span>
+                    <span className="font-medium">{selectedListing.totalAcreage || 0} acres</span>
+                  </div>
+                </div>
               </section>
 
               {/* <section className="rounded-xl border border-stone-200 p-3">
