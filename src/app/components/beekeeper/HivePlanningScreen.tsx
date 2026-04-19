@@ -6,6 +6,7 @@ import { apiariesService, type Apiary } from '../../services/apiaries';
 import { hivesService, type Hive } from '../../services/hives';
 import { planningService, type PlanningAnalysis, type District, type GBIFForageSpecies } from '../../services/planning';
 import { ecologicalZonesService } from '../../services/ecologicalZones';
+import { formatForagePrimaryLabel } from '../../services/forageNames';
 import { MapPin, Hexagon as HiveIcon, CloudRain, Sun, Cloud, Wind, Droplets, Thermometer, Search, Leaf, ChevronDown, ChevronUp, Navigation, X } from 'lucide-react';
 import { ForecastDays14 } from './ForecastDays14';
 import { MapViewer } from '../shared/MapViewer';
@@ -84,7 +85,7 @@ function GBIFForageCard({ plants, currentMonth }: { plants: GBIFNearbyEntry[]; c
       {blooming.length > 0 && (
         <div className="mb-3 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg">
           <p className="text-xs font-semibold text-emerald-700 mb-1">🌸 Blooming Now ({blooming.length})</p>
-          <p className="text-xs text-emerald-600">{blooming.slice(0, 8).map((p) => p.common).join(' · ')}</p>
+          <p className="text-xs text-emerald-600">{blooming.slice(0, 8).map((p) => formatForagePrimaryLabel(p.scientific, p.common)).join(' · ')}</p>
         </div>
       )}
 
@@ -99,13 +100,9 @@ function GBIFForageCard({ plants, currentMonth }: { plants: GBIFNearbyEntry[]; c
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-sm font-medium text-stone-800 truncate">{p.common}</span>
+                    <span className="text-sm font-medium text-stone-800 truncate">{formatForagePrimaryLabel(p.scientific, p.common)}</span>
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5 text-xs text-stone-500 flex-wrap">
-                    {p.english && <span>{p.english}</span>}
-                    {p.english && p.sinhala && <span className="text-stone-300">•</span>}
-                    {p.sinhala && <span className="text-amber-700 font-medium">{p.sinhala}</span>}
-                  </div>
+                  <p className="text-[0.72rem] text-stone-500 -mt-0.5"><em>{p.scientific}</em></p>
                 </div>
                 <span className="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0 bg-blue-100 text-blue-700 border border-blue-200">
                   {p.nearbyCount} obs.

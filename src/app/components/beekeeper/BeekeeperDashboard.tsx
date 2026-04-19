@@ -4,6 +4,7 @@ import { MobileHeader } from '../shared/MobileHeader';
 import { dashboardService, type DashboardData } from '../../services/dashboard';
 import { planningService } from '../../services/planning';
 import { GBIF_FORAGE_SPECIES } from '../../services/gbifForage';
+import { formatForagePrimaryLabel } from '../../services/forageNames';
 import { expensesService } from '../../services/finance';
 import { apiariesService } from '../../services/apiaries';
 import { authService } from '../../services/auth';
@@ -1040,14 +1041,13 @@ function ForagePlantCard({ plant, type, onOpenArea, selectedLanguage = 'en' }: {
     ? plant.note.replace('CSV records near location:', '').trim()
     : '';
 
-  const lookup = typeof plant?.scientific === 'string' ? GBIF_FORAGE_SPECIES[plant.scientific] : undefined;
-  const englishName = lookup?.english || '';
-  const sinhalaName = lookup?.sinhala || '';
+  const primaryLabel = formatForagePrimaryLabel(plant?.scientific, plant?.name);
+  const scientificLabel = typeof plant?.scientific === 'string' ? plant.scientific : '';
 
   return (
     <div className={`p-3 rounded-lg border ${baseClass}`}>
       <div className="flex items-center justify-between mb-1">
-        <span className="font-bold text-stone-800 text-[0.82rem]">{plant.name}</span>
+        <span className="font-bold text-stone-800 text-[0.82rem]">{primaryLabel}</span>
         {sriLankaObs && (
           <span className="text-[0.68rem] px-2 py-0.5 rounded-full font-semibold border border-blue-200 bg-blue-50 text-blue-700">
             {sriLankaObs}
@@ -1055,15 +1055,7 @@ function ForagePlantCard({ plant, type, onOpenArea, selectedLanguage = 'en' }: {
         )}
       </div>
 
-      {(englishName || sinhalaName) && (
-        <div className="flex items-center gap-2 -mt-0.5 mb-1 text-xs text-stone-500 flex-wrap">
-          {englishName && <span>{englishName}</span>}
-          {englishName && sinhalaName && <span className="text-stone-300">•</span>}
-          {sinhalaName && <span className="text-amber-700 font-medium">{sinhalaName}</span>}
-        </div>
-      )}
-
-      <p className="text-xs text-stone-600"><em>{plant.scientific}</em></p>
+      {scientificLabel && <p className="text-[0.72rem] text-stone-600 -mt-0.5"><em>{scientificLabel}</em></p>}
       <p className="text-[0.7rem] text-stone-600 mt-1">{t('observedMonths', selectedLanguage)}: {monthLabel}</p>
       {nearbyRecords && <p className="text-[0.7rem] text-stone-500">{csvRecordsLabel}: {nearbyRecords}</p>}
       <button
@@ -1157,7 +1149,7 @@ function ForageAreaOverlay({
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-white">
       <div className="flex items-center justify-between px-4 py-3 border-b border-stone-200">
-        <h2 className="text-[0.9rem] font-bold text-stone-800">{plant.name} bloom areas</h2>
+        <h2 className="text-[0.9rem] font-bold text-stone-800">{formatForagePrimaryLabel(plant?.scientific, plant?.name)} bloom areas</h2>
         <button onClick={onClose} className="p-1.5 bg-stone-100 rounded-lg hover:bg-stone-200">
           <X className="w-4 h-4 text-stone-600" />
         </button>
