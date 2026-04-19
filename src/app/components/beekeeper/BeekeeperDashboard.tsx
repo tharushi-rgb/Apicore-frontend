@@ -119,7 +119,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         planningService.getForageByMonth(nextMonth, { excludeMonth: currentMonth, maxItems: 20 }),
         expensesService.getAll().catch(() => []),
         supabase.from('harvests').select('quantity, harvest_date').eq('user_id', userId).then((r) => r.data ?? [], () => []),
-        supabase.from('inspections').select('pest_detected, inspection_date').eq('user_id', userId).then((r) => r.data ?? [], () => []),
+        supabase.from('inspections').select('hive_id, pest_detected, inspection_date').eq('user_id', userId).then((r) => r.data ?? [], () => []),
       ]);
       setData(dashData);
       setForageData(forage || []);
@@ -129,7 +129,7 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
       setInspectionRows(inspectionData || []);
 
       if (userId) {
-        await loadRankings(userId);
+        await loadRankings(userId, dateRange);
         // Check for contract expiry and create notifications
         await apiariesService.checkAndNotifyContractExpiry();
       }
@@ -150,30 +150,33 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
       const userId = user?.id;
       if (userId) {
         console.log('Dashboard focused - refreshing rankings data');
-        loadRankings(userId);
+        loadRankings(userId, dateRange);
       }
     };
 
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
-  }, [user?.id]);
+  }, [user?.id, dateRange]);
 
   // Also refresh when component receives focus (for mobile navigation)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden && user?.id) {
         console.log('Dashboard visible - refreshing rankings data');
-        loadRankings(user.id);
+        loadRankings(user.id, dateRange);
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [user?.id]);
+  }, [user?.id, dateRange]);
 
-  const loadRankings = async (userId: number) => {
+  const loadRankings = async (userId: number, range: '7d' | '30d' | '90d') => {
     try {
       console.log('Loading rankings for user:', userId);
+      const days = range === '7d' ? 7 : range === '30d' ? 30 : 90;
+      const rangeStartDate = new Date(Date.now() - (days * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+
       const [
         { data: harvests, error: harvestError },
         { data: allExpenses, error: expenseError },
@@ -184,15 +187,18 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
         supabase
           .from('harvests')
           .select('hive_id, apiary_id, quantity, harvest_date')
-          .eq('user_id', userId),
+          .eq('user_id', userId)
+          .gte('harvest_date', rangeStartDate),
         supabase
           .from('expenses')
-          .select('hive_id, apiary_id, amount')
-          .eq('user_id', userId),
+          .select('hive_id, apiary_id, amount, expense_date')
+          .eq('user_id', userId)
+          .gte('expense_date', rangeStartDate),
         supabase
           .from('inspections')
-          .select('hive_id, apiary_id, pest_detected')
-          .eq('user_id', userId),
+          .select('hive_id, apiary_id, pest_detected, inspection_date')
+          .eq('user_id', userId)
+          .gte('inspection_date', rangeStartDate),
         supabase
           .from('apiaries')
           .select('id, name, district, area, forage_primary')
@@ -407,6 +413,14 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
     }
   };
 
+  const handleDateRangeChange = (next: '7d' | '30d' | '90d') => {
+    setDateRange(next);
+    const userId = user?.id;
+    if (userId) {
+      loadRankings(userId, next);
+    }
+  };
+
   const hives = data?.hives || [];
   const apiaries = data?.apiaries || [];
   const forageAreaDisplay = (() => {
@@ -436,6 +450,19 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
   const rangeDays = dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
   const rangeStart = Date.now() - (rangeDays * 24 * 60 * 60 * 1000);
 
+  const lastInspectionByHiveId = (() => {
+    const map = new Map<number, number>();
+    (inspectionRows || []).forEach((row: any) => {
+      const hiveId = row?.hive_id;
+      if (!hiveId) return;
+      const dt = new Date(row?.inspection_date || '').getTime();
+      if (Number.isNaN(dt)) return;
+      const current = map.get(hiveId) || 0;
+      if (dt > current) map.set(hiveId, dt);
+    });
+    return map;
+  })();
+
   const activeHiveCount = hives.filter((h: any) => h.status === 'active').length;
   const queenlessHiveCount = hives.filter(
     (h: any) => h.queen_present === false
@@ -453,9 +480,10 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
     .reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
 
   const rangeNotInspected = hives.filter((h: any) => {
-    if (!h.last_inspection_date) return true;
-    const last = new Date(h.last_inspection_date).getTime();
-    return Number.isNaN(last) || last < rangeStart;
+    const lastFromInspections = lastInspectionByHiveId.get(h.id);
+    const lastFromHive = h.last_inspection_date ? new Date(h.last_inspection_date).getTime() : NaN;
+    const last = lastFromInspections ?? lastFromHive;
+    return !last || Number.isNaN(last) || last < rangeStart;
   }).length;
 
   const rangeYield = harvestRows
@@ -553,9 +581,9 @@ export function BeekeeperDashboard({ selectedLanguage, onLanguageChange, onNavig
                 </div>
                 {/* Date range slider */}
                 <div className="bg-stone-100 rounded-full flex p-0.5">
-                  <RangeBtn active={dateRange === '7d'} onClick={() => setDateRange('7d')} label={t('oneWeek', selectedLanguage)} />
-                  <RangeBtn active={dateRange === '30d'} onClick={() => setDateRange('30d')} label={t('oneMonth', selectedLanguage)} />
-                  <RangeBtn active={dateRange === '90d'} onClick={() => setDateRange('90d')} label={t('threeMonths', selectedLanguage)} />
+                  <RangeBtn active={dateRange === '7d'} onClick={() => handleDateRangeChange('7d')} label={t('oneWeek', selectedLanguage)} />
+                  <RangeBtn active={dateRange === '30d'} onClick={() => handleDateRangeChange('30d')} label={t('oneMonth', selectedLanguage)} />
+                  <RangeBtn active={dateRange === '90d'} onClick={() => handleDateRangeChange('90d')} label={t('threeMonths', selectedLanguage)} />
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <InfoBox title={t('expenses', selectedLanguage)} value={`Rs.${rangeExpenses.toFixed(0)}`} tone="rose" icon={Wallet} />
@@ -823,7 +851,7 @@ function InfoBox({
 
 function RangeBtn({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
   return (
-    <button onClick={onClick}
+    <button type="button" onClick={onClick}
       className={`flex-1 py-1 px-2 rounded-full text-caption font-semibold transition-all ${active ? 'bg-amber-500 text-white shadow-sm' : 'text-stone-600 hover:text-stone-800'}`}>
       {label}
     </button>

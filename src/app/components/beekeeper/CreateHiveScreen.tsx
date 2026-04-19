@@ -315,7 +315,7 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
       setNearbyWarning('');
       return;
     }
-    const NEARBY_KM = 0.5;
+    const NEARBY_KM = 5;
     const nearby = allHives.find((hive) => {
       if (hive.gps_latitude == null || hive.gps_longitude == null) return false;
       if (isEdit && hive.id === initialHive?.id) return false;
@@ -665,7 +665,7 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[0.82rem] text-amber-900 flex items-start gap-2 shadow-[0_1px_0_rgba(0,0,0,0.02)]">
                 <AlertTriangle className="w-4 h-4 mt-0.5 text-amber-700" />
                 <div className="leading-snug">
-                  <p className="font-semibold text-[0.84rem]">Another hive is within 500 m</p>
+                  <p className="font-semibold text-[0.84rem]">Another hive is within 5 km</p>
                   <p className="text-[0.8rem]">Pick a different spot or confirm placement.</p>
                 </div>
               </div>
