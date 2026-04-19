@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { SplashScreen } from '@/app/components/public/SplashScreen';
 import { BeekeeperRegistration } from '@/app/components/beekeeper/BeekeeperRegistration';
@@ -24,6 +24,15 @@ import { NotificationsScreen } from '@/app/components/shared/NotificationsScreen
 import { AnalyticsScreen } from '@/app/components/beekeeper/AnalyticsScreen';
 import { PotHiveInspectionForm } from '@/app/components/beekeeper/PotHiveInspectionForm';
 import { authService } from './services/auth';
+import { dashboardService } from './services/dashboard';
+import { profileService } from './services/profile';
+import { notificationsService } from './services/notifications';
+import { apiariesService } from './services/apiaries';
+import { hivesService } from './services/hives';
+import { inspectionsService } from './services/inspections';
+import { beekeeperListingsService } from './services/beekeeperListings';
+import { landownerMarketplaceService, type ListingStatus } from './services/landownerMarketplace';
+import { landownerPlotsService } from './services/landownerPlotsService';
 import type { Apiary as ApiaryModel } from './services/apiaries';
 import type { Hive as HiveModel } from './services/hives';
 
@@ -392,11 +401,71 @@ function AdminAnalyticsPage({ lang, onLangChange, onLogout }: { lang: Language; 
 export default function App() {
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
   const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const warmupKeyRef = useRef<string>('');
+  const authWarmupKey = (() => {
+    const token = localStorage.getItem('auth_token');
+    const user = authService.getLocalUser();
+    if (!token || !user) return '';
+    return `${user.id}:${user.role}`;
+  })();
 
   useEffect(() => {
     // Brief check to restore auth state from localStorage
     setIsAuthChecking(false);
   }, []);
+
+  useEffect(() => {
+    if (isAuthChecking) return;
+
+    if (!authWarmupKey) return;
+
+    const token = localStorage.getItem('auth_token');
+    const user = authService.getLocalUser();
+    if (!token || !user) return;
+
+    const warmupKey = `${user.id}:${user.role}`;
+    if (warmupKeyRef.current === warmupKey) return;
+    warmupKeyRef.current = warmupKey;
+
+    const tasks: Array<Promise<unknown>> = [
+      profileService.get(),
+      notificationsService.getAll(false),
+      notificationsService.getAll(true),
+    ];
+
+    if (user.role === 'landowner') {
+      tasks.push(
+        landownerMarketplaceService.getDashboardStats(),
+        landownerMarketplaceService.getPlots(),
+        landownerMarketplaceService.getListings(),
+        landownerMarketplaceService.getContracts(),
+        landownerPlotsService.getPlots(),
+      );
+
+      tasks.push(
+        landownerMarketplaceService.getListings().then((listings) => {
+          const listingIds = listings.map((listing) => listing.id);
+          if (listingIds.length === 0) return;
+          const listingStatusById: Record<number, ListingStatus> = {};
+          listings.forEach((listing) => {
+            listingStatusById[listing.id] = listing.status;
+          });
+          return landownerMarketplaceService.getBidsForListings(listingIds, listingStatusById);
+        })
+      );
+    } else {
+      tasks.push(
+        dashboardService.get(),
+        apiariesService.getAll(),
+        hivesService.getAll(),
+        inspectionsService.getAll(),
+        beekeeperListingsService.getPublishedListings(),
+        beekeeperListingsService.getMyProposals(),
+      );
+    }
+
+    void Promise.allSettled(tasks);
+  }, [isAuthChecking, authWarmupKey]);
 
   const handleLogout = () => {
     authService.logout();

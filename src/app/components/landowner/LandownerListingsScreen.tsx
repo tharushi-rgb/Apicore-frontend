@@ -97,12 +97,12 @@ export function LandownerListingsScreen({
 
       // Filter listings if needed and load bids
       let filteredListings = listingsData;
-      const bidsCacheTemp: Record<number, Bid[]> = {};
-
-      for (const listing of listingsData) {
-        const bids = await landownerMarketplaceService.getBidsForListing(listing.id);
-        bidsCacheTemp[listing.id] = bids;
-      }
+      const listingIds = listingsData.map((listing) => listing.id);
+      const listingStatusById: Record<number, ListingStatus> = {};
+      listingsData.forEach((listing) => {
+        listingStatusById[listing.id] = listing.status;
+      });
+      const bidsCacheTemp = await landownerMarketplaceService.getBidsForListings(listingIds, listingStatusById);
 
       if (pendingFilterOnly) {
         filteredListings = listingsData.filter((listing) =>

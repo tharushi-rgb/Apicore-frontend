@@ -74,31 +74,43 @@ export function ApiariesScreen({ selectedLanguage, onLanguageChange, onNavigate,
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchWeather = async () => {
-      const weatherMap: Record<number, any> = {};
+      const apiariesWithCoords = apiaries.filter((apiary) => apiary.gps_latitude && apiary.gps_longitude);
+      if (apiariesWithCoords.length === 0) {
+        setWeatherData({});
+        return;
+      }
 
-      for (const apiary of apiaries) {
-        if (!apiary.gps_latitude || !apiary.gps_longitude) continue;
-
-        try {
-          const result = await planningService.analyze(
+      const results = await Promise.allSettled(
+        apiariesWithCoords.map(async (apiary) => {
+          const weather = await planningService.getApiaryWeather(
             Number(apiary.gps_latitude),
             Number(apiary.gps_longitude),
             apiary.district || apiary.name
           );
+          return { apiaryId: apiary.id, current: weather.current };
+        })
+      );
 
-          weatherMap[apiary.id] = result.weather.current;
-        } catch (err) {
-          console.error("Weather fetch failed for apiary", apiary.id);
+      if (cancelled) return;
+
+      const weatherMap: Record<number, any> = {};
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          weatherMap[result.value.apiaryId] = result.value.current;
         }
       }
 
       setWeatherData(weatherMap);
     };
 
-    if (apiaries.length > 0) {
-      fetchWeather();
-    }
+    if (apiaries.length > 0) void fetchWeather();
+
+    return () => {
+      cancelled = true;
+    };
   }, [apiaries]);
 
   const totalApiaries = apiaries.length;

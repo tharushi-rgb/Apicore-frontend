@@ -51,25 +51,24 @@ export function LandownerPlotsScreen({
 
       // Load contracts
       const contractData = await landownerMarketplaceService.getContracts();
-      setContracts(contractData.filter(c => c.status === 'active'));
+      const activeContracts = contractData.filter((contract) => contract.status === 'active');
+      setContracts(activeContracts);
 
       // Build plot stats
-      const plotsWithStats: PlotWithStats[] = await Promise.all(
-        plotData.map(async (plot) => {
-          const hiveCount = await landownerPlotsService.getPlotHiveCount(plot.id);
-          const maxCapacity = Math.floor(plot.total_acreage * 8); // ~8 hives per acre
-          const plotContracts = contractData.filter(c => c.plot_id === plot.id && c.status === 'active');
+      const plotsWithStats: PlotWithStats[] = plotData.map((plot) => {
+        const plotContracts = activeContracts.filter((contract) => contract.plot_id === plot.id);
+        const hiveCount = plotContracts.reduce((sum, contract) => sum + (contract.hiveCount || 0), 0);
+        const maxCapacity = Math.floor(plot.total_acreage * 8); // ~8 hives per acre
 
-          return {
-            plot,
-            hiveCount,
-            maxCapacity,
-            occupancyPercent: maxCapacity > 0 ? (hiveCount / maxCapacity) * 100 : 0,
-            activeContracts: plotContracts.length,
-            revenue: plotContracts.reduce((sum, c) => sum + (c.cash_rent_lkr || 0), 0),
-          };
-        })
-      );
+        return {
+          plot,
+          hiveCount,
+          maxCapacity,
+          occupancyPercent: maxCapacity > 0 ? (hiveCount / maxCapacity) * 100 : 0,
+          activeContracts: plotContracts.length,
+          revenue: plotContracts.reduce((sum, contract) => sum + (contract.cash_rent_lkr || 0), 0),
+        };
+      });
 
       setPlots(plotsWithStats);
     } catch (err) {
