@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { MobileHeader } from '../shared/MobileHeader';
 import { authService } from '../../services/auth';
@@ -140,9 +140,21 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
   const [loading, setLoading] = useState(true);
   const user = authService.getLocalUser();
 
+  const prefillCoordinates = (location.state as any)?.prefillCoordinates as {
+    lat?: unknown;
+    lng?: unknown;
+    district?: unknown;
+    dsDivision?: unknown;
+    province?: unknown;
+  } | undefined;
+
+  const prefillLat = Number(prefillCoordinates?.lat);
+  const prefillLng = Number(prefillCoordinates?.lng);
+  const hasPrefillGps = Number.isFinite(prefillLat) && Number.isFinite(prefillLng) && Math.abs(prefillLat) > 0.0001 && Math.abs(prefillLng) > 0.0001;
+
   // Planning analysis state
   const [districts, setDistricts] = useState<District[]>([]);
-  const [searchMode, setSearchMode] = useState<'admin' | 'gps'>('admin');
+  const [searchMode, setSearchMode] = useState<'admin' | 'gps'>(() => (hasPrefillGps ? 'gps' : 'admin'));
   const [selectedProvince, setSelectedProvince] = useState(user?.province ?? '');
   const [selectedDistrict, setSelectedDistrict] = useState(user?.district ?? '');
   const [selectedDsDivision, setSelectedDsDivision] = useState(user?.ds_division ?? '');
@@ -161,6 +173,9 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
   const [resolvingDsCenter, setResolvingDsCenter] = useState(false);
   const [showNearbyHivesOverlay, setShowNearbyHivesOverlay] = useState(false);
   const [prefillHandled, setPrefillHandled] = useState(false);
+
+  const searchModeRef = useRef(searchMode);
+  searchModeRef.current = searchMode;
 
   const availableDistricts = getDistrictsByProvince(selectedProvince);
   const availableDsDivisions = getDsDivisionsByDistrict(selectedDistrict);
@@ -190,26 +205,29 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
     const syncAdminCoordinates = async () => {
       if (searchMode !== 'admin' || !selectedDistrict || !selectedDsDivision) {
         setAdminLocationHint(null);
+        setResolvingDsCenter(false);
         return;
       }
 
       setResolvingDsCenter(true);
       setAdminLocationHint(null);
 
-      const dsCenter = await resolveDsDivisionCenter(selectedDistrict, selectedDsDivision);
-      if (cancelled) return;
+      try {
+        const dsCenter = await resolveDsDivisionCenter(selectedDistrict, selectedDsDivision);
+        if (cancelled || searchModeRef.current !== 'admin') return;
 
-      if (dsCenter) {
-        setCustomLat(String(dsCenter.lat));
-        setCustomLng(String(dsCenter.lng));
-      } else {
-        const districtCenter = getDistrictCenter(selectedDistrict);
-        setCustomLat(String(districtCenter.lat));
-        setCustomLng(String(districtCenter.lng));
-        setAdminLocationHint('Exact DS coordinates unavailable right now. Using district center as fallback.');
+        if (dsCenter) {
+          setCustomLat(String(dsCenter.lat));
+          setCustomLng(String(dsCenter.lng));
+        } else {
+          const districtCenter = getDistrictCenter(selectedDistrict);
+          setCustomLat(String(districtCenter.lat));
+          setCustomLng(String(districtCenter.lng));
+          setAdminLocationHint('Exact DS coordinates unavailable right now. Using district center as fallback.');
+        }
+      } finally {
+        if (!cancelled) setResolvingDsCenter(false);
       }
-
-      setResolvingDsCenter(false);
     };
 
     syncAdminCoordinates();
@@ -232,6 +250,17 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
       .then(([a, h, d]) => { setApiaries(a); setHives(h); setDistricts(d); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
+
+  const inferProvinceFromDistrict = (district: string) => {
+    const needle = district.trim().toLowerCase();
+    if (!needle) return '';
+    for (const province of PROVINCES) {
+      const matches = getDistrictsByProvince(province)
+        .some((d) => d.trim().toLowerCase() === needle);
+      if (matches) return province;
+    }
+    return '';
+  };
 
   const handleAnalyze = async () => {
     let lat = parseFloat(customLat);
@@ -300,17 +329,26 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
   };
 
   useEffect(() => {
-    const prefill = (location.state as any)?.prefillCoordinates;
+    const prefill = prefillCoordinates;
     if (!prefill || prefillHandled) return;
-    if (typeof prefill.lat !== 'number' || typeof prefill.lng !== 'number') return;
+    const lat = Number(prefill.lat);
+    const lng = Number(prefill.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+    const district = typeof prefill.district === 'string' ? prefill.district : '';
+    const dsDivision = typeof prefill.dsDivision === 'string' ? prefill.dsDivision : '';
+    const province = typeof prefill.province === 'string'
+      ? prefill.province
+      : (district ? inferProvinceFromDistrict(district) : '');
 
     setSearchMode('gps');
-    setCustomLat(String(prefill.lat));
-    setCustomLng(String(prefill.lng));
-    if (prefill.district) setSelectedDistrict(String(prefill.district));
-    if (prefill.dsDivision) setSelectedDsDivision(String(prefill.dsDivision));
+    setCustomLat(String(lat));
+    setCustomLng(String(lng));
+    if (province) setSelectedProvince(province);
+    if (district) setSelectedDistrict(district);
+    if (dsDivision) setSelectedDsDivision(dsDivision);
     setPrefillHandled(true);
-  }, [location.state, prefillHandled]);
+  }, [prefillCoordinates, prefillHandled]);
 
   useEffect(() => {
     if (!prefillHandled || analyzing) return;

@@ -296,45 +296,41 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
 
 
   const runSuitability = async (listing: ListingSummary) => {
-    try {
-      let lat = listing.coordinates.lat;
-      let lng = listing.coordinates.lng;
-      
-      // Resolve accurate DS center
-      const dsCenter = await resolveDsDivisionCenter(listing.district, listing.dsDivision);
-      if (dsCenter) {
-        lat = dsCenter.lat;
-        lng = dsCenter.lng;
-      } else {
-        // Fallback: district center
+    let lat = Number(listing.coordinates?.lat);
+    let lng = Number(listing.coordinates?.lng);
+
+    // Prefer the plot's stored GPS coordinates so the map matches the actual land.
+    const hasValidGps = Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) > 0.0001 && Math.abs(lng) > 0.0001;
+
+    if (!hasValidGps) {
+      try {
+        const dsCenter = await resolveDsDivisionCenter(listing.district, listing.dsDivision);
+        if (dsCenter) {
+          lat = dsCenter.lat;
+          lng = dsCenter.lng;
+        } else {
+          const districtCenter = getDistrictCenter(listing.district);
+          lat = districtCenter.lat;
+          lng = districtCenter.lng;
+        }
+      } catch (error) {
+        console.warn('Coordinate resolution failed, using district fallback:', error);
         const districtCenter = getDistrictCenter(listing.district);
         lat = districtCenter.lat;
         lng = districtCenter.lng;
       }
-      
-      navigate('/planning', {
-        state: {
-          prefillCoordinates: {
-            lat,
-            lng,
-            district: listing.district,
-            dsDivision: listing.dsDivision,
-          },
-        },
-      });
-    } catch (error) {
-      console.warn('Coordinate resolution failed, using stored GPS:', error);
-      navigate('/planning', {
-        state: {
-          prefillCoordinates: {
-            lat: listing.coordinates.lat,
-            lng: listing.coordinates.lng,
-            district: listing.district,
-            dsDivision: listing.dsDivision,
-          },
-        },
-      });
     }
+
+    navigate('/planning', {
+      state: {
+        prefillCoordinates: {
+          lat,
+          lng,
+          district: listing.district,
+          dsDivision: listing.dsDivision,
+        },
+      },
+    });
   };
 
   return (
