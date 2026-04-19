@@ -40,7 +40,8 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
   const user = authService.getLocalUser();
 
   const [tab, setTab] = useState<'find' | 'proposals'>('find');
-  const [loading, setLoading] = useState(true);
+  const [listingsLoading, setListingsLoading] = useState(true);
+  const [proposalsLoading, setProposalsLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
   const [listings, setListings] = useState<ListingSummary[]>([]);
@@ -71,26 +72,49 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
     note: '',
   });
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
+  const loadListings = useCallback(async () => {
+    setListingsLoading(true);
     try {
-      const [listingsData, proposalsData] = await Promise.all([
-        beekeeperListingsService.getPublishedListings(),
-        beekeeperListingsService.getMyProposals(),
-      ]);
+      const listingsData = await beekeeperListingsService.getPublishedListings();
       setListings(listingsData);
-      setProposals(proposalsData);
       setError('');
     } catch (loadError: any) {
       setError(loadError?.message || t('failedToLoadListings', selectedLanguage));
     } finally {
-      setLoading(false);
+      setListingsLoading(false);
+    }
+  }, [selectedLanguage]);
+
+  const loadProposals = useCallback(async () => {
+    setProposalsLoading(true);
+    try {
+      const proposalsData = await beekeeperListingsService.getMyProposals();
+      setProposals(proposalsData);
+    } catch (loadError) {
+      // Don't block the Find Land list if proposals are slow/blocked.
+      console.warn('Failed to load proposals:', loadError);
+    } finally {
+      setProposalsLoading(false);
     }
   }, []);
 
+  const refreshAll = useCallback(async () => {
+    await loadListings();
+    void loadProposals();
+  }, [loadListings, loadProposals]);
+
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    let cancelled = false;
+    const run = async () => {
+      await loadListings();
+      if (cancelled) return;
+      void loadProposals();
+    };
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [loadListings, loadProposals]);
 
   const locationOptions = useMemo(() => {
     const values = new Set<string>();
@@ -234,8 +258,8 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
     setError('');
     setReviewsLoading(true);
     try {
-      const detail = await beekeeperListingsService.getListingDetail(listing.ownerUserId, listing.listingId);
-      setListingReviews(detail.reviews.map((review) => ({
+      const reviews = await beekeeperListingsService.getListingReviews(listing.listingId);
+      setListingReviews(reviews.map((review) => ({
         rating: review.rating,
         comment: review.comment,
         beekeeperName: review.beekeeperName,
@@ -243,7 +267,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
       })));
     } catch (detailError: any) {
       setListingReviews([]);
-      setError(detailError?.message || 'Failed to load listing details');
+      console.warn('Failed to load listing reviews:', detailError);
     } finally {
       setReviewsLoading(false);
     }
@@ -281,7 +305,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
         moveOutDate: proposalForm.moveOutDate,
         note: proposalForm.note,
       });
-      await loadData();
+      await refreshAll();
       setSelectedListing(null); // Close the modal
       setError('');
       setSuccess('Your proposal has been submitted. You will be notified once the landowner responds.');
@@ -397,7 +421,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
               </button>
             </div>
 
-            {loading ? (
+            {listingsLoading ? (
               <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-amber-500" /></div>
             ) : filteredListings.length === 0 ? (
               <p className="text-center text-stone-500 py-8 text-sm">{t('noPublishedListingsMatch', selectedLanguage)}</p>
@@ -461,7 +485,9 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
             </div>
 
             <div className="divide-y divide-stone-100">
-              {proposals.map((proposal) => (
+              {proposalsLoading ? (
+                <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-amber-500" /></div>
+              ) : proposals.map((proposal) => (
                 <div key={`${proposal.ownerUserId}-${proposal.listingId}-${proposal.bidId}`} className="px-2.5 py-2.5 space-y-2">
                   <div className="grid grid-cols-[0.95fr_1.05fr_0.95fr_0.85fr] gap-2 text-[0.7rem] text-stone-700">
                     <p className="font-semibold">{proposal.hiveCount} hives</p>
@@ -480,7 +506,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                 </div>
               ))}
 
-              {proposals.length === 0 && <p className="text-center text-stone-500 py-10 text-sm">No proposals submitted yet.</p>}
+              {!proposalsLoading && proposals.length === 0 && <p className="text-center text-stone-500 py-10 text-sm">No proposals submitted yet.</p>}
             </div>
           </section>
         )}

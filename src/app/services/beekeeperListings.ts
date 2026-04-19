@@ -130,27 +130,49 @@ function normalizeForageEntries(input: unknown): Array<{ name: string; bloomStar
     .filter((entry) => entry.name || entry.bloomStartMonth || entry.bloomEndMonth);
 }
 
-function normalizeStringArray(input: unknown): string[] {
-  if (Array.isArray(input)) return input.filter((item) => typeof item === 'string') as string[];
-  if (typeof input === 'string') {
-    try {
-      const parsed = JSON.parse(input);
-      if (Array.isArray(parsed)) return parsed.filter((item) => typeof item === 'string') as string[];
-    } catch {
-      return [];
-    }
-  }
-  return [];
-}
-
 export const beekeeperListingsService = {
+  async getListingReviews(listingId: number): Promise<ListingReview[]> {
+    const { data: reviewsData, error } = await supabase
+      .from('listing_reviews')
+      .select('*')
+      .eq('listing_id', listingId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw new Error(error.message);
+
+    return (reviewsData || []).map((r: any) => ({
+      id: r.id,
+      listingId: r.listing_id,
+      beekeeperUserId: r.beekeeper_user_id,
+      beekeeperName: r.beekeeper_name || `Beekeeper ${r.beekeeper_user_id}`,
+      rating: r.rating,
+      comment: r.comment || '',
+      createdAt: r.created_at,
+    }));
+  },
+
   async getPublishedListings(): Promise<ListingSummary[]> {
     // NOTE: This is on the beekeeper "Find Land" screen. Keep it fast:
-    // avoid N+1 queries by batching plots/owners/bids.
+    // minimize round trips and payload.
 
     const { data: listings, error } = await supabase
       .from('landowner_listings')
-      .select('id, user_id, plot_id, listing_code, status, financial_terms, cash_rent_lkr, honey_share_kgs, created_at')
+      .select(`
+        id, user_id, plot_id, listing_code, status, financial_terms, cash_rent_lkr, honey_share_kgs, created_at,
+        landowner_plots(
+          id, name, province, district, ds_division,
+          gps_latitude, gps_longitude,
+          total_acreage,
+          forage_entries,
+          water_availability,
+          shade_profile,
+          vehicle_access,
+          night_access
+        ),
+        users(
+          id, name, phone, created_at
+        )
+      `)
       .in('status', ['published', 'accepted'])
       .order('created_at', { ascending: false });
 
@@ -160,50 +182,8 @@ export const beekeeperListingsService = {
     if (rows.length === 0) return [];
 
     const listingIds = Array.from(new Set(rows.map((r) => r.id).filter(Boolean)));
-    const plotIds = Array.from(new Set(rows.map((r) => r.plot_id).filter(Boolean)));
-    const ownerIds = Array.from(new Set(rows.map((r) => r.user_id).filter(Boolean)));
-
-    const [plotsResult, ownersResult] = await Promise.all([
-      supabase
-        .from('landowner_plots')
-        .select(
-          'id, name, province, district, ds_division, gps_latitude, gps_longitude, total_acreage, forage_entries, water_availability, shade_profile, vehicle_access, night_access, images'
-        )
-        .in('id', plotIds.length > 0 ? plotIds : [-1]),
-      supabase
-        .from('users')
-        .select('id, name, phone, created_at')
-        .in('id', ownerIds.length > 0 ? ownerIds : [-1]),
-    ]);
-
-    if (plotsResult.error) throw new Error(plotsResult.error.message);
-    if (ownersResult.error) throw new Error(ownersResult.error.message);
-
-    const plotsById = new Map<number, any>((plotsResult.data || []).map((p: any) => [p.id, p]));
-    const ownersById = new Map<number, any>((ownersResult.data || []).map((u: any) => [u.id, u]));
-
-    // Accepted hive counts: single query
-    const acceptedHiveCountByListingId = new Map<number, number>();
-    try {
-      const { data: acceptedBids, error: acceptedError } = await supabase
-        .from('landowner_bids')
-        .select('listing_id, hives_proposed')
-        .in('listing_id', listingIds.length > 0 ? listingIds : [-1])
-        .eq('status', 'accepted');
-
-      if (acceptedError) throw acceptedError;
-
-      for (const bid of acceptedBids || []) {
-        const listingId = bid.listing_id as number;
-        const current = acceptedHiveCountByListingId.get(listingId) || 0;
-        acceptedHiveCountByListingId.set(listingId, current + (bid.hives_proposed || 0));
-      }
-    } catch (bidError) {
-      console.warn('Error fetching accepted bids (possibly RLS blocking):', bidError);
-    }
 
     // Current user's proposal status per listing: single query
-    const userProposalStatusByListingId = new Map<number, 'none' | 'pending' | 'accepted' | 'rejected'>();
     let currentUserId: number | null = null;
     try {
       currentUserId = getCurrentUser().id;
@@ -211,34 +191,58 @@ export const beekeeperListingsService = {
       currentUserId = null;
     }
 
-    if (currentUserId) {
-      try {
-        const { data: userBids, error: userBidsError } = await supabase
-          .from('landowner_bids')
-          .select('listing_id, status, created_at')
-          .eq('beekeeper_user_id', currentUserId)
-          .in('listing_id', listingIds.length > 0 ? listingIds : [-1])
-          .order('created_at', { ascending: false });
+    // Accepted hive counts + proposal statuses in parallel (best-effort)
+    const acceptedHiveCountByListingId = new Map<number, number>();
+    const userProposalStatusByListingId = new Map<number, 'none' | 'pending' | 'accepted' | 'rejected'>();
 
-        if (userBidsError) throw userBidsError;
+    const acceptedBidsPromise = supabase
+      .from('landowner_bids')
+      .select('listing_id, hives_proposed')
+      .in('listing_id', listingIds.length > 0 ? listingIds : [-1])
+      .eq('status', 'accepted');
 
-        for (const bid of userBids || []) {
+    const userBidsPromise = currentUserId
+      ? supabase
+        .from('landowner_bids')
+        .select('listing_id, status, created_at')
+        .eq('beekeeper_user_id', currentUserId)
+        .in('listing_id', listingIds.length > 0 ? listingIds : [-1])
+        .order('created_at', { ascending: false })
+      : Promise.resolve({ data: [], error: null } as any);
+
+    try {
+      const [acceptedBidsResult, userBidsResult] = await Promise.all([acceptedBidsPromise, userBidsPromise]);
+
+      if (acceptedBidsResult?.error) {
+        console.warn('Error fetching accepted bids (possibly RLS blocking):', acceptedBidsResult.error);
+      } else {
+        for (const bid of acceptedBidsResult?.data || []) {
+          const listingId = bid.listing_id as number;
+          const current = acceptedHiveCountByListingId.get(listingId) || 0;
+          acceptedHiveCountByListingId.set(listingId, current + (bid.hives_proposed || 0));
+        }
+      }
+
+      if (userBidsResult?.error) {
+        console.warn('Error checking user proposals (possibly RLS blocking):', userBidsResult.error);
+      } else {
+        for (const bid of userBidsResult?.data || []) {
           const listingId = bid.listing_id as number;
           if (!userProposalStatusByListingId.has(listingId)) {
             userProposalStatusByListingId.set(listingId, bid.status);
           }
         }
-      } catch (proposalError) {
-        console.warn('Error checking user proposals (possibly RLS blocking):', proposalError);
       }
+    } catch (lookupError) {
+      console.warn('Error fetching bid metadata (possibly RLS blocking):', lookupError);
     }
 
     const output: ListingSummary[] = [];
 
     for (const row of rows) {
       try {
-        const plot = plotsById.get(row.plot_id);
-        const owner = ownersById.get(row.user_id);
+        const plot = row.landowner_plots;
+        const owner = row.users;
 
         if (!plot) {
           console.warn(`Skipping listing ${row.id}: plot ${row.plot_id} not found`);
@@ -257,11 +261,6 @@ export const beekeeperListingsService = {
           1,
           Math.floor((Date.now() - ownerCreatedAt.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
         );
-
-        // Load plot images from localStorage if needed
-        const imagesKey = `plot_images_${plot.id}`;
-        const storedImages = localStorage.getItem(imagesKey);
-        const plotImages = storedImages ? normalizeStringArray(storedImages) : normalizeStringArray(plot.images);
 
         const forageNames = normalizeForageEntries(plot.forage_entries)
           .map((e) => e.name)
@@ -289,7 +288,6 @@ export const beekeeperListingsService = {
           ownerName: owner?.name || `Landowner ${row.user_id}`,
           ownerContact: owner?.phone || '',
           ownerYearsActive: yearsActive,
-          image: plotImages[0],
           maxHiveCapacity: 10,
           acceptedHiveCount,
           userProposalStatus,
@@ -314,23 +312,7 @@ export const beekeeperListingsService = {
 
     if (!summary) throw new Error('Listing not found or not currently published');
 
-    // Get reviews for this listing
-    const { data: reviewsData } = await supabase
-      .from('listing_reviews')
-      .select('*')
-      .eq('listing_id', listingId)
-      .order('created_at', { ascending: false });
-
-    const reviews: ListingReview[] = (reviewsData || []).map((r: any) => ({
-      id: r.id,
-      listingId: r.listing_id,
-      beekeeperUserId: r.beekeeper_user_id,
-      beekeeperName: r.beekeeper_name || `Beekeeper ${r.beekeeper_user_id}`,
-      rating: r.rating,
-      comment: r.comment || '',
-      createdAt: r.created_at,
-    }));
-
+    const reviews = await this.getListingReviews(listingId);
     return { summary, reviews };
   },
 
@@ -441,7 +423,7 @@ export const beekeeperListingsService = {
       // Get all bids by this user with simpler query
       const { data: bids, error: bidsError } = await supabase
         .from('landowner_bids')
-        .select('*')
+        .select('id, listing_id, hives_proposed, placement_start_date, placement_end_date, submitted_at, status, created_at')
         .eq('beekeeper_user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -600,7 +582,7 @@ export const beekeeperListingsService = {
       // and assume the current user might have submitted proposals for them
       const { data: acceptedListings } = await supabase
         .from('landowner_listings')
-        .select('*, landowner_plots(*), users!landowner_listings_user_id_fkey(name, phone)')
+        .select('*, landowner_plots(*), users(name, phone)')
         .in('status', ['accepted', 'occupied'])
         .limit(10);
 
