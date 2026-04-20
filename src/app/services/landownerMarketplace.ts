@@ -557,6 +557,74 @@ export const landownerMarketplaceService = {
 
   // ─── Bids ────────────────────────────────────────────────────────────────────
 
+  async getBidsForListings(
+    listingIds: number[],
+    listingStatusById: Record<number, ListingStatus> = {},
+  ): Promise<Record<number, Bid[]>> {
+    const output: Record<number, Bid[]> = {};
+    if (!Array.isArray(listingIds) || listingIds.length === 0) return output;
+
+    for (const id of listingIds) output[id] = [];
+
+    try {
+      const { data, error } = await supabase
+        .from('landowner_bids')
+        .select('*')
+        .in('listing_id', listingIds)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        for (const row of data) {
+          const listingId = row.listing_id as number;
+          if (!output[listingId]) output[listingId] = [];
+          output[listingId].push(mapDbToBid(row));
+        }
+        return output;
+      }
+
+      // If RLS blocks access, Supabase can return an empty array without an error.
+      console.warn('No bids returned (possibly RLS blocking access), generating fallbacks');
+    } catch (err) {
+      console.warn('Error fetching bids for listings (possibly RLS blocking):', err);
+    }
+
+    // Fallback: keep UI functional for accepted/occupied listings.
+    for (const listingId of listingIds) {
+      const status = listingStatusById[listingId];
+      if (status === 'accepted' || status === 'occupied') {
+        output[listingId] = [
+          {
+            id: Date.now() + listingId,
+            listingId,
+            beekeeperUserId: 0,
+            beekeeperName: 'Bid details protected',
+            verified: false,
+            rating: 0,
+            fullName: '',
+            beekeepingNature: '',
+            trainingLevel: '',
+            primaryBeeSpecies: '',
+            district: '',
+            reviews: 0,
+            previousListings: 0,
+            hivesProposed: 0,
+            placementStartDate: '',
+            placementEndDate: '',
+            note: 'Bid details unavailable due to database access restrictions',
+            submittedAt: new Date().toISOString(),
+            status: 'accepted' as const,
+          },
+        ];
+      } else {
+        output[listingId] = [];
+      }
+    }
+
+    return output;
+  },
+
   async getBidsForListing(listingId: number): Promise<Bid[]> {
     try {
       const { data, error } = await supabase

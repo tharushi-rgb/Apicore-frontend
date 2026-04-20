@@ -427,44 +427,26 @@ export default function App() {
     if (warmupKeyRef.current === warmupKey) return;
     warmupKeyRef.current = warmupKey;
 
-    const tasks: Array<Promise<unknown>> = [
-      profileService.get(),
-      notificationsService.getAll(false),
-      notificationsService.getAll(true),
-    ];
+    // Warmup is best-effort only. Keep it lightweight to avoid a burst of parallel
+    // Supabase requests that can cause browser-level connection resets.
+    const warmupTimer = window.setTimeout(() => {
+      const tasks: Array<Promise<unknown>> = [];
 
-    if (user.role === 'landowner') {
-      tasks.push(
-        landownerMarketplaceService.getDashboardStats(),
-        landownerMarketplaceService.getPlots(),
-        landownerMarketplaceService.getListings(),
-        landownerMarketplaceService.getContracts(),
-        landownerPlotsService.getPlots(),
-      );
+      // Notifications are already polled by `MobileHeader`, so avoid duplicating.
+      // Profile is also read from localStorage for most screens.
 
-      tasks.push(
-        landownerMarketplaceService.getListings().then((listings) => {
-          const listingIds = listings.map((listing) => listing.id);
-          if (listingIds.length === 0) return;
-          const listingStatusById: Record<number, ListingStatus> = {};
-          listings.forEach((listing) => {
-            listingStatusById[listing.id] = listing.status;
-          });
-          return landownerMarketplaceService.getBidsForListings(listingIds, listingStatusById);
-        })
-      );
-    } else {
-      tasks.push(
-        dashboardService.get(),
-        apiariesService.getAll(),
-        hivesService.getAll(),
-        inspectionsService.getAll(),
-        beekeeperListingsService.getPublishedListings(),
-        beekeeperListingsService.getMyProposals(),
-      );
-    }
+      if (user.role !== 'landowner') {
+        tasks.push(
+          dashboardService.get(),
+          beekeeperListingsService.getPublishedListings(),
+          beekeeperListingsService.getMyProposals(),
+        );
+      }
 
-    void Promise.allSettled(tasks);
+      if (tasks.length > 0) void Promise.allSettled(tasks);
+    }, 900);
+
+    return () => window.clearTimeout(warmupTimer);
   }, [isAuthChecking, authWarmupKey]);
 
   const handleLogout = () => {
