@@ -517,7 +517,7 @@ export function LandownerListingsScreen({
       )}
 
       {isEditorOpen && (
-        <div className="absolute inset-0 z-50 bg-black/50 px-3 py-6" onClick={closeEditor}>
+        <div className="absolute inset-0 z-50 bg-black/50 px-3 py-6 overflow-y-auto overscroll-contain" onClick={closeEditor}>
           <div className="mx-auto max-w-sm rounded-xl bg-white p-3 shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-stone-900">
