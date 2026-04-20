@@ -53,6 +53,7 @@ export interface Bid {
   listingId: number;
   beekeeperUserId?: number;
   beekeeperName: string;
+  contactNumber?: string;
   verified: boolean;
   rating: number;
   fullName: string;
@@ -186,6 +187,7 @@ function mapDbToBid(row: any): Bid {
     listingId: row.listing_id,
     beekeeperUserId: row.beekeeper_user_id,
     beekeeperName: row.beekeeper_name || '',
+    contactNumber: typeof row?.users?.phone === 'string' ? row.users.phone : undefined,
     verified: row.verified || false,
     rating: row.rating || 0,
     fullName: row.full_name || row.beekeeper_name || '',
@@ -234,6 +236,35 @@ function listingWithDerivedStatus(listing: Listing): Listing {
     }
   }
   return listing;
+}
+
+async function fetchUserPhoneMap(userIds: number[]): Promise<Record<number, string>> {
+  const output: Record<number, string> = {};
+  const uniqueIds = Array.from(new Set(userIds)).filter((id) => Number.isFinite(id) && id > 0);
+  if (uniqueIds.length === 0) return output;
+
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, phone')
+      .in('id', uniqueIds);
+
+    if (error) {
+      console.warn('Unable to fetch user contact numbers:', error.message);
+      return output;
+    }
+
+    for (const row of data || []) {
+      const id = row.id as number;
+      const phone = typeof (row as any).phone === 'string' ? (row as any).phone.trim() : '';
+      if (Number.isFinite(id) && id > 0 && phone) output[id] = phone;
+    }
+
+    return output;
+  } catch (err) {
+    console.warn('Unable to fetch user contact numbers:', err);
+    return output;
+  }
 }
 
 export const landownerMarketplaceService = {
@@ -576,11 +607,27 @@ export const landownerMarketplaceService = {
       if (error) throw error;
 
       if (data && data.length > 0) {
+        const allBids: Bid[] = [];
+
         for (const row of data) {
           const listingId = row.listing_id as number;
           if (!output[listingId]) output[listingId] = [];
-          output[listingId].push(mapDbToBid(row));
+          const bid = mapDbToBid(row);
+          output[listingId].push(bid);
+          allBids.push(bid);
         }
+
+        const phoneMap = await fetchUserPhoneMap(
+          allBids
+            .map((bid) => bid.beekeeperUserId)
+            .filter((id): id is number => typeof id === 'number' && Number.isFinite(id) && id > 0)
+        );
+
+        for (const bid of allBids) {
+          const id = bid.beekeeperUserId;
+          if (typeof id === 'number' && phoneMap[id]) bid.contactNumber = phoneMap[id];
+        }
+
         return output;
       }
 
@@ -600,6 +647,7 @@ export const landownerMarketplaceService = {
             listingId,
             beekeeperUserId: 0,
             beekeeperName: 'Bid details protected',
+            contactNumber: '',
             verified: false,
             rating: 0,
             fullName: '',
@@ -644,7 +692,17 @@ export const landownerMarketplaceService = {
         return this.generateFallbackBidsForListing(listingId);
       }
 
-      return data.map(mapDbToBid);
+      const bids = data.map(mapDbToBid);
+      const phoneMap = await fetchUserPhoneMap(
+        bids
+          .map((bid) => bid.beekeeperUserId)
+          .filter((id): id is number => typeof id === 'number' && Number.isFinite(id) && id > 0)
+      );
+      for (const bid of bids) {
+        const id = bid.beekeeperUserId;
+        if (typeof id === 'number' && phoneMap[id]) bid.contactNumber = phoneMap[id];
+      }
+      return bids;
     } catch (err) {
       console.warn('Exception fetching bids, using fallback:', err);
       return this.generateFallbackBidsForListing(listingId);
@@ -664,6 +722,7 @@ export const landownerMarketplaceService = {
           listingId: listingId,
           beekeeperUserId: 0,
           beekeeperName: 'Bid details protected',
+          contactNumber: '',
           verified: false,
           rating: 0,
           fullName: '',

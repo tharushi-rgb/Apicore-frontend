@@ -691,6 +691,10 @@ export function LandownerListingsScreen({
                       </p>
                     )}
 
+                    <p>
+                      {t('phone', selectedLanguage)}: {bid.contactNumber?.trim() || '-'}
+                    </p>
+
                     {(bid.hivesProposed > 0 || bid.placementStartDate || bid.placementEndDate) && (
                       <p>
                         {t('proposed', selectedLanguage)} {bid.hivesProposed} {t('hives', selectedLanguage)}
