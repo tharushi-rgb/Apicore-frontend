@@ -30,7 +30,7 @@ interface InspectionMetadata {
   pest_statuses: PestStatus[];
   pest_name?: string;
   treatment_used?: string;
-  active_frame_count: number;
+  active_frame_count?: number;
   queen_cell_presence?: OptionalYesNo;
   bottom_board_cleaned?: OptionalYesNo;
   general_remarks?: string;
@@ -72,7 +72,7 @@ function InspectionForm({ hiveId, initial, onClose, onSaved, selectedLanguage }:
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!f.queen_presence || !f.honey_pollen_stores || f.pest_disease_presence.length === 0 || !f.active_frame_count) {
+    if (!f.queen_presence || !f.honey_pollen_stores || f.pest_disease_presence.length === 0) {
       alert('Please fill all mandatory fields');
       return;
     }
@@ -226,14 +226,13 @@ function InspectionForm({ hiveId, initial, onClose, onSaved, selectedLanguage }:
 
           {/* Active Frame Count */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <label className="block text-xs font-medium text-stone-700 mb-1">6. Active Frame Count * (Mandatory)</label>
+            <label className="block text-xs font-medium text-stone-700 mb-1">6. Active Frame Count (Optional)</label>
             <p className="text-[0.7rem] text-stone-600 mb-2">Number of frames covered by bees; validates if the 8mm bee space is maintained.</p>
             <input
               type="number"
               min="0"
               value={f.active_frame_count}
               onChange={e => setF(p => ({ ...p, active_frame_count: e.target.value }))}
-              required
               placeholder={t('enterNumberActiveFrames', selectedLanguage)}
               className="w-full border border-stone-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
             />
@@ -690,7 +689,14 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
     if (!quickInspection.queen_presence) return;
     if (!quickInspection.honey_pollen_stores) return;
     if (quickInspection.pest_statuses.length === 0) return;
-    if (!quickInspection.active_frame_count || Number(quickInspection.active_frame_count) <= 0) return;
+
+    const activeFrameCountRaw = quickInspection.active_frame_count.trim();
+    let activeFrameCount: number | undefined;
+    if (activeFrameCountRaw) {
+      const parsed = parseInt(activeFrameCountRaw, 10);
+      if (!Number.isFinite(parsed) || parsed <= 0) return;
+      activeFrameCount = parsed;
+    }
 
     setSavingQuickInspection(true);
     try {
@@ -714,7 +720,7 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
             ? 'pest_detected'
             : 'clear',
           treatment_used: quickInspection.treatment_used || undefined,
-          active_frame_count: Number(quickInspection.active_frame_count),
+          ...(typeof activeFrameCount === 'number' ? { active_frame_count: activeFrameCount } : {}),
           queen_cell_presence: quickInspection.queen_cell_presence || undefined,
           bottom_board_cleaned: quickInspection.bottom_board_cleaned || undefined,
           general_remarks: quickInspection.general_remarks || undefined,
@@ -737,7 +743,7 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
             ? 'pest_detected'
             : 'clear',
           treatment_used: quickInspection.treatment_used || undefined,
-          active_frame_count: Number(quickInspection.active_frame_count),
+          ...(typeof activeFrameCount === 'number' ? { active_frame_count: activeFrameCount } : {}),
           queen_cell_presence: quickInspection.queen_cell_presence || undefined,
           bottom_board_cleaned: quickInspection.bottom_board_cleaned || undefined,
           general_remarks: quickInspection.general_remarks || undefined,
@@ -1233,7 +1239,7 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-stone-700 mb-0.5">Active Frame Count *</label>
+            <label className="block text-xs font-medium text-stone-700 mb-0.5">Active Frame Count (Optional)</label>
             <input
               type="number"
               min="1"
@@ -1276,9 +1282,6 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
             <div className="rounded-lg bg-stone-50 px-2.5 py-1.5 text-xs text-stone-700">
               <span className="font-semibold">Current pest status:</span>{' '}
               {quickInspection.pest_statuses.join(', ').replace(/_/g, ' ')}
-            </div>
-            <div className="rounded-lg bg-stone-50 px-2.5 py-1.5 text-xs text-stone-700">
-              <span className="font-semibold">Hive pest meter:</span> {hive.pest_detected ? '1' : '0'}
             </div>
           </div>
 
@@ -1402,7 +1405,7 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
                     </span>
 
                     <span className="rounded-full bg-stone-50 px-1.5 py-0.5 text-stone-700">
-                      {inspection.active_frame_count || '0'} frames
+                      {typeof inspection.active_frame_count === 'number' ? `${inspection.active_frame_count} frames` : 'Frames n/a'}
                     </span>
                   </div>
                     {inspection.general_remarks && (
