@@ -9,6 +9,7 @@ import { authService } from '../../services/auth';
 import { hivesService, type Hive } from '../../services/hives';
 import { apiariesService, type Apiary } from '../../services/apiaries';
 import { haversineKm } from '../../services/planning';
+import { supabase } from '../../services/supabaseClient';
 import { t } from '../../i18n';
 import {
   getDistrictsByProvince,
@@ -301,11 +302,39 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    hivesService.getAll()
-      .then(setAllHives)
-      .catch((error) => {
-        console.error('Failed to load hives:', error);
-      });
+    // Fetch ALL hives from ALL users (like planning module saturation check)
+    let active = true;
+
+    const loadAllHives = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('hives')
+          .select('*, apiaries(name, district)');
+
+        if (error) {
+          console.error('Failed to load all hives:', error);
+          return;
+        }
+
+        // Flatten join like hivesService does
+        const flattened = (data ?? []).map((h: any) => ({
+          ...h,
+          apiary_name: h.apiaries?.name,
+          apiary_district: h.apiaries?.district,
+          apiaries: undefined,
+        }));
+
+        if (active) setAllHives(flattened);
+      } catch (loadError) {
+        console.error('Failed to load all hives:', loadError);
+      }
+    };
+
+    void loadAllHives();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -319,6 +348,8 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
     const nearby = allHives.find((hive) => {
       if (hive.gps_latitude == null || hive.gps_longitude == null) return false;
       if (isEdit && hive.id === initialHive?.id) return false;
+      // Exclude current user's hives (like planning module saturation check)
+      if (hive.user_id === user?.id) return false;
       return haversineKm(lat, lng, hive.gps_latitude, hive.gps_longitude) <= NEARBY_KM;
     });
     setNearbyWarning(nearby ? t('nearbyHiveWarning', selectedLanguage) : '');

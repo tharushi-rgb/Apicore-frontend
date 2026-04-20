@@ -365,6 +365,7 @@ export const planningService = {
       endDate?: string;
       apiaries?: SatApiaryInfo[];
       hives?: SatHiveInfo[];
+      currentUserId?: number;
     }
   ): Promise<PlanningAnalysis> {
     const raw = await fetchWeather(lat, lng, opts?.startDate, opts?.endDate);
@@ -527,22 +528,32 @@ export const planningService = {
     else if (boostedScore >= 35) { boostedLabel = 'Fair'; boostedColor = 'orange'; }
     else { boostedLabel = 'Poor'; boostedColor = 'red'; }
 
-    // Real saturation: count ALL hives from ALL users in the same district within 50km radius
+    // Real saturation: count ALL hives from ALL OTHER users in the same district within 50km radius
 
-    // Query all apiaries and hives from database (all users) in the district
+    // Query all apiaries and hives from database (excluding current user) in the district
     let allApiaries: SatApiaryInfo[] = [];
     let allHives: SatHiveInfo[] = [];
 
     try {
-      // Get all apiaries from the database with names
-      const { data: apiariesData, error: apiariesError } = await supabase
+      const currentUserId = opts?.currentUserId;
+
+      // Get all apiaries from the database with names (excluding current user)
+      const apiariesQuery = supabase
         .from('apiaries')
         .select('id, name, gps_latitude, gps_longitude, district');
 
-      // Get all hives from the database with names
-      const { data: hivesData, error: hivesError } = await supabase
+      // Get all hives from the database with names (excluding current user)
+      const hivesQuery = supabase
         .from('hives')
         .select('id, name, apiary_id, gps_latitude, gps_longitude');
+
+      if (typeof currentUserId === 'number' && Number.isFinite(currentUserId)) {
+        apiariesQuery.neq('user_id', currentUserId);
+        hivesQuery.neq('user_id', currentUserId);
+      }
+
+      const { data: apiariesData, error: apiariesError } = await apiariesQuery;
+      const { data: hivesData, error: hivesError } = await hivesQuery;
 
       if (apiariesError) {
         console.warn('Failed to fetch apiaries:', apiariesError);
