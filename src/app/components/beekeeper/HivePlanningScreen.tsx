@@ -318,7 +318,6 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
           gps_latitude: h.gps_latitude,
           gps_longitude: h.gps_longitude
         })),
-        currentUserId: user?.id,
       });
       setAnalysis(result);
     } catch (e) {

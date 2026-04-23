@@ -111,36 +111,8 @@ export function LocationSelectorField({
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <input
-            value={latitude}
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val === '' || /^-?\d*\.?\d*$/.test(val)) {
-                onChange(val, longitude);
-              }
-            }}
-            placeholder="Latitude"
-            className="app-input"
-            type="number"
-            step="0.000001"
-            min="-90"
-            max="90"
-          />
-          <input
-            value={longitude}
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val === '' || /^-?\d*\.?\d*$/.test(val)) {
-                onChange(latitude, val);
-              }
-            }}
-            placeholder="Longitude"
-            className="app-input"
-            type="number"
-            step="0.000001"
-            min="-180"
-            max="180"
-          />
+          <input value={latitude} readOnly placeholder="Latitude" className="app-input bg-stone-50" />
+          <input value={longitude} readOnly placeholder="Longitude" className="app-input bg-stone-50" />
         </div>
 
         <p className="text-[0.72rem] text-stone-500 flex items-center gap-1">
