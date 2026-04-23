@@ -84,6 +84,7 @@ export interface Contract {
   status: ContractStatus;
   cash_rent_lkr?: number;
   honey_share_kgs?: number;
+  honey_share_percent?: number;
   financial_terms?: FinancialTerms;
   moveOutRequestedAt?: string;
 }
@@ -221,6 +222,7 @@ function mapDbToContract(row: any): Contract {
     status: row.status || 'active',
     cash_rent_lkr: row.cash_rent_lkr,
     honey_share_kgs: row.honey_share_kgs,
+    honey_share_percent: row.honey_share_percent,
     financial_terms: row.financial_terms,
     moveOutRequestedAt: row.move_out_requested_at,
   };
@@ -547,15 +549,14 @@ export const landownerMarketplaceService = {
   async deleteListing(listingId: number): Promise<void> {
     const userId = getUserId();
 
-    // Check if listing has accepted bids
-    const { data: acceptedBids } = await supabase
+    // Listings with any bids are protected from deletion.
+    const { data: bids } = await supabase
       .from('landowner_bids')
       .select('id')
-      .eq('listing_id', listingId)
-      .eq('status', 'accepted');
+      .eq('listing_id', listingId);
 
-    if (acceptedBids && acceptedBids.length > 0) {
-      throw new Error('This listing cannot be deleted because it has an accepted bid');
+    if (bids && bids.length > 0) {
+      throw new Error('This listing cannot be deleted because it has bids');
     }
 
     // Delete associated bids
