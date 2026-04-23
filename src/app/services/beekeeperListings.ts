@@ -6,7 +6,6 @@ import {
   type Contract,
   type FinancialTerms,
   type LandPlot,
-  type Listing,
   type ShadeProfile,
 } from './landownerMarketplace';
 
@@ -88,7 +87,7 @@ interface ProposalPayload {
   note?: string;
 }
 
-// --- Helpers ---
+// --- Internal Helpers ---
 function getCurrentUser() {
   const user = authService.getLocalUser();
   if (!user) throw new Error('Not logged in');
@@ -99,34 +98,31 @@ function makeListingCode(id: number): string {
   return `LST-${String(id).padStart(4, '0')}`;
 }
 
-function paymentLabel(financialTerms: FinancialTerms, cashRentLkr?: number, honeyShareKg?: number): string {
-  if (financialTerms === 'cash_rent') return `Rs. ${(cashRentLkr || 0).toLocaleString()}/mo`;
-  if (financialTerms === 'honey_share') return `${honeyShareKg || 0}% Honey Share`;
+function paymentLabel(row: any): string {
+  if (row.financial_terms === 'cash_rent') return `Rs. ${(row.cash_rent_lkr || 0).toLocaleString()}/mo`;
+  if (row.financial_terms === 'honey_share') return `${row.honey_share_kgs || 0}% Honey Share`;
   return 'Free - Pollination';
 }
 
-function normalizeForageEntries(input: any): string[] {
-  if (!input) return [];
-  try {
-    const parsed = typeof input === 'string' ? JSON.parse(input) : input;
-    if (Array.isArray(parsed)) {
-      return parsed.map((e: any) => e.name || e.forage).filter(Boolean);
-    }
-  } catch (e) { console.error("Forage parse error", e); }
+function normalizeForage(entries: any): string[] {
+  if (!entries) return [];
+  if (Array.isArray(entries)) {
+    return entries.map((e: any) => e.name || e.forage).filter(Boolean);
+  }
   return [];
 }
 
+// --- Service Implementation ---
 export const beekeeperListingsService = {
   async getListingReviews(listingId: number): Promise<ListingReview[]> {
-    const { data: reviewsData, error } = await supabase
+    const { data, error } = await supabase
       .from('listing_reviews')
       .select('*')
       .eq('listing_id', listingId)
       .order('created_at', { ascending: false });
 
-    if (error) throw new Error(error.message);
-
-    return (reviewsData || []).map((r: any) => ({
+    if (error) throw error;
+    return (data || []).map((r: any) => ({
       id: r.id,
       listingId: r.listing_id,
       beekeeperUserId: r.beekeeper_user_id,
@@ -138,115 +134,95 @@ export const beekeeperListingsService = {
   },
 
   async getPublishedListings(): Promise<ListingSummary[]> {
-    // FIX 1: Explicit Join using fk_listings_plot and fk_listings_user
     const { data, error } = await supabase
       .from('landowner_listings')
       .select(`
         *,
-        landowner_plots!fk_listings_plot(*),
-        users!fk_listings_user(id, name, phone, created_at)
+        landowner_plots(*),
+        users(id, name, phone, created_at)
       `)
       .in('status', ['published', 'active', 'accepted'])
       .order('created_at', { ascending: false });
 
-    if (error) throw new Error(error.message);
+    if (error) throw error;
 
     const output: ListingSummary[] = [];
+    const user = authService.getLocalUser();
+
     for (const row of (data || [])) {
       const plot = row.landowner_plots;
       const owner = row.users;
-      if (!plot || !owner) continue;
+      if (!plot) continue;
 
-      const { data: acceptedBids } = await supabase
-        .from('landowner_bids')
-        .select('hives_proposed')
-        .eq('listing_id', row.id)
-        .eq('status', 'accepted');
-
-      const acceptedHiveCount = (acceptedBids || []).reduce((sum: number, b: any) => sum + (b.hives_proposed || 0), 0);
-      const ownerCreatedAt = new Date(owner.created_at);
-      const yearsActive = Math.max(1, Math.floor((Date.now() - ownerCreatedAt.getTime()) / (365.25 * 24 * 60 * 60 * 1000)));
+      // Logic to check if user already applied
+      let proposalStatus: any = 'none';
+      if (user) {
+        const { data: userBid } = await supabase
+          .from('landowner_bids')
+          .select('status')
+          .eq('listing_id', row.id)
+          .eq('beekeeper_user_id', user.id)
+          .maybeSingle();
+        if (userBid) proposalStatus = userBid.status;
+      }
 
       output.push({
         id: `${row.user_id}:${row.id}`,
         ownerUserId: row.user_id,
         listingId: row.id,
-        plotId: plot.id,
+        plotId: row.plot_id,
         listingCode: row.listing_code || makeListingCode(row.id),
         plotName: plot.name,
         district: plot.district || '',
         dsDivision: plot.ds_division || '',
         coordinates: { lat: plot.gps_latitude || 0, lng: plot.gps_longitude || 0 },
-        forageNames: normalizeForageEntries(plot.forage_entries),
+        forageNames: normalizeForage(plot.forage_entries),
         shadeProfile: plot.shade_profile || 'Full Sun',
         hasWaterOnSite: plot.water_availability === 'On-site',
         vehicleAccess: plot.vehicle_access || 'Lorry',
-        nightAccess: plot.night_access || false,
-        paymentLabel: paymentLabel(row.financial_terms, row.cash_rent_lkr, row.honey_share_kgs),
+        nightAccess: !!plot.night_access,
+        paymentLabel: paymentLabel(row),
         financialTerms: row.financial_terms,
-        ownerName: owner.name || `Landowner ${row.user_id}`,
-        ownerContact: owner.phone || '',
-        ownerYearsActive: yearsActive,
+        ownerName: owner?.name || 'Landowner',
+        ownerContact: owner?.phone || '',
+        ownerYearsActive: 1,
         image: (plot.images || [])[0],
         maxHiveCapacity: 10,
-        acceptedHiveCount,
-        userProposalStatus: 'none',
+        acceptedHiveCount: 0,
+        userProposalStatus: proposalStatus,
         totalAcreage: plot.total_acreage || 0
       });
     }
-    return output.sort((a, b) => a.listingCode.localeCompare(b.listingCode));
+    return output;
   },
 
   async getMyProposals(): Promise<ListingProposal[]> {
     const user = getCurrentUser();
-    
-    // FIX 2: Explicit Join using fk_bids_listing
-    const { data: bids, error: bidsError } = await supabase
+    const { data, error } = await supabase
       .from('landowner_bids')
       .select(`
         *,
-        landowner_listings!fk_bids_listing(
+        landowner_listings(
           *, 
-          landowner_plots!fk_listings_plot(*), 
-          users!fk_listings_user(name, phone)
+          landowner_plots(*), 
+          users(name, phone)
         )
       `)
       .eq('beekeeper_user_id', user.id)
       .order('created_at', { ascending: false });
 
-    if (bidsError) throw new Error(bidsError.message);
+    if (error) throw error;
 
-    const proposals: ListingProposal[] = [];
-    for (const bid of (bids || [])) {
+    return (data || []).map((bid: any) => {
       const listing = bid.landowner_listings;
-      if (!listing) continue;
-      const plot = listing.landowner_plots;
-      const owner = listing.users;
+      const plot = listing?.landowner_plots;
+      const owner = listing?.users;
 
-      const { data: acceptedBids } = await supabase
-        .from('landowner_bids')
-        .select('hives_proposed')
-        .eq('listing_id', listing.id)
-        .eq('status', 'accepted');
-
-      const acceptedHiveCount = (acceptedBids || []).reduce((sum: number, b: any) => sum + (b.hives_proposed || 0), 0);
-
-      let contract: any = null;
-      if (bid.status === 'accepted') {
-        const { data: contracts } = await supabase
-          .from('landowner_contracts')
-          .select('*')
-          .eq('listing_id', listing.id)
-          .eq('bid_id', bid.id)
-          .maybeSingle();
-        contract = contracts;
-      }
-
-      proposals.push({
-        ownerUserId: listing.user_id,
-        listingId: listing.id,
+      return {
+        ownerUserId: listing?.user_id,
+        listingId: bid.listing_id,
         bidId: bid.id,
-        listingCode: listing.listing_code || makeListingCode(listing.id),
+        listingCode: listing?.listing_code || makeListingCode(bid.listing_id),
         plotName: plot?.name || 'Plot',
         province: plot?.province || '-',
         hiveCount: bid.hives_proposed,
@@ -254,42 +230,25 @@ export const beekeeperListingsService = {
         moveOutDate: bid.placement_end_date,
         submittedAt: bid.submitted_at || bid.created_at,
         status: bid.status,
-        contractId: contract?.id,
-        contractStatus: contract?.status,
-        remainingCapacity: Math.max(0, 10 - acceptedHiveCount),
+        remainingCapacity: 10,
         district: plot?.district || '-',
         dsDivision: plot?.ds_division || '-',
-        ownerName: owner?.name || `Landowner ${listing.user_id}`,
+        ownerName: owner?.name || 'Unknown',
         ownerContact: owner?.phone || '',
-        financialTerms: listing.financial_terms,
-        cashRentLkr: listing.cash_rent_lkr,
-        honeyShareKg: listing.honey_share_kgs,
+        financialTerms: listing?.financial_terms,
         waterAvailability: plot?.water_availability || 'On-site',
         vehicleAccess: plot?.vehicle_access || 'Lorry',
-        nightAccess: plot?.night_access ?? false,
+        nightAccess: !!plot?.night_access,
         gpsLatitude: plot?.gps_latitude ?? 0,
         gpsLongitude: plot?.gps_longitude ?? 0,
         forageEntries: plot?.forage_entries || [],
-      });
-    }
-    return proposals;
+      };
+    });
   },
 
   async submitProposal(payload: ProposalPayload): Promise<void> {
     const user = getCurrentUser();
-    
-    // FIX 3: Explicit Join inside proposal check
-    const { data: listing, error: lError } = await supabase
-      .from('landowner_listings')
-      .select('id, status, users!fk_listings_user(id)')
-      .eq('id', payload.listingId)
-      .single();
-
-    if (lError || !listing || !['published', 'active', 'accepted'].includes(listing.status)) {
-      throw new Error('Listing is not accepting proposals');
-    }
-
-    const { error: bidError } = await supabase.from('landowner_bids').insert({
+    const { error } = await supabase.from('landowner_bids').insert({
       listing_id: payload.listingId,
       beekeeper_user_id: user.id,
       beekeeper_name: user.name,
@@ -302,12 +261,11 @@ export const beekeeperListingsService = {
       submitted_at: new Date().toISOString()
     });
 
-    if (bidError) throw new Error(bidError.message);
-    
+    if (error) throw error;
     notificationsService.createActionNotification({
       entity: 'Proposal',
       event: 'created',
-      details: 'Your proposal has been submitted successfully.',
+      details: 'Your proposal has been submitted.',
       severity: 'low',
     });
   }
