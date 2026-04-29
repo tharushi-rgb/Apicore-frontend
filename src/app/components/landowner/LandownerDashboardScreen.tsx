@@ -8,7 +8,7 @@ import { t } from '../../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
-type RevenueTab = 'rupees' | 'honey_share';
+// Revenue is shown only in rupees on the landowner dashboard
 
 interface Props {
   selectedLanguage: Language;
@@ -42,7 +42,7 @@ function formatHoneyKg(value: number) {
 export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, onNavigate, onLogout }: Props) {
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>(INITIAL_STATS);
-  const [revenueTab, setRevenueTab] = useState<RevenueTab>('rupees');
+  // revenue is always shown in rupees for landowners
   const [loading, setLoading] = useState(true);
   const user = authService.getLocalUser();
 
@@ -62,8 +62,8 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
   }, [user?.id]);
 
   const displayName = useMemo(() => user?.name || t('landowner', selectedLanguage), [user?.name, selectedLanguage]);
-  const revenueValue = revenueTab === 'rupees' ? formatRupees(stats.rupeesReceived) : formatHoneyKg(stats.honeyShareKg);
-  const revenueNote = revenueTab === 'rupees' ? t('totalCashRent', selectedLanguage) : t('totalHoneyYield', selectedLanguage);
+  const revenueValue = formatRupees(stats.rupeesReceived);
+  const revenueNote = t('totalCashRent', selectedLanguage);
 
   return (
     // <div className="h-[100dvh] bg-gradient-to-b from-emerald-50 via-green-50 to-white flex flex-col overflow-hidden">
@@ -111,29 +111,13 @@ export function LandownerDashboardScreen({ selectedLanguage, onLanguageChange, o
 
             <section className="rounded-xl border border-emerald-200 bg-white p-3 shadow-sm">
               <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-emerald-700">{t('revenue', selectedLanguage)}</p>
-              <div className="mt-2 grid grid-cols-2 gap-1.5 rounded-xl bg-emerald-50 p-1.5">
-                <button
-                  onClick={() => setRevenueTab('rupees')}
-                  className={`rounded-lg px-2.5 py-2 text-[0.75rem] font-semibold transition ${
-                    revenueTab === 'rupees' ? 'bg-white text-emerald-800 shadow-sm' : 'text-emerald-700'
-                  }`}
-                >
-                  <span className="inline-flex items-center gap-1">
+              <div className="mt-2">
+                <div className="rounded-xl bg-emerald-50 p-1.5 inline-flex">
+                  <span className="inline-flex items-center gap-2 text-emerald-700 font-semibold">
                     <BadgeIndianRupee className="h-3.5 w-3.5" />
                     {t('rupees', selectedLanguage)}
                   </span>
-                </button>
-                <button
-                  onClick={() => setRevenueTab('honey_share')}
-                  className={`rounded-lg px-2.5 py-2 text-[0.75rem] font-semibold transition ${
-                    revenueTab === 'honey_share' ? 'bg-white text-emerald-800 shadow-sm' : 'text-emerald-700'
-                  }`}
-                >
-                  <span className="inline-flex items-center gap-1">
-                    <Leaf className="h-3.5 w-3.5" />
-                    {t('honeyShare', selectedLanguage)}
-                  </span>
-                </button>
+                </div>
               </div>
 
               <div className="mt-3 flex items-start justify-between gap-2">
