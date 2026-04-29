@@ -19,17 +19,10 @@ import { apiariesService } from '../../services/apiaries';
 import { hivesService } from '../../services/hives';
 import { PROVINCES, getDistrictsByProvince, getDsDivisionsByDistrict } from '../../constants/sriLankaLocations';
 import { t } from '../../i18n';
+import { formatSriLankanPhoneNumber, PHONE_NUMBER_MAX_LENGTH } from '../../utils/phone';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
-
-const formatPhoneNumber = (value: string): string => {
-  const cleaned = value.replace(/\D/g, '');
-  if (cleaned.length <= 2) return cleaned;
-  if (cleaned.length <= 5) return `${cleaned.slice(0, 2)} ${cleaned.slice(2)}`;
-  if (cleaned.length <= 8) return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}`;
-  return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8, 12)}`;
-};
 
 interface Props {
   selectedLanguage: Language;
@@ -79,7 +72,7 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
         setProfile(profile);
         setEditName(profile.name || '');
         setEditEmail(profile.email || '');
-        setEditPhone(profile.phone || '');
+        setEditPhone(formatSriLankanPhoneNumber(profile.phone || ''));
         setEditProvince((profile as any).province || '');
         setEditDistrict(profile.district || '');
         setEditDsDivision((profile as any).ds_division || '');
@@ -125,7 +118,7 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
     if (!profile) return;
     setEditName(profile.name || '');
     setEditEmail(profile.email || '');
-    setEditPhone(profile.phone || '');
+    setEditPhone(formatSriLankanPhoneNumber(profile.phone || ''));
     setEditProvince((profile as any).province || '');
     setEditDistrict(profile.district || '');
     setEditDsDivision((profile as any).ds_division || '');
@@ -151,7 +144,7 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
     try {
       const updated = await profileService.update({
         name: editName.trim(),
-        phone: editPhone.trim(),
+        phone: formatSriLankanPhoneNumber(editPhone),
         district: editDistrict.trim(),
         province: editProvince.trim(),
         ds_division: editDsDivision.trim(),
@@ -474,7 +467,7 @@ function ProfileEditInputTile({
 }) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (type === 'tel') {
-      onChange(formatPhoneNumber(e.target.value));
+      onChange(formatSriLankanPhoneNumber(e.target.value));
     } else {
       onChange(e.target.value);
     }
@@ -490,7 +483,8 @@ function ProfileEditInputTile({
           onChange={handleChange}
           disabled={disabled}
           placeholder={placeholder}
-          maxLength={type === 'tel' ? 15 : undefined}
+          inputMode={type === 'tel' ? 'numeric' : undefined}
+          maxLength={type === 'tel' ? PHONE_NUMBER_MAX_LENGTH : undefined}
           className="min-w-0 flex-1 bg-transparent text-right text-sm font-semibold text-stone-900 placeholder:text-stone-400 focus:outline-none"
         />
       </div>

@@ -1046,7 +1046,42 @@ export const landownerMarketplaceService = {
       .order('created_at', { ascending: false });
 
     if (error) throw new Error(error.message);
-    return (data || []).map(mapDbToContract);
+
+    const contracts = (data || []).map(mapDbToContract);
+    const listingIds = Array.from(new Set(contracts.map((contract) => contract.listingId).filter((id) => Number.isFinite(id) && id > 0)));
+
+    if (listingIds.length === 0) {
+      return contracts;
+    }
+
+    try {
+      const { data: listings, error: listingsError } = await supabase
+        .from('landowner_listings')
+        .select('id, financial_terms, cash_rent_lkr, honey_share_kgs')
+        .in('id', listingIds);
+
+      if (listingsError) {
+        console.warn('Unable to load listing terms for contracts:', listingsError.message);
+        return contracts;
+      }
+
+      const listingById = new Map<number, any>((listings || []).map((listing: any) => [listing.id, listing]));
+
+      return contracts.map((contract) => {
+        const listing = listingById.get(contract.listingId);
+        if (!listing) return contract;
+
+        return {
+          ...contract,
+          financial_terms: listing.financial_terms || contract.financial_terms,
+          cash_rent_lkr: listing.cash_rent_lkr ?? contract.cash_rent_lkr,
+          honey_share_kgs: listing.honey_share_kgs ?? contract.honey_share_kgs,
+        };
+      });
+    } catch (listingLookupError) {
+      console.warn('Failed to enrich contracts with current listing terms:', listingLookupError);
+      return contracts;
+    }
   },
 
   async respondMoveOut(contractId: number, approve: boolean): Promise<void> {

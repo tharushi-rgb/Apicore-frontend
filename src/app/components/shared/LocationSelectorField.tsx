@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { MapPin, X } from 'lucide-react';
 import { MapViewer } from './MapViewer';
 import { getDistrictCenter } from '../../constants/sriLankaLocations';
+import { t, type Language } from '../../i18n';
 
 interface LocationSelectorFieldProps {
   label?: string;
+  selectedLanguage?: Language;
   district?: string;
   latitude: string;
   longitude: string;
@@ -13,12 +15,13 @@ interface LocationSelectorFieldProps {
 }
 
 export function LocationSelectorField({
-  label = 'Location',
+  label,
+  selectedLanguage = 'en',
   district,
   latitude,
   longitude,
   onChange,
-  helperText = 'Pin exact location for accurate forage distance.',
+  helperText,
 }: LocationSelectorFieldProps) {
   const [showMapPicker, setShowMapPicker] = useState(false);
 
@@ -47,8 +50,8 @@ export function LocationSelectorField({
           <div className="w-[min(92vw,22rem)] bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-stone-200">
               <div>
-                <h2 className="text-[0.95rem] font-semibold text-stone-800">Select location</h2>
-                <p className="text-[0.72rem] text-stone-500">{latitude && longitude ? 'Adjust or confirm location' : 'Tap map to select location'}</p>
+                <h2 className="text-[0.95rem] font-semibold text-stone-800">{t('selectLocation', selectedLanguage)}</h2>
+                <p className="text-[0.72rem] text-stone-500">{latitude && longitude ? t('adjustOrConfirmLocation', selectedLanguage) : t('tapMapToSelectLocation', selectedLanguage)}</p>
               </div>
               <button
                 type="button"
@@ -80,7 +83,7 @@ export function LocationSelectorField({
                   onClick={() => setShowMapPicker(false)}
                   className="app-btn-ghost px-3 py-2"
                 >
-                  Cancel
+                  {t('cancel', selectedLanguage)}
                 </button>
                 <button
                   type="button"
@@ -90,7 +93,7 @@ export function LocationSelectorField({
                   }}
                   className="app-btn-primary px-3 py-2"
                 >
-                  Select
+                  {t('select', selectedLanguage)}
                 </button>
               </div>
             </div>
@@ -100,13 +103,13 @@ export function LocationSelectorField({
 
       <div className="app-card space-y-2">
         <div className="flex items-center justify-between">
-          <label className="app-label">{label}</label>
+          <label className="app-label">{label || t('location', selectedLanguage)}</label>
           <button
             type="button"
             onClick={openMapPicker}
             className="app-btn-link"
           >
-            Select location
+            {t('selectLocation', selectedLanguage)}
           </button>
         </div>
 
@@ -145,7 +148,7 @@ export function LocationSelectorField({
 
         <p className="text-[0.72rem] text-stone-500 flex items-center gap-1">
           <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-          {helperText}
+          {helperText || t('pinExactLocationForAccurateForageDistance', selectedLanguage)}
         </p>
       </div>
     </>

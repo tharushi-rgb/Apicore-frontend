@@ -52,6 +52,10 @@ function ClockIcon({ className }: { className?: string }) {
   );
 }
 
+function formatCoordinates(lat: number, lng: number) {
+  return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+}
+
 // ── GBIF Forage Card ──────────────────────────────────────────────────────────
 type GBIFNearbyEntry = GBIFForageSpecies & { scientific: string; nearbyCount: number };
 
@@ -219,11 +223,12 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
         if (dsCenter) {
           setCustomLat(String(dsCenter.lat));
           setCustomLng(String(dsCenter.lng));
+          setAdminLocationHint(`Resolved DS coordinates: ${formatCoordinates(dsCenter.lat, dsCenter.lng)}.`);
         } else {
           const districtCenter = getDistrictCenter(selectedDistrict);
           setCustomLat(String(districtCenter.lat));
           setCustomLng(String(districtCenter.lng));
-          setAdminLocationHint('Exact DS coordinates unavailable right now. Using district center as fallback.');
+          setAdminLocationHint(`Exact DS coordinates unavailable right now. Using district center as fallback: ${formatCoordinates(districtCenter.lat, districtCenter.lng)}.`);
         }
       } finally {
         if (!cancelled) setResolvingDsCenter(false);
@@ -286,9 +291,9 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
       setCustomLng(String(selectedCenter.lng));
 
       if (!dsCenter) {
-        setAdminLocationHint('Exact DS coordinates unavailable right now. Using district center as fallback.');
+        setAdminLocationHint(`Exact DS coordinates unavailable right now. Using district center as fallback: ${formatCoordinates(selectedCenter.lat, selectedCenter.lng)}.`);
       } else {
-        setAdminLocationHint(null);
+        setAdminLocationHint(`Resolved DS coordinates: ${formatCoordinates(selectedCenter.lat, selectedCenter.lng)}.`);
       }
     }else if (selectedDistrict && (!customLat || !customLng)) {
       const d = districts.find(dd => dd.name === selectedDistrict);

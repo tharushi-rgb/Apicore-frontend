@@ -10,6 +10,7 @@ import { apiariesService, type Apiary, type ApiaryForageEntry } from '../../serv
 import { hivesService } from '../../services/hives';
 import { haversineKm } from '../../services/planning';
 import { t } from '../../i18n';
+import { formatSriLankanPhoneNumber, isValidSriLankanPhoneNumber, PHONE_NUMBER_MAX_LENGTH } from '../../utils/phone';
 import {
   getDistrictsByProvince,
   getDsDivisionsByDistrict,
@@ -58,7 +59,7 @@ function buildApiaryFormState(initialApiary?: Apiary, user?: { district?: string
     status: initialApiary?.status || 'active',
     land_ownership: initialApiary?.land_ownership || 'owned',
     landlord_name: (initialApiary as any)?.landlord_name || '',
-    landlord_contact: (initialApiary as any)?.landlord_contact || '',
+    landlord_contact: formatSriLankanPhoneNumber((initialApiary as any)?.landlord_contact || ''),
     contract_start: (initialApiary as any)?.contract_start || '',
     contract_end: (initialApiary as any)?.contract_end || '',
     payment_terms: initialApiary?.payment_terms || 'cash',
@@ -86,21 +87,6 @@ function getInitialForageEntries(initialApiary?: Apiary): ApiaryForageEntry[] {
     }];
   }
   return [{ forageType: '', bloomingPeriod: '' }];
-}
-
-function formatPhoneNumber(value: string): string {
-  const cleaned = value.replace(/\D/g, '');
-  if (cleaned.length <= 2) return cleaned;
-  if (cleaned.length <= 5) return `${cleaned.slice(0, 2)} ${cleaned.slice(2)}`;
-  if (cleaned.length <= 8) return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}`;
-  return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8, 12)}`;
-}
-
-function isValidPhoneNumber(phone: string): boolean {
-  if (!phone || typeof phone !== 'string') return false;
-  const cleaned = phone.replace(/\D/g, '');
-  // Accept 9-12 digits for Sri Lankan format (+94 XXXXXXXXX)
-  return cleaned.length >= 9 && cleaned.length <= 12;
 }
 
 function fileToDataUrl(file: File) {
@@ -175,7 +161,7 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
       max_hive_capacity: proposalPrefill.hiveCount != null ? String(proposalPrefill.hiveCount) : base.max_hive_capacity,
       land_ownership: 'not_owned',
       landlord_name: proposalPrefill.ownerName || base.landlord_name,
-      landlord_contact: proposalPrefill.ownerContact || base.landlord_contact,
+      landlord_contact: formatSriLankanPhoneNumber(proposalPrefill.ownerContact || base.landlord_contact),
       payment_terms: paymentTerms,
       payment_amount_lkr: proposalPrefill.cashRentLkr != null ? String(proposalPrefill.cashRentLkr) : base.payment_amount_lkr,
       honey_share_kgs: proposalPrefill.honeyShareKg != null ? String(proposalPrefill.honeyShareKg) : base.honey_share_kgs,
@@ -325,7 +311,7 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
         return;
       }
       if (!isValidPhoneNumber(form.landlord_contact)) {
-        setError('Enter a valid phone number (+94 format, 9-12 digits)');
+        setError('Enter a valid phone number (072 123 1234 format, 10 digits)');
         return;
       }
       if (form.payment_terms === 'cash' && !form.payment_amount_lkr) {
@@ -410,10 +396,10 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
 
           <div>
             <h2 className="text-lg font-bold text-stone-800">
-              {isEdit ? 'Edit Apiary' : 'Create Apiary'}
+              {isEdit ? t('editApiary', selectedLanguage) : t('createApiary', selectedLanguage)}
             </h2>
             <p className="text-sm text-stone-500">
-              Apiary details, forage, and location
+              {t('apiaryFormSubtitle', selectedLanguage)}
             </p>
           </div>
         </div>
@@ -423,11 +409,12 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
         <form onSubmit={handleSubmit} className="px-4 py-6 pb-24 space-y-4">
 
           <div>
-            <label className={labelClass}>Apiary Name *</label>
+            <label className={labelClass}>{t('apiaryName', selectedLanguage)}</label>
             <input value={form.name} onChange={(event) => setField('name', event.target.value)} className={inputClass} />
           </div>
 
           <AdministrativeLocationFields
+            selectedLanguage={selectedLanguage}
             province={form.province}
             district={form.district}
             dsDivision={form.ds_division}
@@ -437,26 +424,26 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
           />
 
           <div>
-            <label className={labelClass}>Established Date</label>
+            <label className={labelClass}>{t('establishedDate', selectedLanguage)}</label>
             <input type="date" value={form.established_date} onChange={(event) => setField('established_date', event.target.value)} className={inputClass} />
           </div>
 
           {isEdit && (
             <div>
-              <label className={labelClass}>Status</label>
+              <label className={labelClass}>{t('statusLabel', selectedLanguage)}</label>
               <select value={form.status} onChange={(event) => setField('status', event.target.value)} className={inputClass}>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="expired">Expired</option>
+                <option value="active">{t('active', selectedLanguage)}</option>
+                <option value="inactive">{t('inactive', selectedLanguage)}</option>
+                <option value="expired">{t('expired', selectedLanguage)}</option>
               </select>
               {form.status === 'inactive' && (
-                <p className="text-xs text-amber-700 mt-1.5 bg-amber-50 px-2 py-1.5 rounded">⚠️ Marking as inactive will hide all linked hives. Ensure all hives are moved or deactivated first.</p>
+                <p className="text-xs text-amber-700 mt-1.5 bg-amber-50 px-2 py-1.5 rounded">⚠️ {t('markingApiaryInactiveWarning', selectedLanguage)}</p>
               )}
             </div>
           )}
 
           <div className="bg-white rounded-2xl p-4 border border-stone-200 space-y-3">
-            <p className="text-sm font-semibold text-stone-800">Land ownership</p>
+            <p className="text-sm font-semibold text-stone-800">{t('landOwnership', selectedLanguage)}</p>
             <div className="flex flex-wrap gap-4">
               <label className="inline-flex items-center gap-2 text-sm text-stone-700">
                 <input
@@ -466,7 +453,7 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
                   onChange={() => setField('land_ownership', 'owned')}
                   className="accent-amber-500"
                 />
-                Own land
+                {t('ownLand', selectedLanguage)}
               </label>
               <label className="inline-flex items-center gap-2 text-sm text-stone-700">
                 <input
@@ -476,72 +463,72 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
                   onChange={() => setField('land_ownership', 'not_owned')}
                   className="accent-amber-500"
                 />
-                Not owned
+                {t('notOwned', selectedLanguage)}
               </label>
             </div>
           </div>
 
           {form.land_ownership === 'not_owned' && (
             <div className="bg-blue-50/60 rounded-2xl p-4 border border-blue-100 space-y-3">
-              <p className="text-sm font-semibold text-blue-800">Landowner and contract details</p>
+              <p className="text-sm font-semibold text-blue-800">{t('landownerAndContractDetails', selectedLanguage)}</p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className={labelClass}>Landowner Name *</label>
+                  <label className={labelClass}>{t('landownerName', selectedLanguage)}</label>
                   <input value={form.landlord_name} onChange={(event) => setField('landlord_name', event.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <label className={labelClass}>Contact Number *</label>
+                  <label className={labelClass}>{t('contactNumber', selectedLanguage)}</label>
                   <input 
                     value={form.landlord_contact} 
                     onChange={(e) => {
-                      const formatted = formatPhoneNumber(e.target.value);
+                      const formatted = formatSriLankanPhoneNumber(e.target.value);
                       setField('landlord_contact', formatted);
                       if (formatted) {
-                        const cleaned = formatted.replace(/\D/g, '');
-                        setPhoneValidationError(!isValidPhoneNumber(formatted) || cleaned.length !== 12 ? 'Phone must be 12 digits (e.g. 94771234567)' : '');
+                        setPhoneValidationError(!isValidSriLankanPhoneNumber(formatted) ? t('must10DigitsPhone', selectedLanguage) : '');
                       } else {
                         setPhoneValidationError('');
                       }
                     }} 
-                    placeholder="94 77 456 7890"
-                    maxLength={15}
+                    placeholder="072 123 1234"
+                    maxLength={PHONE_NUMBER_MAX_LENGTH}
+                    inputMode="numeric"
                     className={`${inputClass} ${phoneValidationError ? 'border-red-500 bg-red-50/30' : ''}`}
                   />
                   {phoneValidationError && (
                     <p className="text-xs text-red-600 mt-1">{phoneValidationError}</p>
                   )}
                   {!phoneValidationError && form.landlord_contact && (
-                    <p className="text-xs text-green-600 mt-1">✓ Valid phone number</p>
+                    <p className="text-xs text-green-600 mt-1">✓ {t('validPhoneNumber', selectedLanguage)}</p>
                   )}
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className={labelClass}>Contract Start *</label>
+                  <label className={labelClass}>{t('contractStart', selectedLanguage)}</label>
                   <input type="date" value={form.contract_start} onChange={(event) => setField('contract_start', event.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <label className={labelClass}>Contract End *</label>
+                  <label className={labelClass}>{t('contractEnd', selectedLanguage)}</label>
                   <input type="date" value={form.contract_end} onChange={(event) => setField('contract_end', event.target.value)} className={inputClass} />
                 </div>
               </div>
               <div>
-                <label className={labelClass}>Payment Terms</label>
+                <label className={labelClass}>{t('paymentTerms', selectedLanguage)}</label>
                 <select value={form.payment_terms} onChange={(event) => setField('payment_terms', event.target.value as ApiaryFormState['payment_terms'])} className={inputClass}>
-                  <option value="cash">Cash</option>
-                  <option value="honey_share">Honey Share</option>
-                  <option value="pollination_service">Pollination Service</option>
+                  <option value="cash">{t('cash', selectedLanguage)}</option>
+                  <option value="honey_share">{t('honeyShare', selectedLanguage)}</option>
+                  <option value="pollination_service">{t('pollinationService', selectedLanguage)}</option>
                 </select>
               </div>
               {form.payment_terms === 'cash' && (
                 <div>
-                  <label className={labelClass}>LKR Amount</label>
+                  <label className={labelClass}>{t('lkrAmount', selectedLanguage)}</label>
                   <input type="number" min="0" value={form.payment_amount_lkr} onChange={(event) => setField('payment_amount_lkr', event.target.value)} className={inputClass} />
                 </div>
               )}
               {form.payment_terms === 'honey_share' && (
                 <div>
-                  <label className={labelClass}>Yield (kg)</label>
+                  <label className={labelClass}>{t('yieldKg', selectedLanguage)}</label>
                   <input type="number" min="0" step="0.1" value={form.honey_share_kgs} onChange={(event) => setField('honey_share_kgs', event.target.value)} className={inputClass} />
                 </div>
               )}
@@ -551,11 +538,11 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
           <div className="bg-white rounded-2xl p-4 border border-stone-200 space-y-3">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold text-stone-800">Primary forage type</p>
-                <p className="text-xs text-stone-500 mt-0.5">Add one or more forage sources with their blooming period.</p>
+                <p className="text-sm font-semibold text-stone-800">{t('primaryForageType', selectedLanguage)}</p>
+                <p className="text-xs text-stone-500 mt-0.5">{t('addOneOrMoreForageSources', selectedLanguage)}</p>
               </div>
               <button type="button" onClick={addForageEntry} className="inline-flex items-center gap-1 text-sm font-medium text-emerald-700 hover:text-emerald-800">
-                <Plus className="w-4 h-4" /> Add option
+                <Plus className="w-4 h-4" /> {t('addOption', selectedLanguage)}
               </button>
             </div>
             <div className="space-y-3">
@@ -583,27 +570,27 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className={labelClass}>Max Hive Capacity</label>
+              <label className={labelClass}>{t('maxHiveCapacity', selectedLanguage)}</label>
               <input type="number" min="0" value={form.max_hive_capacity} onChange={(event) => setField('max_hive_capacity', event.target.value)} className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>Water Availability</label>
+              <label className={labelClass}>{t('waterAvailability', selectedLanguage)}</label>
               <select value={form.water_availability} onChange={(event) => setField('water_availability', event.target.value as ApiaryFormState['water_availability'])} className={inputClass}>
-                <option value="">Select water availability</option>
-                <option value="On-site">On-site</option>
-                <option value="<500m">&lt;500m</option>
-                <option value=">500m (Requires Manual Water)">&gt;500m (Requires Manual Water)</option>
+                <option value="">{t('select', selectedLanguage)}</option>
+                <option value="On-site">{t('onSite', selectedLanguage)}</option>
+                <option value="<500m">{t('within500m', selectedLanguage)}</option>
+                <option value=">500m (Requires Manual Water)">{t('requiresManualWater', selectedLanguage)}</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label className={labelClass}>Vehicle Accessibility</label>
+            <label className={labelClass}>{t('vehicleAccessibility', selectedLanguage)}</label>
             <select value={form.vehicle_accessibility} onChange={(event) => setField('vehicle_accessibility', event.target.value as ApiaryFormState['vehicle_accessibility'])} className={inputClass}>
-              <option value="">Select accessibility</option>
-              <option value="Lorry">Lorry</option>
-              <option value="Tuk-tuk">Tuk-tuk</option>
-              <option value="Footpath">Footpath</option>
+              <option value="">{t('select', selectedLanguage)}</option>
+              <option value="Lorry">{t('lorry', selectedLanguage)}</option>
+              <option value="Tuk-tuk">{t('tukTuk', selectedLanguage)}</option>
+              <option value="Footpath">{t('footpath', selectedLanguage)}</option>
             </select>
           </div>
 
@@ -614,7 +601,8 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
             </div>
           )}
           <LocationSelectorField
-            label="Location / GPS"
+            selectedLanguage={selectedLanguage}
+            label={t('locationGpsRequired', selectedLanguage)}
             district={form.district || user?.district}
             latitude={form.gps_latitude}
             longitude={form.gps_longitude}
@@ -622,17 +610,17 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
               setField('gps_latitude', latitude);
               setField('gps_longitude', longitude);
             }}
-            helperText="Pin the location on the map, or use province, district, and DS division above."
+            helperText={t('pinLocationOnMapOrUseAdministrativeFields', selectedLanguage)}
           />
 
           <div className="bg-white rounded-2xl p-4 border border-stone-200 space-y-3">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold text-stone-800">Images</p>
-                <p className="text-xs text-stone-500 mt-0.5">Add reference photos for the apiary.</p>
+                <p className="text-sm font-semibold text-stone-800">{t('images', selectedLanguage)}</p>
+                <p className="text-xs text-stone-500 mt-0.5">{t('addReferencePhotosForApiary', selectedLanguage)}</p>
               </div>
               <label className="inline-flex items-center gap-1 text-sm font-medium text-emerald-700 cursor-pointer hover:text-emerald-800">
-                <Plus className="w-4 h-4" /> Add
+                <Plus className="w-4 h-4" /> {t('add', selectedLanguage)}
                 <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
               </label>
             </div>
@@ -648,19 +636,19 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-stone-400">No images added yet.</p>
+              <p className="text-sm text-stone-400">{t('noImagesAddedYet', selectedLanguage)}</p>
             )}
           </div>
 
           <div>
-            <label className={labelClass}>Notes</label>
+            <label className={labelClass}>{t('notesLabel', selectedLanguage)}</label>
             <textarea value={form.notes} onChange={(event) => setField('notes', event.target.value)} rows={4} className={inputClass} />
           </div>
 
           {error && <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm">{error}</div>}
 
           <button type="submit" disabled={saving} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-60">
-            {saving ? <><Loader2 className="w-5 h-5 animate-spin" /> Saving...</> : <><Save className="w-5 h-5" /> {isEdit ? 'Update Apiary' : 'Create Apiary'}</>}
+            {saving ? <><Loader2 className="w-5 h-5 animate-spin" /> {t('saving', selectedLanguage)}</> : <><Save className="w-5 h-5" /> {isEdit ? t('updateApiary', selectedLanguage) : t('saveApiary', selectedLanguage)}</>}
           </button>
         </form>
       </div>

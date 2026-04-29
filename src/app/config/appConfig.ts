@@ -6,7 +6,7 @@ export const APP_CONFIG = {
   DEMO_USER: {
     name: 'Amal', // Change this name to update it everywhere in the system
     email: 'amal@example.com',
-    phone: '+94 77 456 7890',
+    phone: '072 123 1234',
     district: 'Colombo',
     role: 'Beekeeper (Admin)',
   },

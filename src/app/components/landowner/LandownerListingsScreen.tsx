@@ -454,7 +454,7 @@ export function LandownerListingsScreen({
                       <p className="text-button text-stone-800">{plot?.district || '-'}</p>
                       <p className="truncate text-body text-stone-600">{plot?.dsDivision || '-'}</p>
                       <p className="mt-0.5 text-caption text-stone-500">
-                        {listing.financialTerms === 'cash_rent' ? `Rs ${listing.cashRentLkr || 0}` : listing.financialTerms === 'honey_share' ? `${listing.honeyShareKg || 0} kg` : 'Barter'}
+                        {listing.financialTerms === 'cash_rent' ? `Rs ${listing.cashRentLkr || 0}` : listing.financialTerms === 'honey_share' ? `${listing.honeyShareKg || 0}%` : 'Barter'}
                       </p>
                     </div>
 
@@ -587,7 +587,7 @@ export function LandownerListingsScreen({
 
               {form.financialTerms === 'honey_share' && (
                 <label className="block">
-                  <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-stone-500">{t('honeyShareKg', selectedLanguage)}</span>
+                  <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-stone-500">{t('honeySharePercentLabel', selectedLanguage)}</span>
                   <input
                     disabled={editorMode === 'view'}
                     value={form.honeyShareKg}
@@ -782,7 +782,7 @@ function ContractsSection({
       return `${t('cashRentRs', selectedLanguage)} ${contract.cash_rent_lkr || 0}`;
     }
     if (contract.financial_terms === 'honey_share') {
-      return `${t('honeyShareKgLabel', selectedLanguage)} · ${contract.honey_share_kgs || 0} ${t('kg', selectedLanguage)}`;
+      return `${t('honeySharePercentLabel', selectedLanguage)} · ${contract.honey_share_kgs || 0}%`;
     }
     if (contract.financial_terms === 'pollination_service') {
       return t('pollinationServiceLabel', selectedLanguage);

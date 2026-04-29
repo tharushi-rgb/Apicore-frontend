@@ -1,6 +1,7 @@
 import { supabase } from './supabaseClient';
 import { authService } from './auth';
 import { notificationsService } from './notifications';
+import { formatSriLankanPhoneNumber, isValidSriLankanPhoneNumber } from '../utils/phone';
 
 const METADATA_MARKER = '\n\n[APIARY_METADATA]\n';
 
@@ -112,17 +113,12 @@ function validateAndSanitizePhoneNumber(phone?: string | null): string | null {
   if (!phone) return null;
   const sanitized = sanitizeString(phone);
   if (!sanitized) return null;
-  
-  // Extract only numeric characters (include +)
-  const cleaned = sanitized.replace(/\D/g, '');
-  
-  // Check if it's 9-12 digits for Sri Lankan format (+94 XXXXXXXXX)
-  if (cleaned.length >= 9 && cleaned.length <= 12) {
-    return sanitized;
+  if (isValidSriLankanPhoneNumber(sanitized)) {
+    return formatSriLankanPhoneNumber(sanitized);
   }
-  
-  // If invalid, throw error to frontend
-  throw new Error(`Invalid phone number. Must be 9-12 digits (+94 format). Received: ${cleaned.length} digits`);
+
+  const cleaned = sanitized.replace(/\D/g, '');
+  throw new Error(`Invalid phone number. Must be 10 digits (072 123 1234 format). Received: ${cleaned.length} digits`);
 }
 
 function splitNotesAndMetadata(notes?: string | null) {

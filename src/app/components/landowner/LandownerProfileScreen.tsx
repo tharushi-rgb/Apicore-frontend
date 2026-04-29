@@ -7,17 +7,10 @@ import { profileService, type Profile } from '../../services/profile';
 import { landownerMarketplaceService, type LandPlot } from '../../services/landownerMarketplace';
 import { PROVINCES, getDistrictsByProvince, getDsDivisionsByDistrict } from '../../constants/sriLankaLocations';
 import { t } from '../../i18n';
+import { formatSriLankanPhoneNumber, PHONE_NUMBER_MAX_LENGTH } from '../../utils/phone';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
-
-const formatPhoneNumber = (value: string): string => {
-  const cleaned = value.replace(/\D/g, '');
-  if (cleaned.length <= 2) return cleaned;
-  if (cleaned.length <= 5) return `${cleaned.slice(0, 2)} ${cleaned.slice(2)}`;
-  if (cleaned.length <= 8) return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}`;
-  return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8, 12)}`;
-};
 
 interface Props {
   selectedLanguage: Language;
@@ -99,7 +92,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
         setProfile(p);
         setEditName(p.name || '');
         setEditEmail(p.email || '');
-        setEditPhone(p.phone || '');
+        setEditPhone(formatSriLankanPhoneNumber(p.phone || ''));
         setEditProvince((p as any).province || '');
         setEditDistrict(p.district || '');
         setEditDsDivision((p as any).ds_division || '');
@@ -174,7 +167,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
     if (!profile) return;
     setEditName(profile.name || '');
     setEditEmail(profile.email || '');
-    setEditPhone(profile.phone || '');
+    setEditPhone(formatSriLankanPhoneNumber(profile.phone || ''));
     setEditProvince((profile as any).province || '');
     setEditDistrict(profile.district || '');
     setEditDsDivision((profile as any).ds_division || '');
@@ -203,7 +196,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
       const updated = await profileService.update({
         name: editName.trim(),
         // email: editEmail.trim(),
-        phone: editPhone.trim(),
+        phone: formatSriLankanPhoneNumber(editPhone),
         district: editDistrict.trim(),
         province: editProvince.trim(),
         ds_division: editDsDivision.trim(),
@@ -1011,12 +1004,13 @@ function ProfileEditInputTile({
           onChange={(event) => {
             let newValue = event.target.value;
             if (type === 'tel') {
-              newValue = formatPhoneNumber(newValue);
+              newValue = formatSriLankanPhoneNumber(newValue);
             }
             onChange(newValue);
           }}
           placeholder={placeholder}
-          maxLength={type === 'tel' ? 15 : undefined}
+          inputMode={type === 'tel' ? 'numeric' : undefined}
+          maxLength={type === 'tel' ? PHONE_NUMBER_MAX_LENGTH : undefined}
           className="min-w-0 flex-1 bg-transparent text-right text-sm font-semibold text-stone-900 placeholder:text-stone-400 focus:outline-none"
         />
       </div>

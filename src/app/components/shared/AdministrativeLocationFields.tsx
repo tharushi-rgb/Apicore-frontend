@@ -3,8 +3,10 @@ import {
   getDistrictsByProvince,
   getDsDivisionsByDistrict,
 } from '../../constants/sriLankaLocations';
+import { t, type Language } from '../../i18n';
 
 interface AdministrativeLocationFieldsProps {
+  selectedLanguage?: Language;
   province: string;
   district: string;
   dsDivision: string;
@@ -15,6 +17,7 @@ interface AdministrativeLocationFieldsProps {
 }
 
 export function AdministrativeLocationFields({
+  selectedLanguage = 'en',
   province,
   district,
   dsDivision,
@@ -31,13 +34,13 @@ export function AdministrativeLocationFields({
     <>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className="app-label">Province{suffix}</label>
+          <label className="app-label">{t('province', selectedLanguage)}{suffix}</label>
           <select
             value={province}
             onChange={(event) => onProvinceChange(event.target.value)}
             className="app-input"
           >
-            <option value="">Select province</option>
+            <option value="">{t('selectProvince', selectedLanguage)}</option>
             {PROVINCES.map((provinceOption) => (
               <option key={provinceOption} value={provinceOption}>
                 {provinceOption}
@@ -47,13 +50,13 @@ export function AdministrativeLocationFields({
         </div>
 
         <div>
-          <label className="app-label">District{suffix}</label>
+          <label className="app-label">{t('district', selectedLanguage)}{suffix}</label>
           <select
             value={district}
             onChange={(event) => onDistrictChange(event.target.value)}
             className="app-input"
           >
-            <option value="">Select district</option>
+            <option value="">{t('selectDistrictReg', selectedLanguage)}</option>
             {districts.map((districtOption) => (
               <option key={districtOption} value={districtOption}>
                 {districtOption}
@@ -64,13 +67,13 @@ export function AdministrativeLocationFields({
       </div>
 
       <div>
-        <label className="app-label">DS Division{suffix}</label>
+        <label className="app-label">{t('dsDivision', selectedLanguage)}{suffix}</label>
         <select
           value={dsDivision}
           onChange={(event) => onDsDivisionChange(event.target.value)}
           className="app-input"
         >
-          <option value="">Select DS division</option>
+          <option value="">{t('selectDsDivision', selectedLanguage)}</option>
           {dsDivisions.map((dsOption) => (
             <option key={dsOption} value={dsOption}>
               {dsOption}

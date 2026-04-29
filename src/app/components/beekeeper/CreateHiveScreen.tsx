@@ -615,8 +615,8 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
           </button>
 
           <PageTitleBar
-            title={isEdit ? 'Edit Hive' : 'Create Hive'}
-            subtitle="Basic details, hive configuration, and colony setup"
+            title={isEdit ? t('editHive', selectedLanguage) : t('createHive', selectedLanguage)}
+            subtitle={t('hiveFormSubtitle', selectedLanguage)}
             size="sm"
           />
         </div>
@@ -628,18 +628,18 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
           <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-4">
             <div className="bg-white border border-red-200 shadow-xl rounded-2xl p-4 w-full max-w-sm space-y-3">
               <p className="text-sm font-semibold text-red-700">{error}</p>
-              <div className="text-xs text-stone-600">Fix the highlighted issue and try again.</div>
-              <button type="button" onClick={() => setError('')} className="w-full bg-red-500 text-white py-2 rounded-xl font-semibold text-sm">OK</button>
+              <div className="text-xs text-stone-600">{t('fixHighlightedIssue', selectedLanguage)}</div>
+              <button type="button" onClick={() => setError('')} className="w-full bg-red-500 text-white py-2 rounded-xl font-semibold text-sm">{t('ok', selectedLanguage)}</button>
             </div>
           </div>
         )}
 
         <div className="bg-white rounded-2xl p-4 border border-stone-200 space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-stone-800">1. Basic Information</h3>
+            <h3 className="text-sm font-semibold text-stone-800">1. {t('basicInformation', selectedLanguage)}</h3>
             {!isEdit && (
               <button type="button" onClick={addHiveNameRow} className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800">
-                <Plus className="w-4 h-4" /> Add hive
+                <Plus className="w-4 h-4" /> {t('addHive', selectedLanguage)}
               </button>
             )}
           </div>
@@ -648,8 +648,8 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
             {form.hive_names.map((hiveName, index) => (
               <div key={index} className="flex items-center gap-2">
                 <div className="flex-1">
-                  <label className={sLabelCls}>{`Hive Number/Name ${index + 1} *`}</label>
-                  <input value={hiveName} onChange={(e) => updateHiveName(index, e.target.value)} placeholder={`Hive ${index + 1}`} className={inputCls} />
+                  <label className={sLabelCls}>{`${t('hiveNameNumber', selectedLanguage)} ${index + 1} *`}</label>
+                  <input value={hiveName} onChange={(e) => updateHiveName(index, e.target.value)} placeholder={`${t('hiveNameNumber', selectedLanguage)} ${index + 1}`} className={inputCls} />
                 </div>
                 {!isEdit && form.hive_names.length > 1 && (
                   <button type="button" onClick={() => removeHiveNameRow(index)} className="mt-5 p-2 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200">
@@ -661,14 +661,15 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
           </div>
 
           <div>
-            <label className={labelCls}>Apiary *</label>
+            <label className={labelCls}>{t('apiary', selectedLanguage)} *</label>
             <select value={form.apiary_selection} onChange={(e) => updateField('apiary_selection', e.target.value)} className={inputCls}>
-              <option value="">Select an apiary</option>
+              <option value="">{t('selectAnApiary', selectedLanguage)}</option>
               {apiaries.map((apiary) => <option key={apiary.id} value={apiary.id}>{apiary.name}</option>)}
             </select>
           </div>
 
           <AdministrativeLocationFields
+            selectedLanguage={selectedLanguage}
             province={form.province}
             district={form.district}
             dsDivision={form.ds_division}
@@ -679,14 +680,14 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className={labelCls}>Date Established *</label>
+              <label className={labelCls}>{t('establishedDate', selectedLanguage)} *</label>
               <input type="date" value={form.established_date} onChange={(e) => updateField('established_date', e.target.value)} className={inputCls} />
             </div>
             <div>
-              <label className={labelCls}>Status *</label>
+              <label className={labelCls}>{t('statusLabel', selectedLanguage)} *</label>
               <select value={form.status} onChange={(e) => updateField('status', e.target.value)} className={inputCls}>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="active">{t('active', selectedLanguage)}</option>
+                <option value="inactive">{t('inactive', selectedLanguage)}</option>
               </select>
             </div>
           </div>
@@ -696,13 +697,14 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[0.82rem] text-amber-900 flex items-start gap-2 shadow-[0_1px_0_rgba(0,0,0,0.02)]">
                 <AlertTriangle className="w-4 h-4 mt-0.5 text-amber-700" />
                 <div className="leading-snug">
-                  <p className="font-semibold text-[0.84rem]">Another hive is within 5 km</p>
-                  <p className="text-[0.8rem]">Pick a different spot or confirm placement.</p>
+                  <p className="font-semibold text-[0.84rem]">{t('anotherHiveWithin5Km', selectedLanguage)}</p>
+                  <p className="text-[0.8rem]">{t('pickDifferentSpotOrConfirmPlacement', selectedLanguage)}</p>
                 </div>
               </div>
             )}
             <LocationSelectorField
-              label="Location / GPS *"
+              selectedLanguage={selectedLanguage}
+              label={t('locationGpsRequired', selectedLanguage)}
               district={form.district || user?.district}
               latitude={form.gps_latitude}
               longitude={form.gps_longitude}
@@ -710,28 +712,28 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
                 updateField('gps_latitude', latitude);
                 updateField('gps_longitude', longitude);
               }}
-              helperText="Pin exact location for forage-distance accuracy. Administrative location fields above are optional."
+              helperText={t('pinExactLocationForAccuracy', selectedLanguage)}
             />
           </div>
         </div>
 
         <div className="bg-white rounded-2xl p-4 border border-stone-200 space-y-3">
-          <h3 className="text-sm font-semibold text-stone-800">2. Hive Configuration</h3>
+          <h3 className="text-sm font-semibold text-stone-800">2. {t('hiveConfiguration', selectedLanguage)}</h3>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className={labelCls}>Type *</label>
+              <label className={labelCls}>{t('hiveType', selectedLanguage)}</label>
               <select value={form.hive_variant} onChange={(e) => updateField('hive_variant', e.target.value)} className={inputCls}>
-                <option value="standard_box">Standard Box (Mee Pettiya)</option>
-                <option value="ulukata_pettiya">Ulukata Pettiya (Roof Tile Box)</option>
-                <option value="meti_kalaya">Meti Kalaya (Clay Pot)</option>
-                <option value="kitul_kota">Kitul Kota (Log)</option>
+                <option value="standard_box">{t('standardBoxHive', selectedLanguage)}</option>
+                <option value="ulukata_pettiya">{t('ulukataPettiya', selectedLanguage)}</option>
+                <option value="meti_kalaya">{t('potHive', selectedLanguage)}</option>
+                <option value="kitul_kota">{t('logHive', selectedLanguage)}</option>
               </select>
             </div>
             <div>
-              <label className={labelCls}>Material *</label>
+              <label className={labelCls}>{t('materialLabel', selectedLanguage)}</label>
               <select value={form.material} onChange={(e) => updateField('material', e.target.value)} className={inputCls}>
-                <option value="">Select material</option>
+                <option value="">{t('select', selectedLanguage)}</option>
                 {getMaterialOptions(form.hive_variant as HiveVariant).map((option) => (
                   <option key={option} value={option}>{option}</option>
                 ))}
@@ -742,12 +744,12 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
           {isBoxLike && (
             <div className="space-y-3 rounded-xl bg-amber-50/50 border border-amber-100 p-3">
               <div>
-                <label className={sLabelCls}>Frames *</label>
+                <label className={sLabelCls}>{t('frames', selectedLanguage)}</label>
                 <input type="number" min="1" value={form.num_frames} onChange={(e) => updateField('num_frames', e.target.value)} className={inputCls} />
               </div>
 
               <div>
-                <label className={sLabelCls}>Entrance Position * (choose one or more)</label>
+                <label className={sLabelCls}>{t('entrancePosition', selectedLanguage)}</label>
                 <div className="grid grid-cols-3 gap-2">
                   {['top', 'bottom', 'side'].map((position) => (
                     <label key={position} className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-stone-200 bg-white text-sm text-stone-700">
@@ -763,16 +765,16 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
 
           {isPot && (
             <div className="space-y-3 rounded-xl bg-orange-50/50 border border-orange-100 p-3">
-              <p className="text-xs font-medium text-orange-700">Logic details for pot (all required)</p>
+              <p className="text-xs font-medium text-orange-700">{t('logicDetailsForPot', selectedLanguage)}</p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className={sLabelCls}>Wall Thickness (cm) *</label>
+                  <label className={sLabelCls}>{t('wallThickness', selectedLanguage)}</label>
                   <input type="number" min="0" step="0.1" value={form.pot_wall_thickness_cm} onChange={(e) => updateField('pot_wall_thickness_cm', e.target.value)} className={inputCls} />
                 </div>
                 <div>
-                  <label className={sLabelCls}>Pot Shape *</label>
+                  <label className={sLabelCls}>{t('potShape', selectedLanguage)}</label>
                   <select value={form.pot_shape} onChange={(e) => updateField('pot_shape', e.target.value)} className={inputCls}>
-                    <option value="">Select</option>
+                    <option value="">{t('select', selectedLanguage)}</option>
                     <option value="round">Round</option>
                     <option value="oval">Oval</option>
                   </select>
@@ -781,28 +783,28 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className={sLabelCls}>Internal Volume (liters) *</label>
+                  <label className={sLabelCls}>{t('internalVolume', selectedLanguage)}</label>
                   <input type="number" min="0" step="0.1" value={form.pot_internal_volume_liters} onChange={(e) => updateField('pot_internal_volume_liters', e.target.value)} className={inputCls} />
                 </div>
                 <div>
-                  <label className={sLabelCls}>Entrance Hole Diameter (cm) *</label>
+                  <label className={sLabelCls}>{t('entranceHoleDiameter', selectedLanguage)}</label>
                   <input type="number" min="0" step="0.1" value={form.pot_entrance_hole_diameter_cm} onChange={(e) => updateField('pot_entrance_hole_diameter_cm', e.target.value)} className={inputCls} />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className={sLabelCls}>Ventilation Holes *</label>
+                  <label className={sLabelCls}>{t('ventilationHoles', selectedLanguage)}</label>
                   <select value={form.pot_ventilation_holes} onChange={(e) => updateField('pot_ventilation_holes', e.target.value)} className={inputCls}>
-                    <option value="">Select</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
+                    <option value="">{t('select', selectedLanguage)}</option>
+                    <option value="yes">{t('yes', selectedLanguage)}</option>
+                    <option value="no">{t('no', selectedLanguage)}</option>
                   </select>
                 </div>
                 <div>
-                  <label className={sLabelCls}>Shade Level *</label>
+                  <label className={sLabelCls}>{t('shadeLevel', selectedLanguage)}</label>
                   <select value={form.pot_shade_level} onChange={(e) => updateField('pot_shade_level', e.target.value)} className={inputCls}>
-                    <option value="">Select</option>
+                    <option value="">{t('select', selectedLanguage)}</option>
                     <option value="full_shade">Full shade</option>
                     <option value="partial_shade">Partial shade</option>
                   </select>
@@ -811,17 +813,17 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className={sLabelCls}>Rain Protection *</label>
+                  <label className={sLabelCls}>{t('rainProtection', selectedLanguage)}</label>
                   <select value={form.pot_rain_protection} onChange={(e) => updateField('pot_rain_protection', e.target.value)} className={inputCls}>
-                    <option value="">Select</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
+                    <option value="">{t('select', selectedLanguage)}</option>
+                    <option value="yes">{t('yes', selectedLanguage)}</option>
+                    <option value="no">{t('no', selectedLanguage)}</option>
                   </select>
                 </div>
                 <div>
-                  <label className={sLabelCls}>Stand Type *</label>
+                  <label className={sLabelCls}>{t('standType', selectedLanguage)}</label>
                   <select value={form.pot_stand_type} onChange={(e) => updateField('pot_stand_type', e.target.value)} className={inputCls}>
-                    <option value="">Select</option>
+                    <option value="">{t('select', selectedLanguage)}</option>
                     <option value="single_pillar">Single Pillar</option>
                     <option value="four_leg_stand">Four-leg Stand</option>
                     <option value="hanging">Hanging</option>
@@ -833,42 +835,42 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
 
           {isLog && (
             <div className="space-y-3 rounded-xl bg-emerald-50/50 border border-emerald-100 p-3">
-              <p className="text-xs font-medium text-emerald-700">Logic details for log (all required)</p>
+              <p className="text-xs font-medium text-emerald-700">{t('logicDetailsForLog', selectedLanguage)}</p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className={sLabelCls}>Wood Type (Tree Species) *</label>
+                  <label className={sLabelCls}>{t('woodType', selectedLanguage)}</label>
                   <input value={form.log_wood_type} onChange={(e) => updateField('log_wood_type', e.target.value)} className={inputCls} />
                 </div>
                 <div>
-                  <label className={sLabelCls}>Log Length (cm) *</label>
+                  <label className={sLabelCls}>{t('logLength', selectedLanguage)}</label>
                   <input type="number" min="0" step="0.1" value={form.log_length_cm} onChange={(e) => updateField('log_length_cm', e.target.value)} className={inputCls} />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className={sLabelCls}>Cavity Diameter (cm) *</label>
+                  <label className={sLabelCls}>{t('cavityDiameter', selectedLanguage)}</label>
                   <input type="number" min="0" step="0.1" value={form.log_cavity_diameter_cm} onChange={(e) => updateField('log_cavity_diameter_cm', e.target.value)} className={inputCls} />
                 </div>
                 <div>
-                  <label className={sLabelCls}>Entrance Size *</label>
+                  <label className={sLabelCls}>{t('entranceSize', selectedLanguage)}</label>
                   <input value={form.log_entrance_size} onChange={(e) => updateField('log_entrance_size', e.target.value)} className={inputCls} />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className={sLabelCls}>Entrance Orientation *</label>
+                  <label className={sLabelCls}>{t('entranceOrientation', selectedLanguage)}</label>
                   <input value={form.log_entrance_orientation} onChange={(e) => updateField('log_entrance_orientation', e.target.value)} className={inputCls} />
                 </div>
                 <div>
-                  <label className={sLabelCls}>Placement Height *</label>
+                  <label className={sLabelCls}>{t('placementHeight', selectedLanguage)}</label>
                   <input value={form.log_placement_height} onChange={(e) => updateField('log_placement_height', e.target.value)} className={inputCls} />
                 </div>
               </div>
 
               <div>
-                <label className={sLabelCls}>Shade *</label>
+                <label className={sLabelCls}>{t('shade', selectedLanguage)}</label>
                 <input value={form.log_shade} onChange={(e) => updateField('log_shade', e.target.value)} placeholder="e.g., partial shade" className={inputCls} />
               </div>
             </div>
@@ -876,22 +878,22 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className={`${labelCls} min-h-[3rem]`}>Entrance Guard (Optional)</label>
+              <label className={`${labelCls} min-h-[3rem]`}>{t('entranceGuardOptional', selectedLanguage)}</label>
               <div className="flex gap-2">
                 {['yes', 'no'].map((value) => (
                   <button key={value} type="button" onClick={() => updateField('entrance_guard', value)} className={`flex-1 py-1.5 rounded-xl text-sm border ${form.entrance_guard === value ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-stone-700 border-stone-200'}`}>
-                    {value === 'yes' ? 'Yes' : 'No'}
+                    {value === 'yes' ? t('yes', selectedLanguage) : t('no', selectedLanguage)}
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="sm:border-l sm:border-stone-200 sm:pl-4">
-              <label className={`${labelCls} min-h-[3rem]`}>Ant Protection *</label>
+              <label className={`${labelCls} min-h-[3rem]`}>{t('antProtection', selectedLanguage)}</label>
               <div className="flex gap-2">
                 {['yes', 'no'].map((value) => (
                   <button key={value} type="button" onClick={() => updateField('ant_protection', value)} className={`flex-1 py-1.5 rounded-xl text-sm border ${form.ant_protection === value ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-stone-700 border-stone-200'}`}>
-                    {value === 'yes' ? 'Yes' : 'No'}
+                    {value === 'yes' ? t('yes', selectedLanguage) : t('no', selectedLanguage)}
                   </button>
                 ))}
               </div>
@@ -900,13 +902,13 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
         </div>
 
         <div className="bg-white rounded-2xl p-4 border border-stone-200 space-y-3">
-          <h3 className="text-sm font-semibold text-stone-800">3. Colony & Biological Details</h3>
+          <h3 className="text-sm font-semibold text-stone-800">3. {t('colonyBiologicalDetails', selectedLanguage)}</h3>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className={labelCls}>Bee Species *</label>
+              <label className={labelCls}>{t('beeSpecies', selectedLanguage)}</label>
               <select value={form.bee_species} onChange={(e) => updateField('bee_species', e.target.value)} className={inputCls}>
-                <option value="">Select species</option>
+                <option value="">{t('select', selectedLanguage)}</option>
                 <option value="apis_cerana">Mee Massa (Apis cerana)</option>
                 <option value="tetragonula">Kaneyiya (Tetragonula)</option>
                 <option value="apis_florea">Danduwal Massa (Apis florea)</option>
@@ -914,9 +916,9 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
             </div>
 
             <div>
-              <label className={labelCls}>Colony Origin *</label>
+              <label className={labelCls}>{t('colonyOrigin', selectedLanguage)}</label>
               <select value={form.colony_origin} onChange={(e) => updateField('colony_origin', e.target.value)} className={inputCls}>
-                <option value="">Select origin</option>
+                <option value="">{t('select', selectedLanguage)}</option>
                 <option value="rukula_capture">Rukula Capture (Trap)</option>
                 <option value="wild_transfer">Wild Transfer (Bambara/Wall)</option>
                 <option value="division">Division (Beduma)</option>
@@ -927,9 +929,9 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 items-start">
             <div className="flex flex-col gap-1">
-              <label className={labelCls}>Queen Status (Optional)</label>
+              <label className={labelCls}>{t('queenStatusOptional', selectedLanguage)}</label>
               <select value={form.queen_status} onChange={(e) => updateField('queen_status', e.target.value)} className={inputCls}>
-                <option value="">Not specified</option>
+                <option value="">{t('notSpecified', selectedLanguage)}</option>
                 <option value="marked">Marked</option>
                 <option value="unmarked">Unmarked</option>
                 <option value="virgin">Virgin (Kumari)</option>
@@ -938,15 +940,15 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className={labelCls}>Queen Acceptance Date</label>
+              <label className={labelCls}>{t('queenAcceptanceDate', selectedLanguage)}</label>
               <input type="date" value={form.queen_acceptance_date} onChange={(e) => updateField('queen_acceptance_date', e.target.value)} className={inputCls} />
             </div>
           </div>
 
           <div>
             <div className="flex items-center justify-between">
-              <label className={labelCls}>Colony Strength (0-100%)</label>
-              <span className="text-sm text-stone-600">{form.colony_strength_percent ? `${form.colony_strength_percent}%` : 'Not set'}</span>
+              <label className={labelCls}>{t('colonyStrength', selectedLanguage)}</label>
+              <span className="text-sm text-stone-600">{form.colony_strength_percent ? `${form.colony_strength_percent}%` : t('notSet', selectedLanguage)}</span>
             </div>
             <input
               type="range"
@@ -961,24 +963,24 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
         </div>
 
         <div className="bg-white rounded-2xl p-4 border border-stone-200 space-y-3">
-          <h3 className="text-sm font-semibold text-stone-800">5. Maintenance</h3>
+          <h3 className="text-sm font-semibold text-stone-800">5. {t('maintenance', selectedLanguage)}</h3>
 
           <div>
-            <label className={labelCls}>Notes</label>
+            <label className={labelCls}>{t('notesLabel', selectedLanguage)}</label>
             <textarea value={form.notes} onChange={(e) => updateField('notes', e.target.value)} rows={3} className={inputCls} />
           </div>
 
           <div className="space-y-2">
-            <label className={labelCls}>Photos</label>
+            <label className={labelCls}>{t('photos', selectedLanguage)}</label>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 className="px-4 py-2 rounded-xl border border-amber-300 bg-amber-50 text-sm font-semibold text-amber-800 hover:bg-amber-100 transition-colors"
               >
-                Choose Photos
+                {t('choosePhotos', selectedLanguage)}
               </button>
-              <span className="text-xs text-stone-500">JPEG/PNG, multiple files allowed</span>
+              <span className="text-xs text-stone-500">{t('jpegPngMultipleFilesAllowed', selectedLanguage)}</span>
             </div>
             <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
             {form.photos.length > 0 && (
@@ -998,8 +1000,8 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
 
         <button type="submit" disabled={saving} className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-60">
           {saving
-            ? <><Loader2 className="w-5 h-5 animate-spin" /> Saving...</>
-            : <><Save className="w-5 h-5" /> {isEdit ? 'Update Hive' : 'Create Hive'}</>}
+            ? <><Loader2 className="w-5 h-5 animate-spin" /> {t('saving', selectedLanguage)}</>
+            : <><Save className="w-5 h-5" /> {isEdit ? t('editHive', selectedLanguage) : t('createHive', selectedLanguage)}</>}
         </button>
       </form>
       </div>
