@@ -96,7 +96,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
     } finally {
       setProposalsLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   const refreshAll = useCallback(async () => {
     await loadListings();
@@ -106,6 +106,8 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
+      // Clear old proposals if user changed
+      setProposals([]);
       await loadListings();
       if (cancelled) return;
       void loadProposals();
@@ -114,7 +116,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
     return () => {
       cancelled = true;
     };
-  }, [loadListings, loadProposals]);
+  }, [loadListings, loadProposals, user?.id]);
 
   const locationOptions = useMemo(() => {
     const values = new Set<string>();

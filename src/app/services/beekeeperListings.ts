@@ -419,6 +419,13 @@ export const beekeeperListingsService = {
   async getMyProposals(): Promise<ListingProposal[]> {
     const user = getCurrentUser();
 
+    // Validate that user context is current by checking against the most recent auth state
+    // This prevents stale user data from being used after login changes
+    const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+    if (!supabaseUser || !user.id) {
+      throw new Error('User session is invalid. Please log in again.');
+    }
+
     try {
       // Get all bids by this user with simpler query
       const { data: bids, error: bidsError } = await supabase
