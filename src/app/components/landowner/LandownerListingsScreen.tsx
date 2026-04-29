@@ -461,19 +461,19 @@ export function LandownerListingsScreen({
                     <div className="flex flex-col items-end gap-1.5">
                       <ActionBtn label={t('view', selectedLanguage)} onClick={() => openView(listing)} icon={<Eye className="h-3.5 w-3.5" />} />
                       <ActionBtn label={t('edit', selectedLanguage)} onClick={() => openEdit(listing)} icon={<Pencil className="h-3.5 w-3.5" />} />
-                      {listingBids.length > 0 && (
+                      <ActionBtn
+                        label={`${t('bids', selectedLanguage)} ${pendingCount > 0 ? `(${pendingCount})` : ''}`}
+                        onClick={() => openBids(listing)}
+                        icon={<HandCoins className="h-3.5 w-3.5" />}
+                      />
+                      {listingBids.length === 0 && (
                         <ActionBtn
-                          label={`${t('bids', selectedLanguage)} ${pendingCount > 0 ? `(${pendingCount})` : ''}`}
-                          onClick={() => openBids(listing)}
-                          icon={<HandCoins className="h-3.5 w-3.5" />}
+                          label={t('delete', selectedLanguage)}
+                          onClick={() => setConfirmDelete(listing.id)}
+                          icon={<Trash2 className="h-3.5 w-3.5" />}
+                          danger
                         />
                       )}
-                      <ActionBtn
-                        label={t('delete', selectedLanguage)}
-                        onClick={() => setConfirmDelete(listing.id)}
-                        icon={<Trash2 className="h-3.5 w-3.5" />}
-                        danger
-                      />
                     </div>
                   </div>
                 );
@@ -782,7 +782,7 @@ function ContractsSection({
       return `${t('cashRentRs', selectedLanguage)} ${contract.cash_rent_lkr || 0}`;
     }
     if (contract.financial_terms === 'honey_share') {
-      return `${t('honeySharePercentLabel', selectedLanguage)} · ${contract.honey_share_kgs || 0}%`;
+      return `${t('honeyShareKgLabel', selectedLanguage)} · ${contract.honey_share_percent || 0}%`;
     }
     if (contract.financial_terms === 'pollination_service') {
       return t('pollinationServiceLabel', selectedLanguage);
