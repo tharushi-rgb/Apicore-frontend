@@ -180,7 +180,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
     if (!profile) return;
     setEditName(profile.name || '');
     setEditEmail(profile.email || '');
-    setEditPhone(profile.phone || '');
+    setEditPhone(formatSriLankanPhoneNumber(profile.phone || ''));
     setEditProvince((profile as any).province || '');
     setEditDistrict(profile.district || '');
     setEditDsDivision((profile as any).ds_division || '');

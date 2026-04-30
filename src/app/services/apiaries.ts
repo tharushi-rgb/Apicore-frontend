@@ -1,7 +1,7 @@
 import { supabase } from './supabaseClient';
 import { authService } from './auth';
 import { notificationsService } from './notifications';
-import { formatSriLankanPhoneNumber, isValidSriLankanPhoneNumber } from '../utils/phone';
+import { formatSriLankanPhoneNumber, isValidSriLankanPhoneNumber, PHONE_NUMBER_DIGITS } from '../utils/phone';
 
 const METADATA_MARKER = '\n\n[APIARY_METADATA]\n';
 
@@ -119,6 +119,7 @@ function validateAndSanitizePhoneNumber(phone?: string | null): string | null {
 
   const cleaned = sanitized.replace(/\D/g, '');
   throw new Error(`Invalid phone number. Must be 10 digits (072 123 1234 format). Received: ${cleaned.length} digits`);
+  throw new Error(`Invalid phone number. Must be ${PHONE_NUMBER_DIGITS} digits (072 123 1234 format). Received: ${cleaned.length} digits`);
 }
 
 function splitNotesAndMetadata(notes?: string | null) {

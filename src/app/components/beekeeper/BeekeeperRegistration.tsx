@@ -250,7 +250,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                   }, onChange: (e) => {
                     const formatted = formatSriLankanPhoneNumber(e.target.value);
                     setValue('phoneNumber', formatted);
-                  }})} className={inputClass} placeholder="072 123 1234" maxLength={PHONE_NUMBER_MAX_LENGTH} inputMode="numeric" />
+                  }})} className={inputClass} placeholder={t('enterPhone', selectedLanguage)} maxLength={PHONE_NUMBER_MAX_LENGTH} inputMode="numeric" />
                   {errors.phoneNumber && <p className="text-red-500 text-[0.75rem] mt-1">{errors.phoneNumber.message}</p>}
                 </div>
                 <div>
@@ -320,7 +320,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                 </div>
                 <div>
                   <label className={labelClass}>{t('businessRegNo', selectedLanguage)}</label>
-                  <input {...register('businessRegNo')} className={inputClass} placeholder={t('brPlaceholder', selectedLanguage)} />
+                  <input {...register('businessRegNo')} className={inputClass} placeholder="BR number if available" />
                 </div>
                 <div>
                   <label className={labelClass}>{t('nvqLevel', selectedLanguage)}</label>

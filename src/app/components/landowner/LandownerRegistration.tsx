@@ -164,7 +164,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
                       const formatted = formatSriLankanPhoneNumber(e.target.value);
                       setValue('phoneNumber', formatted);
                     }
-                  })} className={ic} placeholder="072 123 1234" maxLength={PHONE_NUMBER_MAX_LENGTH} inputMode="numeric" />
+                  })} className={ic} placeholder={t('enterPhone', selectedLanguage)} maxLength={PHONE_NUMBER_MAX_LENGTH} inputMode="numeric" />
                   {errors.phoneNumber && <p className={ec}>{errors.phoneNumber.message}</p>}
                 </div>
                 <div>
@@ -220,7 +220,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
                 <div>
                   <label className={lc}>{t('businessRegNo', selectedLanguage)} <span className="text-stone-400 text-[0.7rem]">{t('optionalText', selectedLanguage)}</span></label>
                   <input {...register('businessRegNo')}
-                    className={ic} placeholder={t('brPlaceholder', selectedLanguage)} />
+                    className={ic} placeholder="BR number if available" />
                 </div>
               </>
             )}

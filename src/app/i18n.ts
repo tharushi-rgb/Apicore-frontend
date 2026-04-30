@@ -69,7 +69,7 @@ const translations = {
   enterName: { en: 'Enter name', si: 'නම ඇතුළු කරන්න', ta: ' ' },
   enterEmail: { en: 'Enter email', si: 'ඊ-තැපෑල ඇතුළු කරන්න', ta: ' ' },
   enterPhone: { en: '072 123 1234', si: '072 123 1234', ta: '072 123 1234' },
-  must10DigitsPhone: { en: 'Must be 10 digits (e.g. 0721231234)', si: 'ඉලක්කම් 10ක් (උදා: 0721231234)', ta: '10 இலக்கங்கள் வேண்டும் (எ.கா. 0721231234)' },
+  must10DigitsPhone: { en: 'Must be 10 digits (e.g. 072 123 1234)', si: 'ඉලක්කම් 10ක් (උදා: 072 123 1234)', ta: '10 இலக்கங்கள் வேண்டும் (எ.கா. 072 123 1234)' },
   validPhoneNumber: { en: 'Valid phone number', si: 'වලංගු දුරකථන අංකයක්', ta: 'செல்லுபடியான தொலைபேசி எண்' },
   select: { en: 'Select', si: 'තෝරන්න', ta: 'தேர்வு செய்க' },
   yes: { en: 'Yes', si: 'ඔව්', ta: 'ஆம்' },
@@ -621,8 +621,7 @@ const translations = {
   provinceRequired: { en: 'Province is required', si: 'පළාත අවශ්‍යයි', ta: 'மாகாணம் தேவை' },
   districtRequired: { en: 'District is required', si: 'දිස්ත්‍රික්කය අවශ්‍යයි', ta: 'மாவட்டம் தேவை' },
   must12Digits: { en: 'Must be 12 digits', si: 'ඉලක්කම් 12ක් විය යුතුය', ta: '12 இலக្က் இருக வண්டům' },
-  must12DigitsPhone: { en: 'Must be 12 digits (e.g. 94771234567)', si: 'ඉලක්කම් 12ක් (උදා: 94771234567)', ta: '12 இலக్క  இருக_ ณum (: 94771234567)' },
-  brPlaceholder: { en: 'BR number if available', si: 'BR අංකය ඇත්නම්', ta: 'உள್ளதெனில் BR எண்' },
+  must12DigitsPhone: { en: 'Must be 10 digits (e.g. 072 123 1234)', si: 'ඉලක්කම් 10ක් (උදා: 072 123 1234)', ta: '10 இலக்கங்கள் வேண்டும் (எ.கா. 072 123 1234)' },
   apisCerana: { en: 'Apis cerana (Mee Bee)', si: 'Apis cerana (මී මැස්සා)', ta: 'Apis cerana (Mee Bee)' },
   tetragonula: { en: 'Tetragonula (Kaneyawa)', si: 'Tetragonula (කණේයාවා)', ta: 'Tetragonula (Kaneyawa)' },
   academicDegree: { en: 'Academic Degree', si: 'ශාස්ත්‍රපති උපාධිය', ta: 'கல્վి ப' },
@@ -643,7 +642,6 @@ const translations = {
   alphanumericPwd: { en: '8-16 Alphanumeric', si: '8-16 අක්ෂරාංක', ta: '8-16 எண்ணெழுத்திகள்' },
   confirmPwdPlaceholder: { en: 'Confirm your password', si: 'ඔබේ මුරපදය තහවුරු කරන්න', ta: 'உஙள் கடச்ொை உறತ ட' },
   stepOf: { en: 'of', si: 'න්', ta: 'உள்' },
-  emailPhonePlaceholder: { en: 'your@email.com or 0721231234', si: 'your@email.com හෝ 0721231234', ta: 'your@email.com அல்லது 0721231234' },
   emailAlreadyRegistered: { en: 'This email is already registered. Please log in.', si: 'මෙම ඊ-තැපෑල දැනටමත් ලියාපදිංචි කර ඇත. කරුණාකර ඇතුල් වන්න.', ta: 'இந்த மின்னஞ்சல் ஏற்கனவே பதிவு செய்யப்பட்டது. உள்நுழைக.' },
 
   // ── Performance Rankings (Tab Labels) ──────────────────────────────

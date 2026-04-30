@@ -310,8 +310,8 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
         setError('Landowner details and contract dates are required for non-owned land');
         return;
       }
-      if (!isValidPhoneNumber(form.landlord_contact)) {
-        setError('Enter a valid phone number (072 123 1234 format, 10 digits)');
+      if (!isValidSriLankanPhoneNumber(form.landlord_contact)) {
+        setError('Enter a valid phone number (10 digits, 072 123 1234 format)');
         return;
       }
       if (form.payment_terms === 'cash' && !form.payment_amount_lkr) {
@@ -489,7 +489,7 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
                         setPhoneValidationError('');
                       }
                     }} 
-                    placeholder="072 123 1234"
+                    placeholder={t('enterPhone', selectedLanguage)}
                     maxLength={PHONE_NUMBER_MAX_LENGTH}
                     inputMode="numeric"
                     className={`${inputClass} ${phoneValidationError ? 'border-red-500 bg-red-50/30' : ''}`}
