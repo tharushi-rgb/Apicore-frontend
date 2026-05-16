@@ -8,6 +8,7 @@ interface Props {
   lng?: number;
   onLocationSelect?: (lat: number, lng: number) => void;
   district?: string;
+  dsDivision?: string;
   editable?: boolean;
   compact?: boolean;
 }
@@ -30,7 +31,7 @@ const DefaultIcon = L.icon({
 
 L.Marker.prototype.setIcon(DefaultIcon);
 
-export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, district, editable = false, compact = false }: Props) {
+export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, district, dsDivision, editable = false, compact = false }: Props) {
   const lat = latProp ?? DEFAULT_LAT;
   const lng = lngProp ?? DEFAULT_LNG;
   const hasLocation = latProp != null && lngProp != null;
@@ -56,7 +57,7 @@ export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, distri
       // Only add marker when we have a real location
       if (hasLocation) {
         marker.current = L.marker([lat, lng], { icon: DefaultIcon })
-          .bindPopup(`<div class="text-sm"><strong>${district || 'Selected Location'}</strong><br/>${lat.toFixed(4)}, ${lng.toFixed(4)}</div>`)
+          .bindPopup(`<div class="text-sm"><strong>${dsDivision || district || 'Selected Location'}</strong><br/>${lat.toFixed(4)}, ${lng.toFixed(4)}</div>`)
           .addTo(map.current);
       }
 
@@ -97,11 +98,11 @@ export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, distri
         if (marker.current) {
           marker.current.setLatLng([lat, lng]);
           marker.current.setPopupContent(
-            `<div class="text-sm"><strong>${district || 'Location'}</strong><br/>${lat.toFixed(4)}, ${lng.toFixed(4)}</div>`
+            `<div class="text-sm"><strong>${dsDivision || district || 'Location'}</strong><br/>${lat.toFixed(4)}, ${lng.toFixed(4)}</div>`
           );
         } else {
           marker.current = L.marker([lat, lng], { icon: DefaultIcon })
-            .bindPopup(`<div class="text-sm"><strong>${district || 'Location'}</strong><br/>${lat.toFixed(4)}, ${lng.toFixed(4)}</div>`)
+            .bindPopup(`<div class="text-sm"><strong>${dsDivision || district || 'Location'}</strong><br/>${lat.toFixed(4)}, ${lng.toFixed(4)}</div>`)
             .addTo(map.current);
         }
          map.current.setView([lat, lng], 10);
@@ -146,7 +147,7 @@ export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, distri
         <div>
           <h3 className="font-bold text-sm text-stone-800">
             {latProp && lngProp
-              ? (detectedDistrict || 'Loading...')
+              ? (dsDivision || detectedDistrict || district || 'Loading...')
               : (district || 'Sri Lanka Map')}
           </h3>
           <p className="text-xs text-stone-500">

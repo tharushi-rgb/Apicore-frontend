@@ -152,7 +152,7 @@ export function ForecastDays14({ days, hourly, lang = 'en' }: Props) {
             <div className="space-y-2.5">
               <MetricRow
                 label={t('temperature', lang)}
-                value={`${Math.round((selectedDay.maxTemp + selectedDay.minTemp) / 2)}°C ${lang === 'si' ? 'සාමාන්‍ය' : 'average'}`}
+                value={`${Math.round((selectedDay.maxTemp + selectedDay.minTemp) / 2)}°C ${t('average', lang)}`}
                 explanation={tempExplanation(Math.round((selectedDay.maxTemp + selectedDay.minTemp) / 2), lang)}
                 color={selectedDay.tempRisk.color}
                 statusLabel={selectedDay.tempRisk.label}
@@ -160,18 +160,18 @@ export function ForecastDays14({ days, hourly, lang = 'en' }: Props) {
 
               <MetricRow
                 label={t('heatStress', lang)}
-                value={`${selectedDay.maxTemp.toFixed(1)}°C ${lang === 'si' ? 'උපරිම' : 'peak'}`}
+                value={`${selectedDay.maxTemp.toFixed(1)}°C ${t('peak', lang)}`}
                 explanation={heatStressExplanation(selectedDay.maxTemp, lang)}
                 color={selectedDay.maxTemp > 38 ? 'red' : selectedDay.maxTemp > 33 ? 'amber' : 'green'}
-                statusLabel={selectedDay.maxTemp > 38 ? (lang === 'si' ? 'ඉහළ' : 'High') : selectedDay.maxTemp > 33 ? (lang === 'si' ? 'මධ්‍යම' : 'Moderate') : (lang === 'si' ? 'අඩු' : 'Low')}
+                statusLabel={selectedDay.maxTemp > 38 ? t('high', lang) : selectedDay.maxTemp > 33 ? t('moderate', lang) : t('low', lang)}
               />
 
               <MetricRow
-                label={t('rainfall', lang)}
+                label={t('precipitation', lang)}
                 value={`${selectedDay.precipMm} mm`}
                 explanation={rainExplanation(selectedDay.precipMm, lang)}
                 color={selectedDay.rainStatus?.color || (selectedDay.precipMm > 5 ? 'red' : selectedDay.precipMm > 0.5 ? 'amber' : 'green')}
-                statusLabel={selectedDay.rainStatus?.label || (selectedDay.precipMm > 5 ? 'Heavy' : selectedDay.precipMm > 0.5 ? 'Light' : 'None')}
+                statusLabel={selectedDay.rainStatus?.label || (selectedDay.precipMm > 5 ? t('heavy', lang) : selectedDay.precipMm > 0.5 ? t('light', lang) : t('none', lang))}
               />
 
               {selectedDay.humidityAvg !== null && (
@@ -190,7 +190,7 @@ export function ForecastDays14({ days, hourly, lang = 'en' }: Props) {
                   value={`${selectedDay.windspeed} km/h`}
                   explanation={windExplanation(selectedDay.windspeed, lang)}
                   color={selectedDay.windspeed > 30 ? 'red' : selectedDay.windspeed > 15 ? 'amber' : 'green'}
-                  statusLabel={selectedDay.windspeed > 30 ? (lang === 'si' ? 'තද' : 'Strong') : selectedDay.windspeed > 15 ? (lang === 'si' ? 'මධ්‍යම' : 'Moderate') : (lang === 'si' ? 'සන්සුන්' : 'Calm')}
+                  statusLabel={selectedDay.windspeed > 30 ? t('strong', lang) : selectedDay.windspeed > 15 ? t('moderate', lang) : t('calm', lang)}
                 />
               )}
 

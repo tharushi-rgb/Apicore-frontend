@@ -15,8 +15,12 @@ import {
   getDistrictsByProvince,
   getDsDivisionsByDistrict,
   getDistrictCenter,
-  resolveDsDivisionCenter
+  resolveDsDivisionCenter,
+  getLocalizedProvinceName,
+  getLocalizedDistrictName,
+  getLocalizedDsDivisionName,
 } from '../../constants/sriLankaLocations';
+import { formatMonthAbbrList } from '../../services/planning';
 import { t } from '../../i18n';
 
 type Language = 'en' | 'si' | 'ta';
@@ -58,8 +62,6 @@ function formatCoordinates(lat: number, lng: number) {
 
 // ── GBIF Forage Card ──────────────────────────────────────────────────────────
 type GBIFNearbyEntry = GBIFForageSpecies & { scientific: string; nearbyCount: number };
-
-const MONTH_ABBR = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function GBIFForageCard({ plants, currentMonth }: { plants: GBIFNearbyEntry[]; currentMonth: number }) {
   const [expanded, setExpanded] = useState(false);
@@ -113,7 +115,7 @@ function GBIFForageCard({ plants, currentMonth }: { plants: GBIFNearbyEntry[]; c
                 </span>
               </div>
               <div className="flex items-center gap-3 mt-1.5 text-xs text-stone-500 flex-wrap">
-                <span>Observed months: {MONTH_ABBR[firstMonth]}{firstMonth !== lastMonth ? `–${MONTH_ABBR[lastMonth]}` : ''}</span>
+                <span>Observed months: {formatMonthAbbrList(p.observedMonths, firstMonth, lastMonth) || '—'}</span>
                 <span className="ml-auto text-blue-600 font-medium">Sri Lanka total: {p.gbifCount}</span>
               </div>
             </div>
@@ -142,7 +144,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
   const [apiaries, setApiaries] = useState<Apiary[]>([]);
   const [hives, setHives] = useState<Hive[]>([]);
   const [loading, setLoading] = useState(true);
-  const user = authService.getLocalUser();
+  const [currentUser, setCurrentUser] = useState(() => authService.getLocalUser());
 
   const prefillCoordinates = (location.state as any)?.prefillCoordinates as {
     lat?: unknown;
@@ -159,9 +161,9 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
   // Planning analysis state
   const [districts, setDistricts] = useState<District[]>([]);
   const [searchMode, setSearchMode] = useState<'admin' | 'gps'>(() => (hasPrefillGps ? 'gps' : 'admin'));
-  const [selectedProvince, setSelectedProvince] = useState(user?.province ?? '');
-  const [selectedDistrict, setSelectedDistrict] = useState(user?.district ?? '');
-  const [selectedDsDivision, setSelectedDsDivision] = useState(user?.ds_division ?? '');
+  const [selectedProvince, setSelectedProvince] = useState(currentUser?.province ?? '');
+  const [selectedDistrict, setSelectedDistrict] = useState(currentUser?.district ?? '');
+  const [selectedDsDivision, setSelectedDsDivision] = useState(currentUser?.ds_division ?? '');
   const [customLat, setCustomLat] = useState('');
   const [customLng, setCustomLng] = useState('');
   const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -181,8 +183,33 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
   const searchModeRef = useRef(searchMode);
   searchModeRef.current = searchMode;
 
+  useEffect(() => {
+    const syncUser = () => setCurrentUser(authService.getLocalUser());
+
+    syncUser();
+    window.addEventListener('storage', syncUser);
+    window.addEventListener('user-profile-updated', syncUser);
+
+    return () => {
+      window.removeEventListener('storage', syncUser);
+      window.removeEventListener('user-profile-updated', syncUser);
+    };
+  }, []);
+
+  useEffect(() => {
+    setSelectedProvince(currentUser?.province ?? '');
+    setSelectedDistrict(currentUser?.district ?? '');
+    setSelectedDsDivision(currentUser?.ds_division ?? '');
+  }, [currentUser]);
+
   const availableDistricts = getDistrictsByProvince(selectedProvince);
   const availableDsDivisions = getDsDivisionsByDistrict(selectedDistrict);
+
+  const selectedDsDivisionLabel = selectedDsDivision
+    ? getLocalizedDsDivisionName(selectedDsDivision, selectedLanguage)
+    : '';
+  const selectedLocationLabel = selectedDsDivisionLabel
+    || (selectedDistrict ? getLocalizedDistrictName(selectedDistrict, selectedLanguage) : '');
 
   useEffect(() => {
     const nextEndDate = new Date(`${startDate}T00:00:00`);
@@ -244,11 +271,11 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
   useEffect(() => {
     if (searchMode === 'gps' && !customLat && !customLng) {
-      const center = getDistrictCenter(user?.district);
+      const center = getDistrictCenter(currentUser?.district);
       setCustomLat(String(center.lat));
       setCustomLng(String(center.lng));
     }
-  }, [customLat, customLng, searchMode, user?.district]);
+  }, [customLat, customLng, currentUser?.district, searchMode]);
 
   useEffect(() => {
     Promise.all([apiariesService.getAll(), hivesService.getAll(), planningService.getDistricts()])
@@ -272,7 +299,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
     let lng = parseFloat(customLng);
     const districtLabel = searchMode === 'admin'
       ? selectedDistrict
-      : (selectedDistrict || 'GPS search');
+      : (selectedDistrict || t('gpsSearch', selectedLanguage));
 
     if (startDate && endDate && startDate > endDate) {
       return;
@@ -323,7 +350,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
           gps_latitude: h.gps_latitude,
           gps_longitude: h.gps_longitude
         })),
-        currentUserId: user?.id,
+        currentUserId: currentUser?.id,
       });
       setAnalysis(result);
     } catch (e) {
@@ -374,7 +401,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
     <div className="h-full bg-white relative flex flex-col">
 
       <div className="bg-white shadow-sm shrink-0 z-30">
-        <MobileHeader userName={user?.name} roleLabel={user?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
+        <MobileHeader userName={currentUser?.name} roleLabel={currentUser?.role} selectedLanguage={selectedLanguage} onLanguageChange={onLanguageChange}
           activeTab="planning" onNavigate={onNavigate} onLogout={onLogout} onViewAllNotifications={() => onNavigate('notifications')} />
         <div className="px-4 pb-3 border-t border-stone-100">
           <h1 className="text-[1.1rem] font-bold text-stone-800">{t('hivePlanning', selectedLanguage)}</h1>
@@ -389,20 +416,20 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
             <>
                 {/* Search Mode Selector */}
                 <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
-                  <h3 className="font-bold text-stone-800 flex items-center gap-2"><Search className="w-4 h-4 text-emerald-500" /> Search Location</h3>
+                  <h3 className="font-bold text-stone-800 flex items-center gap-2"><Search className="w-4 h-4 text-emerald-500" /> {t('searchLocation', selectedLanguage)}</h3>
 
                   <div className="flex gap-2 rounded-xl bg-stone-100 p-1">
                     <button
                       onClick={() => setSearchMode('admin')}
                       className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${searchMode === 'admin' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500'}`}
                     >
-                      Province / District / DS
+                      {t('adminLocationMode', selectedLanguage)}
                     </button>
                     <button
                       onClick={() => setSearchMode('gps')}
                       className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${searchMode === 'gps' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500'}`}
                     >
-                      GPS Coordinates
+                      {t('gpsCoordinatesMode', selectedLanguage)}
                     </button>
                   </div>
 
@@ -413,14 +440,14 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                         onChange={e => setSelectedProvince(e.target.value)}
                         className="w-full border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
                       >
-                        <option value="">Select province</option>
-                        {PROVINCES.map(province => <option key={province} value={province}>{province}</option>)}
+                        <option value="">{t('selectProvince', selectedLanguage)}</option>
+                        {PROVINCES.map((province) => <option key={province} value={province}>{getLocalizedProvinceName(province, selectedLanguage)}</option>)}
                       </select>
 
                       <select value={selectedDistrict} onChange={e => handleDistrictChange(e.target.value)}
                         className="w-full border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
-                        <option value="">— Select a district —</option>
-                        {availableDistricts.map(d => <option key={d} value={d}>{d}</option>)}
+                        <option value="">{t('selectDistrict', selectedLanguage)}</option>
+                        {availableDistricts.map((d) => <option key={d} value={d}>{getLocalizedDistrictName(d, selectedLanguage)}</option>)}
                       </select>
 
                       <select
@@ -428,23 +455,23 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                         onChange={e => setSelectedDsDivision(e.target.value)}
                         className="w-full border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
                       >
-                        <option value="">Select DS division</option>
-                        {availableDsDivisions.map(ds => <option key={ds} value={ds}>{ds}</option>)}
+                        <option value="">{t('selectDSDivision', selectedLanguage)}</option>
+                        {availableDsDivisions.map((ds) => <option key={ds} value={ds}>{getLocalizedDsDivisionName(ds, selectedLanguage)}</option>)}
                       </select>
                     </div>
                   ) : (
                     <>
                       <div className="grid grid-cols-2 gap-2">
-                        <input type="text" placeholder="Latitude" value={customLat} onChange={e => setCustomLat(e.target.value)}
+                        <input type="text" placeholder={t('latitude', selectedLanguage)} value={customLat} onChange={e => setCustomLat(e.target.value)}
                           className="border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none" />
-                        <input type="text" placeholder="Longitude" value={customLng} onChange={e => setCustomLng(e.target.value)}
+                        <input type="text" placeholder={t('longitude', selectedLanguage)} value={customLng} onChange={e => setCustomLng(e.target.value)}
                           className="border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none" />
                       </div>
 
                       <MapViewer
                         lat={customLat ? parseFloat(customLat) : undefined}
                         lng={customLng ? parseFloat(customLng) : undefined}
-                        district={searchMode === 'gps' ? '' : (selectedDistrict || user?.district)}
+                        district={searchMode === 'gps' ? '' : (selectedDistrict || currentUser?.district)}
                         editable={true}
                         onLocationSelect={(lat, lng) => {
                           setCustomLat(String(lat));
@@ -456,12 +483,12 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <label className="text-xs text-stone-500">Start date</label>
+                      <label className="text-xs text-stone-500">{t('startDate', selectedLanguage)}</label>
                       <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
                         className="border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none w-full" />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs text-stone-500">End date</label>
+                      <label className="text-xs text-stone-500">{t('endDate', selectedLanguage)}</label>
                       <input type="date" value={endDate} min={startDate} onChange={e => setEndDate(e.target.value)}
                         className="border-2 border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none w-full" />
                     </div>
@@ -475,7 +502,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
 
                   <button onClick={handleAnalyze} disabled={analyzing || resolvingDsCenter || (!customLat && !selectedDistrict)}
                     className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50">
-                    {analyzing ? <><div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> Analyzing...</> : resolvingDsCenter ? <><div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> Resolving DS location...</> : <><Search className="w-4 h-4" /> Analyze Location</>}
+                    {analyzing ? <><div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> {t('analyzing', selectedLanguage)}</> : resolvingDsCenter ? <><div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> {t('resolvingDsLocation', selectedLanguage)}</> : <><Search className="w-4 h-4" /> {t('analyzeLocation', selectedLanguage)}</>}
                   </button>
                   
 
@@ -483,7 +510,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                   {analysisError && (
                     <div className="bg-red-50 border border-red-200 rounded-xl p-3">
                       <p className="text-sm text-red-700">{analysisError}</p>
-                      <p className="text-xs text-red-500 mt-1">Check console for more details or try different coordinates.</p>
+                      <p className="text-xs text-red-500 mt-1">{t('checkConsoleTryDifferentCoordinates', selectedLanguage)}</p>
                     </div>
                   )}
                 </div>
@@ -541,9 +568,9 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                         <h3 className="font-bold text-stone-800 text-[0.8rem] mb-2 flex items-center gap-2"><Droplets className="w-3.5 h-3.5 text-blue-500" /> {t('beeHumidityGuide', selectedLanguage)}</h3>
                         <div className="space-y-2">
                           {[
-                            { label: 'Optimal', value: '60-95%', tone: 'bg-emerald-50 border-emerald-200 text-emerald-800' },
-                            { label: 'Best for foraging', value: '70-79%', tone: 'bg-blue-50 border-blue-200 text-blue-800' },
-                            { label: 'Risky', value: '>95%', tone: 'bg-red-50 border-red-200 text-red-800' },
+                            { label: t('optimal', selectedLanguage), value: '60-95%', tone: 'bg-emerald-50 border-emerald-200 text-emerald-800' },
+                            { label: t('bestForForaging', selectedLanguage), value: '70-79%', tone: 'bg-blue-50 border-blue-200 text-blue-800' },
+                            { label: t('risky', selectedLanguage), value: '>95%', tone: 'bg-red-50 border-red-200 text-red-800' },
                           ].map((item) => (
                             <div key={item.label} className={`flex items-center justify-between rounded-lg border px-3 py-2 ${item.tone}`}>
                               <span className="text-[0.75rem] font-medium">{item.label}</span>
@@ -557,7 +584,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                     {/* Current Weather */}
                     {analysis.weather.current && (
                       <div className="bg-white rounded-xl p-3 shadow-sm">
-                        <h3 className="font-bold text-stone-800 mb-2 text-[0.875rem] flex items-center gap-2"><Thermometer className="w-3.5 h-3.5 text-amber-500" /> Current Weather</h3>
+                        <h3 className="font-bold text-stone-800 mb-2 text-[0.875rem] flex items-center gap-2"><Thermometer className="w-3.5 h-3.5 text-amber-500" /> {t('currentWeather', selectedLanguage)}</h3>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <WeatherIcon code={analysis.weather.current.wcode} className="w-8 h-8" />
@@ -580,7 +607,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                       <ForecastDays14 days={analysis.weather.days} hourly={analysis.weather.hourly} lang={selectedLanguage} />
                     )}
 
-                    {/* Ecological Zone Reference - Based on Selected District */}
+                    {/* Ecological Zone Reference - Based on Selected DS Division */}
                     {selectedDistrict && (
                       <div className="bg-white rounded-xl p-3 shadow-sm border border-emerald-100">
                         <h3 className="font-bold text-stone-800 text-[0.82rem] mb-2 flex items-center gap-2"><Leaf className="w-3.5 h-3.5 text-emerald-500" /> Ecological Zone</h3>
@@ -601,7 +628,7 @@ export function HivePlanningScreen({ selectedLanguage, onLanguageChange, onNavig
                           } else {
                             return (
                               <div className="rounded-lg border border-stone-200 bg-stone-50 p-2">
-                                <p className="text-[0.72rem] text-stone-600">No ecological zone data available for {selectedDistrict}.</p>
+                                <p className="text-[0.72rem] text-stone-600">No ecological zone data available for {selectedLocationLabel || selectedDistrict}.</p>
                               </div>
                             );
                           }

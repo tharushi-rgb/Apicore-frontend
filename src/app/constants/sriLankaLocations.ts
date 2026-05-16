@@ -78,6 +78,101 @@ export const DISTRICT_CENTERS: Record<string, { lat: number; lng: number }> = {
   Vavuniya: { lat: 8.7514, lng: 80.4997 },
 };
 
+type LocationLanguage = 'en' | 'si' | 'ta';
+
+const PROVINCE_LABELS: Record<string, { si: string; ta: string }> = {
+  Central: { si: 'මධ්යම', ta: 'மத்திய' },
+  Eastern: { si: 'නැගෙනහිර', ta: 'கிழக்கு' },
+  'North Central': { si: 'උතුරු මැද', ta: 'வட மத்திய' },
+  Northern: { si: 'උතුරු', ta: 'வடக்கு' },
+  'North Western': { si: 'වයඹ', ta: 'வடமேற்கு' },
+  Sabaragamuwa: { si: 'සබරගමුව', ta: 'சபரகமுவ' },
+  Southern: { si: 'දකුණු', ta: 'தெற்கு' },
+  Uva: { si: 'ඌව', ta: 'ஊவா' },
+  Western: { si: 'බස්නාහිර', ta: 'மேற்கு' },
+};
+
+const DISTRICT_LABELS: Record<string, { si: string; ta: string }> = {
+  Ampara: { si: 'අම්පාර', ta: 'அம்பாறை' },
+  Anuradhapura: { si: 'අනුරාධපුර', ta: 'அனுராதபுரம்' },
+  Badulla: { si: 'බදුල්ල', ta: 'பதுளை' },
+  Batticaloa: { si: 'මඩකලපුව', ta: 'மட்டக்களப்பு' },
+  Colombo: { si: 'කොළඹ', ta: 'கொழும்பு' },
+  Galle: { si: 'ගාල්ල', ta: 'காலி' },
+  Gampaha: { si: 'ගම්පහ', ta: 'கம்பஹா' },
+  Hambantota: { si: 'හම්බන්තොට', ta: 'அம்பாந்தோட்டை' },
+  Jaffna: { si: 'යාපනය', ta: 'யாழ்ப்பாணம்' },
+  Kalutara: { si: 'කළුතර', ta: 'கலுத்துறை' },
+  Kandy: { si: 'මහනුවර', ta: 'கண்டி' },
+  Kegalle: { si: 'කෑගල්ල', ta: 'கேகாலை' },
+  Kilinochchi: { si: 'කිලිනොච්චි', ta: 'கிளிநொச்சி' },
+  Kurunegala: { si: 'කුරුණෑගල', ta: 'குருநாகல்' },
+  Mannar: { si: 'මන්නාරම', ta: 'மன்னார்' },
+  Matale: { si: 'මාතලේ', ta: 'மாத்தளை' },
+  Matara: { si: 'මාතර', ta: 'மாத்தறை' },
+  Monaragala: { si: 'මොණරාගල', ta: 'மொனராகலை' },
+  Mullaitivu: { si: 'මුලතිව්', ta: 'முல்லைத்தீவு' },
+  'Nuwara Eliya': { si: 'නුවරඑළිය', ta: 'நுவரெலியா' },
+  Polonnaruwa: { si: 'පොලොන්නරුව', ta: 'பொலன்னறுவை' },
+  Puttalam: { si: 'පුත්තලම', ta: 'புத்தளம்' },
+  Ratnapura: { si: 'රත්නපුර', ta: 'இரத்தினபுரி' },
+  Trincomalee: { si: 'ත්රිකුණාමලය', ta: 'திருகோணமலை' },
+  Vavuniya: { si: 'වවුනියාව', ta: 'வவுனியா' },
+};
+
+const DS_TOKEN_TRANSLATIONS: Record<'si' | 'ta', Array<[string, string]>> = {
+  si: [
+    ['North-West', 'උතුරු-බටහිර'],
+    ['South-West', 'දකුණු-බටහිර'],
+    ['North-East', 'උතුරු-නැගෙනහිර'],
+    ['South-East', 'දකුණු-නැගෙනහිර'],
+    ['North', 'උතුරු'],
+    ['South', 'දකුණු'],
+    ['East', 'නැගෙනහිර'],
+    ['West', 'බටහිර'],
+    ['Central', 'මැද'],
+  ],
+  ta: [
+    ['North-West', 'வடமேற்கு'],
+    ['South-West', 'தென்மேற்கு'],
+    ['North-East', 'வடகிழக்கு'],
+    ['South-East', 'தென்கிழக்கு'],
+    ['North', 'வடக்கு'],
+    ['South', 'தெற்கு'],
+    ['East', 'கிழக்கு'],
+    ['West', 'மேற்கு'],
+    ['Central', 'மத்திய'],
+  ],
+};
+
+function translateByMap(value: string, map: Record<string, { si: string; ta: string }>, lang: LocationLanguage) {
+  if (lang === 'en') return value;
+  return map[value]?.[lang] ?? value;
+}
+
+function translateDsTokens(value: string, lang: LocationLanguage) {
+  if (lang === 'en') return value;
+
+  let localized = value;
+  for (const [token, replacement] of DS_TOKEN_TRANSLATIONS[lang]) {
+    const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    localized = localized.replace(new RegExp(`\\b${escaped}\\b`, 'g'), replacement);
+  }
+  return localized;
+}
+
+export function getLocalizedProvinceName(province: string, lang: LocationLanguage = 'en') {
+  return translateByMap(province, PROVINCE_LABELS, lang);
+}
+
+export function getLocalizedDistrictName(district: string, lang: LocationLanguage = 'en') {
+  return translateByMap(district, DISTRICT_LABELS, lang);
+}
+
+export function getLocalizedDsDivisionName(dsDivision: string, lang: LocationLanguage = 'en') {
+  return translateDsTokens(dsDivision, lang);
+}
+
 export function getDistrictsByProvince(province?: string) {
   return province ? DISTRICTS_BY_PROVINCE[province] || [] : [];
 }
@@ -89,18 +184,6 @@ export function getDsDivisionsByDistrict(district?: string) {
 export function getDistrictCenter(district?: string) {
   return district && DISTRICT_CENTERS[district] ? DISTRICT_CENTERS[district] : { lat: 7.8731, lng: 80.7718 };
 }
-
-export const DS_DIVISION_CENTERS: Record<string, Record<string, { lat: number; lng: number }>> = {
-  Kandy: {
-    Akurana: { lat: 7.3700, lng: 80.6200 },
-  },
-  Matara: {
-    Akuressa: { lat: 6.1000, lng: 80.4800 },
-  },
-  Ampara: {
-    Akkayarapattu: { lat: 7.2167, lng: 81.8500 },
-  }
-};
 
 const DS_CENTER_CACHE_KEY = 'ds_division_center_cache_v1';
 let dsCenterCache: Record<string, { lat: number; lng: number }> | null = null;
@@ -147,15 +230,6 @@ function saveDsCenterCache() {
 }
 
 export function getDsDivisionCenter(district?: string, dsDivision?: string) {
-  if (
-    district &&
-    dsDivision &&
-    DS_DIVISION_CENTERS[district] &&
-    DS_DIVISION_CENTERS[district][dsDivision]
-  ) {
-    return DS_DIVISION_CENTERS[district][dsDivision];
-  }
-
   if (district && dsDivision) {
     const cache = getSafeDsCenterCache();
     const cached = cache[getDsCenterCacheKey(district, dsDivision)];

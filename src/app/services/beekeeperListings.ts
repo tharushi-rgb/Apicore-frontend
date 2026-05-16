@@ -30,7 +30,6 @@ export interface ListingSummary {
   financialTerms: FinancialTerms;
   ownerName: string;
   ownerContact: string;
-  ownerYearsActive: number;
   image?: string;
   maxHiveCapacity: number;
   acceptedHiveCount: number;
@@ -185,7 +184,6 @@ export const beekeeperListingsService = {
         financialTerms: row.financial_terms,
         ownerName: owner?.name || 'Landowner',
         ownerContact: owner?.phone || '',
-        ownerYearsActive: 1,
         image: (plot.images || [])[0],
         maxHiveCapacity: 10,
         acceptedHiveCount: 0,

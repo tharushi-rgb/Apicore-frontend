@@ -552,10 +552,20 @@ export function LandownerListingsScreen({
                   <p className="text-xs text-stone-600 mt-0.5">{t('water', selectedLanguage)}: {selectedPlot.waterAvailability}</p>
                   <p className="text-xs text-stone-600 mt-0.5">Acreage: {selectedPlot.totalAcreage?.toFixed(1) ?? 'N/A'} acres</p>
                   <p className="text-xs text-stone-600 mt-0.5">{t('vehicleAccess', selectedLanguage)}: {selectedPlot.vehicleAccess ?? 'N/A'}</p>
-                  <p className="text-xs text-stone-600 mt-1">
-                    Forage: {(selectedPlot.forageEntries ?? [])[0]?.name ?? 'N/A'}
-                    {((selectedPlot.forageEntries ?? [])[1]) && `, ${selectedPlot.forageEntries[1].name}`}
-                  </p>
+                  <div className="mt-1 text-xs text-stone-600">
+                    <p className="font-medium text-stone-700">Forage :</p>
+                    <div className="mt-0.5 space-y-0.5">
+                      {(selectedPlot.forageEntries ?? []).length > 0 ? (
+                        (selectedPlot.forageEntries ?? []).map((forage, index) => (
+                          <p key={`${forage.name}-${index}`}>
+                            {forage.name || 'N/A'} ({forage.bloomStartMonth || 'N/A'} to {forage.bloomEndMonth || 'N/A'})
+                          </p>
+                        ))
+                      ) : (
+                        <p>N/A</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -782,7 +792,8 @@ function ContractsSection({
       return `${t('cashRentRs', selectedLanguage)} ${contract.cash_rent_lkr || 0}`;
     }
     if (contract.financial_terms === 'honey_share') {
-      return `${t('honeyShareKgLabel', selectedLanguage)} · ${contract.honey_share_percent || 0}%`;
+      const honeyShareValue = contract.honey_share_kgs ?? contract.honey_share_percent ?? 0;
+      return `${t('honeyShareKgLabel', selectedLanguage)} · ${honeyShareValue}%`;
     }
     if (contract.financial_terms === 'pollination_service') {
       return t('pollinationServiceLabel', selectedLanguage);

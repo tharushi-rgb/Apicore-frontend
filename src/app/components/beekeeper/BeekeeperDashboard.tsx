@@ -12,6 +12,7 @@ import { supabase } from '../../services/supabaseClient';
 import { AlertTriangle, ClipboardList, Hexagon as HiveIcon, Leaf, Sprout, Wallet, Wheat, X } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { formatMonthAbbrList } from '../../services/planning';
 import { t } from '../../i18n';
 
 type Language = 'en' | 'si' | 'ta';
@@ -1032,8 +1033,7 @@ function ForagePlantCard({ plant, type, onOpenArea, selectedLanguage = 'en' }: {
   const baseClass = type === 'current'
     ? 'bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200'
     : 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200';
-  const monthAbbr = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const monthLabel = plant.bloomStart && plant.bloomEnd ? `${monthAbbr[plant.bloomStart]}–${monthAbbr[plant.bloomEnd]}` : t('monthsNotListed', selectedLanguage);
+  const monthLabel = formatMonthAbbrList(plant.bloomMonths, plant.bloomStart, plant.bloomEnd) || t('monthsNotListed', selectedLanguage);
   const csvLankaLabel = t('csvObsLanka', selectedLanguage);
   const sriLankaObs = typeof plant.gbifCount === 'number' ? `${plant.gbifCount} ${csvLankaLabel}` : '';
   const csvRecordsLabel = t('csvRecordsNearLocation', selectedLanguage);

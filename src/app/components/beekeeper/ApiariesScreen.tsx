@@ -18,7 +18,7 @@ import {
 import { MobileHeader } from '../shared/MobileHeader';
 import { PageTitleBar } from '../shared/PageTitleBar';
 import { apiariesService, type Apiary } from '../../services/apiaries';
-import { planningService } from '../../services/planning';
+import { planningService, formatBloomingWindowLabel } from '../../services/planning';
 import { hivesService, type Hive } from '../../services/hives';
 import { inspectionsService, type Inspection } from '../../services/inspections';
 import { authService } from '../../services/auth';
@@ -416,7 +416,7 @@ function ApiaryCard({ apiary, lang, onView, onEdit, onAddHive, getWeatherIcon, h
               <span className="text-stone-300">|</span>
               <span className="text-emerald-700 truncate">{apiary.forage_primary || t('mixed', lang)}</span>
               {apiary.blooming_window && (
-                <span className="text-stone-400 hidden sm:inline truncate"> · {apiary.blooming_window}</span>
+                <span className="text-stone-400 hidden sm:inline truncate"> · {formatBloomingWindowLabel(apiary.blooming_window)}</span>
               )}
             </>
           )}

@@ -5,7 +5,14 @@ import { MobileHeader } from '../shared/MobileHeader';
 import { authService } from '../../services/auth';
 import { profileService, type Profile } from '../../services/profile';
 import { landownerMarketplaceService, type LandPlot } from '../../services/landownerMarketplace';
-import { PROVINCES, getDistrictsByProvince, getDsDivisionsByDistrict } from '../../constants/sriLankaLocations';
+import {
+  PROVINCES,
+  getDistrictsByProvince,
+  getDsDivisionsByDistrict,
+  getLocalizedProvinceName,
+  getLocalizedDistrictName,
+  getLocalizedDsDivisionName,
+} from '../../constants/sriLankaLocations';
 import { t } from '../../i18n';
 import { formatSriLankanPhoneNumber, PHONE_NUMBER_MAX_LENGTH } from '../../utils/phone';
 
@@ -123,13 +130,6 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
 
   const districts = useMemo(() => getDistrictsByProvince(editProvince), [editProvince]);
   const dsDivisions = useMemo(() => getDsDivisionsByDistrict(editDistrict), [editDistrict]);
-
-  const memberSince = useMemo(() => {
-    if (!profile?.created_at) return 'Member';
-    const dt = new Date(profile.created_at);
-    if (Number.isNaN(dt.getTime())) return 'Member';
-    return `Member since ${dt.toLocaleString('en-US', { month: 'short', year: 'numeric' })}`;
-  }, [profile?.created_at]);
 
   const fileToDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -742,7 +742,7 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">Province *</label>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">{t('province', selectedLanguage)} *</label>
                 <select
                   value={plotEditor.province}
                   onChange={(e) => {
@@ -751,15 +751,15 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                   disabled={isPlotViewMode}
                   className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 >
-                  <option value="">Select Province</option>
+                  <option value="">{t('selectProvince', selectedLanguage)}</option>
                   {PROVINCES.map((prov) => (
-                    <option key={prov} value={prov}>{prov}</option>
+                    <option key={prov} value={prov}>{getLocalizedProvinceName(prov, selectedLanguage)}</option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">District *</label>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">{t('district', selectedLanguage)} *</label>
                 <select
                   value={plotEditor.district}
                   onChange={(e) => {
@@ -768,24 +768,24 @@ export function LandownerProfileScreen({ selectedLanguage, onLanguageChange, onN
                   disabled={isPlotViewMode || !plotEditor.province}
                   className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 >
-                  <option value="">Select District</option>
+                  <option value="">{t('selectDistrictReg', selectedLanguage)}</option>
                   {getDistrictsByProvince(plotEditor.province).map((dist) => (
-                    <option key={dist} value={dist}>{dist}</option>
+                    <option key={dist} value={dist}>{getLocalizedDistrictName(dist, selectedLanguage)}</option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">DS Division *</label>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1">{t('dsDivision', selectedLanguage)} *</label>
                 <select
                   value={plotEditor.dsDivision}
                   onChange={(e) => setPlotEditor((prev) => ({ ...prev, dsDivision: e.target.value }))}
                   disabled={isPlotViewMode || !plotEditor.district}
                   className="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm disabled:bg-stone-100"
                 >
-                  <option value="">Select DS Division</option>
+                  <option value="">{t('selectDSDivision', selectedLanguage)}</option>
                   {getDsDivisionsByDistrict(plotEditor.district).map((div) => (
-                    <option key={div} value={div}>{div}</option>
+                    <option key={div} value={div}>{getLocalizedDsDivisionName(div, selectedLanguage)}</option>
                   ))}
                 </select>
               </div>

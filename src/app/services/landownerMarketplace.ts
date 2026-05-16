@@ -898,6 +898,10 @@ export const landownerMarketplaceService = {
 
     // Create contract
     const plotName = listing.landowner_plots?.name || 'Plot';
+    const expiryLabel = selectedBid.placement_end_date 
+      ? new Date(selectedBid.placement_end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+      : 'N/A';
+    
     const { data: createdContract, error: contractError } = await supabase
       .from('landowner_contracts')
       .insert({
@@ -909,7 +913,7 @@ export const landownerMarketplaceService = {
         beekeeper_name: selectedBid.beekeeper_name,
         plot_name: plotName,
         hive_count: selectedBid.hives_proposed,
-        // expiry_label: selectedBid.placement_end_date ? new Date(selectedBid.placement_end_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A', // Column doesn't exist in schema
+        expiry_label: expiryLabel,
         status: 'active',
         financial_terms: listing.financial_terms,
         cash_rent_lkr: listing.cash_rent_lkr,

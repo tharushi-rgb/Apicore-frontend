@@ -4,6 +4,11 @@ import { ArrowLeft, ArrowRight, Check, Eye, EyeOff } from 'lucide-react';
 import { authService } from '../../services/auth';
 import { t } from '../../i18n';
 import { formatSriLankanPhoneNumber, isValidSriLankanPhoneNumber, PHONE_NUMBER_MAX_LENGTH } from '../../utils/phone';
+import {
+  getLocalizedProvinceName,
+  getLocalizedDistrictName,
+  getLocalizedDsDivisionName,
+} from '../../constants/sriLankaLocations';
 
 type Language = 'en' | 'si' | 'ta';
 
@@ -22,7 +27,9 @@ interface FormData {
   nicNumber: string;
   password: string;
   confirmPassword: string;
+  province: string;
   district: string;
+  dsDivision: string;
   preferredLanguage: string;
   ageGroup: string;
   knownBeeAllergy: string;
@@ -171,7 +178,12 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
         password: data.password,
         phone: data.phoneNumber,
         nic_number: data.nicNumber,
+
+        // Administrative location
+        province: data.province,
         district: data.district,
+        ds_division: data.dsDivision,
+
         preferred_language: data.preferredLanguage || 'en',
         age_group: data.ageGroup,
         beekeeping_nature: data.beekeepingNature,
@@ -179,6 +191,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
         primary_bee_species: data.primaryBeeSpecies,
         nvq_level: data.nvqLevel || undefined,
         role: role,
+
         // Optional fields removed from registration for profile later
         known_bee_allergy: 'no',
         blood_group: undefined,
@@ -348,7 +361,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                     }}
                     className={selectClass}>
                     <option value="">{t('selectProvince', selectedLanguage)}</option>
-                    {Object.keys(districtsByProvince).map(p => <option key={p} value={p}>{p}</option>)}
+                    {Object.keys(districtsByProvince).map((p) => <option key={p} value={p}>{getLocalizedProvinceName(p, selectedLanguage)}</option>)}
                   </select>
                   {errors.province && <p className="text-red-500 text-[0.7rem] mt-0.5">{errors.province.message}</p>}
                 </div>
@@ -362,7 +375,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                     }}
                     className={selectClass}>
                     <option value="">{t('selectDistrictReg', selectedLanguage)}</option>
-                    {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                    {districts.map((d) => <option key={d} value={d}>{getLocalizedDistrictName(d, selectedLanguage)}</option>)}
                   </select>
                   {errors.district && <p className="text-red-500 text-[0.7rem] mt-0.5">{errors.district.message}</p>}
                 </div>
@@ -372,7 +385,7 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                     disabled={!selectedDistrict}
                     className={selectClass}>
                     <option value="">{t('selectDSDivision', selectedLanguage)}</option>
-                    {dsDivisions.map(ds => <option key={ds} value={ds}>{ds}</option>)}
+                    {dsDivisions.map((ds) => <option key={ds} value={ds}>{getLocalizedDsDivisionName(ds, selectedLanguage)}</option>)}
                   </select>
                   {errors.dsDivision && <p className="text-red-500 text-[0.7rem] mt-0.5">{errors.dsDivision.message}</p>}
                 </div>
@@ -396,9 +409,9 @@ export function BeekeeperRegistration({ selectedLanguage, onLanguageChange, onBa
                     <span className="text-stone-500">Species</span><span className="text-stone-800 font-medium capitalize">{watch('primaryBeeSpecies')?.replace('_',' ') || '—'}</span>
                     <span className="text-stone-500">BR No</span><span className="text-stone-800 font-medium">{watch('businessRegNo') || '—'}</span>
                     <span className="text-stone-500">Training</span><span className="text-stone-800 font-medium capitalize">{watch('nvqLevel')?.replace('_',' ') || '—'}</span>
-                    <span className="text-stone-500">Province</span><span className="text-stone-800 font-medium">{watch('province') || '—'}</span>
-                    <span className="text-stone-500">District</span><span className="text-stone-800 font-medium">{watch('district') || '—'}</span>
-                    <span className="text-stone-500">DS Division</span><span className="text-stone-800 font-medium truncate">{watch('dsDivision') || '—'}</span>
+                    <span className="text-stone-500">Province</span><span className="text-stone-800 font-medium">{watch('province') ? getLocalizedProvinceName(watch('province'), selectedLanguage) : '—'}</span>
+                    <span className="text-stone-500">District</span><span className="text-stone-800 font-medium">{watch('district') ? getLocalizedDistrictName(watch('district'), selectedLanguage) : '—'}</span>
+                    <span className="text-stone-500">DS Division</span><span className="text-stone-800 font-medium truncate">{watch('dsDivision') ? getLocalizedDsDivisionName(watch('dsDivision'), selectedLanguage) : '—'}</span>
                   </div>
                 </div>
                 {error && <div className="bg-red-50 border border-red-200 rounded-lg p-3"><p className="text-red-700 text-[0.8rem] font-medium">{error}</p></div>}

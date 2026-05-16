@@ -3,8 +3,15 @@ import { ArrowLeft, CalendarRange, ImagePlus, Plus, Save, Trash2 } from 'lucide-
 import { MobileHeader } from '../shared/MobileHeader';
 import { LocationSelectorField } from '../shared/LocationSelectorField';
 import { authService } from '../../services/auth';
-import { t } from '../../i18n';
-import { PROVINCES, getDistrictsByProvince, getDsDivisionsByDistrict } from '../../constants/sriLankaLocations';
+import { t, translations } from '../../i18n';
+import {
+  PROVINCES,
+  getDistrictsByProvince,
+  getDsDivisionsByDistrict,
+  getLocalizedProvinceName,
+  getLocalizedDistrictName,
+  getLocalizedDsDivisionName,
+} from '../../constants/sriLankaLocations';
 import { landownerMarketplaceService } from '../../services/landownerMarketplace';
 
 type Language = 'en' | 'si' | 'ta';
@@ -227,45 +234,45 @@ export function LandownerAddPlotScreen({
 
             <div className="grid grid-cols-1 gap-1.5">
               <div>
-                <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">Province *</label>
+                <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">{t('province', selectedLanguage)} *</label>
                 <select
                   value={province}
                   onChange={(event) => setProvinceAndReset(event.target.value)}
                   className="w-full rounded-lg border border-stone-300 px-2.5 py-2.5 text-[0.88rem] focus:border-emerald-600 focus:outline-none"
                 >
-                  <option value="">Select province</option>
+                  <option value="">{t('selectProvince', selectedLanguage)}</option>
                   {PROVINCES.map((option) => (
-                    <option key={option} value={option}>{option}</option>
+                    <option key={option} value={option}>{getLocalizedProvinceName(option, selectedLanguage)}</option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">District *</label>
+                <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">{t('district', selectedLanguage)} *</label>
                 <select
                   value={district}
                   onChange={(event) => setDistrictAndReset(event.target.value)}
                   disabled={!province}
                   className="w-full rounded-lg border border-stone-300 px-2.5 py-2.5 text-[0.88rem] focus:border-emerald-600 focus:outline-none disabled:bg-stone-100"
                 >
-                  <option value="">Select district</option>
+                  <option value="">{t('selectDistrictReg', selectedLanguage)}</option>
                   {districts.map((option) => (
-                    <option key={option} value={option}>{option}</option>
+                    <option key={option} value={option}>{getLocalizedDistrictName(option, selectedLanguage)}</option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">DS Division *</label>
+                <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">{t('dsDivision', selectedLanguage)} *</label>
                 <select
                   value={dsDivision}
                   onChange={(event) => setDsDivision(event.target.value)}
                   disabled={!district}
                   className="w-full rounded-lg border border-stone-300 px-2.5 py-2.5 text-[0.88rem] focus:border-emerald-600 focus:outline-none disabled:bg-stone-100"
                 >
-                  <option value="">Select DS division</option>
+                  <option value="">{t('selectDSDivision', selectedLanguage)}</option>
                   {dsDivisions.map((option) => (
-                    <option key={option} value={option}>{option}</option>
+                    <option key={option} value={option}>{getLocalizedDsDivisionName(option, selectedLanguage)}</option>
                   ))}
                 </select>
               </div>
@@ -274,6 +281,8 @@ export function LandownerAddPlotScreen({
             <LocationSelectorField
               label={t('gpsCoordinates', selectedLanguage)}
               district={district}
+              dsDivision={dsDivision}
+              prioritizeAdminCenter
               latitude={gpsLatitude}
               longitude={gpsLongitude}
               onChange={(latitude, longitude) => {
@@ -357,19 +366,27 @@ export function LandownerAddPlotScreen({
           <div className="rounded-lg border border-stone-200 bg-white p-2.5 shadow-sm space-y-1.5">
             <div className="grid grid-cols-1 gap-1.5">
               <div>
-                <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">Water Availability *</label>
+                <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">{translations.waterAvailability[selectedLanguage]} *</label>
                 <select value={waterAvailability} onChange={(event) => setWaterAvailability(event.target.value)} className="w-full rounded-lg border border-stone-300 px-2.5 py-2.5 text-[0.88rem] focus:border-emerald-600 focus:outline-none">
                   {WATER_OPTIONS.map((option) => (
-                    <option key={option} value={option}>{option}</option>
+                    <option key={option} value={option}>
+                      {option === 'On-site' && translations.waterOnSite[selectedLanguage]}
+                      {option === 'Within 500m' && translations.waterWithin500m[selectedLanguage]}
+                      {option === 'Requires Manual Water' && translations.waterManual[selectedLanguage]}
+                    </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">Vehicle Access *</label>
+                <label className="mb-0.5 block text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-stone-600">{translations.vehicleAccess[selectedLanguage]} *</label>
                 <select value={vehicleAccess} onChange={(event) => setVehicleAccess(event.target.value)} className="w-full rounded-lg border border-stone-300 px-2.5 py-2.5 text-[0.88rem] focus:border-emerald-600 focus:outline-none">
                   {VEHICLE_OPTIONS.map((option) => (
-                    <option key={option} value={option}>{option}</option>
+                    <option key={option} value={option}>
+                      {option === 'Lorry' && translations.vehicleLorry[selectedLanguage]}
+                      {option === 'Tuk-tuk' && translations.vehicleTukTuk[selectedLanguage]}
+                      {option === 'Footpath' && translations.vehicleFootpath[selectedLanguage]}
+                    </option>
                   ))}
                 </select>
               </div>

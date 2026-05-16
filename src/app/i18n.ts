@@ -1,6 +1,6 @@
 export type Language = 'en' | 'si' | 'ta';
 
-const translations = {
+export const translations = {
   // ── Common / Shared ──────────────────────────────────────────────────
   dashboard: { en: 'Dashboard', si: 'පුවරුව', ta: 'டாஷ்போர்டு' },
   apiaries: { en: 'Apiaries', si: 'මී මැස්සන්ගේ වත්ත', ta: 'தேனீ பண்ணைகள்' },
@@ -249,6 +249,14 @@ const translations = {
   planAndAnalyze: { en: 'Plan and analyze locations', si: 'ස්ථාන සැලසුම් කිරීම සහ විශ්ලේෂණය', ta: 'இடங்களை திட்டமிடவும் பகுப்பாய்வு செய்யவும்' },
   selectLocation: { en: 'Select Location', si: 'ස්ථානය තෝරන්න', ta: 'இடம் தேர்வு செய்க' },
   selectDistrict: { en: '— Select a district —', si: '— දිස්ත්‍රික්කය තෝරන්න —', ta: '— மாவட்டம் தேர்வு செய்க —' },
+  adminLocationMode: { en: 'Province / District / DS', si: 'පළාත / දිස්ත්‍රික්කය / ප්‍රා.ලේ.', ta: 'மாகாணம் / மாவட்டம் / பிர.செ.' },
+  gpsCoordinatesMode: { en: 'GPS Coordinates', si: 'GPS ඛණ්ඩාංක', ta: 'GPS இணைக்கோட்டுகள்' },
+  startDate: { en: 'Start date', si: 'ආරම්භ දිනය', ta: 'தொடக்க தேதி' },
+  endDate: { en: 'End date', si: 'අවසන් දිනය', ta: 'முடிவு தேதி' },
+  resolvingDsLocation: { en: 'Resolving DS location...', si: 'ප්‍රා.ලේ. ස්ථානය සොයමින්...', ta: 'பிர.செ. இடத்தை தீர்மானிக்கிறது...' },
+  analyzeLocation: { en: 'Analyze Location', si: 'ස්ථානය විශ්ලේෂණය කරන්න', ta: 'இடத்தை பகுப்பாய்வு செய்க' },
+  checkConsoleTryDifferentCoordinates: { en: 'Check console for more details or try different coordinates.', si: 'වැඩි විස්තර සඳහා console පරීක්ෂා කරන්න හෝ වෙනත් ඛණ්ඩාංක උත්සාහ කරන්න.', ta: 'மேலும் விவரங்களுக்கு console-ஐ பார்க்கவும் அல்லது வேறு இணைக்கோட்டுகளை முயற்சிக்கவும்.' },
+  gpsSearch: { en: 'GPS search', si: 'GPS සෙවුම', ta: 'GPS தேடல்' },
   latitude: { en: 'Latitude', si: 'අක්ෂාංශ', ta: 'அட்சரேகை' },
   longitude: { en: 'Longitude', si: 'දේශාංශ', ta: 'தீர்க்கரேகை' },
   analyze: { en: 'Analyze This Location', si: 'මෙම ස්ථානය විශ්ලේෂණය කරන්න', ta: 'இந்த இடத்தை பகுப்பாய்வு செய்க' },
@@ -270,6 +278,7 @@ const translations = {
   minTemp: { en: 'Lowest', si: 'අවම', ta: 'குறைந்தபட்சம்' },
   avgTemp: { en: 'Average Temperature', si: 'සාමාන්‍ය උෂ්ණත්වය', ta: 'சராசரி வெப்பநிலை' },
   humidity: { en: 'Humidity', si: 'ආර්ද්‍රතාවය', ta: 'ஈரப்பதம்' },
+  precipitation: { en: 'Precipitation', si: 'වර්ෂාපතනය', ta: 'மழைப்பொழிவு' },
   rainfall: { en: 'Rainfall', si: 'වර්ෂාපතනය', ta: 'மழைப்பொழிவு' },
   rainfallRisk: { en: 'Rainfall Risk', si: 'වැසි අවදානම', ta: 'மழை ஆபத்து' },
   wind: { en: 'Wind Speed', si: 'සුළං වේගය', ta: 'காற்று வேகம்' },
@@ -277,6 +286,18 @@ const translations = {
   beeTemperatureGuide: { en: 'Bee Temperature Guide', si: 'මී මැස්සන්ගේ උෂ්ණත්ව මාර්ගෝපදේශය', ta: 'தேனீ வெப்பநிலை வழிகாட்டி' },
   beeHumidityGuide: { en: 'Bee Humidity Guide', si: 'මී මැස්සන්ගේ ආර්ද්‍රතා මාර්ගෝපදේශය', ta: 'தேனீ ஈரப்பத வழிகாட்டி' },
   optimal: { en: 'Optimal', si: 'සුදුසුම', ta: 'சிறந்தது' },
+  bestForForaging: { en: 'Best for foraging', si: 'ආහාර සෙවීමට හොඳම', ta: 'உணவு தேட சிறந்தது' },
+  risky: { en: 'Risky', si: 'අවදානම්', ta: 'அபாயம்' },
+  average: { en: 'average', si: 'සාමාන්‍ය', ta: 'சராசரி' },
+  peak: { en: 'peak', si: 'උපරිම', ta: 'உச்சம்' },
+  high: { en: 'High', si: 'ඉහළ', ta: 'உயர்' },
+  moderate: { en: 'Moderate', si: 'මධ්‍යම', ta: 'மிதமான' },
+  low: { en: 'Low', si: 'අඩු', ta: 'குறைவு' },
+  heavy: { en: 'Heavy', si: 'තද', ta: 'கனமான' },
+  light: { en: 'Light', si: 'සුළු', ta: 'லேசான' },
+  none: { en: 'None', si: 'නැත', ta: 'இல்லை' },
+  strong: { en: 'Strong', si: 'තද', ta: 'வலுவான' },
+  calm: { en: 'Calm', si: 'සන්සුන්', ta: 'அமைதியான' },
   optimalForaging: { en: 'Optimal Foraging', si: 'හොඳම ආහාර සෙවීම', ta: 'சிறந்த உணவுத்தேடல்' },
   stress: { en: 'Stress', si: 'පීඩනය', ta: 'அழுத்தம்' },
   risk: { en: 'Risk', si: 'අවදානම', ta: 'ஆபத்து' },
@@ -429,7 +450,6 @@ const translations = {
   critical: { en: 'Critical', si: 'බරපතල', ta: 'ஆபத்தானது' },
   weak: { en: 'Weak', si: 'දුර්වල', ta: 'பலவீனம்' },
   normal: { en: 'Normal', si: 'සාමාන්‍ය', ta: 'சாதாரண' },
-  strong: { en: 'Strong', si: 'ශක්තිමත්', ta: 'வலிமையான' },
   pestActive: { en: 'Pest Active', si: 'පළිබෝධ ක්‍රියාකාරී', ta: 'பூச்சி செயலில்' },
   needsInspection: { en: 'Needs Inspection', si: 'පරීක්ෂාව අවශ්‍යයි', ta: 'ஆய்வு தேவை' },
   queenChangeDue: { en: 'Queen Change Due', si: 'රැජින මාරු කළ යුතුයි', ta: 'ராணி மாற்றம் தேவை' },
@@ -654,40 +674,40 @@ const translations = {
 
   // ── Landowner Registration Step Labels ──────────────────────────────
   personalDetailsStep: { en: 'Personal Details', si: 'පුද්ගලික විස්තර', ta: 'தனிப்பட்ட விவரங்கள்' },
-  profileStep: { en: 'Profile', si: 'පැතිකඩ', ta: 'সুযවিరம্' },
-  locationPasswordStep: { en: 'Location & Password', si: 'ස්ථානය සහ මුරපදය', ta: 'ইডম্ মর্ড্রুম্ কডভুচ্চোল্' },
-  summaryStep: { en: 'Summary', si: 'සාරාංශය', ta: 'শুরুক্কম্' },
-  businessReg: { en: 'Business Reg', si: 'ව්‍යාපාර ලියාප', ta: 'বণিক পতিবু' },
-  role: { en: 'Role', si: 'භූමිකාව', ta: 'পাত্থিরম্' },
-  optionalText: { en: '(optional)', si: '(විකල්ප)', ta: '(বিরুপ্পম্)' },
+  profileStep: { en: 'Profile', si: 'පැතිකඩ', ta: 'சுயவிவரம்' },
+  locationPasswordStep: { en: 'Location & Password', si: 'ස්ථානය සහ මුරපදය', ta: 'இடம் & கடவுச்சொல்' },
+  summaryStep: { en: 'Summary', si: 'සාරාංශය', ta: 'சுருக்கம்' },
+  businessReg: { en: 'Business Reg', si: 'ව්‍යාපාර ලියාප', ta: 'வணிக ரெஜி' },
+  role: { en: 'Role', si: 'භූමිකාව', ta: 'பங்கு' },
+  optionalText: { en: '(optional)', si: '(විකල්ප)', ta: '(விருப்பமானது)' },
 
   // ── Landowner Plots Screen Messages ─────────────────────────────────
-  plotManager: { en: 'Plot Manager', si: 'ඉඩම් කළමනාකරු', ta: 'নিল মেলার্' },
-  noPlotsMatchFilters: { en: 'No plots match your filters', si: 'ඔබේ පෙරහන්වලට ගැළපෙන ඉඩම් නොමැත', ta: 'উঙ্গ্ বডিকট্টিকুক্কু পোরুন্তুম্ নিলঙ্গ্ ইল্লৈ' },
-  createFirstPlotMessage: { en: 'Create your first plot to start listing for beekeepers', si: 'මී මැසි පාලකයින් සඳහා ලැයිස්තුගත කිරීම ආරම්භ කිරීමට ඔබේ පළමු ඉඩම සාදන්න', ta: 'তেনী বর্প্পার্কুক্কাক পট্টিয্ সেয্য উঙ্গ্ মুদ্ নিলত্তৈ উরুবাক্কুঙ্গ্' },
-  tryAdjustingFilters: { en: 'Try adjusting your search or status filter.', si: 'ඔබේ සෙවීම හෝ තත්ත්ව පෙරනය වෙනස් කිරීමට උත්සාහ කරන්න.', ta: 'উঙ্গ্ তেডল্ অল্লদু নিলৈ বডিকট্টিযৈ সরিসেয্য মুযর্সিক্কবুম্' },
+  plotManager: { en: 'Plot Manager', si: 'ඉඩම් කළමනාකරු', ta: 'சதி மேலாளர்' },
+  noPlotsMatchFilters: { en: 'No plots match your filters', si: 'ඔබේ පෙරහන්වලට ගැළපෙන ඉඩම් නොමැත', ta: 'உங்கள் வடிகட்டிகளுடன் எந்த வரைபடங்களும் பொருந்தவில்லை' },
+  createFirstPlotMessage: { en: 'Create your first plot to start listing for beekeepers', si: 'මී මැසි පාලකයින් සඳහා ලැයිස්තුගත කිරීම ආරම්භ කිරීමට ඔබේ පළමු ඉඩම සාදන්න', ta: 'தேனீ வளர்ப்பாளர்களுக்கான பட்டியலைத் தொடங்க, உங்கள் முதல் நிலத்தை உருவாக்குங்கள்' },
+  tryAdjustingFilters: { en: 'Try adjusting your search or status filter.', si: 'ඔබේ සෙවීම හෝ තත්ත්ව පෙරනය වෙනස් කිරීමට උත්සාහ කරන්න.', ta: 'உங்கள் தேடல் அல்லது நிலை வடிப்பானைச் சரிசெய்ய முயற்சிக்கவும்' },
 
   // ── Land Plot Registration Form Fields ───────────────────────────────
-  landPlotName: { en: 'Land/Plot Name', si: 'ඉඩම/බිම් නම', ta: 'নিলম্/পকুতি পেযর্' },
-  landPlotNameRequired: { en: 'Land/Plot Name *', si: 'ඉඩම/බිම් නම *', ta: 'নিলম্/পকুতি পেযর্ *' },
-  registerNewLandPlot: { en: 'Register New Land Plot', si: 'නව ඉඩම් බිම ලියාපදිංচි කරන්න', ta: 'পুদিয নিল পকুতিযৈ পতিবু সেয্যবুম্' },
-  gpsCoordinatesRequired: { en: 'GPS Coordinates are required. Drop a pin on the map area.', si: 'GPS ඛණ්ඩාංක අවශ්‍යයි. සිතියම් ප්‍රදේශයේ පින් එකක් දමන්න.', ta: 'GPS আকুল্ আবশ্যক হৈং মানচিত্র প্রদেশযিল্ ওরু পিন্ পোডুঙ্গল্' },
+  landPlotName: { en: 'Land/Plot Name', si: 'ඉඩම/බිම් නම', ta: 'நிலம்/மனைப் பெயர்' },
+  landPlotNameRequired: { en: 'Land/Plot Name *', si: 'ඉඩම/බිම් නම *', ta: 'நிலம்/மனைப் பெயர்' },
+  registerNewLandPlot: { en: 'Register New Land Plot', si: 'නව ඉඩම් බිම ලියාපදිංচි කරන්න', ta: 'புதிய நிலத்தைப் பதிவு செய்யவும்' },
+  gpsCoordinatesRequired: { en: 'GPS Coordinates are required. Drop a pin on the map area.', si: 'GPS ඛණ්ඩාංක අවශ්‍යයි. සිතියම් ප්‍රදේශයේ පින් එකක් දමන්න.', ta: 'GPS ஆயத்தொலைவுகள் தேவை. வரைபடப் பகுதியில் ஒரு குறியை இடவும்' },
 
   // ── Add Plot Form Additional Fields ─────────────────────────────────
-  editPlotTitle: { en: 'Edit Plot', si: 'ඉඩම සංස්කරණය', ta: 'নিলম্ তিরুত্তু' },
-  addNewPlotTitle: { en: 'Add New Plot', si: 'අලුත් ඉඩමක් එකතු කරන්න', ta: 'পুতিয নিলম্ চের্ক্ক' },
-  plotNamePlaceholder: { en: 'e.g., North Coconut Grove', si: 'උදා: උතුරු පොල් වත්ත', ta: 'উদা: উত্তর নারিকেল বাগান' },
-  acreageExample: { en: 'e.g., 8.5', si: 'උදා: 8.5', ta: 'উদা: 8.5' },
-  primaryForageSourcesLabel: { en: 'Primary Forage Sources', si: 'මූලික ආහාර ප්‍රභව', ta: 'মুখ্য খাদ্য উৎস' },
-  forageNameLabel: { en: 'Forage name (e.g., Coconut Palm)', si: 'ආහාර නම (උදා: පොල් ගස)', ta: 'খাদ্য নাম (উদা: নারিকেল গাছ)' },
-  startMonth: { en: 'Start Month', si: 'ආරම්භක මාසය', ta: 'আরম্ভের মাস' },
-  endMonth: { en: 'End Month', si: 'අවසන් මාসය', ta: 'শেষ মাস' },
-  addForageSource: { en: 'Add Forage', si: 'ආහාර එකতු කරන්න', ta: 'খাদ্য যোগ করুন' },
-  shadeProfileLabel: { en: 'Shade Profile', si: 'සෙවන පැතිකඩ', ta: 'ছায়ার প্রোফাইল' },
-  fullShade: { en: 'Full Shade', si: 'සම්පූර්ණ සෙවන', ta: 'সম্পূর্ণ ছায়া' },
-  partialShade: { en: 'Partial Shade', si: 'අර්ධ සෙවන', ta: 'আংশিক ছায়া' },
-  fullSun: { en: 'Full Sun', si: 'සම්පූර්ණ අව්ව', ta: 'সম্পূর্ণ রোদ' },
-  nightAccessQuestion: { en: 'Can beekeeper access the land at night?', si: 'මී මැසි පාලකයාට රාත්‍රියේ ඉඩමට ප්‍රවේශ විය හැකිද?', ta: 'মৌচাষি কি রাতে জমিতে প্রবেশ করতে পারে?' },
+  editPlotTitle: { en: 'Edit Plot', si: 'ඉඩම සංස්කරණය', ta: 'நில விவரத்தைத் திருத்து' },
+  addNewPlotTitle: { en: 'Add New Plot', si: 'අලුත් ඉඩමක් එකතු කරන්න', ta: 'புதிய நிலத்தைச் சேர்' },
+  plotNamePlaceholder: { en: 'e.g., North Coconut Grove', si: 'උදා: උතුරු පොල් වත්ත', ta: 'வடக்கு தென்னை தோட்டம்' },
+  acreageExample: { en: 'e.g., 8.5', si: 'උදා: 8.5', ta: 'எ.கா.: 8.5' },
+  primaryForageSourcesLabel: { en: 'Primary Forage Sources', si: 'මූලික ආහාර ප්‍රභව', ta: 'முதன்மை தீவன ஆதாரங்கள்' },
+  forageNameLabel: { en: 'Forage name (e.g., Coconut Palm)', si: 'ආහාර නම (උදා: පොල් ගස)', ta: 'தீவனத்தின் பெயர் (எ.கா., தென்னை மரம்)' },
+  startMonth: { en: 'Start Month', si: 'ආරම්භක මාසය', ta: 'தொடக்க மாதம்' },
+  endMonth: { en: 'End Month', si: 'අවසන් මාসය', ta: 'இறுதி மாதம்' },
+  addForageSource: { en: 'Add Forage', si: 'ආහාර එකতු කරන්න', ta: 'தீவனம் சேர்க்கவும்' },
+  shadeProfileLabel: { en: 'Shade Profile', si: 'සෙවන පැතිකඩ', ta: 'நிழல் சுயவிவரம்' },
+  fullShade: { en: 'Full Shade', si: 'සම්පූර්ණ සෙවන', ta: 'முழு நிழல்' },
+  partialShade: { en: 'Partial Shade', si: 'අර්ධ සෙවන', ta: 'பகுதி நிழல்' },
+  fullSun: { en: 'Full Sun', si: 'සම්පූර්ණ අව්ව', ta: 'முழு சூரியன்' },
+  nightAccessQuestion: { en: 'Can beekeeper access the land at night?', si: 'මී මැසි පාලකයාට රාත්‍රියේ ඉඩමට ප්‍රවේශ විය හැකිද?', ta: 'தேனீ வளர்ப்பவர் இரவில் அந்த நிலத்தை அணுக முடியுமா?' },
   yourPlots: { en: 'Your Plots', si: 'ඔබේ ඉඩම්', ta: 'உங்கள் நிலங்கள்' },
   registeredPlots: { en: 'registered plots', si: 'ලියාපදිංචි ඉඩම්', ta: 'பதிவு செய்யப்பட்ட நிලங்கள்' },
   activeContracts: { en: 'active contracts', si: 'ක්‍රියාකාරී ගිවිසුම්', ta: 'செயலில் உள்ள ஒப்பந்தங்கள்' },
@@ -696,53 +716,53 @@ const translations = {
   anyStatus: { en: 'Any status', si: 'ඕනෑම තත්ත්වයක්', ta: 'எந்த நிலையிலும்' },
   noPlotsYet: { en: 'No plots registered yet', si: 'තවම ඉඩම් ලියාපදිංචි කර නැත', ta: 'இன்னும் நிலங்கள் பதிவு செய்யப்படவில্லை' },
   createFirstPlot: { en: 'Create your first plot to start listing for beekeepers', si: 'මී මැසි පාලකයින් සඳහා ලැයිස්තුගත කිරීම ආරම්භ කිරීමට ඔබේ පළමු ප්ලට් එක සාදන්න', ta: 'தேனீ வளர்ப்பாளர்களுக  சூ செய்ய உங முলல  ' },
-  adjustSearchFilter: { en: 'Try adjusting your search or status filter.', si: 'ඔබේ සෙවීම හෝ තත්ත්ව පෙරනය සකසන්න.', ta: 'உங்கள் தேட்  நলை வడை    ' },
+  adjustSearchFilter: { en: 'Try adjusting your search or status filter.', si: 'ඔබේ සෙවීම හෝ තත්ත්ව පෙරනය සකසන්න.', ta: 'உங்கள் தேடல் அல்லது நிலை வடிப்பானைச் சரிசெய்ய முயற்சிக்கவும்.' },
   createFirstPlotBtn: { en: 'Create First Plot', si: 'පළමු ඉඩම සාදන්න', ta: 'முதல் நிலம் உருவාକুங' },
-  hiveOccupancy: { en: 'Hive occupancy', si: 'මී පෙට්ටි වාසය', ta: 'தেনকு வාச' },
-  hivesUnit: { en: 'hives', si: 'මී පෙට්ටි', ta: 'தে' },
+  hiveOccupancy: { en: 'Hive occupancy', si: 'මී පෙට්ටි වාසය', ta: 'தேன்கூடு ஆக்கிரமிப்பு' },
+  hivesUnit: { en: 'hives', si: 'මී පෙට්ටි', ta: 'படை நோய்' },
   revenue: { en: 'Revenue', si: 'ආදායම', ta: 'வரு' },
   viewContract: { en: 'View Contract', si: 'ගිවිසුම බලන්න', ta: 'ஒப ப' },
   createListing: { en: 'Create Listing', si: 'ලැයිස්තුව සාදන්න', ta: 'பட்டியல் உருவாக்கவும்' },
-  activeContractsTitle: { en: 'Active Contracts', si: 'ක්‍රියාකාරී ගිවිසුම්', ta: 'செயలি உ ஒ' },
-  plot: { en: 'Plot', si: 'ඉඩම', ta: 'நිల' },
-  expiry: { en: 'Expiry', si: 'කල් ඉකුත් වීම', ta: ' ' },
-  movingOut: { en: 'Moving Out', si: 'පිටවීම', ta: ' ' },
-  completed: { en: 'Completed', si: 'සම්පුර්ණ', ta: '' },
-  showing: { en: 'Showing', si: 'පෙන්වන්නේ', ta: '   ' },
-  activeContract: { en: 'active contract', si: 'ක්‍රියාකාරී ගිවිසුම', ta: ' ' },
-  viewAll: { en: 'View all', si: 'සියල්ල බලන්න', ta: ' ' },
-  districtNotSet: { en: 'District not set', si: 'දිස්ත්‍රික්කය සකසා නැත', ta: '্ট    ' },
-  accountSummary: { en: 'Account Summary', si: 'ගිණුම් සාරාංශය', ta: ' ' },
-  recentActivity: { en: 'Recent Activity', si: 'මෑතකදී ක්‍රියාකාරකම්', ta: '  ' },
-  activeListings: { en: 'Active Listings', si: 'ක්‍රියාකාරී ලැයිස්තු', ta: ' ' },
-  contractProposals: { en: 'Contract Proposals', si: 'ගිවිසුම් යෝජනා', ta: ' ' },
-  completedContracts: { en: 'Completed Contracts', si: 'සම්පුර්ණ කරන ලද ගිවිසුම්', ta: 'ప   ു' },
-  manageYourLandPlots: { en: 'Manage your land plots to create listings and partnerships with local beekeepers', si: 'ප්‍රාදේශීය මී මැසි පාලකයින් සමඟ ලැයිස්තු සහ හවුල්කාරිත්ව නිර්මාණය කිරීම සඳහා ඔබේ ඉඩම් කළමනාකරණය කරන්න', ta: '                ' },
-  deletePlot: { en: 'Delete plot', si: 'ඉඩම මකන්න', ta: ' ' },
-  plotNameExample: { en: 'e.g., South Mango Orchard', si: 'උදා: දකුණු අඹ වත්ත', ta: ':    ' },
-  enterBusinessReg: { en: 'Enter business registration', si: 'ව්‍යාපාර ලියාපදිංචිය ඇතුලත් කරන්න', ta: '   ' },
+  activeContractsTitle: { en: 'Active Contracts', si: 'ක්‍රියාකාරී ගිවිසුම්', ta: 'செயலில் உள்ள ஒப்பந்தங்கள்' },
+  plot: { en: 'Plot', si: 'ඉඩම', ta: 'நிலம' },
+  expiry: { en: 'Expiry', si: 'කල් ඉකුත් වීම', ta: 'காலாவதியாகும்' },
+  movingOut: { en: 'Moving Out', si: 'පිටවීම', ta: 'புறப்பாடு ' },
+  completed: { en: 'Completed', si: 'සම්පුර්ණ', ta: 'முழுமையான' },
+  showing: { en: 'Showing', si: 'පෙන්වන්නේ', ta: ' காட்டும்  ' },
+  activeContract: { en: 'active contract', si: 'ක්‍රියාකාරී ගිවිසුම', ta: 'செயலில் ஒப்பந்தம்' },
+  viewAll: { en: 'View all', si: 'සියල්ල බලන්න', ta: 'அனைத்தையும் பார்க்கவும் ' },
+  districtNotSet: { en: 'District not set', si: 'දිස්ත්‍රික්කය සකසා නැත', ta: 'மாவட்டம் அமைக்கப்படவில்லை    ' },
+  accountSummary: { en: 'Account Summary', si: 'ගිණුම් සාරාංශය', ta: 'கணக்கு சுருக்கம் ' },
+  recentActivity: { en: 'Recent Activity', si: 'මෑතකදී ක්‍රියාකාරකම්', ta: 'சமீபத்திய செயல்பாடு' },
+  activeListings: { en: 'Active Listings', si: 'ක්‍රියාකාරී ලැයිස්තු', ta: 'செயலில் உள்ள பட்டியல்கள்' },
+  contractProposals: { en: 'Contract Proposals', si: 'ගිවිසුම් යෝජනා', ta: 'ஒப்பந்த முன்மொழிவுகள்' },
+  completedContracts: { en: 'Completed Contracts', si: 'සම්පුර්ණ කරන ලද ගිවිසුම්', ta: 'முடிக்கப்பட்ட ஒப்பந்தங்கள்' },
+  manageYourLandPlots: { en: 'Manage your land plots to create listings and partnerships with local beekeepers', si: 'ප්‍රාදේශීය මී මැසි පාලකයින් සමඟ ලැයිස්තු සහ හවුල්කාරිත්ව නිර්මාණය කිරීම සඳහා ඔබේ ඉඩම් කළමනාකරණය කරන්න', ta: '  உள்ளூர் தேனீ வளர்ப்பாளர்களுடன் பட்டியல்களை உருவாக்கவும் மற்றும் கூட்டாண்மைகளை ஏற்படுத்தவும் உங்கள் நிலப் பகுதிகளை நிர்வகிக்கவும்' },
+  deletePlot: { en: 'Delete plot', si: 'ඉඩම මකන්න', ta: 'சதியை நீக்கு' },
+  plotNameExample: { en: 'e.g., South Mango Orchard', si: 'උදා: දකුණු අඹ වත්ත', ta: 'தெற்கு மாம்பழத் தோட்டம்   ' },
+  enterBusinessReg: { en: 'Enter business registration', si: 'ව්‍යාපාර ලියාපදිංචිය ඇතුලත් කරන්න', ta: 'வணிகப் பதிவை உள்ளிடவும்' },
 
   // ── Add Plot and Form Translations ──────────────────────────────────
   gpsCoordinates: { en: 'GPS Coordinates', si: 'GPS ඛණ්ඩාංක', ta: 'GPS ' },
-  primaryForageSources: { en: 'Primary Forage Sources', si: 'මූලික ආහාර ප්‍රභව', ta: '  ' },
-  forageNamePlaceholder: { en: 'Forage name (e.g., Coconut Palm)', si: 'ආහාර නම (උදා: පොල් ගස)', ta: '   (:  )' },
-  addForage: { en: 'Add Forage', si: 'ආහාර එකතু කරන්න', ta: ' ' },
-  shadeProfile: { en: 'Shade Profile', si: 'සෙවන පැතිකඩ', ta: ' ' },
+  primaryForageSources: { en: 'Primary Forage Sources', si: 'මූලික ආහාර ප්‍රභව', ta: ' முதன்மை தீவன ஆதாரங்கள் ' },
+  forageNamePlaceholder: { en: 'Forage name (e.g., Coconut Palm)', si: 'ආහාර නම (උදා: පොල් ගස)', ta: 'தீவனத்தின் பெயர் (எ.கா., தென்னை மரம்)' },
+  addForage: { en: 'Add Forage', si: 'ආහාර එකතু කරන්න', ta: ' தீவனம் சேர்க்கவும்' },
+  shadeProfile: { en: 'Shade Profile', si: 'සෙවන පැතිකඩ', ta: 'நிழல் சுயவிவரம் ' },
   nightAccess: { en: 'Can beekeeper access the land at night?', si: 'මී මැසි පාලකයාට රාත්‍රියේ ඉඩමට ප්‍රවේශ විය හැකිද?', ta: '         ?' },
-  clickToUpload: { en: 'Click to upload images', si: 'පින්තූර උඩුගත කිරීමට ක්ලික් කරන්න', ta: '      ' },
+  clickToUpload: { en: 'Click to upload images', si: 'පින්තූර උඩුගත කිරීමට ක්ලික් කරන්න', ta: '    தேனீ வளர்ப்பவர் இரவில் அந்த நிலத்திற்குள் செல்ல முடியுமா?  ' },
   maxSizeEach: { en: 'Max 5MB each', si: 'ප්‍රභේදයක් 5MB', ta: '  5MB' },
-  savingPlot: { en: 'Saving...', si: 'සුරකිමින්...', ta: '   ...' },
+  savingPlot: { en: 'Saving...', si: 'සුරකිමින්...', ta: 'சேமிப்பு ...' },
 
   // ── Registration Form Translations ─────────────────────────────────
-  locationPassword: { en: 'Location & Password', si: 'ස්ථානය සහ මුරපදය', ta: '  ' },
-  failedToFetch: { en: 'Failed to fetch', si: 'ගෙන ඒමට අසමත්', ta: '   ' },
+  locationPassword: { en: 'Location & Password', si: 'ස්ථානය සහ මුරපදය', ta: 'இடம் & கடவுச்சொல்' },
+  failedToFetch: { en: 'Failed to fetch', si: 'ගෙන ඒමට අසමත්', ta: 'பெற முடியவில்லை' },
   cannotConnect: { en: 'Cannot connect to server. Please check your internet connection.', si: 'සේවාදායකයා සමඟ සම්බන්ධ විය නොහැක. ඔබේ අන්තර්ජාල සම්බන්ධතාවය පරීක්ෂා කරන්න.', ta: 'இணைக்க முடியவில்லை. இணையத்தை சரிபார்க்கவும்.' },  phoneExample: { en: '072 123 1234', si: '072 123 1234', ta: '072 123 1234' },
   nicExample: { en: '200012345678', si: '200012345678', ta: '200012345678' },
   emailExample: { en: 'your@email.com', si: 'ඔබේ@ඊමේල්.com', ta: '@.com' },
 
   // ── Additional UI Translations ─────────────────────────────────────
-  accountStatus: { en: 'Account Status', si: 'ගිණුම් තත්ත්වය', ta: ' ' },
-  profileCompletion: { en: 'Profile Completion', si: 'පැතිකඩ සම්පූර්ණකරණය', ta: ' ' },
+  accountStatus: { en: 'Account Status', si: 'ගිණුම් තත්ත්වය', ta: 'கணக்கு நிலை' },
+  profileCompletion: { en: 'Profile Completion', si: 'පැතිකඩ සම්පූර්ණකරණය', ta: 'சுயவிவரத்தை நிறைவு செய்தல்' },
   rankTabPestDetection: { en: 'Pest Detection', si: 'පළිබෝධ සනාක්ත කිරීම', ta: 'பூச்சி கண்டறிதல்' },
   rankTabPestShort: { en: 'Pest Det.', si: 'පළිබෝධ.', ta: 'பூச்சி.' },
   
@@ -759,33 +779,33 @@ const translations = {
   // ── Missing Form Field Placeholders ──────────────────────────────────
   enterNumberActiveFrames: { en: 'Enter number of active frames', si: 'ක්‍රියාකාරී රාමු සංඛ්‍යාව ඇතුළත් කරන්න', ta: '     ' },
   qty: { en: 'Qty', si: 'ප්‍රමාණය', ta: '' },
-  productName: { en: 'Product Name', si: 'නිෂ්පාදන නම', ta: ' ' },
-  dosage: { en: 'Dosage', si: 'මාත්‍රාව', ta: '' },
+  productName: { en: 'Product Name', si: 'නිෂ්පාදන නම', ta: 'செயலில் உள்ள பிரேம்களின் எண்ணிக்கையை உள்ளிடவும்' },
+  dosage: { en: 'Dosage', si: 'මාත්‍රාව', ta: 'மருந்தளவு' },
   broodFrames: { en: 'Brood Frames', si: 'පැටවුන් රාමු', ta: '  ' },
-  enterTreatmentUsed: { en: 'Enter treatment used', si: 'භාවිතා කළ ප්‍රතිකාරය ඇතුළත් කරන්න', ta: '     ' },
-  framesNumberCoveredByBees: { en: 'Number of frames covered by bees', si: 'මී මැස්සන් ආවරණය කළ රාමු සංඛ්‍යාව', ta: '     ' },
-  generalRemarks: { en: 'General Remarks', si: 'සාමාන්‍ය ප්‍රකාශන', ta: ' ' },
-  shortNote: { en: 'Short note', si: 'කෙටි සටහන', ta: ' ' },
-  forageType: { en: 'Forage type', si: 'ආහාර වර්ගය', ta: '  ' },
-  bloomingPeriod: { en: 'Blooming period', si: 'මල් පිපෙන කාලය', ta: '  ' },
-  searchLocation: { en: 'Search location', si: 'ස්ථානය සොයන්න', ta: ' ' },
-  optionalMessage: { en: 'Optional message', si: 'විකල්ප පණිවිඩය', ta: ' ' },
-  latitudePlaceholder: { en: 'Latitude', si: 'අක්ෂාංශ', ta: '' },
-  longitudePlaceholder: { en: 'Longitude', si: 'දේශාංශ', ta: '' },
+  enterTreatmentUsed: { en: 'Enter treatment used', si: 'භාවිතා කළ ප්‍රතිකාරය ඇතුළත් කරන්න', ta: 'பயன்படுத்தப்பட்ட சிகிச்சையை உள்ளிடவும்  ' },
+  framesNumberCoveredByBees: { en: 'Number of frames covered by bees', si: 'මී මැස්සන් ආවරණය කළ රාමු සංඛ්‍යාව', ta: 'தேனீக்களால் மூடப்பட்ட சட்டங்களின் எண்ணிக்கை' },
+  generalRemarks: { en: 'General Remarks', si: 'සාමාන්‍ය ප්‍රකාශන', ta: 'சிறு குறிப்பு' },
+  shortNote: { en: 'Short note', si: 'කෙටි සටහන', ta: 'சிறு குறிப்பு' },
+  forageType: { en: 'Forage type', si: 'ආහාර වර්ගය', ta: 'தீவன வகை' },
+  bloomingPeriod: { en: 'Blooming period', si: 'මල් පිපෙන කාලය', ta: 'பூக்கும் காலம்' },
+  searchLocation: { en: 'Search location', si: 'ස්ථානය සොයන්න', ta: 'தேடல் இடம் ' },
+  optionalMessage: { en: 'Optional message', si: 'විකල්ප පණිවිඩය', ta: 'சிறு குறிப்பு ' },
+  latitudePlaceholder: { en: 'Latitude', si: 'අක්ෂාංශ', ta: 'அட்சரேகை' },
+  longitudePlaceholder: { en: 'Longitude', si: 'දේශාංශ', ta: 'தீர்க்கரேகை' },
 
   // ── Button Labels and Actions ─────────────────────────────────────────
-  transfer: { en: 'Transfer', si: 'මාරු කරන්න', ta: '' },
-  ok: { en: 'OK', si: 'හරි', ta: ' ' },
+  transfer: { en: 'Transfer', si: 'මාරු කරන්න', ta: 'இடமாற்றம்' },
+  ok: { en: 'OK', si: 'හරි', ta: ' சரி' },
 
   // ── Form Labels and Static Text ───────────────────────────────────────
   invitationToken: { en: 'Invitation Token', si: 'ආරාධනා ටෝකනය', ta: ' ' },
   accountSummaryTitle: { en: 'Account Summary', si: 'ගිණුම් සාරාංශය', ta: ' ' },
   accountStatusActive: { en: 'Account Status: Active & Verified', si: 'ගිණුම් තත්ත්වය: ක්‍රියාකාරී සහ සත්‍යාපිත', ta: '  :   ' },
-  roleBeekeeper: { en: 'Role: Beekeeper', si: 'භූමිකාව: මී මැසි පාලකයා', ta: ':  ' },
+  roleBeekeeper: { en: 'Role: Beekeeper', si: 'භූමිකාව: මී මැසි පාලකයා', ta: 'பங்கு: தேனீ வளர்ப்பவர்' },
   profileCompletionPercent: { en: 'Profile Completion: 85%', si: 'පැතිකඩ සම්පූර්ණකරණය: 85%', ta: ' : 85%' },
 
   // ── Status and Error Messages ─────────────────────────────────────────
-  noForageNamesRecorded: { en: 'No forage names recorded yet', si: 'තවම ආහාර නම් සටහන් කර නැත', ta: '        ' },
+  noForageNamesRecorded: { en: 'No forage names recorded yet', si: 'තවම ආහාර නම් සටහන් කර නැත', ta: ' இதுவரை தீவனப் பெயர்கள் எதுவும் பதிவு செய்யப்படவில்லை. ' },
   noForageNamesInArea: { en: 'No forage names recorded by beekeepers for this area yet', si: 'මෙම ප්‍රදේශය සඳහා මී මැසි පාලකයින් විසින් තවම ආහාර නම් සටහන් කර නැත', ta: '               ' },
   pleaseEnterInvitationToken: { en: 'Please enter your invitation token', si: 'කරුණාකර ඔබේ ආරාධනා ටෝකනය ඇතුළත් කරන්න', ta: '     ' },
   invalidExpiredToken: { en: 'Invalid or expired token', si: 'වලංගු නොවන හෝ කල් ඉකුත් වූ ටෝකනය', ta: '   ' },
@@ -918,10 +938,13 @@ const translations = {
   moveOutRequestedPending: { en: 'Move-Out Requested - Awaiting Landowner Approval', si: 'ඉවත් වීම ඉල්ලා ඇත - ඉඩම් අයිතිකරුගේ අනුමැතිය බලාපොරොත්තුවෙන්', ta: 'வெளியேறுதல் கோரப்பட்டது - நிலவுரிமையாளர் அனுமதிக்காக காத்திருக்கிறது' },
   noProposalsYet: { en: 'No proposals submitted yet.', si: 'තවම යෝජනා ඉදිරිপත් කර නැත.', ta: 'இன்னும் முன்மொழிவுகள் சமர்ப்பிக்கப்படவில்லை.' },
   listingDetail: { en: 'Listing Detail', si: 'ලැය්ිස්තු විස්තර', ta: 'பட்டியல் விவரம்' },
+  plotDetails: { en: 'Plot Details', si: 'ඉඩම් විස්තර', ta: 'நில விவரங்கள்' },
+  foragePlants: { en: 'Forage Plants', si: 'ආහාර ශාක', ta: 'தீவனச் செடிகள்' },
   noImagesUploaded: { en: 'No images uploaded for this plot', si: 'මෙම බිම සඳහා රූප උඩුගත කර නැත', ta: 'இந்த நிலத்திற்கு படங்கள் பதிவேற்றப்படவில்லை' },
   landownerProfile: { en: 'Landowner Profile', si: 'ඉඩම් අයිතිකරු පැතිකඩ', ta: 'நிலவுரிமையாளர் சுயவிவரம்' },
-  activeOnApiCore: { en: 'Active on APICore:', si: 'APICore හි ක්‍රියාකාරී:', ta: 'APICore-ல் செயலில் உள்ளது:' },
   years: { en: 'years', si: 'වසර', ta: 'ஆண்டுகள்' },
+  acresUnit: { en: 'acres', si: 'අක්කර', ta: 'ஏக்கர்' },
+  nearby: { en: 'Nearby', si: 'අසල', ta: 'அருகில்' },
   contact: { en: 'Contact:', si: 'සම්බන්ධතාවය:', ta: 'தொடர்பு:' },
   communityReviews: { en: 'Community Reviews', si: 'ප්‍රජා සමාලෝචන', ta: 'சமூக மதிப்புரைகள்' },
   loadingReviews: { en: 'Loading reviews...', si: 'සමාලෝචන පූරණය වෙමින்...', ta: 'மதிப்புரைகள் ஏற்றுகிறது...' },
@@ -945,7 +968,115 @@ const translations = {
   proposalSubmittedSuccess: { en: 'Your proposal has been submitted. You will be notified once the landowner responds.', si: 'ඔබේ යෝජනාව ඉදිරිපත් කර ඇත. ඉඩම් අයිතිකරු ප්‍රතිචාර දක්වන විට ඔබට දැනුම් දෙනු ඇත.', ta: 'உங்கள் முன்மொழிவு சமர்ப்பிக்கப்பட்டது. நிலவுரிமையாளர் பதிலளித்ததும் உங்களுக்கு அறிவிக்கப்படும்.' },
   failedToSubmitProposal: { en: 'Failed to submit proposal', si: 'යෝජනාව ඉදිරිපත් කිරීම අසාර්ථක විය', ta: 'முன்மொழிவு சமர்ப்பிக்க தோல்வி' },
   moveOutRequestSent: { en: 'Move-out request sent to landowner. Awaiting approval.', si: 'ඉවත් වීමේ ඉල්ලීම ඉඩම් අයිතිකරුට යවා ඇත. අනුමැතියක් බලාපොරොත්තුවෙන්.', ta: 'வெளியேறுதல் கோரிக்கை நிலவுரிமையாளருக்கு அனுப்பப்பட்டது. அனுமதிக்காக காத்திருக்கிறது.' },
-  failedToRequestMoveOut: { en: 'Failed to request move-out', si: 'ඉවත් වීම ඉල්ලීම අසාර්ථක විය', ta: 'வெளியேறுதல் கோர தோல்வி' },
+  failedToRequestMoveOut: { en: 'Failed to request move-out', si: 'ඉවත් වීම ඉල්ලීම අසාර්ථක විය', ta: 'வெளியேறுதல் கோர தோல්வி' },
+
+  // ── DROPDOWN OPTIONS - WATER AVAILABILITY ──────────────────────────
+  waterOnSite: { en: 'On-site', si: 'ස්ථානයේ ම', ta: 'தளத்தில்' },
+  waterWithin500m: { en: 'Within 500m', si: 'මීටර් 500ක් ඇතුළත', ta: '500 மீ உள்ளே' },
+  waterManual: { en: 'Requires Manual Water', si: 'හස්තකර්ම ජලය අවශ්‍යයි', ta: 'கைமுறை நீர் தேவை' },
+
+  // ── DROPDOWN OPTIONS - SHADE PROFILE ───────────────────────────────
+  shadeFullShade: { en: 'Full Shade', si: 'සම්පූර්ණ සෙවන', ta: 'முழு நிழல்' },
+  shadePartialShade: { en: 'Partial Shade', si: 'අර්ධ සෙවන', ta: 'பகுதி நிழல்' },
+  shadeFullSun: { en: 'Full Sun', si: 'සම්පූර්ණ අව්ව', ta: 'முழு சூரியன்' },
+
+  // ── DROPDOWN OPTIONS - VEHICLE ACCESS ──────────────────────────────
+  vehicleLorry: { en: 'Lorry', si: 'ලොරිය', ta: 'லாரி' },
+  vehicleTukTuk: { en: 'Tuk-tuk', si: 'ටුක් ටුක්', ta: 'ட்டுக் ட்டுக்' },
+  vehicleFootpath: { en: 'Footpath', si: 'පාද මාර්ගය', ta: 'நடைபாதை' },
+
+  // ── DROPDOWN OPTIONS - HIVE MATERIALS ──────────────────────────────
+  materialRubberWoodStandard: { en: 'Rubber Wood (Standard)', si: 'රබර් ගස (සම්මත)', ta: 'ரப்பர் மரம் (நிலையான)' },
+  materialTeakMahogany: { en: 'Teak / Mahogany', si: 'තේක / මහෝගනි', ta: 'டीக் / மகோகனி' },
+  materialClayTilesUlu: { en: 'Clay Tiles (Ulu)', si: 'පිත්තල් ගල් (උලු)', ta: 'களிமண் ஓடுகள் (உலு)' },
+  materialTerracottaMeti: { en: 'Terracotta (Meti)', si: 'මිට්ටි භාජනය (මෙටි)', ta: 'மெட்டிக் (மேதி)' },
+  materialKitulPalm: { en: 'Kitul Palm', si: 'කිතුල් පඩිය', ta: 'கிதுல் பனை' },
+
+  // ── DROPDOWN OPTIONS - EXPENSE CATEGORIES (WITH EMOJIS TRANSLATED) ───
+  expenseFuelTransport: { en: 'Fuel & Transport', si: 'ඉන්ධනය සහ ප්‍රවාහනය', ta: 'எரிபொருள் மற்றும் போக்குவரத்து' },
+  expenseBeeFeed: { en: 'Bee Feed', si: 'මී මැසි ආහාර', ta: 'தேனீ உணவு' },
+  expenseEquipmentRepair: { en: 'Equipment/Repair', si: 'උපකරණ/මেරුම්', ta: 'உபகரணங்கள்/பழுதொരുப்பு' },
+  expenseMedicinesTreatments: { en: 'Medicines/Treatments', si: 'බෙහෙත්/ප්‍රතිකාර', ta: 'மருந்துகள்/சிகிச்சைகள்' },
+  expenseLabor: { en: 'Labor/Salary', si: 'කම්කරු/වැටුප', ta: 'உழைப்பு/சம்பளம்' },
+  expenseRent: { en: 'Rent', si: 'කුලිය', ta: 'வாடகை' },
+  expenseOther: { en: 'Other', si: 'වෙනත්', ta: 'மற்றவை' },
+
+  // ── DROPDOWN OPTIONS - PEST TYPES ──────────────────────────────────
+  pestVarroa: { en: 'Varroa mite', si: 'වර්රෝවා එකතු', ta: 'வாரோவா பூச்சி' },
+  pestNosema: { en: 'Nosema', si: 'නොසේමා', ta: 'நோசீமா' },
+  pestFoulbrood: { en: 'Foulbrood', si: 'අවුල්ගිරි', ta: 'அசுத்தமான குஞ்சு' },
+  pestWaxMoth: { en: 'Wax Moth', si: 'ඉටි සීරුවා', ta: 'மெழுகு சாம விட்டு' },
+
+  // ── DROPDOWN OPTIONS - AGE GROUPS ──────────────────────────────────
+  ageGroup18_30: { en: '18-30', si: '18-30', ta: '18-30' },
+  ageGroup31_50: { en: '31-50', si: '31-50', ta: '31-50' },
+  ageGroup51_65: { en: '51-65', si: '51-65', ta: '51-65' },
+  ageGroup65Plus: { en: '65+', si: '65+', ta: '65+' },
+
+  // ── DROPDOWN OPTIONS - PROVINCES (SRI LANKA) ─────────────────────
+  provinceWestern: { en: 'Western', si: 'බස්නාහිර', ta: 'மேற்கு' },
+  provinceCentral: { en: 'Central', si: 'මධ්‍යම', ta: 'மத்திய' },
+  provinceNorthCentral: { en: 'North Central', si: 'උතුරු-මධ්‍යම', ta: 'வடக்கு-மத்திய' },
+  provinceNorthern: { en: 'Northern', si: 'උතුරු', ta: 'வடக்கு' },
+  provinceNorthWestern: { en: 'North Western', si: 'උතුරු-බස්නාහිර', ta: 'வடக்கு-மேற்கு' },
+  provinceSabaragamuwa: { en: 'Sabaragamuwa', si: 'සබරගමුව', ta: 'சபரගமுவ' },
+  provinceSouthern: { en: 'Southern', si: 'දකුණු', ta: 'தெற்கு' },
+  provinceUva: { en: 'Uva', si: 'ඌව', ta: 'உவ' },
+
+  // ── DROPDOWN OPTIONS - DISTRICTS ───────────────────────────────────
+  // Western Province
+  districtColombo: { en: 'Colombo', si: 'කොලොම්බෝ', ta: 'கொழும்பு' },
+  districtGampaha: { en: 'Gampaha', si: 'ගම්පහ', ta: 'கம்பஹ' },
+  districtKalutara: { en: 'Kalutara', si: 'කලුතර', ta: 'கலுதර' },
+
+  // Central Province
+  districtMatara: { en: 'Matara', si: 'මාතර', ta: 'மாதర' },
+  districtKandy: { en: 'Kandy', si: 'කණ්ඩි', ta: 'கண்டி' },
+  districtNuwaraEliya: { en: 'Nuwara Eliya', si: 'නුවර ඇලියා', ta: 'நுவரை எலिய' },
+
+  // North Central Province
+  districtMatale: { en: 'Matale', si: 'මතලේ', ta: 'மதலை' },
+  districtPolonnaruwa: { en: 'Polonnaruwa', si: 'පොලොන්නරුව', ta: 'பொலொனறுவ' },
+
+  // Northern Province
+  districtJaffna: { en: 'Jaffna', si: 'යාපනය', ta: 'யாழ்ப்பாணம்' },
+  districtMultlaitivu: { en: 'Mullaitivu', si: 'මුලතිව්', ta: 'முல்லைத்தீவு' },
+  districtVavuniya: { en: 'Vavuniya', si: 'වවුනිය', ta: 'வவுனியா' },
+
+  // North Western Province
+  districtKurunegala: { en: 'Kurunegala', si: 'කුරුණෑගල', ta: 'குருணாகல' },
+  districtPuttalam: { en: 'Puttalam', si: 'පුත්තලම', ta: 'புத்தளம்' },
+
+  // Sabaragamuwa Province
+  districtRatnapura: { en: 'Ratnapura', si: 'රත්නපුර', ta: 'ரத்னபுர' },
+  districtKegalle: { en: 'Kegalle', si: 'කෙගල්ල', ta: 'கேகல்ல' },
+
+  // Southern Province
+  districtGalle: { en: 'Galle', si: 'ගාල්ල', ta: 'கல்ல' },
+  districtHambantota: { en: 'Hambantota', si: 'හම්බන්තොട', ta: 'அம்பன்தொட' },
+
+  // Uva Province
+  districtMonaragala: { en: 'Monaragala', si: 'මොණරාගල', ta: 'மொனரகல' },
+  districtBadulla: { en: 'Badulla', si: 'බදුල්ල', ta: 'பதுள்ள' },
+
+  // Eastern Province
+  districtTrincomalee: { en: 'Trincomalee', si: 'ත්‍රිකුණාමලේ', ta: 'திருகோணமலை' },
+  districtBatticaola: { en: 'Batticaloa', si: 'මඩකලපුව', ta: 'மட்டக்களப்பு' },
+  districtAmpara: { en: 'Ampara', si: 'අම්පර', ta: 'அம்பாறை' },
+
+  // ── MONTHS (for forage/dropdown usage) ───────────────────────────
+  monthJanuary: { en: 'January', si: 'ජනවාරි', ta: 'ஜனவரி' },
+  monthFebruary: { en: 'February', si: 'පෙබරවාරි', ta: 'பிப்ரவரி' },
+  monthMarch: { en: 'March', si: 'මාර්තු', ta: 'மார்ச்' },
+  monthApril: { en: 'April', si: 'අපේ‍්‍රේල්', ta: 'ஏப்ரல்' },
+  monthMay: { en: 'May', si: 'මැයි', ta: 'மே' },
+  monthJune: { en: 'June', si: 'ජුනි', ta: 'ஜூன்' },
+  monthJuly: { en: 'July', si: 'ජුලි', ta: 'ஜூலை' },
+  monthAugust: { en: 'August', si: 'අගෝස්තු', ta: 'ஆகஸ்ட்' },
+  monthSeptember: { en: 'September', si: 'සැප්තැම්බර්', ta: 'செப்டம்பர்' },
+  monthOctober: { en: 'October', si: 'ඔක්තෝබර්', ta: 'அக்டோபர்' },
+  monthNovember: { en: 'November', si: 'නොවැම්බර්', ta: 'நவம்பர்' },
+  monthDecember: { en: 'December', si: 'දෙසැම්බර්', ta: 'டிசம்பர்' },
 
   // ── Beekeeper Client Services (Find Land) ───────────────────────────
   browsePlots: { en: 'Browse, filter, and submit proposals', si: 'ජුරු කරන්න, පරිශීලන කරන්න සහ යෝජනා ඉදිරිපත් කරන්න', ta: 'உலாவுங்கள், வடிகட்டி மற்றும் முன்மொழகளை சకவும்' },
@@ -976,6 +1107,7 @@ const translations = {
   moveHive: { en: 'Move Hive', si: 'මීමැස්සන් පෙට්ටිය ගෙන යන්න', ta: 'தேன்கூட்டை நகர்த்து' },
   selectTargetApiary: { en: 'Select target apiary', si: 'ඉලක්ක මී වත්ත තෝරන්න', ta: 'இலக்கு பண்ணையை தேர்வு செய்க' },
   moving: { en: 'Moving...', si: 'ගෙන යමින්...', ta: 'நகர்த்துகிறது...' },
+  beekeepingOverviewDescription: { en: 'Your beekeeping overview shows your current apiaries, hives, and planning activities. Add more apiaries to expand your beekeeping operations.', si: 'ඔබේ මී පාලන දළ දර්ශනයේ වත්මන් වත්ත, මී පෙට්ටි සහ සැලසුම් ක්‍රියාකාරකම් පෙන්වයි. ඔබේ මී පාලනය වර්ධනය කිරීමට තවත් වත්ත එකතු කරන්න.', ta: 'உங்கள் தேனீ வளர்ப்பு கண்ணோட்டம் தற்போதைய பண்ணைகள், தேன்கூடுகள் மற்றும் திட்டமிடல் செயல்பாடுகளை காட்டுகிறது. வளர்ச்சிக்காக மேலும் பண்ணைகளைச் சேர்க்கவும்.' },
 
 } as const;
 

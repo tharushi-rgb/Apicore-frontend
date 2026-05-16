@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { MapPin, X } from 'lucide-react';
 import { MapViewer } from './MapViewer';
-import { getDistrictCenter } from '../../constants/sriLankaLocations';
+import { getDistrictCenter, resolveDsDivisionCenter } from '../../constants/sriLankaLocations';
 import { t, type Language } from '../../i18n';
 
 interface LocationSelectorFieldProps {
   label?: string;
   selectedLanguage?: Language;
   district?: string;
+  dsDivision?: string;
+  prioritizeAdminCenter?: boolean;
   latitude: string;
   longitude: string;
   onChange: (latitude: string, longitude: string) => void;
@@ -18,6 +20,8 @@ export function LocationSelectorField({
   label,
   selectedLanguage = 'en',
   district,
+  dsDivision,
+  prioritizeAdminCenter = false,
   latitude,
   longitude,
   onChange,
@@ -33,14 +37,30 @@ export function LocationSelectorField({
   });
 
   const openMapPicker = () => {
-    if (latitude && longitude) {
-      // If GPS is already set, use it
-      setPendingLocation({ lat: parseFloat(latitude), lng: parseFloat(longitude) });
-    } else {
-      // If GPS is NOT set, use district center as reference only, not selection
-      setPendingLocation(getDistrictCenter(district));
-    }
-    setShowMapPicker(true);
+    const parsedLat = Number(latitude);
+    const parsedLng = Number(longitude);
+    const hasGpsLocation = Number.isFinite(parsedLat) && Number.isFinite(parsedLng);
+
+    const loadInitialLocation = async () => {
+      if (prioritizeAdminCenter && district) {
+        const dsCenter = await resolveDsDivisionCenter(district, dsDivision);
+        setPendingLocation(dsCenter || getDistrictCenter(district));
+        setShowMapPicker(true);
+        return;
+      }
+
+      if (hasGpsLocation) {
+        setPendingLocation({ lat: parsedLat, lng: parsedLng });
+        setShowMapPicker(true);
+        return;
+      }
+
+      const dsCenter = await resolveDsDivisionCenter(district, dsDivision);
+      setPendingLocation(dsCenter || getDistrictCenter(district));
+      setShowMapPicker(true);
+    };
+
+    void loadInitialLocation();
   };
 
   return (
@@ -67,6 +87,7 @@ export function LocationSelectorField({
                 lat={pendingLocation.lat}
                 lng={pendingLocation.lng}
                 district={district}
+                dsDivision={dsDivision}
                 editable
                 compact
                 onLocationSelect={(lat, lng) => setPendingLocation({ lat, lng })}

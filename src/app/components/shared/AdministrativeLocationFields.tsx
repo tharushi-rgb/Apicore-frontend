@@ -2,6 +2,9 @@ import {
   PROVINCES,
   getDistrictsByProvince,
   getDsDivisionsByDistrict,
+  getLocalizedProvinceName,
+  getLocalizedDistrictName,
+  getLocalizedDsDivisionName,
 } from '../../constants/sriLankaLocations';
 import { t, type Language } from '../../i18n';
 
@@ -43,7 +46,7 @@ export function AdministrativeLocationFields({
             <option value="">{t('selectProvince', selectedLanguage)}</option>
             {PROVINCES.map((provinceOption) => (
               <option key={provinceOption} value={provinceOption}>
-                {provinceOption}
+                {getLocalizedProvinceName(provinceOption, selectedLanguage)}
               </option>
             ))}
           </select>
@@ -59,7 +62,7 @@ export function AdministrativeLocationFields({
             <option value="">{t('selectDistrictReg', selectedLanguage)}</option>
             {districts.map((districtOption) => (
               <option key={districtOption} value={districtOption}>
-                {districtOption}
+                {getLocalizedDistrictName(districtOption, selectedLanguage)}
               </option>
             ))}
           </select>
@@ -76,7 +79,7 @@ export function AdministrativeLocationFields({
           <option value="">{t('selectDsDivision', selectedLanguage)}</option>
           {dsDivisions.map((dsOption) => (
             <option key={dsOption} value={dsOption}>
-              {dsOption}
+              {getLocalizedDsDivisionName(dsOption, selectedLanguage)}
             </option>
           ))}
         </select>

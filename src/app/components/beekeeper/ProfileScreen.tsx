@@ -17,7 +17,14 @@ import { authService } from '../../services/auth';
 import { profileService, type Profile } from '../../services/profile';
 import { apiariesService } from '../../services/apiaries';
 import { hivesService } from '../../services/hives';
-import { PROVINCES, getDistrictsByProvince, getDsDivisionsByDistrict } from '../../constants/sriLankaLocations';
+import {
+  PROVINCES,
+  getDistrictsByProvince,
+  getDsDivisionsByDistrict,
+  getLocalizedProvinceName,
+  getLocalizedDistrictName,
+  getLocalizedDsDivisionName,
+} from '../../constants/sriLankaLocations';
 import { t } from '../../i18n';
 import { formatSriLankanPhoneNumber, PHONE_NUMBER_MAX_LENGTH } from '../../utils/phone';
 
@@ -52,13 +59,6 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
 
   const districts = useMemo(() => getDistrictsByProvince(editProvince), [editProvince]);
   const dsDivisions = useMemo(() => getDsDivisionsByDistrict(editDistrict), [editDistrict]);
-
-  const memberSince = useMemo(() => {
-    if (!profile?.created_at) return 'Member';
-    const dt = new Date(profile.created_at);
-    if (Number.isNaN(dt.getTime())) return 'Member';
-    return `Member since ${dt.toLocaleString('en-US', { month: 'short', year: 'numeric' })}`;
-  }, [profile?.created_at]);
 
   useEffect(() => {
     const load = async () => {
@@ -306,7 +306,8 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                         setEditDistrict('');
                         setEditDsDivision('');
                       }}
-                      options={PROVINCES as unknown as string[]}
+                      options={(PROVINCES as unknown as string[]).map((option) => getLocalizedProvinceName(option, selectedLanguage))}
+                      optionValues={PROVINCES as unknown as string[]}
                       placeholder={t('selectProvince', selectedLanguage)}
                     />
                     <ProfileEditSelectTile
@@ -316,7 +317,8 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                         setEditDistrict(value);
                         setEditDsDivision('');
                       }}
-                      options={districts}
+                      options={districts.map((option) => getLocalizedDistrictName(option, selectedLanguage))}
+                      optionValues={districts}
                       placeholder={t('selectDistrict', selectedLanguage)}
                       disabled={!editProvince}
                     />
@@ -324,7 +326,8 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
                       label={t('dsDivision', selectedLanguage)}
                       value={editDsDivision}
                       onChange={setEditDsDivision}
-                      options={dsDivisions}
+                      options={dsDivisions.map((option) => getLocalizedDsDivisionName(option, selectedLanguage))}
+                      optionValues={dsDivisions}
                       placeholder={t('selectDsDivision', selectedLanguage)}
                       disabled={!editDistrict}
                     />
@@ -380,8 +383,7 @@ export function ProfileScreen({ selectedLanguage, onLanguageChange, onNavigate, 
             </div>
             <div className="mt-3 rounded-lg bg-amber-100/50 p-2">
               <p className="text-xs text-amber-800">
-                Your beekeeping overview shows your current apiaries, hives, and planning activities.
-                Add more apiaries to expand your beekeeping operations.
+                {t('beekeepingOverviewDescription', selectedLanguage)}
               </p>
             </div>
           </div>
@@ -492,14 +494,17 @@ function ProfileEditInputTile({
   );
 }
 
-function ProfileEditSelectTile({ label, value, onChange, options, placeholder, disabled = false }: {
+function ProfileEditSelectTile({ label, value, onChange, options, optionValues, placeholder, disabled = false }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   options: string[];
+  optionValues?: string[];
   placeholder: string;
   disabled?: boolean;
 }) {
+  const values = optionValues ?? options;
+
   return (
     <div className="rounded-lg bg-white px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
       <div className="flex items-center justify-between gap-2">
@@ -511,8 +516,8 @@ function ProfileEditSelectTile({ label, value, onChange, options, placeholder, d
           className="min-w-0 flex-1 bg-transparent text-right text-sm font-semibold text-stone-900 focus:outline-none disabled:text-stone-400"
         >
           <option value="">{placeholder}</option>
-          {options.map((option) => (
-            <option key={option} value={option}>
+          {options.map((option, index) => (
+            <option key={values[index] ?? option} value={values[index] ?? option}>
               {option}
             </option>
           ))}

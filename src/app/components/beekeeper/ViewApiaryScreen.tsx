@@ -1,3 +1,4 @@
+import { formatBloomingWindowLabel } from '../../services/planning';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Hexagon as HiveIcon, MapPin, Clock, Trash2, Eye, Pencil, Leaf, Sprout, AlertTriangle } from 'lucide-react';
 import { apiariesService, type Apiary } from '../../services/apiaries';
@@ -104,9 +105,9 @@ export function ViewApiaryScreen({ onBack, onAddHive, onEditApiary, onViewHive, 
   const forageDisplay = apiary.forage_entries && apiary.forage_entries.length > 0
     ? apiary.forage_entries
       .filter((entry) => entry.forageType || entry.bloomingPeriod)
-      .map((entry) => `${entry.forageType || 'Unknown forage'}${entry.bloomingPeriod ? ` (${entry.bloomingPeriod})` : ''}`)
+      .map((entry) => `${entry.forageType || 'Unknown forage'}${entry.bloomingPeriod ? ` (${formatBloomingWindowLabel(entry.bloomingPeriod)})` : ''}`)
     : apiary.forage_primary
-      ? [`${apiary.forage_primary}${apiary.blooming_window ? ` (${apiary.blooming_window})` : ''}`]
+      ? [`${apiary.forage_primary}${apiary.blooming_window ? ` (${formatBloomingWindowLabel(apiary.blooming_window)})` : ''}`]
       : [];
 
   const paymentTermsLabel = apiary.payment_terms === 'cash'

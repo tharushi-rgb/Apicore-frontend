@@ -10,7 +10,7 @@ import { hivesService, type Hive } from '../../services/hives';
 import { apiariesService, type Apiary } from '../../services/apiaries';
 import { haversineKm } from '../../services/planning';
 import { supabase } from '../../services/supabaseClient';
-import { t } from '../../i18n';
+import { t, translations } from '../../i18n';
 import {
   getDistrictsByProvince,
   getDsDivisionsByDistrict,
@@ -421,6 +421,17 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
     return ['Kitul Palm'];
   };
 
+  const getMaterialLabel = (material: string) => {
+    switch(material) {
+      case 'Rubber Wood (Standard)': return translations.materialRubberWoodStandard[selectedLanguage];
+      case 'Teak / Mahogany': return translations.materialTeakMahogany[selectedLanguage];
+      case 'Clay Tiles (Ulu)': return translations.materialClayTilesUlu[selectedLanguage];
+      case 'Terracotta (Meti)': return translations.materialTerracottaMeti[selectedLanguage];
+      case 'Kitul Palm': return translations.materialKitulPalm[selectedLanguage];
+      default: return material;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -706,6 +717,7 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
               selectedLanguage={selectedLanguage}
               label={t('locationGpsRequired', selectedLanguage)}
               district={form.district || user?.district}
+              dsDivision={form.ds_division}
               latitude={form.gps_latitude}
               longitude={form.gps_longitude}
               onChange={(latitude, longitude) => {
@@ -733,9 +745,9 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
             <div>
               <label className={labelCls}>{t('materialLabel', selectedLanguage)}</label>
               <select value={form.material} onChange={(e) => updateField('material', e.target.value)} className={inputCls}>
-                <option value="">{t('select', selectedLanguage)}</option>
+                <option value="">{translations.select[selectedLanguage]}</option>
                 {getMaterialOptions(form.hive_variant as HiveVariant).map((option) => (
-                  <option key={option} value={option}>{option}</option>
+                  <option key={option} value={option}>{getMaterialLabel(option)}</option>
                 ))}
               </select>
             </div>

@@ -9,7 +9,7 @@ import { transfersService, type ColonyTransfer } from '../../services/transfers'
 import { notificationsService } from '../../services/notifications';
 import { harvestsService, type Harvest } from '../../services/harvests';
 import { expensesService, type Expense } from '../../services/finance';
-import { t } from '../../i18n';
+import { t, translations } from '../../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'apiaries' | 'hives' | 'planning' | 'finance' | 'clients' | 'notifications' | 'profile';
@@ -973,11 +973,13 @@ export function ViewHiveScreen({ selectedLanguage, onLanguageChange, onLogout, o
   };
 
   const expenseCategoryOptions = [
-    { value: 'fuel_transport', label: '⛽ Fuel & Transport' },
-    { value: 'bee_feed', label: '🥣 Bee Feed' },
-    { value: 'equipment_repair', label: '🛠️ Equipment/Repair' },
-    { value: 'medicines_treatments', label: '💊 Medicines/Treatments' },
-    { value: 'labor_salary', label: '💸 Labor/Salary' },
+    { value: 'fuel_transport', label: '⛽ ' + translations.expenseFuelTransport[selectedLanguage] },
+    { value: 'bee_feed', label: '🥣 ' + translations.expenseBeeFeed[selectedLanguage] },
+    { value: 'equipment_repair', label: '🛠️ ' + translations.expenseEquipmentRepair[selectedLanguage] },
+    { value: 'medicines_treatments', label: '💊 ' + translations.expenseMedicinesTreatments[selectedLanguage] },
+    { value: 'labor_salary', label: '💸 ' + translations.expenseLabor[selectedLanguage] },
+    { value: 'rent', label: '🏠 ' + translations.expenseRent[selectedLanguage] },
+    { value: 'other', label: '📋 ' + translations.expenseOther[selectedLanguage] },
   ];
 
   const clearInspectionForm = () => {

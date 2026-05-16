@@ -604,6 +604,7 @@ export function CreateApiaryScreen({ selectedLanguage, onLanguageChange, onNavig
             selectedLanguage={selectedLanguage}
             label={t('locationGpsRequired', selectedLanguage)}
             district={form.district || user?.district}
+            dsDivision={form.ds_division}
             latitude={form.gps_latitude}
             longitude={form.gps_longitude}
             onChange={(latitude, longitude) => {

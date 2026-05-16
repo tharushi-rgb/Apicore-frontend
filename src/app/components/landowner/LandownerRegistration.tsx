@@ -4,7 +4,14 @@ import { ArrowLeft, ArrowRight, Check, Eye, EyeOff } from 'lucide-react';
 import { authService } from '../../services/auth';
 import { t } from '../../i18n';
 import { formatSriLankanPhoneNumber, isValidSriLankanPhoneNumber, PHONE_NUMBER_MAX_LENGTH } from '../../utils/phone';
-import { PROVINCES, getDistrictsByProvince, getDsDivisionsByDistrict } from '../../constants/sriLankaLocations';
+import {
+  PROVINCES,
+  getDistrictsByProvince,
+  getDsDivisionsByDistrict,
+  getLocalizedProvinceName,
+  getLocalizedDistrictName,
+  getLocalizedDsDivisionName,
+} from '../../constants/sriLankaLocations';
 
 type Language = 'en' | 'si' | 'ta';
 
@@ -234,7 +241,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
                     onChange={e => { register('province').onChange(e); setValue('district', ''); setValue('dsDivision', ''); }}
                     className={sc}>
                     <option value="">{t('selectProvince', selectedLanguage)}</option>
-                    {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+                    {PROVINCES.map((p) => <option key={p} value={p}>{getLocalizedProvinceName(p, selectedLanguage)}</option>)}
                   </select>
                   {errors.province && <p className={ec}>{errors.province.message}</p>}
                 </div>
@@ -245,7 +252,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
                     onChange={e => { register('district').onChange(e); setValue('dsDivision', ''); }}
                     className={sc}>
                     <option value="">{t('selectDistrictReg', selectedLanguage)}</option>
-                    {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                    {districts.map((d) => <option key={d} value={d}>{getLocalizedDistrictName(d, selectedLanguage)}</option>)}
                   </select>
                   {errors.district && <p className={ec}>{errors.district.message}</p>}
                 </div>
@@ -255,7 +262,7 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
                     disabled={!selectedDistrict}
                     className={sc}>
                     <option value="">{t('selectDSDivision', selectedLanguage)}</option>
-                    {dsDivisions.map(ds => <option key={ds} value={ds}>{ds}</option>)}
+                    {dsDivisions.map((ds) => <option key={ds} value={ds}>{getLocalizedDsDivisionName(ds, selectedLanguage)}</option>)}
                   </select>
                   {errors.dsDivision && <p className={ec}>{errors.dsDivision.message}</p>}
                 </div>
@@ -319,11 +326,11 @@ export function LandownerRegistration({ selectedLanguage, onLanguageChange, onBa
                     <span className="text-stone-500">{t('businessReg', selectedLanguage)}</span>
                     <span className="text-stone-800 font-medium">{watch('businessRegNo') || '—'}</span>
                     <span className="text-stone-500">{t('province', selectedLanguage)}</span>
-                    <span className="text-stone-800 font-medium">{watch('province') || '—'}</span>
+                    <span className="text-stone-800 font-medium">{watch('province') ? getLocalizedProvinceName(watch('province'), selectedLanguage) : '—'}</span>
                     <span className="text-stone-500">{t('district', selectedLanguage)}</span>
-                    <span className="text-stone-800 font-medium">{watch('district') || '—'}</span>
+                    <span className="text-stone-800 font-medium">{watch('district') ? getLocalizedDistrictName(watch('district'), selectedLanguage) : '—'}</span>
                     <span className="text-stone-500">{t('dsDivision', selectedLanguage)}</span>
-                    <span className="text-stone-800 font-medium truncate">{watch('dsDivision') || '—'}</span>
+                    <span className="text-stone-800 font-medium truncate">{watch('dsDivision') ? getLocalizedDsDivisionName(watch('dsDivision'), selectedLanguage) : '—'}</span>
                     <span className="text-stone-500">{t('role', selectedLanguage)}</span>
                     <span className="text-stone-800 font-medium">{t('landowner', selectedLanguage)}</span>
                   </div>

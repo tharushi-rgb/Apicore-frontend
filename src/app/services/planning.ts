@@ -55,6 +55,7 @@ export interface ForagePlant {
   name: string;
   scientific: string;
   resourceType: string;
+  bloomMonths?: number[];
   bloomStart: number;
   bloomEnd: number;
   availability: string;
@@ -210,6 +211,112 @@ function suitabilityScore(avgTemp: number, avgHumidity: number, totalRain: numbe
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+export const MONTH_ABBR = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+export function formatMonthAbbrList(months?: number[] | null, fallbackStart?: number, fallbackEnd?: number) {
+  const validMonths = Array.isArray(months)
+    ? months.filter((month) => Number.isInteger(month) && month >= 1 && month <= 12)
+    : [];
+
+  const orderedMonths: number[] = [];
+  const seen = new Set<number>();
+
+  for (const month of validMonths) {
+    if (!seen.has(month)) {
+      seen.add(month);
+      orderedMonths.push(month);
+    }
+  }
+
+  if (orderedMonths.length === 0 && fallbackStart && fallbackEnd) {
+    if (fallbackStart <= fallbackEnd) {
+      for (let month = fallbackStart; month <= fallbackEnd; month += 1) {
+        orderedMonths.push(month);
+      }
+    } else {
+      for (let month = fallbackStart; month <= 12; month += 1) {
+        orderedMonths.push(month);
+      }
+      for (let month = 1; month <= fallbackEnd; month += 1) {
+        orderedMonths.push(month);
+      }
+    }
+  }
+
+  return orderedMonths.map((month) => MONTH_ABBR[month]).filter(Boolean).join(', ');
+}
+
+function parseMonthToken(token: string) {
+  const normalized = token.trim().toLowerCase();
+  if (!normalized) return null;
+
+  const map: Record<string, number> = {
+    jan: 1, january: 1,
+    feb: 2, february: 2,
+    mar: 3, march: 3,
+    apr: 4, april: 4,
+    may: 5,
+    jun: 6, june: 6,
+    jul: 7, july: 7,
+    aug: 8, august: 8,
+    sep: 9, sept: 9, september: 9,
+    oct: 10, october: 10,
+    nov: 11, november: 11,
+    dec: 12, december: 12,
+  };
+
+  if (map[normalized]) return map[normalized];
+
+  const numeric = Number(normalized);
+  if (Number.isInteger(numeric) && numeric >= 1 && numeric <= 12) return numeric;
+
+  return null;
+}
+
+function buildMonthSequence(start: number, end: number) {
+  const months: number[] = [];
+  if (start <= end) {
+    for (let month = start; month <= end; month += 1) months.push(month);
+  } else {
+    for (let month = start; month <= 12; month += 1) months.push(month);
+    for (let month = 1; month <= end; month += 1) months.push(month);
+  }
+  return months;
+}
+
+export function formatBloomingWindowLabel(windowLabel?: string | null) {
+  const raw = windowLabel?.trim();
+  if (!raw) return '';
+
+  const normalized = raw.replace(/[–—]/g, '-').replace(/\bto\b/gi, '-');
+  const commaTokens = normalized.split(',').map((token) => token.trim()).filter(Boolean);
+
+  if (commaTokens.length > 1) {
+    const months = commaTokens.map(parseMonthToken).filter((month): month is number => month !== null);
+    if (months.length === commaTokens.length) {
+      return formatMonthAbbrList(months);
+    }
+  }
+
+  const rangeMatch = normalized.match(/^(.+?)\s*-\s*(.+?)$/);
+  if (rangeMatch) {
+    const start = parseMonthToken(rangeMatch[1]);
+    const end = parseMonthToken(rangeMatch[2]);
+    if (start && end) {
+      return formatMonthAbbrList(buildMonthSequence(start, end));
+    }
+  }
+
+  const singleMonths = normalized
+    .split(/\s+/)
+    .map(parseMonthToken)
+    .filter((month): month is number => month !== null);
+  if (singleMonths.length > 0) {
+    return formatMonthAbbrList(singleMonths);
+  }
+
+  return raw;
+}
 
 async function fetchWeather(lat: number, lng: number, startDate?: string, endDate?: string) {
   const today = new Date();
@@ -487,6 +594,7 @@ export const planningService = {
           name: entry.common,
           scientific: entry.scientific,
           resourceType: 'records',
+          bloomMonths: entry.observedMonths,
           bloomStart: minMonth,
           bloomEnd: maxMonth,
           availability: 'observed',
@@ -506,6 +614,7 @@ export const planningService = {
           name: entry.common,
           scientific: entry.scientific,
           resourceType: 'records',
+          bloomMonths: entry.observedMonths,
           bloomStart: minMonth,
           bloomEnd: maxMonth,
           availability: 'observed',
@@ -737,6 +846,7 @@ export const planningService = {
         name: species.common,
         scientific,
         resourceType: 'records',
+        bloomMonths: species.observedMonths,
         bloomStart: species.observedMonths.length ? Math.min(...species.observedMonths) : month,
         bloomEnd: species.observedMonths.length ? Math.max(...species.observedMonths) : month,
         availability: 'observed',

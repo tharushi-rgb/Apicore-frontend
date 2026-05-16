@@ -58,6 +58,7 @@ export const profileService = {
       email: (typeof p.email === 'string' && p.email.trim()) ? p.email.trim() : (data as any).email ?? current?.email,
     };
     localStorage.setItem('user', JSON.stringify(merged));
+    window.dispatchEvent(new Event('user-profile-updated'));
 
     notificationsService.createActionNotification({
       entity: 'Profile',

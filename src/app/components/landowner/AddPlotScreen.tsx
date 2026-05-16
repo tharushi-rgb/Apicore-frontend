@@ -4,7 +4,7 @@ import { AdministrativeLocationFields } from '../shared/AdministrativeLocationFi
 import { LocationSelectorField } from '../shared/LocationSelectorField';
 import { landownerPlotsService, type LandPlot, type ForageEntry, type WaterAvailability, type ShadeProfile, type VehicleAccess } from '../../services/landownerPlotsService';
 import { getDistrictsByProvince, getDsDivisionsByDistrict } from '../../constants/sriLankaLocations';
-import { t } from '../../i18n';
+import { t, translations } from '../../i18n';
 
 type Language = 'en' | 'si' | 'ta';
 type NavTab = 'dashboard' | 'plots' | 'listings' | 'bids' | 'contracts' | 'profile';
@@ -232,6 +232,7 @@ export function AddPlotScreen({
 
         {/* Location Selection */}
         <AdministrativeLocationFields
+          selectedLanguage={selectedLanguage}
           province={form.province}
           district={form.district}
           dsDivision={form.ds_division}
@@ -246,6 +247,8 @@ export function AddPlotScreen({
           <LocationSelectorField
             label={t('gpsCoordinates', selectedLanguage)}
             district={form.district}
+            dsDivision={form.ds_division}
+            prioritizeAdminCenter
             latitude={form.gps_latitude}
             longitude={form.gps_longitude}
             onChange={(latitude, longitude) => {
@@ -347,48 +350,48 @@ export function AddPlotScreen({
         {/* Water Availability */}
         <div className="bg-white rounded-lg p-3 shadow-sm">
           <label className="text-xs font-semibold text-stone-700 uppercase tracking-widest block mb-2">
-            Water Availability
+            {translations.waterAvailability[selectedLanguage]}
           </label>
           <select
             value={form.water_availability}
             onChange={e => handleInputChange('water_availability', e.target.value)}
             className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
           >
-            <option value="On-site">On-site</option>
-            <option value="Within 500m">Within 500m</option>
-            <option value="Requires Manual Water">Requires Manual Water</option>
+            <option value="On-site">{translations.waterOnSite[selectedLanguage]}</option>
+            <option value="Within 500m">{translations.waterWithin500m[selectedLanguage]}</option>
+            <option value="Requires Manual Water">{translations.waterManual[selectedLanguage]}</option>
           </select>
         </div>
 
         {/* Shade Profile */}
         <div className="bg-white rounded-lg p-3 shadow-sm">
           <label className="text-xs font-semibold text-stone-700 uppercase tracking-widest block mb-2">
-            Shade Profile
+            {translations.shadeProfile[selectedLanguage]}
           </label>
           <select
             value={form.shade_profile}
             onChange={e => handleInputChange('shade_profile', e.target.value)}
             className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
           >
-            <option value="Full Shade">Full Shade</option>
-            <option value="Partial Shade">Partial Shade</option>
-            <option value="Full Sun">Full Sun</option>
+            <option value="Full Shade">{translations.shadeFullShade[selectedLanguage]}</option>
+            <option value="Partial Shade">{translations.shadePartialShade[selectedLanguage]}</option>
+            <option value="Full Sun">{translations.shadeFullSun[selectedLanguage]}</option>
           </select>
         </div>
 
         {/* Vehicle Access */}
         <div className="bg-white rounded-lg p-3 shadow-sm">
           <label className="text-xs font-semibold text-stone-700 uppercase tracking-widest block mb-2">
-            Vehicle Access
+            {translations.vehicleAccess[selectedLanguage]}
           </label>
           <select
             value={form.vehicle_access}
             onChange={e => handleInputChange('vehicle_access', e.target.value)}
             className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
           >
-            <option value="Lorry">Lorry</option>
-            <option value="Tuk-tuk">Tuk-tuk</option>
-            <option value="Footpath">Footpath</option>
+            <option value="Lorry">{translations.vehicleLorry[selectedLanguage]}</option>
+            <option value="Tuk-tuk">{translations.vehicleTukTuk[selectedLanguage]}</option>
+            <option value="Footpath">{translations.vehicleFootpath[selectedLanguage]}</option>
           </select>
         </div>
 

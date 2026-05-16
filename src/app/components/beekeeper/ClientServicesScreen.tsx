@@ -283,17 +283,17 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
       return;
     }
     if (!proposalForm.moveInDate || !proposalForm.moveOutDate) {
-      setError('Placement dates are mandatory');
+      setError(t('placementDatesMandatory', selectedLanguage));
       return;
     }
     if (proposalForm.moveInDate > proposalForm.moveOutDate) {
-      setError('Move-out date must be after move-in date');
+      setError(t('moveOutAfterMoveIn', selectedLanguage));
       return;
     }
 
     const remaining = selectedListing.maxHiveCapacity - selectedListing.acceptedHiveCount;
     if (hiveCount > remaining) {
-      setError(`Hive count cannot exceed remaining capacity (${remaining})`);
+      setError(`${t('hiveCountExceedsCapacity', selectedLanguage)} (${remaining})`);
       return;
     }
 
@@ -310,11 +310,11 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
       await refreshAll();
       setSelectedListing(null); // Close the modal
       setError('');
-      setSuccess('Your proposal has been submitted. You will be notified once the landowner responds.');
+      setSuccess(t('proposalSubmittedSuccess', selectedLanguage));
       // Scroll to top to show success message
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (submitError: any) {
-      setError(submitError?.message || 'Failed to submit proposal');
+      setError(submitError?.message || t('failedToSubmitProposal', selectedLanguage));
     } finally {
       setSaving(false);
     }
@@ -591,46 +591,45 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
         <div className="absolute inset-0 z-50 bg-black/50 p-2 flex items-start justify-center overflow-y-auto" onClick={() => { setSelectedListing(null); setError(''); }}>
           <div className="bg-white rounded-2xl max-h-full overflow-y-auto w-full max-w-2xl my-4" onClick={(event) => event.stopPropagation()}>
             <div className="sticky top-0 bg-white border-b border-stone-200 px-3 py-2 flex items-center justify-between z-10">
-              <h3 className="text-[0.88rem] font-bold text-stone-800">Listing Detail</h3>
+              <h3 className="text-[0.88rem] font-bold text-stone-800">{t('listingDetail', selectedLanguage)}</h3>
               <button onClick={() => { setSelectedListing(null); setError(''); }} className="p-1 rounded-lg bg-stone-100"><X className="w-4 h-4" /></button>
             </div>
 
             <div className="p-3 space-y-3">
 
               <section className="rounded-xl border border-stone-200 p-3">
-                <p className="text-[0.68rem] text-stone-500">Plot</p>
+                <p className="text-[0.68rem] text-stone-500">{t('plot', selectedLanguage)}</p>
                 <h4 className="text-[0.92rem] font-bold text-stone-800">{selectedListing.plotName}</h4>
                 <p className="text-[0.74rem] text-stone-600">{selectedListing.district} · {selectedListing.dsDivision}</p>
                 <p className="mt-1 text-[0.74rem] text-emerald-700 font-semibold">{selectedListing.paymentLabel}</p>
               </section>
 
               <section className="rounded-xl border border-stone-200 p-3">
-                <p className="text-[0.68rem] text-stone-500 mb-1">Landowner Profile</p>
+                <p className="text-[0.68rem] text-stone-500 mb-1">{t('landownerProfile', selectedLanguage)}</p>
                 <p className="text-[0.84rem] font-bold text-stone-800 inline-flex items-center gap-1">
                   {selectedListing.ownerName}
                 </p>
-                <p className="text-[0.72rem] text-stone-600 mt-0.5">Active on APICore: {selectedListing.ownerYearsActive} years</p>
-                <p className="text-[0.72rem] text-stone-600 mt-0.5">Contact: {selectedListing.ownerContact}</p>
+                <p className="text-[0.72rem] text-stone-600 mt-0.5">{t('contact', selectedLanguage)} {selectedListing.ownerContact}</p>
               </section>
 
               <section className="rounded-xl border border-stone-200 p-3 space-y-1">
-                <p className="text-[0.68rem] text-stone-500 mb-1.5">Plot Details</p>
+                <p className="text-[0.68rem] text-stone-500 mb-1.5">{t('plotDetails', selectedLanguage)}</p>
                 <div className="space-y-1 text-[0.72rem] text-stone-700">
                   <div className="flex justify-between">
-                    <span>Forage Plants:</span>
-                    <span className="font-medium">{selectedListing.forageNames?.join(', ') || 'Not specified'}</span>
+                    <span>{t('foragePlants', selectedLanguage)}:</span>
+                    <span className="font-medium">{selectedListing.forageNames?.join(', ') || t('notSpecified', selectedLanguage)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Water:</span>
-                    <span className="font-medium">{selectedListing.hasWaterOnSite ? 'On-site' : 'Nearby'}</span>
+                    <span>{t('water', selectedLanguage)}:</span>
+                    <span className="font-medium">{selectedListing.hasWaterOnSite ? t('waterOnSite', selectedLanguage) : t('nearby', selectedLanguage)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Vehicle Access:</span>
-                    <span className="font-medium">{selectedListing.vehicleAccess || 'Not specified'}</span>
+                    <span>{t('vehicleAccess', selectedLanguage)}:</span>
+                    <span className="font-medium">{selectedListing.vehicleAccess || t('notSpecified', selectedLanguage)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Size:</span>
-                    <span className="font-medium">{selectedListing.totalAcreage || 0} acres</span>
+                    <span>{t('totalAcreage', selectedLanguage)}:</span>
+                    <span className="font-medium">{selectedListing.totalAcreage || 0} {t('acresUnit', selectedLanguage)}</span>
                   </div>
                 </div>
               </section>
@@ -660,7 +659,7 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
               </section> */}
 
               <section className="rounded-xl border border-stone-200 p-3 space-y-2">
-                <p className="text-[0.68rem] text-stone-500">Submit Proposal</p>
+                <p className="text-[0.68rem] text-stone-500">{t('submitProposal', selectedLanguage)}</p>
 
                 {/* Show error inside modal */}
                 {error && (
@@ -669,35 +668,35 @@ export function ClientServicesScreen({ selectedLanguage, onLanguageChange, onNav
                   </div>
                 )}
 
-                {selectedProposal?.status === 'pending' && <p className="rounded-lg bg-amber-50 border border-amber-200 text-amber-700 px-2.5 py-2 text-[0.72rem] font-semibold">Proposal Submitted - Pending Review</p>}
-                {selectedProposal?.status === 'accepted' && <p className="rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 px-2.5 py-2 text-[0.72rem] font-semibold">Your proposal was accepted.</p>}
-                {selectedProposal?.status === 'rejected' && <p className="rounded-lg bg-red-50 border border-red-200 text-red-700 px-2.5 py-2 text-[0.72rem] font-semibold">Your last proposal was rejected.</p>}
+                {selectedProposal?.status === 'pending' && <p className="rounded-lg bg-amber-50 border border-amber-200 text-amber-700 px-2.5 py-2 text-[0.72rem] font-semibold">{t('proposalPendingReview', selectedLanguage)}</p>}
+                {selectedProposal?.status === 'accepted' && <p className="rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 px-2.5 py-2 text-[0.72rem] font-semibold">{t('proposalAccepted', selectedLanguage)}</p>}
+                {selectedProposal?.status === 'rejected' && <p className="rounded-lg bg-red-50 border border-red-200 text-red-700 px-2.5 py-2 text-[0.72rem] font-semibold">{t('proposalRejected', selectedLanguage)}</p>}
 
                 {selectedProposal?.status !== 'pending' && (
                   <>
                     <div className="grid grid-cols-2 gap-2">
-                      <label className="text-[0.7rem] text-stone-600">Hive Count *
+                      <label className="text-[0.7rem] text-stone-600">{t('hiveCountRequired', selectedLanguage)}
                         <input type="number" value={proposalForm.hiveCount} onChange={(event) => setProposalForm((current) => ({ ...current, hiveCount: event.target.value }))} className="mt-1 w-full rounded-lg border border-stone-300 px-2.5 py-2 text-[0.75rem]" />
                       </label>
                       {/* <div className="rounded-lg bg-stone-50 border border-stone-200 px-2 py-2 text-[0.68rem] text-stone-600 self-end">Remaining capacity: {selectedListing.maxHiveCapacity - selectedListing.acceptedHiveCount}</div> */}
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
-                      <label className="text-[0.7rem] text-stone-600">Move-In *
+                      <label className="text-[0.7rem] text-stone-600">{t('moveInDate', selectedLanguage)}
                         <input type="date" value={proposalForm.moveInDate} onChange={(event) => setProposalForm((current) => ({ ...current, moveInDate: event.target.value }))} className="mt-1 w-full rounded-lg border border-stone-300 px-2.5 py-2 text-[0.75rem]" />
                       </label>
-                      <label className="text-[0.7rem] text-stone-600">Move-Out *
+                      <label className="text-[0.7rem] text-stone-600">{t('moveOutDate', selectedLanguage)}
                         <input type="date" value={proposalForm.moveOutDate} onChange={(event) => setProposalForm((current) => ({ ...current, moveOutDate: event.target.value }))} className="mt-1 w-full rounded-lg border border-stone-300 px-2.5 py-2 text-[0.75rem]" />
                       </label>
                     </div>
 
-                    <label className="text-[0.7rem] text-stone-600 block">Note to Landowner
-                      <textarea rows={3} value={proposalForm.note} onChange={(event) => setProposalForm((current) => ({ ...current, note: event.target.value }))} className="mt-1 w-full rounded-lg border border-stone-300 px-2.5 py-2 text-[0.75rem]" placeholder="Optional message" />
+                    <label className="text-[0.7rem] text-stone-600 block">{t('noteToLandowner', selectedLanguage)}
+                      <textarea rows={3} value={proposalForm.note} onChange={(event) => setProposalForm((current) => ({ ...current, note: event.target.value }))} className="mt-1 w-full rounded-lg border border-stone-300 px-2.5 py-2 text-[0.75rem]" placeholder={t('optionalMessage', selectedLanguage)} />
                     </label>
 
                     <button onClick={onSubmitProposal} disabled={saving} className="w-full rounded-xl bg-emerald-600 py-2.5 text-[0.78rem] font-semibold text-white inline-flex items-center justify-center gap-2">
                       {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                      Submit Proposal
+                      {t('submitProposal', selectedLanguage)}
                     </button>
                   </>
                 )}
