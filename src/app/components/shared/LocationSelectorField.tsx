@@ -88,6 +88,7 @@ export function LocationSelectorField({
                 lng={pendingLocation.lng}
                 district={district}
                 dsDivision={dsDivision}
+                selectedLanguage={selectedLanguage}
                 editable
                 compact
                 onLocationSelect={(lat, lng) => setPendingLocation({ lat, lng })}

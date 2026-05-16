@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapPin } from 'lucide-react';
+import { getLocalizedDsDivisionName } from '../../constants/sriLankaLocations';
+import { type Language } from '../../i18n';
 
 interface Props {
   lat?: number;
@@ -9,6 +11,7 @@ interface Props {
   onLocationSelect?: (lat: number, lng: number) => void;
   district?: string;
   dsDivision?: string;
+  selectedLanguage?: Language;
   editable?: boolean;
   compact?: boolean;
 }
@@ -31,7 +34,7 @@ const DefaultIcon = L.icon({
 
 L.Marker.prototype.setIcon(DefaultIcon);
 
-export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, district, dsDivision, editable = false, compact = false }: Props) {
+export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, district, dsDivision, selectedLanguage = 'en', editable = false, compact = false }: Props) {
   const lat = latProp ?? DEFAULT_LAT;
   const lng = lngProp ?? DEFAULT_LNG;
   const hasLocation = latProp != null && lngProp != null;
@@ -57,7 +60,7 @@ export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, distri
       // Only add marker when we have a real location
       if (hasLocation) {
         marker.current = L.marker([lat, lng], { icon: DefaultIcon })
-          .bindPopup(`<div class="text-sm"><strong>${dsDivision || district || 'Selected Location'}</strong><br/>${lat.toFixed(4)}, ${lng.toFixed(4)}</div>`)
+          .bindPopup(`<div class="text-sm"><strong>${dsDivision ? getLocalizedDsDivisionName(dsDivision, selectedLanguage) : (district || 'Selected Location')}</strong><br/>${lat.toFixed(4)}, ${lng.toFixed(4)}</div>`)
           .addTo(map.current);
       }
 
@@ -98,11 +101,11 @@ export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, distri
         if (marker.current) {
           marker.current.setLatLng([lat, lng]);
           marker.current.setPopupContent(
-            `<div class="text-sm"><strong>${dsDivision || district || 'Location'}</strong><br/>${lat.toFixed(4)}, ${lng.toFixed(4)}</div>`
+            `<div class="text-sm"><strong>${dsDivision ? getLocalizedDsDivisionName(dsDivision, selectedLanguage) : (district || 'Location')}</strong><br/>${lat.toFixed(4)}, ${lng.toFixed(4)}</div>`
           );
         } else {
           marker.current = L.marker([lat, lng], { icon: DefaultIcon })
-            .bindPopup(`<div class="text-sm"><strong>${dsDivision || district || 'Location'}</strong><br/>${lat.toFixed(4)}, ${lng.toFixed(4)}</div>`)
+            .bindPopup(`<div class="text-sm"><strong>${dsDivision ? getLocalizedDsDivisionName(dsDivision, selectedLanguage) : (district || 'Location')}</strong><br/>${lat.toFixed(4)}, ${lng.toFixed(4)}</div>`)
             .addTo(map.current);
         }
          map.current.setView([lat, lng], 10);
@@ -112,7 +115,7 @@ export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, distri
     return () => {
       // Cleanup on unmount
     };
-  }, [lat, lng, district, editable, onLocationSelect]);
+  }, [lat, lng, district, dsDivision, selectedLanguage, editable, onLocationSelect]);
 
 
   useEffect(() => {
@@ -146,8 +149,8 @@ export function MapViewer({ lat: latProp, lng: lngProp, onLocationSelect, distri
         <MapPin className="w-4 h-4 text-emerald-600" />
         <div>
           <h3 className="font-bold text-sm text-stone-800">
-            {latProp && lngProp
-              ? (dsDivision || detectedDistrict || district || 'Loading...')
+              {latProp && lngProp
+                ? (dsDivision ? getLocalizedDsDivisionName(dsDivision, selectedLanguage) : (detectedDistrict || district || 'Loading...'))
               : (district || 'Sri Lanka Map')}
           </h3>
           <p className="text-xs text-stone-500">

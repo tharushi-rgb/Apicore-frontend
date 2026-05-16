@@ -120,6 +120,17 @@ const DISTRICT_LABELS: Record<string, { si: string; ta: string }> = {
   Vavuniya: { si: 'වවුනියාව', ta: 'வவுனியா' },
 };
 
+// Optional explicit translations for DS divisions. When present, these take
+// precedence over the token-based translations performed by
+// `translateDsTokens`. Populate entries here where full-name translations are
+// required or where token substitution is insufficient.
+const DS_DIVISION_LABELS: Record<string, { si: string; ta: string }> = {
+  // Example entries (add more as needed):
+  'Colombo': { si: 'කොළඹ', ta: 'கொழும்பு' },
+  'Dehiwala': { si: 'දෙහිවල', ta: 'தேஹிவலா' },
+  'Homagama': { si: 'හෝමගම', ta: 'ஓமகமா' },
+};
+
 const DS_TOKEN_TRANSLATIONS: Record<'si' | 'ta', Array<[string, string]>> = {
   si: [
     ['North-West', 'උතුරු-බටහිර'],
@@ -170,6 +181,14 @@ export function getLocalizedDistrictName(district: string, lang: LocationLanguag
 }
 
 export function getLocalizedDsDivisionName(dsDivision: string, lang: LocationLanguage = 'en') {
+  if (lang === 'en') return dsDivision;
+
+  // Prefer explicit full-name translations when available.
+  const explicit = DS_DIVISION_LABELS[dsDivision];
+  if (explicit && explicit[lang]) return explicit[lang];
+
+  // Fall back to token-based translation which handles directional tokens
+  // (e.g., "North-West") and simple replacements.
   return translateDsTokens(dsDivision, lang);
 }
 
