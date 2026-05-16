@@ -400,6 +400,7 @@ function AdminAnalyticsPage({ lang, onLangChange, onLogout }: { lang: Language; 
 
 export default function App() {
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
+  const location = useLocation();
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const warmupKeyRef = useRef<string>('');
   const authWarmupKey = (() => {
@@ -448,6 +449,16 @@ export default function App() {
 
     return () => window.clearTimeout(warmupTimer);
   }, [isAuthChecking, authWarmupKey]);
+
+  // Persist current route per tab so we can restore it on reload/back navigation.
+  useEffect(() => {
+    try {
+      const path = window.location.pathname + window.location.search + window.location.hash;
+      sessionStorage.setItem('apicore_last_path', path);
+    } catch {
+      // ignore sessionStorage errors
+    }
+  }, [location]);
 
   const handleLogout = () => {
     authService.logout();
