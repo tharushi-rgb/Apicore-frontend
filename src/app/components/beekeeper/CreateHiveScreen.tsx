@@ -718,6 +718,7 @@ export function CreateHiveScreen({ selectedLanguage, onLanguageChange, onNavigat
               label={t('locationGpsRequired', selectedLanguage)}
               district={form.district || user?.district}
               dsDivision={form.ds_division}
+              prioritizeAdminCenter
               latitude={form.gps_latitude}
               longitude={form.gps_longitude}
               onChange={(latitude, longitude) => {
